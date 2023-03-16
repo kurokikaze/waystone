@@ -29,13 +29,13 @@ import {
 	endStepAnimation,
 	startPromptResolutionAnimation,
 	endPromptResolutionAnimation,
-	END_POWER_ANIMATION,
-	END_RELIC_ANIMATION,
-	END_SPELL_ANIMATION,
-	END_ATTACK_ANIMATION,
-	END_PROMPT_RESOLUTION_ANIMATION,
+	START_POWER_ANIMATION,
+	START_RELIC_ANIMATION,
+	START_SPELL_ANIMATION,
+	START_ATTACK_ANIMATION,
+	START_PROMPT_RESOLUTION_ANIMATION,
 	END_STEP_ANIMATION,
-  END_CREATURE_ANIMATION,
+  START_CREATURE_ANIMATION,
 } from './actions';
 import { ClientCommand } from './clientProtocol';
 import { Action, Store } from 'redux';
