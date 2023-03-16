@@ -1,0 +1,458 @@
+@font-face {
+    font-family: Lato;
+    src: url('/fonts/Lato/Lato-Regular.ttf');
+}
+
+body {
+    margin: 2px;
+}
+
+#game {
+    width: 1280px;
+}
+
+.game {
+    width: 900px;
+    position: relative;
+    background-image: url("/defaultbackground.jpg");
+}
+
+#playerHand {
+    height: 100px;
+    width: 900px;
+}
+
+#opponentHand {
+    height: 100px;
+    width: 900px;
+}
+
+.zone {
+    min-height: 100px;
+    max-width: 900px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    transition: flex 0.3s ease;
+}
+
+.cardHolder {
+    position: relative;
+    width: 64px;
+    height: 94px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.cardHolder .cardEnergy {
+    position: absolute;
+    top: 6px;
+    color: #f7e73a;
+    font-size: 4em;
+    width: 100%;
+    text-align: center;
+    font-family: Lato, "Helvetica Neue", Helvetica, Arial;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.cardHolder .startingEnergy {
+    position: absolute;
+    top: 0;
+    color: #000;
+    background-color: #f7e73a;
+    font-size: 0.8em;
+    text-align: center;
+    font-family: Lato, "Helvetica Neue", Helvetica, Arial;
+    width: auto;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border-color: #f7e73a;
+    opacity: 0.8;
+}
+
+.cardHolder.magi .startingEnergy {
+    display: none;
+}
+
+.zone-creatures .cardHolder {
+    position: relative;
+    width: 80px;
+    height: 62px;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.zone-creatures .cardHolder.relic {
+    overflow: hidden;
+    height: 100px;
+    border-radius: 3px;
+}
+
+.zone-creatures .cardHolder img {
+    width: 98px;
+    height: auto;
+    position: relative;
+    top: -22px;
+    left: -9px;
+}
+.zone-creatures .cardHolder.relic img {
+    width: auto;
+    height: 100px;
+    top: 0;
+    left: 0;
+}
+
+.zone-creatures .cardHolder .cardEnergy {
+    top: 0px;
+    line-height: 60px;
+}
+
+.zone-creatures .cardAbilities {
+    margin-bottom: 60px;
+}
+
+.zone-magi .cardHolder {
+    position: relative;
+    width: 94px;
+    height: 94px;
+    border-radius: 47px;
+    overflow: hidden;
+}
+
+.BaseMessage {
+    display: flex;
+    position: absolute;
+    top: 41px;
+    margin: 0 300px;
+    padding: 12px;
+    background-color: rgba(0, 0, 0, .75);
+    color: #fff;
+    z-index: 2;
+    max-width: 100%;
+    border-radius: 5px;
+    font-size: 1.5em;
+    white-space: nowrap;
+    vertical-align: middle;
+    /* line-height: 50px;*/
+    font-family: sans-serif;
+}
+
+.BaseMessage__messages {
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.BaseMessage__message {
+    display: inline-block;
+}
+
+.messageIcon {
+    display: flex;
+    margin-right: 12px;
+    align-items: center;
+}
+
+.zone-magi .cardHolder img {
+    width: 124px;
+    height: auto;
+    top: -17px;
+    left: -15px;
+    position: relative;
+}
+
+.cardHolder.onPrompt {
+    z-index: 120;
+}
+
+.cardHolder.available {
+    box-shadow: 0px 0 6px 6px green;
+}
+
+.cardHolder.target {
+    box-shadow: 0px 0 6px 6px red;
+}
+
+.cardHolder.attackTarget {
+    box-shadow: 0px 0 6px 6px gold;
+}
+
+.cardHolder.attackSource {
+    box-shadow: 0px 0 6px 6px lightblue;
+}
+
+.zone img {
+    width: 64px;
+    /* height: 90px;  */
+}
+
+.zone.zone-magi {
+    height: 110px;
+    width: 110px;
+}
+
+#playerActiveMagi {
+    height: 100px;
+    width: 900px;
+}
+
+#opponentMagi {
+    height: 100px;
+    width: 900px;
+}
+
+.zone-creatures {
+    margin-right: 50px;
+    align-items: center;
+}
+
+.middleZones {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-right: 50px;
+}
+
+.zone-relics {
+    max-width: 380px;
+    min-width: 380px;
+    justify-content: center;
+    align-items: center;
+}
+
+.zone-relics .cardHolder {
+    height: 64px;
+}
+
+.zone-relics .cardAbilities {
+    margin-bottom: 66px;
+}
+
+.zone-relics .abilityIconHolder .magiCardIcons {
+    bottom: 10px;
+    right: -8px;
+}
+
+.zone-relics.opponentRelics .cardView {
+    top: 80px;
+    bottom: initial;
+}
+
+.zone-discard {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-row-gap: 30px;
+}
+
+.zone-discard .cardView {
+    top: 95px;
+    bottom: initial;
+}
+
+.zone-relics .cardAbilityHolder {
+    display: flex;
+    align-items: flex-end;
+    height: 64px;
+}
+
+.zone-placeholder {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 0 50px;
+    max-width: 280px;
+    min-width: 280px;
+}
+
+.button {
+    padding: 9px 17px;
+    font-family: Verdana, sans-serif;
+    background-color: #D1A53E;
+    color: #040403;
+    border: 1px solid #E7DCCA;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.endgame {
+    font-family: Lato, "Helvetica Neue", Helvetica, Arial;
+}
+
+.endgame h1 {
+    text-align: center;
+    padding-top: 20%;
+    font-size: 76px;
+}
+
+.endgame h1.win {
+    color: gold;
+}
+
+.endgame p {
+    text-align: center;
+    padding-top: 2px;
+    font-size: 25px;
+}
+
+.creaturePowerIcon {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0px 0 1px 1px rgba(0, 0, 0, .4);
+}
+
+.iconNumber {
+    position: absolute;
+    font-family: Lato, Verdana, sans-serif;
+    top: 0;
+    left: 5px;
+}
+
+.magiPowerIcon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: #fff;
+    box-shadow: 0px 0 2px 2px rgba(0, 0, 0, .2);
+    overflow: hidden;
+}
+
+.magiPowerIcon .iconNumber {
+    left: 3px;
+    top: 2px;
+    font-size: 28px;
+    color: #f7e73a;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.stepIcon {
+    background-color: #000;
+}
+
+.magiPowerIcon svg,
+.creaturePowerIcon svg,
+.stepIcon svg {
+    transition: fill .2s ease;
+}
+
+.abilityIconHolder {
+    position: relative;
+}
+
+.abilityIconHolder .cardIcons {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+}
+
+.zone-relics .abilityIconHolder .cardIcons {
+    bottom: 12px;
+    right: -5px;
+}
+
+.zone-magi .abilityIconHolder .cardIcons {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.abilityIconHolder .magiCardIcons > div {
+    margin-left: 4px;
+}
+
+.libraryCounter {
+    width: 64px;
+    height: 90px;
+    background-image: url('/cards/cardBack.jpg');
+    background-size: cover;
+    max-width: 64px;
+    color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    box-shadow:
+    /* The top layer shadow */
+    0 -1px 1px rgba(0,0,0,0.8),
+    /* The second layer */
+    0 -8px 0 -5px #eee,
+    /* The second layer shadow */
+    0 -8px 1px -4px rgba(0,0,0,0.8),
+     /* The third layer */
+    0 -16px 0 -10px #eee,
+    /* The third layer shadow */
+    0 -16px 1px -9px rgba(0,0,0,0.8);
+}
+
+.discardCounter {
+    width: 64px;
+    height: 90px;
+    background-image: url('/cards/cardBack.jpg');
+    background-size: cover;
+    max-width: 64px;
+    color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 3em;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+}
+
+/** Animations **/
+.zone.animated .cardHolder.attackSource {
+    --targetOffsetX: 100px;
+    --targetOffsetY: -120px;
+    animation-duration: 0.6s;
+    animation-name: attack;
+}
+
+.zone.animated .cardHolder.additionalAttacker {
+  box-shadow: 0 0 6px 6px rgb(131, 49, 131);
+  --targetOffsetX: 100px;
+  --targetOffsetY: -120px;
+  animation-duration: 0.6s;
+  animation-name: attack;
+}
+
+@keyframes attack {
+    0% {
+        transform: translateX(0px) translateY(0px);
+    }
+
+    50% {
+        transform: translateX(var(--targetOffsetX)) translateY(var(--targetOffsetY));
+    }
+
+    100% {
+        transform: translateX(0px) translateY(0px);
+    }
+}
+
+@media (max-width: 900px) {
+    .gameContainer {
+        max-height: 100%;
+        flex-direction: column;
+    }
+
+    .gameContainer .game {
+        width: 890px;
+    }
+
+    .gameContainer .actionLog {
+        max-height: 290px;
+    }
+}

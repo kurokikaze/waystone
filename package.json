@@ -1,0 +1,38 @@
+{
+  "name": "waystone",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.2.0",
+    "classnames": "^2.3.2",
+    "comlink": "^4.4.1",
+    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.14.4.tar.gz",
+    "ramda": "^0.28.0",
+    "react": "^18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "redux": "^4.2.1",
+    "redux-observable": "^2.0.0",
+    "redux-thunk": "^2.4.2",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.2.2",
+    "@types/node": "^18.7.10",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "@vitejs/plugin-react": "^3.0.0",
+    "typescript": "^4.6.4",
+    "vite": "^4.0.0",
+    "vite-plugin-comlink": "^3.0.5"
+  }
+}
