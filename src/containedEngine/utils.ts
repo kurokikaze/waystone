@@ -71,6 +71,7 @@ import {
   PROPERTY_CONTROLLER,
   PROMPT_TYPE_MAY_ABILITY,
   EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+  EFFECT_TYPE_START_STEP,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types/common.js';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
@@ -633,10 +634,19 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						game.getMetaValue(action.target, action.generatedBy) :
 						action.target;
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
+          // @ts-ignore will be fixed in a future moonlands update
+					const sourceCard: CardInGame | null = (typeof action?.source == 'string') ?
+          // @ts-ignore will be fixed in a future moonlands update
+            game.getMetaValue(action?.source, action.generatedBy) :
+						action.target;
 
 					return {
-						...action,
+						type: action.type,
+            effectType: action.effectType,
+            source: sourceCard ? convertCard(sourceCard) : null,
 						target: convertCard(target),
+            generatedBy: action.generatedBy,
+            player: action.player,
 					};
 				}
 				case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
@@ -716,9 +726,21 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						amount,
 					};
 				}
+        case EFFECT_TYPE_START_STEP: {
+          return {
+            type: action.type,
+            effectType: action.effectType,
+            player: action.player,
+          }
+        }
 				case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 					const targetCard = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
+						action.target;
+          // @ts-ignore
+          const sourceCard: CardInGame | undefined = (typeof action.source == 'string') ?
+          // @ts-ignore
+            game.getMetaValue(action.source, action.generatedBy) :
 						action.target;
                     
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
@@ -728,7 +750,9 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						action.amount;
 
 					return {
-						...action,
+						type: action.type,
+            effectType: action.effectType,
+            ...(sourceCard ? {source: convertCardMinimal(sourceCard)} : {}),
 						target: convertCardMinimal(target),
 						amount,
 					};

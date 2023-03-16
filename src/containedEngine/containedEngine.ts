@@ -45,6 +45,7 @@ export const createGame = (): State => {
   });
 
   game.setPlayers(1, 2)
+  game.enableDebug();
 
   return game
 }

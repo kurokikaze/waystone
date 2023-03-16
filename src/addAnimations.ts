@@ -74,6 +74,7 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 				action,
 			] : [action];
 		case ACTION_ATTACK: {
+      const state = store.getState();
       const actionSource = getPowerSource(action.source)(state);
       if (!actionSource) {
         return []
@@ -139,19 +140,11 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, sto
 
   const actionDelayed = new Observable<ClientCommand>(observer => {
     const streamActions = () => {
-      // console.log(`Starting to stream out ${actionsStorage.length} actions`)
       while (actionsStorage.length) {
         const action = actionsStorage.shift();
         const delayBy = convertTimer(action.type)
         observer.next(action);
         if (delayBy > 0) {
-        //   observer.next(action);
-        // } else {
-          // observer.next(action);
-          console.log(`Delaying ${actionsStorage.length} actions by ${delayBy}`)
-          if (actionsStorage.length) {
-            console.log(`First action is ${action.type}`)
-          }
           timeout = setTimeout(() => {
             delaying = false;
             streamActions();
@@ -167,9 +160,7 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, sto
 
     action$.subscribe({
       next: (action) => {
-        // console.log(`Got action ${action.type}`);
-        const convertedActions = convertAction(action, store)
-        // console.log(`Storing ${convertedActions.length} actions`)
+        const convertedActions = convertAction(action, store);
         actionsStorage.push(...convertedActions);
         if (!delaying) {
           streamActions()

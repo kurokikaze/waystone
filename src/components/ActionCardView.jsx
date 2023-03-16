@@ -17,7 +17,6 @@ function ActionCardView() {
 	let power = null;
 	let sourceCard = null;
 	if (source) {
-		console.log(`Found one: ${JSON.stringify(source)}`);
 		sourceCard = byName(source.card);
 		if (sourceCard) {
 			power = sourceCard.data.powers.find(({ name }) => name === message.power);

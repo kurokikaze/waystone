@@ -102,7 +102,7 @@
     z-index: 400;
 }
 
-.cardView img {
+.cardViewHolder .cardView img {
     width: 200px;
 }
 

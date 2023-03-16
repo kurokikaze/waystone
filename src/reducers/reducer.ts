@@ -360,7 +360,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				}
 				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
 					promptParams = {
-						source: action.source,
+						source: action.source.id,
 					};
 					break;
 				}
@@ -382,7 +382,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 					promptParams = {
 						zone: action.zone,
-						restrictions: action.restrictions,
+						...(action.restrictions ? {restrictions: action.restrictions} : {}),
 						cards: action.cards,
 						zoneOwner: action.zoneOwner,
 						numberOfCards: action.numberOfCards,
@@ -401,7 +401,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
 					promptParams = {
 						zone: action.zone,
-						restrictions: action.restrictions,
+						...(action.restrictions ? {restrictions: action.restrictions} : {}),
 						cards: action.cards,
 						zoneOwner: action.zoneOwner,
 						numberOfCards: action.numberOfCards,

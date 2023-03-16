@@ -30,12 +30,13 @@ type Pack = {
   hunters: string[]
 }
 
-export type ExpandedPromptParams = Omit<Omit<PromptParams, "promptType">, "zoneOwner"> & {
+export type ExpandedPromptParams = Omit<Omit<Omit<PromptParams, "promptType">, "zoneOwner">, "restrictionValue"> & {
   amount?: number
   cards?: ConvertedCard[]
   startingCards?: string[]
   availableCards?: string[]
-  zoneOwner: number
+  restrictionValue?: string | string[] | number | boolean
+  zoneOwner?: number
 }
 
 type AnimationStateType = {
