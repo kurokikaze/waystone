@@ -87,7 +87,7 @@ type PromptMessage = {
   power: string,
 }
 
-function App({engineConnector}: {engineConnector: EngineConnector}) {
+function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBreak: Function}) {
 	const [discardShown, setDiscardShown] = useState(false);
 	const [opponentDiscardShown, setOpponentDiscardShown] = useState(false);
 
@@ -136,7 +136,11 @@ function App({engineConnector}: {engineConnector: EngineConnector}) {
 		});
 	}, [engineConnector]);
 
-	const onPlay = useCallback((cardId: string) => {
+  const onRefresh = useCallback(() => {
+    engineConnector.emit({special: 'refresh'});
+  }, [engineConnector])
+
+  const onPlay = useCallback((cardId: string) => {
 		engineConnector.emit({
 			type: ACTION_PLAY,
 			payload: {
@@ -157,10 +161,10 @@ function App({engineConnector}: {engineConnector: EngineConnector}) {
 			<div className="game">
 				<DndProvider backend={HTML5Backend}>
           <>
-            {message && message.type == MESSAGE_TYPE_POWER && <EnhancedPowerMessage id={message.source} power={message.power} display={message.source && message.source.owner !== 1} />}
-            {message && message.type == MESSAGE_TYPE_RELIC && <RelicMessage card={message.card} display={message.card.owner !== 1} />}
-            {message && message.type == MESSAGE_TYPE_SPELL && <SpellMessage card={message.card} display={message.card.owner !== 1} />}
-            {message && message.type == MESSAGE_TYPE_CREATURE && <CreatureMessage card={message.card} display={message.card.owner !== 1} />}
+            {message && message.type == MESSAGE_TYPE_POWER && <EnhancedPowerMessage id={message.source} power={message.power} onBreak={onBreak} />}
+            {message && message.type == MESSAGE_TYPE_RELIC && <RelicMessage card={message.card}/>}
+            {message && message.type == MESSAGE_TYPE_SPELL && <SpellMessage card={message.card} />}
+            {message && message.type == MESSAGE_TYPE_CREATURE && <CreatureMessage card={message.card} />}
             {message && message.type == MESSAGE_TYPE_PROMPT_RESOLUTION && <PromptResolutionMessage card={message.chosenTarget} number={message.chosenNumber} />}
             <Zone zoneId='opponentHand' name='Opponent hand' />
             <div className='middleZones'>
@@ -184,7 +188,7 @@ function App({engineConnector}: {engineConnector: EngineConnector}) {
             <ZoneHand zoneId='playerHand' name='Player hand' onCardClick={onPlay} />
             <StepBoard />
             <ActionCardView />
-            {ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <button onClick={onPass}>Pass</button>}
+            {ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <><button onClick={onPass}>Pass</button><button onClick={onRefresh}>Refresh</button></>}
             {!ourTurn && <div>Opponent&apos;s turn ({currentPlayer})</div>}
             {discardShown && <div className='discardOverlay'>
               <h2>Discard</h2>

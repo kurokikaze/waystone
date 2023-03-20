@@ -2,7 +2,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { RESTRICTION_EXCEPT_SOURCE } from 'moonlands/dist/const';
 import cn from 'classnames';
-import { plusEnergy, minusEnergy } from '../actions';
+import { plusEnergyOnCreature, minusEnergyOnCreature } from '../actions';
 import { getPromptGeneratedBy } from '../selectors';
 
 export const SimpleButton = ({name, disabled, style, onClick}) =>
@@ -20,13 +20,13 @@ export const withEnergyManipulation = Component => ({ id, data, ...props }) => {
 
 	const handlePlusEnergy = () => {
 		if (freeEnergy > 0) {
-			dispatch(plusEnergy(id));
+			dispatch(plusEnergyOnCreature(id));
 		}
 	};
 
 	const handleMinusEnergy = () => {
 		if (currentEnergy > 0) {
-			dispatch(minusEnergy(id));
+			dispatch(minusEnergyOnCreature(id));
 		}
 	};
 	

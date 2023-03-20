@@ -6,7 +6,7 @@ import {
 } from 'moonlands/src/const.ts';
 import {cards} from 'moonlands/src/cards.ts';
 import Card from '../Card.tsx';
-import {getCurrentStep, isOurTurn, getMagiCard, getMagiEnergy} from '../../selectors';
+import {getCurrentStep, isOurTurn, getActivePlayerMagi, getMagiEnergy} from '../../selectors';
 import {
 	STEP_CREATURES,
 	STEP_PRS_FIRST,
@@ -39,7 +39,7 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 	const ourTurn = useSelector(isOurTurn);
 	const relics = useSelector(getRelics);
 	const magiEnergy = useSelector(getMagiEnergy);
-	const magiCard = useSelector(getMagiCard);
+	const magi = useSelector(getActivePlayerMagi);
 
 	return (
 		<div className={`zone ${ourTurn ? 'zone-active' : ''}`} data-zone-name={name}>
@@ -50,7 +50,7 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 					card={cardData.card}
 					data={cardData.data}
 					onClick={onCardClick}
-					available={ourTurn && cardData.card && canCast(cardData.card.type, cardData.card.cost + (cardData.card.region === magiCard.region ? 1 : 0), magiEnergy, currentStep, relics, cardData.card.name)}
+					available={ourTurn && cardData.card && canCast(cardData.card.type, cardData.card.cost + (cardData.card.region === magi?.region ? 1 : 0), magiEnergy, currentStep, relics, cardData.card.name)}
 				/>,
 			) : null}
 		</div>

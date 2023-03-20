@@ -1,3 +1,4 @@
+import { AnyEffectType } from './types';
 export declare const color: {
     red: (word: string) => string;
     green: (word: string) => string;
@@ -7,4 +8,4 @@ export declare const color: {
     cyan: (word: string) => string;
     white: (word: string) => string;
 };
-export declare const showAction: (action: any) => void;
+export declare const showAction: (action: AnyEffectType) => void;

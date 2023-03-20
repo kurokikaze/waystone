@@ -46,6 +46,7 @@ function App() {
 
   const engineRef = useRef<Worker>();
   const botRef = useRef<Worker>();
+  const breakRef = useRef<Function>(() => {});
 
   const actionsObservableRef = useRef<Observable<ClientAction>>()
 
@@ -96,11 +97,21 @@ function App() {
       });      
 
       actionsObservableRef.current = actionsObservable;
-      const delayedActions = addAnimations(actionsObservable, store);
+      // console.log('Creating the break observable');
+      const breakObservable = new Observable<{}>(observer => {
+        // console.log('Setting break callback')
+        breakRef.current = () => {
+          // console.log('Break detected');
+          observer.next({});
+        }
+      });
+      const delayedActions = addAnimations(actionsObservable, breakObservable, store);
 
 	    delayedActions.subscribe({
         next: (transformedAction) => {
-          console.dir(transformedAction);
+          if (transformedAction.type && transformedAction.type.includes('animation')) {
+            console.dir(transformedAction);
+          }
           store.dispatch(transformedAction);
         },
       });
@@ -142,7 +153,7 @@ function App() {
     <div>
       {game ? <div>
         <Provider store={store}>
-          <GameApp engineConnector={engineConnector}/>
+          <GameApp engineConnector={engineConnector} onBreak={breakRef.current} />
         </Provider>
       </div> : <div className="container">
         <h1>Welcome to Tauri!</h1>

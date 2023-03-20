@@ -1,4 +1,7 @@
+// @ts-nocheck
+import { ACTION_PASS } from "moonlands/dist/const"
 import {Socket} from "socket.io-client"
+import { ClientAction, ClientPassAction, FromClientPassAction } from "../clientProtocol"
 import { GameState } from "./GameState"
 import {Strategy} from './strategies/Strategy'
 import { SerializedClientState } from "./types"
@@ -26,7 +29,7 @@ const STEP_NAMES: Record<number, string> = {
 // }
 
 export class StrategyConnector {
-  private playerId?: number
+  private playerId: number = 2
   private gameState?: GameState
   private strategy?: Strategy
   public constructor(private readonly io: Socket) {}
@@ -46,7 +49,7 @@ export class StrategyConnector {
       }
     })
 
-    this.io.on('action', action => {
+    this.io.on('action', (action: ClientAction | {type: 'display/priority', player: number}) => {
       if (this.gameState && this.playerId && action) {
         try {
           this.gameState.update(action)
@@ -73,6 +76,10 @@ export class StrategyConnector {
   }
 
   private requestAndSendAction() {
+    if (!this.gameState) {
+      this.io.emit('clientAction', {type: ACTION_PASS, player: this.playerId} as FromClientPassAction)
+      return;
+    }
     const inPromptState = this.gameState.isInPromptState(this.playerId)
     const currentStep = this.gameState.getStep()
     if (this.strategy && this.gameState && this.playerId &&

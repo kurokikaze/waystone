@@ -1,8 +1,7 @@
 /* global window */
 // @ts-nocheck
-// import {from, merge, zip, Observable} from 'rxjs';
+
 import {Observable} from 'rxjs';
-// import {delayWhen, concatMap, share, filter, map} from 'rxjs/operators';
 
 import {
 	ACTION_POWER,
@@ -13,6 +12,7 @@ import {
 	EFFECT_TYPE_PLAY_SPELL,
 	ACTION_RESOLVE_PROMPT,
   EFFECT_TYPE_PLAY_CREATURE,
+  EFFECT_TYPE_ATTACK,
 } from 'moonlands/dist/const';
 
 import { 
@@ -36,6 +36,7 @@ import {
 	START_PROMPT_RESOLUTION_ANIMATION,
 	END_STEP_ANIMATION,
   START_CREATURE_ANIMATION,
+  END_CREATURE_ANIMATION,
 } from './actions';
 import { ClientCommand } from './clientProtocol';
 import { Action, Store } from 'redux';
@@ -74,19 +75,26 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 				action,
 			] : [action];
 		case ACTION_ATTACK: {
-      const state = store.getState();
-      const actionSource = getPowerSource(action.source)(state);
-      if (!actionSource) {
-        return []
-      }
-			return (actionSource.owner !== 1) ? [
-				startAttackAnimation(actionSource.id, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, actionSource.owner), 
-				endAttackAnimation(actionSource.id),
+      // const state = store.getState();
+      // const actionSource = getPowerSource(action.source)(state);
+      // if (!actionSource) {
+      //   return [action]
+      // }
+			return (action.player === 2) ? [
+				startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, 2), 
+				endAttackAnimation(action.source),
 				action,
 			] : [action];
 		}
 		case ACTION_EFFECT: {
 			switch(action.effectType) {
+        // case EFFECT_TYPE_ATTACK: {
+          // return (action.player !== 1) ? [
+          //   startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, actionSource.owner), 
+          //   endAttackAnimation(action.source),
+          //   action,
+          // ] : [action];
+        // }
 				case EFFECT_TYPE_PLAY_RELIC:
 					return (action.player !== 1) ? [
 						startRelicAnimation(action.card, action.player), 
@@ -132,7 +140,7 @@ const convertTimer = (type: any) => {
 	return TIMERS_BY_EVENT[type] || 0;
 };
 
-export default function addAnimationsNew(action$: Observable<ClientCommand>, store: Store<any, Action<any>>) {
+export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>) {
   const actionsStorage: ClientCommand[] = []
   let delaying: boolean = false;
   let timeout: ReturnType<typeof setTimeout> = 0;
@@ -158,6 +166,17 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, sto
       }
     }
 
+    break$.subscribe({
+      next: () => {
+        if (delaying) {
+          console.log('Break applied');
+          clearTimeout(timeout);
+          delaying = false;
+          streamActions();
+        }
+      }
+    });
+
     action$.subscribe({
       next: (action) => {
         const convertedActions = convertAction(action, store);
@@ -178,32 +197,3 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, sto
 
   return actionDelayed;
 }
-
-// function addAnimations (action$: Observable<ClientCommand>, store: Store<any, Action<any>>) {
-// 	const actionDelayed$ = action$.pipe(
-// 		concatMap(action =>
-// 			from(convertAction(action, store)).pipe(
-// 				delayWhen(({type}) => convertTimer(type)),
-// 			),
-// 		),
-// 		share()
-// 	);
-
-// 	const response$ = action$.pipe(
-// 		filter(({type}) => type == ACTION_RESOLVE_PROMPT),
-// 	);
-
-// 	const promptDelayed$ = actionDelayed$.pipe(
-// 		filter(({type}) => type == ACTION_ENTER_PROMPT),
-// 	);
-  
-// 	const responseN1AfterPromptN$ = zip(response$, promptDelayed$).pipe(
-// 		map(([r]) => r),
-// 	);
-
-// 	const actionNoResponseDelayed$ = actionDelayed$.pipe(
-// 		filter(({type}) => type != ACTION_RESOLVE_PROMPT),
-// 	);
-
-// 	return merge(actionNoResponseDelayed$, responseN1AfterPromptN$);
-// }

@@ -62,12 +62,12 @@ type InGameData = {
 	energyLossThreshold?: number;
 }
 
-type ClientCard = {
+type ClientCard = ConvertedCard /*{
   card: string
   id: string
   data: InGameData
   owner: number
-}
+}*/
 
 export type ExpandedClientCard = ClientCard & {
   _card: Card

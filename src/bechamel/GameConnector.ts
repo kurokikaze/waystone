@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SocketOptions } from 'dgram'
 import {io, ManagerOptions, Socket} from 'socket.io-client'
 

@@ -58,6 +58,7 @@ export type ClientAttackAction = {
   source: string,
   target: string,
   additionalAttackers?: string[],
+  player: number,
 }
 
 interface ClientEnterPromptInterface {
@@ -117,7 +118,7 @@ export type ClientEnterPromptChooseCards = ClientEnterPromptInterface & {
     promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
     promptParams: {
       availableCards: string[],
-      cards: string[],
+      startingCards: string[],
     },
     generatedBy: string,
     player: number,

@@ -26,7 +26,7 @@ import {createState, getStateScore, booleanGuard} from './simulationUtils'
 import {HashBuilder} from './HashBuilder';
 import {ExpandedClientCard, SimulationEntity} from '../types';
 import {ActionExtractor} from './ActionExtractor';
-import { ClientAttackAction, ClientPassAction, ClientPlayAction, ClientPowerAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
+import { ClientAttackAction, ClientPassAction, ClientPlayAction, ClientPowerAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -81,7 +81,7 @@ export class SimulationStrategy implements Strategy {
     this.playerId = playerId
   }
 
-  private pass(): ClientPassAction {
+  private pass(): FromClientPassAction {
     return {
       type: ACTION_PASS,
       player: this.playerId || 0,
@@ -106,10 +106,12 @@ export class SimulationStrategy implements Strategy {
       source: from,
       additionalAttackers: [add],
       target: to,
+      player: this.playerId || 2,
     } : {
       type: ACTION_ATTACK,
       source: from,
       target: to,
+      player: this.playerId || 2,
     }
   }
 
@@ -280,7 +282,7 @@ export class SimulationStrategy implements Strategy {
           isPrompt: Boolean(workEntity.sim.state.prompt),
         })
         simulationQueue.push(...ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder))
-        delete workEntity.sim;
+        // delete workEntity.sim;
       }
     }
 
@@ -308,6 +310,7 @@ export class SimulationStrategy implements Strategy {
 
   private shouldClearHeldActions(): boolean {
     if (!this.actionsOnHold.length) return false
+    if (!this.gameState) return false
 
     const action = this.actionsOnHold[0]
     if (this.gameState.getStep() === STEP_NAME.CREATURES) {
@@ -352,6 +355,10 @@ export class SimulationStrategy implements Strategy {
       this.actionsOnHold = []
     }
 
+    if (!this.gameState) {
+      return this.pass()
+    }
+
     if (this.actionsOnHold.length) {
       const action = this.actionsOnHold.shift()
       
@@ -372,7 +379,7 @@ export class SimulationStrategy implements Strategy {
         }
       }
 
-      if (this.gameState.isInPromptState && this.gameState.getPromptType() === PROMPT_TYPE_MAY_ABILITY) {
+      if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_MAY_ABILITY) {
         return {
           type: ACTION_RESOLVE_PROMPT,
           promptType: PROMPT_TYPE_MAY_ABILITY,
@@ -419,16 +426,20 @@ export class SimulationStrategy implements Strategy {
             const playableEnrichedCards = this.gameState.getPlayableCards()
               .map(addCardData).filter(card => card._card.type !== TYPE_RELIC)
 
-            outerSim.getZone(ZONE_TYPE_HAND, this.playerId).add(playableEnrichedCards.map(card => {
-              const gameCard = new CardInGame(byName(card.card), this.playerId)
+            outerSim.getZone(ZONE_TYPE_HAND, this.playerId).add(playableEnrichedCards.map((card): CardInGame | false => {
+              const baseCard = byName(card.card)
+              if (!baseCard) return false;
+              const gameCard = new CardInGame(baseCard, this.playerId || 2)
               gameCard.id = card.id
               return gameCard
-            }))
+            }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
             outerSim.getZone(ZONE_TYPE_MAGI_PILE, this.playerId).add(myMagiPile.map(magi => {
-              const card = new CardInGame(byName(magi.card), this.playerId)
+              const baseCard = byName(magi.card)
+              if (!baseCard) return false;
+              const card = new CardInGame(baseCard, this.playerId || 2)
               card.id = magi.id
               return card
-            }))
+            }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
             const hash = this.hashBuilder.makeHash(outerSim)
             const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
 
@@ -459,9 +470,13 @@ export class SimulationStrategy implements Strategy {
             if (!myMagiCard) {
               return this.pass()
             }
+            const magiBaseCard = byName(myMagiCard.card)
+            if (!magiBaseCard) {
+              return this.pass()
+            }
             const myMagi: ExpandedClientCard = {
               ...myMagiCard,
-              _card: byName(myMagiCard.card)
+              _card: magiBaseCard
             }
             const availableEnergy = myMagi.data.energy
             const playable = this.gameState.getPlayableCards()

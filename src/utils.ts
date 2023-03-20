@@ -40,14 +40,14 @@ export function enrichState(state: State, playerId: number) {
 	const isOnDistributeEnergyPrompt = state.prompt && state.promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
 	if (isOnDistributeEnergyPrompt) {
 		result.energyPrompt = {
-			freeEnergy: state.promptParams?.amount,
+			freeEnergy: (typeof state.promptParams?.amount == 'number') ? state.promptParams?.amount : 0,
 			cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 		};
 	}
 	const isOnDistributeDamagePrompt = state.prompt && state.promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
 	if (isOnDistributeDamagePrompt) {
 		result.energyPrompt = {
-			freeEnergy: state.promptParams?.amount,
+			freeEnergy: (typeof state.promptParams?.amount == 'number') ? state.promptParams?.amount : 0,
 			cards: Object.fromEntries(state.zones.inPlay.filter(({ card }) => byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 		};
 	}

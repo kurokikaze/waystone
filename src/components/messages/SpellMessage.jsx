@@ -1,8 +1,8 @@
 import MessageIcon from './MessageIcon.jsx';
 import Spell from '../icons/Spell.tsx';
 
-export default function SpellMessage ({card, display}) {
-	return ((card && display) ?
+export default function SpellMessage ({card}) {
+	return ((card) ?
 		<div className="BaseMessage">
 			<MessageIcon icon={<Spell />} />
 			<div className='BaseMessage__message'>

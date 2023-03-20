@@ -1,4 +1,5 @@
 /* global window */
+import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 import {
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -8,8 +9,11 @@ import {
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
 } from 'moonlands/dist/const.js';
+import { ZoneType } from 'moonlands/dist/types';
+import { HiddenConvertedCard } from '../clientProtocol';
+import { State } from '../types';
 
-const clientZoneNames = {
+const clientZoneNames: Record<ZoneType, string> = {
 	[ZONE_TYPE_DECK]: 'Deck',
 	[ZONE_TYPE_HAND]: 'Hand',
 	[ZONE_TYPE_DISCARD]: 'Discard',
@@ -19,7 +23,7 @@ const clientZoneNames = {
 	[ZONE_TYPE_IN_PLAY]: 'InPlay',
 };
 
-export const findInPlay = (state, id) => {
+export const findInPlay = (state: State, id: string) => {
 	const cardPlayerInPlay = state.zones.inPlay.find(card => card.id === id);
 	if (cardPlayerInPlay) return cardPlayerInPlay;
 
@@ -32,7 +36,7 @@ export const findInPlay = (state, id) => {
 	return null;
 };
 
-export const getZoneName = (serverZoneType, source) => {
+export const getZoneName = (serverZoneType: ZoneType, source: ConvertedCard | HiddenConvertedCard): keyof State["zones"] => {
 	if (!clientZoneNames[serverZoneType]) {
 		throw new Error(`Unknown zone: ${serverZoneType}`);
 	}
@@ -42,5 +46,5 @@ export const getZoneName = (serverZoneType, source) => {
 	}
 	const zonePrefix = source.owner === 1 ? 'player' : 'opponent';
 	const zoneName = clientZoneNames[serverZoneType];
-	return `${zonePrefix}${zoneName}`;
+	return `${zonePrefix}${zoneName}` as keyof State["zones"];
 };

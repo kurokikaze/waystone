@@ -44,7 +44,7 @@ export class HashBuilder {
     if (this.comesFrom.has(hash)) {
       // Okay, we've either already seen this pair...
       if (this.childIds.has(hash)) {
-        return this.childIds.get(hash);
+        return this.childIds.get(hash) as number;
       } else {
         // ...or it's our first time.
         this.childIds.set(hash, nextId);

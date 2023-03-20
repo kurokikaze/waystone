@@ -180,6 +180,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 				type: action.type,
 				source: attackSource.id,
 				target: attackTarget.id,
+        player: attackSource.owner,
 			};
 
 			if ('additionalAttackers' in action && action.additionalAttackers) {
@@ -304,7 +305,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             promptType: action.promptType,
             promptParams: {
               availableCards: action.promptParams.availableCards,
-              cards: action.promptParams.cards || [],
+              startingCards: action.promptParams.startingCards || [],
             },
             generatedBy: action.generatedBy,
             player: action.player,
@@ -720,10 +721,13 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						action.amount;
 
 					return {
-						...action,
+						type: action.type,
+            effectType: action.effectType,
 						target,
 						source: action.source ? convertCardMinimal(action.source) : false,
 						amount,
+            generatedBy: action.generatedBy,
+            player: action.player,
 					};
 				}
         case EFFECT_TYPE_START_STEP: {
@@ -1138,20 +1142,24 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
       type AttackTypeTemp = {
         type: typeof ACTION_ATTACK,
         source: CardInGame,
+        sourceAtStart: CardInGame,
         target: CardInGame,
-        additionalAttackers?: CardInGame[]
+        targetAtStart: CardInGame,
+        additionalAttackers?: CardInGame[],
+        player: number,
       }
 
       const finalAction: AttackTypeTemp = {
         type: action.type,
         source: attackSource,
+        sourceAtStart: attackSource,
         target: attackTarget,
+        targetAtStart: attackSource,
+        player: action.player,
       }
       if (additionalAttackers.length) {
         finalAction.additionalAttackers = additionalAttackers;
       }
-      console.log(`Attack action converted:`);
-      console.dir(finalAction);
       return finalAction as AnyEffectType;
 			// break;
 		}

@@ -90,11 +90,13 @@ export class ActionExtractor {
             })
           }
 
-          const playableSpells = sim.getZone(ZONE_TYPE_HAND, playerId).cards.filter(card => card.card.type === TYPE_SPELL && card.card.cost <= magiCard.data.energy)
+          const playableSpells = sim.getZone(ZONE_TYPE_HAND, playerId).cards.filter(
+            card => card.card.type === TYPE_SPELL && typeof card.card.cost == 'number' && card.card.cost <= magiCard.data.energy
+          )
           playableSpells.forEach(spell => {
             const innerSim = sim.clone()
             const card = innerSim.getZone(ZONE_TYPE_HAND, playerId).byId(spell.id)
-            if (card && spell.card.cost <= magiCard.data.energy) {
+            if (card && typeof spell.card.cost == 'number' && spell.card.cost <= magiCard.data.energy) {
               const action = {
                 type: ACTION_PLAY,
                 payload: {

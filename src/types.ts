@@ -7,14 +7,16 @@ export type EngineConnector = {
   emit: (action: ClientCommand) => void
 }
 
-type MessageType = {
+export type MessageType = {
   type: string,
   source?: string,
   card?: string,
   power?: string,
+  chosenTarget?: string,
+  chosenNumber?: number,
 }
 
-type ExtendedCard = ConvertedCard & {card: Card}
+type ExtendedCard = Omit<ConvertedCard, "card"> & {card: Card}
 
 type ContinuousEffectType = {
   generatedBy: string,
@@ -46,6 +48,8 @@ type AnimationStateType = {
   additionalAttacker?: string,
 }
 
+type LastPositionsMap = Record<string, [number, number]>;
+
 export type State = {
 	zones: {
 		playerHand: ConvertedCard[],
@@ -74,7 +78,10 @@ export type State = {
 	winner: number | null,
   activePlayer: number,
 	packs: Pack[],
-	energyPrompt: {},
+	energyPrompt: {
+    freeEnergy: number,
+    cards: Record<string, number>
+  },
 	prompt: boolean,
 	promptPlayer: number | null,
 	promptType: PromptTypeType | null,
@@ -82,6 +89,7 @@ export type State = {
 	promptParams: ExpandedPromptParams | null,
 	promptGeneratedBy: string | null,
 	promptAvailableCards: string[] | null,
+  lastPositions: LastPositionsMap,
 }
 
 export type DraggedItem = {

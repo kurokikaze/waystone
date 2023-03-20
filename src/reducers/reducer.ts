@@ -8,7 +8,6 @@ import {
 	ACTION_RESOLVE_PROMPT,
 	ACTION_PLAYER_WINS,
 	ACTION_POWER,
-	ACTION_TIME_NOTIFICATION,
 
 	TYPE_CREATURE,
 
@@ -63,10 +62,13 @@ import {
   EndCreatureAnimationAction,
   END_CREATURE_ANIMATION,
   StartCreatureAnimationAction,
+  CLEAR_ENTRY_ANIMATION,
+  ClearEntryAnimationAction,
+  MinusEnergyOnCreatureAction,
+  PlusEnergyOnCreatureAction,
 } from '../actions';
 
 import {
-	ACTION_TIMER_TICK,
 	MESSAGE_TYPE_POWER,
 	MESSAGE_TYPE_RELIC,
 	MESSAGE_TYPE_SPELL,
@@ -78,7 +80,7 @@ import {applyEffect} from './applyEffect';
 import {findInPlay} from './utils';
 import { ClientAction } from '../clientProtocol';
 import { LogEntryType } from 'moonlands/dist/types';
-import { ExpandedPromptParams, State } from '../types';
+import { ExpandedPromptParams, MessageType, State } from '../types';
 
 const INITIAL_STATE = 'setInitialState';
 
@@ -113,7 +115,10 @@ export const defaultState: State = {
 	gameEnded: false,
 	winner: null,
 	packs: [],
-	energyPrompt: {},
+	energyPrompt: {
+    freeEnergy: 0,
+    cards: {},
+  },
 	prompt: false,
 	promptPlayer: null,
 	promptType: null,
@@ -122,15 +127,16 @@ export const defaultState: State = {
 	promptGeneratedBy: null,
 	promptAvailableCards: [],
   activePlayer: 0,
+  lastPositions: {},
 };
 
-type TimeNotificationAction = {
-  type: typeof ACTION_TIME_NOTIFICATION,
-}
+// type TimeNotificationAction = {
+//   type: typeof ACTION_TIME_NOTIFICATION,
+// }
 
-type TimerTickAction = {
-  type: typeof ACTION_TIMER_TICK,
-}
+// type TimerTickAction = {
+//   type: typeof ACTION_TIMER_TICK,
+// }
 
 type InitialStateAction = {
   type: typeof INITIAL_STATE,
@@ -149,6 +155,7 @@ type AnimationAction = StartPowerAnimationAction |
   EndCreatureAnimationAction |
   StartPromptResolutionAnimationAction |
   EndPromptResolutionAnimationAction |
+  ClearEntryAnimationAction |
   EndAnimationAction;
 
 type AddToPackAction = {
@@ -162,7 +169,7 @@ type DismissPackAction = {
   leader: string,
 }
 
-type InternalAction = /*TimeNotificationAction | TimerTickAction |*/ InitialStateAction | AnimationAction | AddToPackAction | DismissPackAction;
+type InternalAction = /*TimeNotificationAction | TimerTickAction |*/ InitialStateAction | AnimationAction | AddToPackAction | DismissPackAction | PlusEnergyOnCreatureAction | MinusEnergyOnCreatureAction;
 
 type ReducerAction = ClientAction | InternalAction
 
@@ -170,7 +177,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 	switch (action.type) {
     case INITIAL_STATE: {
       return {
-        ...defaultState,
+        ...state,
         ...action.state
       };
     }
@@ -374,7 +381,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				}
         case PROMPT_TYPE_CHOOSE_CARDS: {
           promptParams = {
-            startingCards: action?.promptParams.cards,
+            startingCards: action?.promptParams.startingCards,
             availableCards: action?.promptParams.availableCards,
           }
           break;
@@ -411,17 +418,17 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: 0,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card).type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
 					};
 					promptParams = promptParams || {
-						restriction: false,
+						// restriction: false,
 					};
 					break;
 				}
 				case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: action.amount,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card).type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 					};
 				}
 			}
@@ -439,7 +446,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case START_PROMPT_RESOLUTION_ANIMATION: {
-			var messageData = {...state.message};
+			var messageData: MessageType | null = state.message ? {...state.message} : state.message;
 			if (typeof action.target === 'number') {
 				messageData = {
 					type: MESSAGE_TYPE_PROMPT_RESOLUTION,
@@ -467,19 +474,23 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			var promptLogEntry: LogEntryType | null = null;
 
 			if (
-				state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
-				state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
-				state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
-				state.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
-				state.promptType === PROMPT_TYPE_SINGLE_MAGI
+        action.target && 
+        (
+          state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
+          state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
+          state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
+          state.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
+          state.promptType === PROMPT_TYPE_SINGLE_MAGI
+        )
 			) {
 				const target = findInPlay(state, action.target);
-
-				promptLogEntry = {
-					type: LOG_ENTRY_TARGETING,
-					card: target.card,
-					player: action.player,
-				};
+        if (target) {
+          promptLogEntry = {
+            type: LOG_ENTRY_TARGETING,
+            card: target.card,
+            player: action.player,
+          };
+        }
 			} else if (state.promptType === PROMPT_TYPE_NUMBER) {
 				promptLogEntry = {
 					type: LOG_ENTRY_NUMBER_CHOICE,
@@ -545,6 +556,13 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				},
 			};
 		}
+    case CLEAR_ENTRY_ANIMATION: {
+      const { [action.id]: [], ...positions} = state.lastPositions;
+      return {
+        ...state,
+        lastPositions: positions,
+      }
+    }
 		default: {
 			return state;
 		}

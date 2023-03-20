@@ -4,8 +4,8 @@ import CardInGame from 'moonlands/src/classes/CardInGame'
 import Zone from 'moonlands/src/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
-import {StateShape} from 'moonlands/dist';
 
+type StateShape = State["state"];
 export const booleanGuard = Boolean as any as <T>(x: T | false | undefined | null | "" | 0) => x is T;
 
 export const createZones = (player1: number, player2: number, creatures: CardInGame[] = [], activeMagi: CardInGame[] = []) => [
@@ -139,7 +139,7 @@ export const getStateScore = (state: State, attacker: number, opponent: number):
   if (enemyMagi) {
     enemyScore += enemyMagi.data.energy
   }
-  if (state.hasWinner) {
+  if (state.hasWinner()) {
     if (state.winner === opponent) {
       enemyScore += 1000;
     } else {

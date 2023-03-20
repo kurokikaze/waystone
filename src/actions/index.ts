@@ -1,5 +1,3 @@
-import { ConvertedCard } from "moonlands/dist/classes/CardInGame";
-
 export const SHOW_POWER_NAME = 'actions/show_power_name';
 export const HIDE_POWER_NAME = 'actions/hide_power_name';
 export const START_POWER_ANIMATION = 'actions/start_power_animation';
@@ -19,6 +17,8 @@ export const END_ANIMATION = 'actions/end_animation';
 
 export const ADD_TO_PACK = 'actions/add_to_pack';
 export const DISMISS_PACK = 'actions/dismiss_pack';
+
+export const CLEAR_ENTRY_ANIMATION = 'actions/clear_entry_animation'
 
 export const MINUS_ENERGY_ON_CREATURE = 'actions/minus_energy_on_creature';
 export const PLUS_ENERGY_ON_CREATURE = 'actions/plus_energy_on_creature';
@@ -88,7 +88,7 @@ export const endCreatureAnimation = () => ({
   type: END_CREATURE_ANIMATION as typeof END_CREATURE_ANIMATION,
   endAnimation: true,
 });
-export const startPromptResolutionAnimation = (target: string) => ({
+export const startPromptResolutionAnimation = (target: string | number) => ({
   type: START_PROMPT_RESOLUTION_ANIMATION as typeof START_PROMPT_RESOLUTION_ANIMATION,
   target,
 });
@@ -102,6 +102,14 @@ export const endAnimation = () => ({
   type: END_ANIMATION as typeof END_ANIMATION,
   endAnimation: true,
 });
+export const plusEnergyOnCreature = (cardId: string) => ({
+  type: PLUS_ENERGY_ON_CREATURE as typeof PLUS_ENERGY_ON_CREATURE,
+  cardId,
+});
+export const minusEnergyOnCreature = (cardId: string) => ({
+  type: MINUS_ENERGY_ON_CREATURE as typeof MINUS_ENERGY_ON_CREATURE,
+  cardId,
+});
 
 export const addToPack = (leader: string, hunter: string) => ({
   type: ADD_TO_PACK as typeof ADD_TO_PACK,
@@ -112,9 +120,10 @@ export const dismissPack = (leader: string) => ({
   type: DISMISS_PACK as typeof DISMISS_PACK,
   leader,
 });
-
-export const plusEnergy = (cardId: string) => ({ type: PLUS_ENERGY_ON_CREATURE, cardId });
-export const minusEnergy = (cardId: string) => ({ type: MINUS_ENERGY_ON_CREATURE, cardId });
+export const clearEntryAnimation = (id: string) => ({
+  type: CLEAR_ENTRY_ANIMATION as typeof CLEAR_ENTRY_ANIMATION,
+  id,
+})
 
 export type StartPowerAnimationAction = ReturnType<typeof startPowerAnimation>
 export type EndPowerAnimationAction = ReturnType<typeof endPowerAnimation>
@@ -132,3 +141,6 @@ export type EndStepAnimationAction = ReturnType<typeof endStepAnimation>
 export type EndAnimationAction = ReturnType<typeof endAnimation>
 export type AddToPackAction = ReturnType<typeof addToPack>
 export type DismissPackAction = ReturnType<typeof dismissPack>
+export type ClearEntryAnimationAction = ReturnType<typeof clearEntryAnimation>
+export type PlusEnergyOnCreatureAction = ReturnType<typeof plusEnergyOnCreature>
+export type MinusEnergyOnCreatureAction = ReturnType<typeof minusEnergyOnCreature>

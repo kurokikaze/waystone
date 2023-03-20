@@ -151,8 +151,14 @@ onmessage = (event) => {
       for: 2,
       state: serializedStateTwo,
     });
-  } else if (event.data === 'pass') {
-    console.error('Time to do proper pass');
+  } else if (event.data.special === 'refresh') {
+    if (game) {
+    const serializedState = game.serializeData(1);
+      postMessage({
+        for: 1,
+        state: serializedState,
+      });
+    }
   } else if (event.data && 'type' in event.data) {
     if (game) {
       const convertedCommand = convertClientCommands({
