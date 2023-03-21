@@ -79,6 +79,7 @@ function ZoneOpponentInPlay({
           engineConnector={engineConnector}
 					className={cn({'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
 					attacker={animation && animation.source === cardData.id}
+          attackNumber={cardData.data.attacked}
 				/>,
 			) : null}
 		</div>

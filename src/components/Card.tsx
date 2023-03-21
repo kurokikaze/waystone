@@ -53,6 +53,7 @@ type CardProps = {
   guarded: boolean;
 	useLocket: boolean;
 	modifiedData: CardData;
+  attackNumber: number,
 	pack: string[];
 	target: boolean;
 	connectDragSource: () => void;
@@ -78,6 +79,7 @@ function Card({
 	isOnPrompt,
 	className,
 	attacker,
+  attackNumber,
 	target,
 	onPackHunt,
   engineConnector,
@@ -111,7 +113,7 @@ function Card({
 			}
 			return () => tl.clear();
 		}
-	}, [attacker]);
+	}, [attacker, attackNumber]);
 
 
 	const ref = useRef(null);
