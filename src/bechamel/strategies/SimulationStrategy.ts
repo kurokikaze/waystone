@@ -214,10 +214,10 @@ export class SimulationStrategy implements Strategy {
         simulationQueue.push(...ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder))
       }
     }
-    console.log(`Done ${counter} attack simulations`)
-    console.log(`Best found score is ${bestAction.score} (initial is ${initialScore})`)
-    console.log('Actions corresponding to the score: ')
-    console.log(JSON.stringify(bestAction.action))
+    // console.log(`Done ${counter} attack simulations`)
+    // console.log(`Best found score is ${bestAction.score} (initial is ${initialScore})`)
+    // console.log('Actions corresponding to the score: ')
+    // console.log(JSON.stringify(bestAction.action))
     return bestAction.action[0]
   }
 
@@ -303,8 +303,8 @@ export class SimulationStrategy implements Strategy {
     //   ${this.graph}
     // }
     // `)
-    console.log(`Done ${counter} power simulations. Leaves reached: ${this.leaves.size}`)
-    console.log(`Best found score is ${bestAction.score} (initial is ${initialScore})`)
+    // console.log(`Done ${counter} power simulations. Leaves reached: ${this.leaves.size}`)
+    // console.log(`Best found score is ${bestAction.score} (initial is ${initialScore})`)
     return bestAction.action
   }
 
@@ -456,12 +456,12 @@ export class SimulationStrategy implements Strategy {
 
             this.actionsOnHold = bestActions.slice(1).map(action => this.simulationActionToClientAction(action))
             if (this.actionsOnHold.length) {
-              console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
+              // console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
               // console.dir(this.actionsOnHold)
             }
             const bestAction = bestActions[0]
-            console.log('Chosen action:')
-            console.log(JSON.stringify(bestAction, null, 2))
+            // console.log('Chosen action:')
+            // console.log(JSON.stringify(bestAction, null, 2))
             return this.simulationActionToClientAction(bestAction)
           }
 

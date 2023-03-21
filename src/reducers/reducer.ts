@@ -516,16 +516,28 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				...state,
 				zones: {
 					...state.zones,
-					inPlay: state.zones.inPlay.map(card =>
-						attackerIds.includes(card.id) ? ({
-							...card,
-							data: {
-								...card.data,
-								attacked: card.data.attacked + 1,
-								hasAttacked: true,
-							},
-						}) : card,
-					),
+					inPlay: state.zones.inPlay.map(card => {
+            if (attackerIds.includes(card.id)) { 
+               return {
+                ...card,
+                data: {
+                  ...card.data,
+                  attacked: card.data.attacked + 1,
+                  hasAttacked: true,
+                },
+						  }
+            }
+            if (card.id === action.target) {
+              return {
+                ...card,
+                data: {
+                  ...card.data,
+                  wasAttacked: true,
+                },
+						  }
+            }
+            return card;
+          }),
 				},
 			};
 		}

@@ -9,7 +9,6 @@ import {
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-	EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
@@ -47,7 +46,7 @@ import { State } from '../types.js';
 import { LogEntryType } from 'moonlands/dist/types/log.js';
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 
-const zonesToConsiderForStaticAbilities = new Set(['inPlay', 'opponentInPlay', 'playerActiveMagi', 'opponentActiveMagi']);
+const zonesToConsiderForStaticAbilities = new Set<string>(['inPlay', 'opponentInPlay', 'playerActiveMagi', 'opponentActiveMagi']);
 
 export function applyEffect(state: State, action: ClientEffectAction): State {
 	switch(action.effectType) {
@@ -97,7 +96,25 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				};
 			}
 
-			return state;
+			return {
+        ...state,
+        zones: {
+          ...state.zones,
+          inPlay: state.zones.inPlay.map(card => {
+            if (card.id === action.source.id) {
+              return {
+                ...card,
+                data: {
+                  ...card.data,
+                  hasAttacked: true,
+                  attacked: 1,
+                }
+              }
+            }
+            return card
+          })
+        },
+      };
 		}
 		case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
 			const sourceZone: keyof State["zones"] = getZoneName(action.sourceZone, action.sourceCard);

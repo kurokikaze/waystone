@@ -1,10 +1,10 @@
 import Card from "moonlands/dist/classes/Card"
 import { ConvertedCard, InGameData } from "moonlands/dist/classes/CardInGame"
 import { LogEntryType, PromptParams, PromptTypeType } from "moonlands/dist/types"
-import { ClientCommand, HiddenConvertedCard } from "./clientProtocol"
+import { C2SAction, ClientCommand, HiddenConvertedCard } from "./clientProtocol"
 
 export type EngineConnector = {
-  emit: (action: ClientCommand) => void
+  emit: (action: C2SAction) => void
 }
 
 export type MessageType = {
@@ -16,7 +16,7 @@ export type MessageType = {
   chosenNumber?: number,
 }
 
-type ExtendedCard = Omit<ConvertedCard, "card"> & {card: Card}
+export type ExtendedCard = Omit<ConvertedCard, "card"> & {card: Card}
 
 type ContinuousEffectType = {
   generatedBy: string,

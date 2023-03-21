@@ -1,8 +1,9 @@
 /* global window */
 import { byName } from 'moonlands/dist/cards.js';
+import Card from 'moonlands/dist/classes/Card';
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, TYPE_CREATURE } from 'moonlands/dist/const';
-import { State } from './types';
+import { ExtendedCard, State } from './types';
 
 export function camelCase(str: string):string {
 	return str.replace(/'/g, '').split(' ').map(function(word, index){
@@ -16,9 +17,9 @@ export function camelCase(str: string):string {
 }
 
 const onlyCardsWithStaticAbilities = (card: ConvertedCard) => byName(card.card)?.data.staticAbilities;
-const addCardData = (card: ConvertedCard) => ({...card, card: byName(card.card)});
+const addCardData = (card: ConvertedCard): ExtendedCard => ({...card, card: byName(card.card) as Card});
 
-export function enrichState(state: State, playerId: number) {
+export function enrichState(state: State, playerId: number): State {
 	const result = {
 		...state,
 		staticAbilities: [

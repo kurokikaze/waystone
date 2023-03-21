@@ -13,3 +13,5 @@ export const MESSAGE_TYPE_PROMPT_RESOLUTION = 'messages/prompt_resolution';
 
 export const ACTION_TIMER_TICK = 'actions/timer_tick';
 export const CLIENT_ACTION = 'clientAction';
+
+export const COMMAND_START = 'start';

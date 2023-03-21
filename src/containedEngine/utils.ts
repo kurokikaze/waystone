@@ -7,6 +7,7 @@ import {
 	ACTION_EFFECT,
 	ACTION_POWER,
 	ACTION_ATTACK,
+  ACTION_PLAYER_WINS,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
@@ -72,6 +73,7 @@ import {
   PROMPT_TYPE_MAY_ABILITY,
   EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
   EFFECT_TYPE_START_STEP,
+  PROMPT_TYPE_PLAYER,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types/common.js';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
@@ -173,6 +175,12 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 				}
 			} as ClientPlayAction;
 		}
+    case ACTION_PLAYER_WINS: {
+      return {
+        type: action.type,
+        player: action.player,
+      }
+    }
 		case ACTION_ATTACK: {
       const attackSource: CardInGame = game.getMetaValue(action.source, action.generatedBy);
       const attackTarget: CardInGame = game.getMetaValue(action.target, action.generatedBy);
@@ -1066,6 +1074,10 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
           return action as ClientAction;
         }
         case PROMPT_TYPE_MAY_ABILITY: {
+          // @ts-ignore
+          return action as ClientAction;
+        }
+        case PROMPT_TYPE_PLAYER: {
           // @ts-ignore
           return action as ClientAction;
         }

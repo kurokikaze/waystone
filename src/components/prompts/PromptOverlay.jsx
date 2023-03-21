@@ -11,6 +11,7 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  PROMPT_TYPE_PLAYER,
 } from 'moonlands/src/const.ts';
 
 import PromptChooseCards from './PromptChooseCards.jsx';
@@ -22,7 +23,7 @@ import PromptEnergyManipulation from './PromptEnergyManipulation.jsx';
 import PromptEnergyDistribution from './PromptEnergyDistribution.jsx';
 import PromptDamageDistribution from './PromptDamageDistribution.jsx';
 import PromptRearrangeCards from './PromptRearrangeCards.jsx';
-
+import PromptChoosePlayer from './PromptChoosePlayer';
 import {getPromptType, getPromptMessage} from '../../selectors'; 
 
 import './style.css';
@@ -53,6 +54,7 @@ function PromptOverlay({engineConnector}) {
 			{promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES && <PromptEnergyDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES && <PromptDamageDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE && <PromptRearrangeCards engineConnector={engineConnector} />}
+			{promptType === PROMPT_TYPE_PLAYER && <PromptChoosePlayer engineConnector={engineConnector} />}
 		</div>
 	);
 }

@@ -22,6 +22,7 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_ENERGY_EQUALS,
+  RESTRICTION_CREATURE_WAS_ATTACKED,
 
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_OWN_MAGI,
@@ -245,6 +246,8 @@ const getRestrictionFilter = (restriction, value) => {
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === 1);
 		case RESTRICTION_OPPONENT_CREATURE:
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) !== 1);
+    case RESTRICTION_CREATURE_WAS_ATTACKED:
+      return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
 	}
 };
 

@@ -55,6 +55,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 					droppable={active}
 					target={active}
 					guarded={guarded}
+          engineConnector={engineConnector}
 				/>,
 			) : null}
 		</div>

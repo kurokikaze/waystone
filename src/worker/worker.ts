@@ -6,6 +6,7 @@ declare const self: DedicatedWorkerGlobalScope;
 import { State } from 'moonlands';
 import { ACTION_PASS } from 'moonlands/dist/const';
 import { AnyEffectType } from 'moonlands/dist/types';
+import { COMMAND_START } from '../const';
 import { createGame } from '../containedEngine/containedEngine';
 import convertClientCommands, { convertServerCommand } from '../containedEngine/utils';
 const caldDeck = [
@@ -102,12 +103,14 @@ const naroomDeck =[
 
 var game: State | null = null;
 onmessage = (event) => {
-  if (event.data === 'start') {
+  if (event.data && event.data.type === COMMAND_START) {
     game = createGame();
     game.setPlayers(1,2);
-    game.setDeck(1, caldDeck);
-    game.setDeck(2, naroomDeck);
+    game.setDeck(1, event.data.playerDeck);
+    game.setDeck(2, event.data.opponentDeck);
     game.setup();
+
+    game.enableDebug();
 
     const actionCallback = (action: AnyEffectType) => {
       if (game) {

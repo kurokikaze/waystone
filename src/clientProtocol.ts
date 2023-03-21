@@ -399,6 +399,7 @@ export type ClientResolvePromptAction = {
   type: typeof ACTION_RESOLVE_PROMPT,
   target?: string,
   targetCard?: ConvertedCard | HiddenConvertedCard,
+  targetPlayer?: number,
   number?: number,
   player: number,
   zone?: ZoneType,

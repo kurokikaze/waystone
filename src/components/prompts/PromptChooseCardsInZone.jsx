@@ -18,6 +18,7 @@ import {
 } from '../../selectors';
 
 function PromptChooseCards({engineConnector}) {
+  const [contracted, setContracted] = useState(false);
 	const cards = useSelector(getPromptCards);
 	const zone = useSelector(getPromptZone);
 	const message = useSelector(getPromptMessage);
@@ -45,24 +46,29 @@ function PromptChooseCards({engineConnector}) {
 		setSelected(selected => selected.includes(cardName) ? selected.filter(e => e !== cardName): [...selected, cardName]);
 
 	return (
-		<div className="promptWindow promptChooseCards">
+		<div className={cn("promptWindow promptChooseCards", {"promptContracted": contracted})}>
 			<h1>Choose {numberOfCards} card(s)</h1>
-			{message && <h3>{message}</h3>}
-			<div className={cn('cardsRow', {'smallCards': cards.length > 4})}>
-				{cards.map(({card, id}) => (
-					<div className={cn('zoneCardSelect', {'chosen': selected.includes(id)})} key={id}>
-						<CardDisplay
-							id={`card_${card}`}
-							card={{name: card}}
-							data={{}}
-							onClick={() => triggerElement(id)}
-						/>
-					</div>
-				))}
-			</div>
-			<div className="buttonHolder">
-				<button onClick={handleSend} disabled={numberOfCards !== selected.length}>OK</button>
-			</div>
+      <div style={{position: 'relative', top: 20, right: 20 }}>
+        {contracted ? <div onClick={() => setContracted(false)}><Expand size={20} /></div> : <div onClick={() => setContracted(true)}><Contract size={20} /></div>}
+      </div>
+      {contracted ? null : <>
+        {message && <h3>{message}</h3>}
+        <div className={cn('cardsRow', {'smallCards': cards.length > 4})}>
+          {cards.map(({card, id}) => (
+            <div className={cn('zoneCardSelect', {'chosen': selected.includes(id)})} key={id}>
+              <CardDisplay
+                id={`card_${card}`}
+                card={{name: card}}
+                data={{}}
+                onClick={() => triggerElement(id)}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="buttonHolder">
+          <button onClick={handleSend} disabled={numberOfCards !== selected.length}>OK</button>
+        </div>
+      </>}
 		</div>
 	);
 }

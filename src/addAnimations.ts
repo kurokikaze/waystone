@@ -12,7 +12,7 @@ import {
 	EFFECT_TYPE_PLAY_SPELL,
 	ACTION_RESOLVE_PROMPT,
   EFFECT_TYPE_PLAY_CREATURE,
-  EFFECT_TYPE_ATTACK,
+  // EFFECT_TYPE_ATTACK,
 } from 'moonlands/dist/const';
 
 import { 
@@ -36,7 +36,6 @@ import {
 	START_PROMPT_RESOLUTION_ANIMATION,
 	END_STEP_ANIMATION,
   START_CREATURE_ANIMATION,
-  END_CREATURE_ANIMATION,
 } from './actions';
 import { ClientCommand } from './clientProtocol';
 import { Action, Store } from 'redux';

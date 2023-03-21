@@ -11,19 +11,6 @@ const STEP_NAMES: Record<number, string> = {
   5: 'Draw',
 }
 
-// export const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
-//   let timeout: NodeJS.Timeout
-
-//   return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-//     new Promise(resolve => {
-//       if (timeout) {
-//         clearTimeout(timeout)
-//       }
-
-//       timeout = setTimeout(() => resolve(func(...args)), waitFor)
-//     })
-// }
-
 export class WorkerStrategyConnector {
   private playerId?: number
   private gameState?: GameState
@@ -71,42 +58,6 @@ export class WorkerStrategyConnector {
   
       }
     }
-    // this.io.on('gameData', (data: {playerId: number, state: SerializedClientState}) => {
-    //   this.playerId = data.playerId
-    //   this.gameState = new GameState(data.state)
-    //   this.gameState.setPlayerId(data.playerId)
-
-    //   strategy.setup(this.gameState, this.playerId)
-    //   console.log('We got the game data')
-    //   if (this.gameState.playerPriority(this.playerId) || this.gameState.isInPromptState(this.playerId)) {
-    //     this.requestAndSendAction()
-    //   }
-    // })
-
-    // this.io.on('action', action => {
-    //   if (this.gameState && this.playerId && action) {
-    //     try {
-    //       this.gameState.update(action)
-    //     } catch(e: any) {
-    //       console.log('Error applying the action')
-    //       console.dir(action)
-    //       console.log(e?.message)
-    //     }
-
-    //     if (this.gameState.hasGameEnded()) {
-    //       console.log(this.gameState.getWinner() === this.playerId ? 'We won' : 'We lost');
-    //       close();
-    //       // process.exit(0);
-    //       return true;
-    //     }
-
-    //     if (action.type === 'display/priority') {
-    //       if (action.player === this.playerId) {
-    //         this.requestAndSendAction()
-    //       }
-    //     } 
-    //   }
-    // })
   }
 
   private requestAndSendAction() {
@@ -119,11 +70,11 @@ export class WorkerStrategyConnector {
         (this.gameState.playerPriority(this.playerId) || inPromptState)
     ) {
       if (currentStep !== 5) {
-        console.log(`Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
+        // console.log(`Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
         const action = this.strategy.requestAction()
         if (action) {
-          console.log(`Thinking is done, chosen action is:`)
-          console.dir(action);
+          // console.log(`Thinking is done, chosen action is:`)
+          // console.dir(action);
           postMessage(action)
         } else {
           console.log('No action returned from request')

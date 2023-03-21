@@ -55,6 +55,10 @@
     overflow: hidden;
 }
 
+.promptOverlay .promptWindow.promptContracted {
+  min-height: 65px;
+}
+
 .promptWindow .cardHolder img {
     max-width: 128px;
     max-height: 180px;

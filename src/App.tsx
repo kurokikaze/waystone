@@ -1,192 +1,159 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { Observable } from 'rxjs';
-import reactLogo from "./assets/react.svg";
-import GameApp from './components/App';
+import { useCallback, useState } from "react";
 import "./App.css";
-import Worker from "./worker/worker?worker"
-import BotWorker from "./worker/botWorker?worker"
 
-import { Provider } from 'react-redux';
+import { GameAppWrapper } from "./components/GameAppWrapper/GameAppWrapper";
+import MoonlandsLogo from "./components/MoonlandsLogo/MoonlandsLogo";
+import DeckEditor, { DeckType } from "./components/DeckEditor/DeckEditor";
 
-import { createStore, applyMiddleware, compose } from 'redux';
-import { createEpicMiddleware } from 'redux-observable';
-// import { Observable } from 'rxjs';
-import thunk from 'redux-thunk';
-import addAnimations from './addAnimations.js';
-// @ts-ignore
-import { enrichState } from './utils.js';
-// @ts-ignore
-import rootReducer from './reducers';
-// @ts-ignore
-import {defaultState} from './reducers/reducer';
-import { EngineConnector } from "./types";
-import { ACTION_PASS, ACTION_PLAYER_WINS } from "moonlands/dist/const";
-import { ClientAction, ClientCommand } from "./clientProtocol";
+import engineData from 'moonlands/package.json'
 
-var emptyEngineConnector: EngineConnector = {
-  emit: (_action: ClientCommand) => {},
-};
+const MODE_BASE = 'modes/base';
+const MODE_EDITOR = 'modes/editor';
+const MODE_GAME = 'modes/game';
 
-const epicMiddleware = createEpicMiddleware();
-const store = createStore(
-  rootReducer,
-  defaultState,
-  compose(
-    applyMiddleware(thunk),
-    applyMiddleware(epicMiddleware),
-  ),
-);
+type AppMode = typeof MODE_BASE | typeof MODE_EDITOR | typeof MODE_GAME;
 
 function App() {
-  const [name, setName] = useState("");
+  // const [name, setName] = useState("");
 
   const [game, setGame] = useState<boolean>(false);
-  const [lastAction, setLastAction] = useState("");
-  const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
+  const [mode, setMode] = useState<AppMode>(MODE_BASE);
 
-  const engineRef = useRef<Worker>();
-  const botRef = useRef<Worker>();
-  const breakRef = useRef<Function>(() => {});
+  const [editedDeck, setEditedDeck] = useState<DeckType>({name: '', cards: []})
+  const [playerDeckEdited, setPlayerDeckEdited] = useState(true)
 
-  const actionsObservableRef = useRef<Observable<ClientAction>>()
-
-  useEffect(() => {
-    if (!botRef.current) {
-      const bechamel = new BotWorker();
-      botRef.current = bechamel
-      console.log('Bechamel worker created');
+  const handleSave = useCallback((cards: string[]) => {
+    if (playerDeckEdited) {
+      setPlayerDeck(cards)
+    } else {
+      setOpponentDeck(cards)
     }
+  }, [playerDeckEdited])
 
-    if (!engineRef.current && !actionsObservableRef.current) {
-      const engine = new Worker();
-      console.log('Created the worker')
-      const actionsObservable = new Observable<ClientAction>(subscriber => {
-        const onmessage = (message: any) => {
-          // console.dir(message)
-          if (message.data && 'state' in message.data) {
-            const data = message.data;
-            if (data.for === 1) {
-              console.log('Setting the initial state');
-              console.dir(message.data.state);
-              store.dispatch({type: 'setInitialState', state: enrichState(message.data.state, 1)});
-              setGame(true);
-            } else if (botRef.current) {
-              console.log('Sending initial state to the bot')
-              botRef.current.postMessage({
-                type: 'special/setup',
-                playerId: 2,
-                state: message.data.state,
-              })
-            }
-          } else if (message.data && 'action' in message.data) {
-            if (message.data.for === 1) {
-              // console.dir(message.data.action);
-              subscriber.next(message.data.action);
-              if (message.data.action.type === ACTION_PLAYER_WINS) {
-                subscriber.complete();
-              }
+  const [playerDeck, setPlayerDeck] = useState<string[]>([
+    'Grega',
+    'Magam',
+    'Sinder',
+    'Fire Chogo',
+    'Fire Chogo',
+    'Fire Chogo',
+    'Fire Grag',
+    'Fire Grag',
+    'Fire Grag',
+    'Arbolit',
+    'Arbolit',
+    'Arbolit',
+    'Magma Hyren',
+    'Magma Hyren',
+    'Magma Hyren',
+    'Quor',
+    'Quor',
+    'Quor',
+    'Lava Aq',
+    'Lava Aq',
+    'Lava Aq',
+    'Lava Arboll',
+    'Lava Arboll',
+    'Lava Arboll',
+    'Diobor',
+    'Diobor',
+    'Diobor',
+    'Drakan',
+    'Drakan',
+    'Drakan',
+    'Thermal Blast',
+    'Thermal Blast',
+    'Thermal Blast',
+    'Flame Geyser',
+    'Flame Geyser',
+    'Flame Geyser',
+    'Cave Hyren',
+    'Cave Hyren',
+    'Cave Hyren',
+    'Magma Armor',
+    'Magma Armor',
+    'Water of Life',
+    'Water of Life',
+  ])
+  const [opponentDeck, setOpponentDeck] = useState<string[]>(['Pruitt',
+	'Poad',
+	'Yaki',
+	'Leaf Hyren',
+	'Leaf Hyren',
+	'Leaf Hyren',
+	'Weebo',
+	'Weebo',
+	'Weebo',
+	'Arboll',
+	'Arboll',
+	'Arboll',
+	'Giant Carillion',
+	'Giant Carillion',
+	'Giant Carillion',
+	'Giant Parathin',
+	'Giant Parathin',
+	'Giant Parathin',
+	'Balamant',
+	'Balamant',
+	'Balamant',
+	'Grow',
+	'Grow',
+	'Grow',
+	'Giant Parathin',
+	'Giant Parathin',
+	'Giant Parathin',
+	'Water of Life',
+	'Syphon Stone',
+	'Syphon Stone',
+	'Carillion',
+	'Carillion',
+	'Carillion',
+	'Rudwot',
+	'Rudwot',
+	'Rudwot',
+	'Stagadan',
+	'Stagadan',
+	'Stagadan',
+	'Robe of Vines',
+	'Robe of Vines',
+	'Water of Life',
+	'Sea Barl',
+])
 
-              // store.dispatch(message.data.action);
-            } else if (botRef.current) {
-              botRef.current.postMessage(message.data.action);
-            }
-          }
-        }
+const handleEditPlayerDeck = useCallback(() => {
+  setEditedDeck({name: 'Player deck', cards: playerDeck})
+  setPlayerDeckEdited(true)
+  setMode(MODE_EDITOR)
+}, [playerDeck])
 
-        engine.onmessage = onmessage;
-      });      
-
-      actionsObservableRef.current = actionsObservable;
-      // console.log('Creating the break observable');
-      const breakObservable = new Observable<{}>(observer => {
-        // console.log('Setting break callback')
-        breakRef.current = () => {
-          // console.log('Break detected');
-          observer.next({});
-        }
-      });
-      const delayedActions = addAnimations(actionsObservable, breakObservable, store);
-
-	    delayedActions.subscribe({
-        next: (transformedAction) => {
-          if (transformedAction.type && transformedAction.type.includes('animation')) {
-            console.dir(transformedAction);
-          }
-          store.dispatch(transformedAction);
-        },
-      });
-
-      engine.postMessage('start');
-      // @ts-ignore
-      // window.engine = engine;
-      engineRef.current = engine;
-      const realEngineConnector = {
-        emit: (action: any) => engine.postMessage({
-          ...action,
-          player: 1,
-        }),
-      };
-      setEngineConnector(realEngineConnector);
-
-      // Connect bechamel to the engine
-      if (botRef.current) {
-        botRef.current.onmessage = (action) => {
-          if (action.data && 'type' in action.data) {
-            engine.postMessage({
-              ...action.data,
-              player: 2,
-            });
-          }
-        }
-        console.log('Bechamel connected to the engine');
-      }
-    }
-  }, []);
-
-  const pass = useCallback(() => {
-    if (engineRef.current && engineRef.current.postMessage) {
-      engineRef.current.postMessage({type: ACTION_PASS, player: 1})
-    }
+const handleEditOpponentDeck = useCallback(() => {
+  setEditedDeck({name: 'Opponent deck', cards: opponentDeck})
+  setPlayerDeckEdited(false)
+  setMode(MODE_EDITOR)
+}, [playerDeck])
+ 
+  const handleReturnToBase = useCallback(() => {
+    setMode(MODE_BASE);
   }, [])
 
   return (
     <div>
-      {game ? <div>
-        <Provider store={store}>
-          <GameApp engineConnector={engineConnector} onBreak={breakRef.current} />
-        </Provider>
-      </div> : <div className="container">
+      {mode === MODE_GAME ? <div>
+        <GameAppWrapper playerDeck={playerDeck} opponentDeck={opponentDeck} />
+      </div> : null}
+      {mode === MODE_BASE ? <>
         <h1>Welcome to Tauri!</h1>
 
         <div className="row">
-          <a href="https://vitejs.dev" target="_blank">
-            <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-          </a>
-          <a href="https://tauri.app" target="_blank">
-            <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-          </a>
-          <a href="https://reactjs.org" target="_blank">
-            <img src={reactLogo} className="logo react" alt="React logo" />
-          </a>
+            <MoonlandsLogo />
         </div>
 
-        <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-        <p>Last game action: {lastAction}.</p>
-
-        <div className="row">
-          <div>
-            <input
-              id="greet-input"
-              onChange={(e) => setName(e.currentTarget.value)}
-              placeholder="Enter a name..."
-            />
-            <button type="button" onClick={pass}>
-              Game
-            </button>
-          </div>
-        </div>
-      </div>}
+        <p>Moonlands engine version: {engineData.version}</p>
+        <p><button onClick={handleEditPlayerDeck}>Edit player deck</button></p>
+        <p><button onClick={handleEditOpponentDeck}>Edit opponent deck</button></p>
+        <p><button onClick={() => setMode(MODE_GAME)}>Start game</button></p>
+      </> : null}
+      {mode === MODE_EDITOR ? <DeckEditor deckContents={editedDeck} onSave={handleSave} onClose={handleReturnToBase} /> : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import {useRef, useEffect} from 'react';
 import {useSelector} from 'react-redux';
 import cn from 'classnames';
 
-import './style.css';
+// import './style.css';
 
 const getWinner = state => state.winner;
 

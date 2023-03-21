@@ -28,9 +28,9 @@ import PromptResolutionMessage from './messages/PromptResolutionMessage.jsx';
 import ActionCardView from './ActionCardView.jsx';
 
 // @ts-ignore
-import StepBoard from './StepBoard.jsx';
+import StepBoard from './StepBoard/StepBoard.jsx';
 // @ts-ignore
-import EndgameOverlay from './EndgameOverlay.jsx';
+import EndgameOverlay from './EndgameOverlay/EndgameOverlay.jsx';
 
 import "./style.css";
 import "../assets/style.css";
