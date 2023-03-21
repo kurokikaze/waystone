@@ -1,3 +1,4 @@
+import { appWindow, LogicalSize } from "@tauri-apps/api/window";
 import { ACTION_PLAYER_WINS } from "moonlands";
 import { useRef, useEffect, useState } from "react";
 import { Provider } from "react-redux"
@@ -49,6 +50,8 @@ export const GameAppWrapper = ({
   const breakRef = useRef<Function>(() => {});
 
   useEffect(() => {
+    appWindow.setResizable(false);
+    appWindow.setSize(new LogicalSize(1111, 637));
     if (!botRef.current) {
       const bechamel = new BotWorker();
       botRef.current = bechamel

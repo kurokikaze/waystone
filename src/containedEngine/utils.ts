@@ -213,7 +213,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             type: action.type,
             promptType: action.promptType,
             min: parseInt(game.getMetaValue(action.min, action.generatedBy), 10),
-            max: parseInt(game.getMetaValue(action.min, action.generatedBy), 10),
+            max: parseInt(game.getMetaValue(action.max, action.generatedBy), 10),
             ...(action.message ? {message: action.message} : {}),
             player: action.player,
           } as ClientEnterPromptNumber;
@@ -313,6 +313,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             promptType: action.promptType,
             promptParams: {
               availableCards: action.promptParams.availableCards,
+              // @ts-ignore
               startingCards: action.promptParams.startingCards || [],
             },
             generatedBy: action.generatedBy,

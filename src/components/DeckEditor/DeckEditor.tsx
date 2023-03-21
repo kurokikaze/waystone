@@ -160,7 +160,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 										<div className={cn('cardImage', {'canAdd': canAdd(card.name)})}>
 											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
 										</div>
-										{canAdd(card.name) && <div onClick={() => addToDeck(card.name)} className='addIcon'><Add size={50} color={'green'} /></div>}
+										{canAdd(card.name) && <div onClick={() => addToDeck(card.name)} className='addIcon'><Add size={50} fillColor={'green'} /></div>}
 									</div>)}
 								</div>
 							</div>}
@@ -170,7 +170,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 										<div className={cn('cardImage', {'canAdd': canSelectMagi(card.name)})}>
 											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
 										</div>
-										{canSelectMagi(card.name) && <div onClick={() => setMagi(card.name)} className='addIcon'><Add size={50} color={'green'} /></div>}
+										{canSelectMagi(card.name) && <div onClick={() => setMagi(card.name)} className='addIcon'><Add size={50} fillColor={'green'} /></div>}
 									</div>)}
 								</div>
 							</div>}

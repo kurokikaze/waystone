@@ -28,7 +28,7 @@ const relicsHash = cards
 	.map(card => card.name)
 	.reduce((acc, cardName) => ({...acc, [cardName]: true}), {});
 
-const CardWithView = withView(Card);
+const CardWithView = withView(Card, true);
 
 const getRelics = state => state.zones.inPlay.filter(cardData => cardData.data.controller === state.playerId && relicsHash[cardData.card]).map(cardData => cardData.card);
 
