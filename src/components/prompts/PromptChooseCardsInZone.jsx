@@ -4,6 +4,8 @@ import {useSelector} from 'react-redux';
 import cn from 'classnames';
 import Card from '../Card.tsx';
 import {withView} from '../CardView.jsx';
+import Expand from '../icons/Expand';
+import Contract from '../icons/Contract';
 import {
 	ACTION_RESOLVE_PROMPT,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,

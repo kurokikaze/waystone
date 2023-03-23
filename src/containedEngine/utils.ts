@@ -440,10 +440,11 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           if (!action.target) {
             return null;
           }
+          const actionTarget = game.getMetaValue(action.target, action.generatedBy);
           return {
             type: action.type,
             effectType: action.effectType,
-            target: convertCardMinimal(action.target),
+            target: convertCardMinimal(actionTarget),
             player: action.player,
           }
         }

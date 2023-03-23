@@ -184,7 +184,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					activePlayer: action.player,
 				};
 			}
-		}
+    }
 		case EFFECT_TYPE_END_OF_TURN: {
 			return {
 				...state,

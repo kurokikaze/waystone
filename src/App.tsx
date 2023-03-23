@@ -95,8 +95,6 @@ const handleEditOpponentDeck = useCallback(() => {
         <GameAppWrapper playerDeck={playerDeck} opponentDeck={opponentDeck} />
       </div> : null}
       {mode === MODE_BASE ? <>
-        <h1>Welcome to Tauri!</h1>
-
         <div className="row">
             <MoonlandsLogo />
         </div>

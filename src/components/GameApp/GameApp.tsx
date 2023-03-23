@@ -108,7 +108,9 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
 	const cardsInOurDeck: number = useSelector(getCardsCountInOurDeck);
 	const cardsInOpponentDeck: number = useSelector(getCardsCountInOpponentDeck);
 
-  const dispatch = useDispatch();
+  // const onRefresh = useCallback(() => {
+  //   engineConnector.emit({special: 'refresh'});
+  // }, [engineConnector])
 
 	const onPass = useCallback(() => {
 		engineConnector.emit({
@@ -116,10 +118,6 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
       player: 1,
 		});
 	}, [engineConnector]);
-
-  const onRefresh = useCallback(() => {
-    engineConnector.emit({special: 'refresh'});
-  }, [engineConnector])
 
   const onPlay = useCallback((cardId: string) => {
 		engineConnector.emit({
@@ -167,10 +165,10 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
             <StepBoard />
             <ActionCardView />
             {ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <>
-              <button onClick={onPass}>Pass</button>
+              <button onClick={onPass}>{currentStep === null ? 'Start the game' : 'Pass'}</button>
             </>}
             {!ourTurn && <div>Opponent&apos;s turn ({currentPlayer})</div>}
-            <button onClick={onRefresh}>Refresh</button>
+            {/*<button onClick={onRefresh}>Refresh</button>*/}
             {discardShown && <div className='discardOverlay'>
               <h2>Discard</h2>
               <div className='closeIcon' onClick={handleOurDiscardClose}>&times;</div>

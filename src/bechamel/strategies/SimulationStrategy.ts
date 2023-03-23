@@ -492,8 +492,10 @@ export class SimulationStrategy implements Strategy {
             return this.pass()
           }
           case STEP_NAME.ATTACK: {
+            console.log('We`re in ATTACK step')
             const opponentMagi = this.gameState.getOpponentMagi()
             if (opponentMagi) {
+              console.log('Enemy Magi still present')
               const TEMPORARY_OPPONENT_ID = this.playerId + 1
               const myMagi = this.gameState.getMyMagi()
               const myCreatures = this.gameState.getMyCreaturesInPlay()
@@ -501,6 +503,8 @@ export class SimulationStrategy implements Strategy {
               const enemyCreatures = this.gameState.getEnemyCreaturesInPlay()
 
               const outerSim = createState(myCreatures, enemyCreatures, myMagi, opponentMagi, this.playerId || 1, TEMPORARY_OPPONENT_ID)
+              console.dir(this.gameState.getContinuousEffects());
+              outerSim.state.continuousEffects = this.gameState.getContinuousEffects();
               const hash = this.hashBuilder.makeHash(outerSim)
               const simulationQueue = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
 

@@ -1,7 +1,7 @@
 import CardInGame from 'moonlands/src/classes/CardInGame';
 import {State} from 'moonlands/src/index'
 // import { RestrictionObjectType } from 'moonlands/src/types';
-import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES} from '../const';
+import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER} from '../const';
 import {PlayerActionType, SimulationEntity} from '../types';
 import { HashBuilder } from './HashBuilder';
 
@@ -41,7 +41,7 @@ export class ActionExtractor {
 
         if (!magiCard) return [ActionExtractor.getPassAction(sim, playerId, actionLog, previousHash)]
 
-        const mySimCreatures = (sim.getZone(ZONE_TYPE_IN_PLAY).cards as CardInGame[]).filter(card => card.owner === playerId)
+        const mySimCreatures = (sim.getZone(ZONE_TYPE_IN_PLAY).cards as CardInGame[]).filter(card => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === playerId)
         const creaturesWithPowers = mySimCreatures.filter(creature => creature.card.data.powers && creature.data.actionsUsed.length === 0)
 
         const simulationQueue: SimulationEntity[] = []
@@ -460,8 +460,8 @@ export class ActionExtractor {
 
   public static getAllAttackPatterns(sim: State, attacker: number, opponent: number): AttackPattern[] {
     const creatures = sim.getZone(ZONE_TYPE_IN_PLAY).cards.filter((card: CardInGame) => card.card.type === TYPE_CREATURE)
-    const attackers = creatures.filter((card: CardInGame) => card.owner === attacker)
-    const defenders = creatures.filter((card: CardInGame) => card.owner !== attacker)
+    const attackers = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === attacker)
+    const defenders = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== attacker)
     const enemyMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards[0]
   
     const result: AttackPattern[] = []

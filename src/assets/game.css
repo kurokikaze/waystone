@@ -146,12 +146,20 @@ body {
 
 .BaseMessage__message {
     display: inline-block;
+    line-height: 50px;
 }
 
 .messageIcon {
     display: flex;
     margin-right: 12px;
     align-items: center;
+}
+
+.BaseMessage__close {
+  width: 50px;
+  line-height: 50px;
+  text-align: center;
+  cursor: pointer;
 }
 
 .zone-magi .cardHolder img {

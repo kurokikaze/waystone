@@ -189,6 +189,10 @@ export class GameState {
       .filter<ExpandedClientCard>((card): card is ExpandedClientCard => card._card?.type === TYPE_CREATURE && card.owner === this.playerId)
   }
 
+  public getContinuousEffects() {
+    return this.state.continuousEffects;
+  }
+
   public getEnemyCreaturesInPlay(): ExpandedClientCard[] {
     return this.state.zones.inPlay
       .map(card => ({
