@@ -23,7 +23,7 @@ import {withAbilities} from '../CardAbilities.jsx';
 import {withView} from '../CardView.jsx';
 
 const CardWithAbilities = withAbilities(Card);
-const CardWithView = withView(Card);
+const CardWithView = withView(Card, true);
 
 function ZonePlayerRelics({
 	name,

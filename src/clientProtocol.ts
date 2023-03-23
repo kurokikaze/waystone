@@ -38,6 +38,7 @@ import {
   PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
   PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
   PROMPT_TYPE_CHOOSE_CARDS,
+  EFFECT_TYPE_PLAY_SPELL,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -162,7 +163,16 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectDiscardEnergyFromCreature |
   ClientEffectMoveEnergy |
   ClientEffectCreateContinuousEffect |
+  ClientEffectPlaySpell |
   ClientEffectCreatureAttacks;
+
+export type ClientEffectPlaySpell = {
+  type: typeof ACTION_EFFECT
+  effectType: typeof EFFECT_TYPE_PLAY_SPELL
+  card: ConvertedCard
+  player: number
+  generatedBy: string
+}
 
 export type ClientEffectCreateContinuousEffect = {
   type: typeof ACTION_EFFECT,

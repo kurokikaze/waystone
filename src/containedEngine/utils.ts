@@ -74,6 +74,7 @@ import {
   EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
   EFFECT_TYPE_START_STEP,
   PROMPT_TYPE_PLAYER,
+  EFFECT_TYPE_PLAY_SPELL,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types/common.js';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
@@ -81,7 +82,7 @@ import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
 import clone from 'moonlands/dist/clone';
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 import { RestrictionType } from 'moonlands/dist/types';
-import { ClientAction, ClientAttackAction, ClientCommand, ClientEffectCardMovedBetweenZones, ClientEffectCreateContinuousEffect, ClientEffectCreatureAttacks, ClientEffectDiscardEnergyFromCreature, ClientEffectDiscardEnergyFromMagi, ClientEffectDraw, ClientEffectEndOfTurn, ClientEffectMagiIsDefeated, ClientEffectMoveEnergy, ClientEffectPayingEnergyForPower, ClientEffectRearrangeCardsOfZone, ClientEffectRearrangeEnergyOnCreatures, ClientEffectRemoveEnergyFromCreature, ClientEffectRemoveEnergyFromMagi, ClientEffectReturnCreatureReturningEnergy, ClientEffectStartOfTurn, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptChooseCards, ClientEnterPromptChooseNCardsFromZone, ClientEnterPromptChooseUpToNCardsFromZone, ClientEnterPromptDistributeEnergyOnCreatures, ClientEnterPromptNumber, ClientEnterPromptRearrangeCardsOfZone, ClientEnterPromptRearrangeEnergyOnCreatures, ClientEnterPromptSingleCreatureFiltered, ClientPassAction, ClientPlayAction, ClientPowerAction, ClientResolvePromptAction, ConvertedCardMinimal, HiddenConvertedCard } from '../clientProtocol';
+import { ClientAction, ClientAttackAction, ClientCommand, ClientEffectCardMovedBetweenZones, ClientEffectCreateContinuousEffect, ClientEffectCreatureAttacks, ClientEffectDiscardEnergyFromCreature, ClientEffectDiscardEnergyFromMagi, ClientEffectDraw, ClientEffectEndOfTurn, ClientEffectMagiIsDefeated, ClientEffectMoveEnergy, ClientEffectPayingEnergyForPower, ClientEffectPlaySpell, ClientEffectRearrangeCardsOfZone, ClientEffectRearrangeEnergyOnCreatures, ClientEffectRemoveEnergyFromCreature, ClientEffectRemoveEnergyFromMagi, ClientEffectReturnCreatureReturningEnergy, ClientEffectStartOfTurn, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptChooseCards, ClientEnterPromptChooseNCardsFromZone, ClientEnterPromptChooseUpToNCardsFromZone, ClientEnterPromptDistributeEnergyOnCreatures, ClientEnterPromptNumber, ClientEnterPromptRearrangeCardsOfZone, ClientEnterPromptRearrangeEnergyOnCreatures, ClientEnterPromptSingleCreatureFiltered, ClientPassAction, ClientPlayAction, ClientPowerAction, ClientResolvePromptAction, ConvertedCardMinimal, HiddenConvertedCard } from '../clientProtocol';
 
 const hiddenZonesHash: Record<ZoneType, boolean> = {
 	[ZONE_TYPE_DECK]: true,
@@ -426,6 +427,15 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             generatedBy: action.generatedBy,
 					} as ClientEffectCardMovedBetweenZones;
 				}
+        case EFFECT_TYPE_PLAY_SPELL: {
+          return {
+            type: action.type,
+            effectType: action.effectType,
+            player: action.player,
+            card: convertCard(action.card),
+            generatedBy: action.generatedBy,
+          } as ClientEffectPlaySpell;
+        }
         case EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE: {
           if (!action.target) {
             return null;

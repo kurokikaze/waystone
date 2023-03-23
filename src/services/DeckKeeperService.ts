@@ -7,6 +7,15 @@ type DecksResult = {player: string[], opponent: string[]}
 export class DeckKeeperService {
   static DECKS_DIR = 'decks'
 
+  private isTauri() {
+    return Boolean(
+      typeof window !== 'undefined' &&
+      window !== undefined &&
+      // @ts-ignore
+      window.__TAURI_IPC__ !== undefined
+    )
+  }
+
   static defaultPlayerDeck = [
     'Grega',
     'Magam',
@@ -103,6 +112,9 @@ export class DeckKeeperService {
   }
 
   public async createFiles() {
+    if (!this.isTauri()) {
+      return;
+    }
     const dirExists = await exists(DeckKeeperService.DECKS_DIR, { dir: BaseDirectory.AppConfig });
     if (!dirExists) {
       await createDir(DeckKeeperService.DECKS_DIR, { dir: BaseDirectory.AppConfig, recursive: true });
@@ -119,6 +131,12 @@ export class DeckKeeperService {
   }
 
   public async loadDecks(): Promise<DecksResult> {
+    if (!this.isTauri()) {
+      return {
+        player: DeckKeeperService.defaultPlayerDeck,
+        opponent: DeckKeeperService.defaultOpponentDeck,
+      };
+    }
     const result: DecksResult = {player: [], opponent: []}
     const playerDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`, { dir: BaseDirectory.AppConfig });
     const playerDeckCards: string[] = playerDeckContents.split("\n");
@@ -145,6 +163,8 @@ export class DeckKeeperService {
   }
 
   public async saveDeck(deckFileName: string, deckContents: string[]) {
-    await writeTextFile(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, deckContents.join("\n"), { dir: BaseDirectory.AppConfig })
+    if (this.isTauri()) {
+      await writeTextFile(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, deckContents.join("\n"), { dir: BaseDirectory.AppConfig })
+    }
   }
 }

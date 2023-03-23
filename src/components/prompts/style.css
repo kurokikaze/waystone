@@ -48,6 +48,14 @@
     top: 95px;
 }
 
+.promptWindow.promptChooseCards .cardSelect.notAvailable {
+  filter: grayscale(100%);
+}
+
+.promptWindow.promptChooseCards .cardSelect.notAvailable .cardHolder {
+  cursor: default;
+}
+
 .promptWindow .cardHolder {
     height: 180px;
     width: 123px;

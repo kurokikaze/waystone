@@ -110,7 +110,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 		{loading ? <Spin size='large' /> :
 			<>
 				<Row>
-					<Col span={24}><Input className='deckName' onChange={(e: React.FormEvent<HTMLInputElement>) => setName(e.currentTarget.value)} defaultValue={deck.name} /></Col>
+					<Col span={24}><Input className='deckName' /*onChange={(e: React.FormEvent<HTMLInputElement>) => setName(e.currentTarget.value)}*/ disabled defaultValue={deck.name} /></Col>
 				</Row>
 				<Row>
 					<Col span={16}>

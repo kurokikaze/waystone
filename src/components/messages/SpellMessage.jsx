@@ -6,7 +6,7 @@ export default function SpellMessage ({card}) {
 		<div className="BaseMessage">
 			<MessageIcon icon={<Spell />} />
 			<div className='BaseMessage__message'>
-				Opponent plays spell <span className="SpellMessage__spell">{card}</span>
+				Opponent plays spell <span className="SpellMessage__spell">{card.card}</span>
 			</div>
 		</div>
 		: null

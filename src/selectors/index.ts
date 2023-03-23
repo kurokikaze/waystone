@@ -127,6 +127,12 @@ export const getIsOnMagiPrompt = (state: State) => state.prompt &&
 export const getPowerSource = (id: string) => (state: State) => {
 	if (!id) return null;
 
+  if (state.zones.opponentActiveMagi.length) {
+    const opponentMagi = state.zones.opponentActiveMagi[0];
+    if (opponentMagi && opponentMagi.id === id) {
+      return opponentMagi;
+    }
+  }
 	const myCards = state.zones.inPlay;
 	const myCard = myCards ? myCards.find(card => card.id === id) : null;
 

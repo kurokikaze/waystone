@@ -12,7 +12,6 @@ import {
 	EFFECT_TYPE_PLAY_SPELL,
 	ACTION_RESOLVE_PROMPT,
   EFFECT_TYPE_PLAY_CREATURE,
-  // EFFECT_TYPE_ATTACK,
 } from 'moonlands/dist/const';
 
 import { 
@@ -44,6 +43,7 @@ import { getPowerSource } from './selectors/index';
 const POWER_MESSAGE_TIMEOUT = 10000;
 const RELIC_MESSAGE_TIMEOUT = 3000;
 const CREATURE_MESSAGE_TIMEOUT = 1000;
+const SPELL_MESSAGE_TIMEOUT = 2000;
 const ATTACK_MESSAGE_TIMEOUT = 600;
 const PROMPT_RESOLUTION_TIMEOUT = 600;
 const STEP_TIMEOUT = 500;
@@ -74,11 +74,6 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 				action,
 			] : [action];
 		case ACTION_ATTACK: {
-      // const state = store.getState();
-      // const actionSource = getPowerSource(action.source)(state);
-      // if (!actionSource) {
-      //   return [action]
-      // }
 			return (action.player === 2) ? [
 				startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, 2), 
 				endAttackAnimation(action.source),
@@ -87,13 +82,6 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 		}
 		case ACTION_EFFECT: {
 			switch(action.effectType) {
-        // case EFFECT_TYPE_ATTACK: {
-          // return (action.player !== 1) ? [
-          //   startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, actionSource.owner), 
-          //   endAttackAnimation(action.source),
-          //   action,
-          // ] : [action];
-        // }
 				case EFFECT_TYPE_PLAY_RELIC:
 					return (action.player !== 1) ? [
 						startRelicAnimation(action.card, action.player), 
@@ -129,7 +117,7 @@ const TIMERS_BY_EVENT = {
 	[START_PROMPT_RESOLUTION_ANIMATION]: PROMPT_RESOLUTION_TIMEOUT,
 	[START_POWER_ANIMATION]: POWER_MESSAGE_TIMEOUT,
 	[START_RELIC_ANIMATION]: RELIC_MESSAGE_TIMEOUT,
-	[START_SPELL_ANIMATION]: POWER_MESSAGE_TIMEOUT,
+	[START_SPELL_ANIMATION]: SPELL_MESSAGE_TIMEOUT,
 	[START_CREATURE_ANIMATION]: CREATURE_MESSAGE_TIMEOUT,
 	[START_ATTACK_ANIMATION]: ATTACK_MESSAGE_TIMEOUT,
 	[END_STEP_ANIMATION]: STEP_TIMEOUT,

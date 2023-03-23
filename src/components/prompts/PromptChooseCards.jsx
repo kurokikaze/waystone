@@ -42,7 +42,7 @@ function PromptChooseCards({engineConnector}) {
 			<h1>Choose starting cards</h1>
 			<div className="cardsRow">
 				{cards.map(card => (
-					<div className={cn('cardSelect', {'chosen': selected.includes(card)})} key={card}>
+					<div className={cn('cardSelect', {'chosen': selected.includes(card), 'notAvailable': !availableCards.includes(card)})} key={card}>
 						<Card
 							id={`test_${card}`}
 							card={{ name: card }}
