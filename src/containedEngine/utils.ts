@@ -1178,7 +1178,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
         source: attackSource,
         sourceAtStart: attackSource,
         target: attackTarget,
-        targetAtStart: attackSource,
+        targetAtStart: attackTarget,
         player: action.player,
       }
       if (additionalAttackers.length) {
