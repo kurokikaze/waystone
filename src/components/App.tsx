@@ -188,8 +188,9 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
             <ZoneHand zoneId='playerHand' name='Player hand' onCardClick={onPlay} />
             <StepBoard />
             <ActionCardView />
-            {ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <><button onClick={onPass}>Pass</button><button onClick={onRefresh}>Refresh</button></>}
+            {ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <><button onClick={onPass}>Pass</button></>}
             {!ourTurn && <div>Opponent&apos;s turn ({currentPlayer})</div>}
+            <button onClick={onRefresh}>Refresh</button>
             {discardShown && <div className='discardOverlay'>
               <h2>Discard</h2>
               <div className='closeIcon' onClick={handleOurDiscardClose}>&times;</div>

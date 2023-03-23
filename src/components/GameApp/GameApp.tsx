@@ -66,25 +66,6 @@ import { EngineConnector, MessageType } from '../../types';
 
 const EnhancedPowerMessage = withSingleCardData(PowerMessage);
 
-// type PromptMessage = {
-//   type: string,
-//   message: string,
-//   source: {
-//     card: string,
-//     owner: number,
-//   },
-//   chosenTarget: {
-//     card: string,
-//     owner: number,
-//   },
-//   card: {
-//     card: string,
-//     owner: number,
-//   },
-//   chosenNumber: number,
-//   power: string,
-// }
-
 function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBreak: Function}) {
 	const [discardShown, setDiscardShown] = useState(false);
 	const [opponentDiscardShown, setOpponentDiscardShown] = useState(false);
@@ -187,13 +168,9 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
             <ActionCardView />
             {ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <>
               <button onClick={onPass}>Pass</button>
-              <button onClick={onRefresh}>Refresh</button>
-              <button onClick={() => dispatch({
-                type: ACTION_PLAYER_WINS,
-                player: 1,
-              })}>Win</button>
             </>}
             {!ourTurn && <div>Opponent&apos;s turn ({currentPlayer})</div>}
+            <button onClick={onRefresh}>Refresh</button>
             {discardShown && <div className='discardOverlay'>
               <h2>Discard</h2>
               <div className='closeIcon' onClick={handleOurDiscardClose}>&times;</div>

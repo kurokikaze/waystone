@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-// import {useDispatch} from 'react-redux';
+import { useState, useCallback, useEffect } from 'react';
+import { appWindow, LogicalSize } from "@tauri-apps/api/window";
 
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
@@ -40,51 +40,16 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 
 	const [magiEditor, setMagiEditor] = useState<number|null>(null);
 
-	// const dispatch = useDispatch();
-
-	// useEffect(() => {
-	// 	fetch(`/api/deck/${deckId}`)
-	// 		.then(data => data.json())
-	// 		.then(deck=> {
-	// 			setDeck(deck);
-	// 			setLoading(false);
-	// 		});
-	// }, [deckId]);
+  useEffect(() => {
+    appWindow.setResizable(false);
+    appWindow.setSize(new LogicalSize(1250, 816));
+  }, []);
 
 	const handleSave = useCallback(() => {
 		setSaving(true);
     onSave(deck.cards);
-		// fetch(`/api/deck/${deckId}`, {
-		// 	method: 'POST',
-		// 	headers: {
-		// 		'Content-Type': 'application/json'
-		// 	},
-		// 	body: JSON.stringify(deck),
-		// }).then(() => {
-		// 	dispatch(saveDeck(deck));
-		// 	setSaving(false);
-		// }).catch(() => {
-		// 	setSaving(false);
-		// });
     setSaving(false);
 	}, [deck]);
-
-	// const handleSaveAsNew = useCallback(() => {
-	// 	setSavingNew(true);
-	// 	fetch('/api/deck/new', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json'
-	// 		},
-	// 		body: JSON.stringify(deck),
-	// 	}).then(data => data.json())
-	// 		.then(newDeck => {
-	// 			dispatch(saveNewDeck(newDeck));
-	// 			setSavingNew(false);
-	// 		}).catch(() => {
-	// 			setSavingNew(false);
-	// 		});
-	// }, [deck]);
 
 	const removeFromDeck = useCallback((name: string) => {
 		const id = deck.cards.lastIndexOf(name);
