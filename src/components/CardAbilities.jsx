@@ -51,6 +51,7 @@ export const withAbilities = Component => (props) => {
 	const canPackHunt = props.card.data.canPackHunt;
 	const hasEnergize = energizeProperty > 0;
 	const hasAdditionalIcons = hasSeveralAttacks || canAttackDirectly || canPackHunt || hasEnergize;
+  const unableToAttack = props.data.ableToAttack === false || props.data.attacked === Infinity;
 	const showEffects = hasEffects && !props.isOnPrompt && !props.isDragging;
 
 	const powers = (props.modifiedData ? props.modifiedData.powers : props.card.data.powers);
@@ -85,6 +86,7 @@ export const withAbilities = Component => (props) => {
 					{hasEnergize &&  <PowerIcon icon={<Energize />} number={`+${energizeProperty}`} active />}
 					{showEffects && <PowerIcon icon={<Ability />} />}
 					{hasSeveralAttacks && <PowerIcon icon={<Attack />} number={props.modifiedData.attacksPerTurn} />}
+					{unableToAttack && <PowerIcon icon={<Attack />} number="&#10006;" />}
 					{canAttackDirectly && <PowerIcon icon={<Dagger />} />}
 					{canPackHunt && <PowerIcon icon={<Velociraptor/>} active={stillHasAttacks} activeColor='rgb(131, 49, 131)' />}
 					{showAbilities && <PowerIcon active={hasUnusedAbilities && props.actionsAvailable} />}
