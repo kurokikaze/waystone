@@ -4,7 +4,7 @@ import CardInGame from 'moonlands/src/classes/CardInGame'
 import Zone from 'moonlands/src/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
-import { ExpandedClientCard } from '../types';
+import { ExpandedClientCard, ProcessedClientCard } from '../types';
 
 type StateShape = State["state"];
 export const booleanGuard = Boolean as any as <T>(x: T | false | undefined | null | "" | 0) => x is T;
@@ -47,19 +47,15 @@ const defaultState: StateShape = {
 export const STEP_ATTACK = 2;
 
 export function createState(
-  myCreatures: ExpandedClientCard[],
-  enemyCreatures: ExpandedClientCard[],
+  myCreatures: ProcessedClientCard[],
+  enemyCreatures: ProcessedClientCard[],
   myMagi: any,
   opponentMagi: any,
   playerId: number,
   opponentId: number,
 ): State {
   const myCreaturesCards = myCreatures.map(card => {
-    if (typeof card.card !== 'string') {
-      console.error(`Not-a-string in a card name found, cannot create a creature card.`)
-      console.error(`Actual property: ${JSON.stringify(card.card, null, 2)}`)
-    }
-    const creatureCard = byName(card.card)
+    const creatureCard = byName(card.card.name)
     if (!creatureCard) {
       return false
     }
@@ -73,7 +69,7 @@ export function createState(
     return cardInGame
   }).filter(booleanGuard)
   const enemyCreaturesCards = enemyCreatures.map(card => {
-    const creatureCard = byName(card.card)
+    const creatureCard = byName(card.card.name)
     if (!creatureCard) {
       return false
     }

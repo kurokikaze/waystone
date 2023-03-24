@@ -24,7 +24,7 @@ import {ClientCard, GameState, SimplifiedCard} from "../GameState";
 import {Strategy} from './Strategy';
 import {createState, getStateScore, booleanGuard} from './simulationUtils'
 import {HashBuilder} from './HashBuilder';
-import {ExpandedClientCard, SimulationEntity} from '../types';
+import {ExpandedClientCard, ProcessedClientCard, SimulationEntity} from '../types';
 import {ActionExtractor} from './ActionExtractor';
 import { ClientAttackAction, ClientPassAction, ClientPlayAction, ClientPowerAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 
@@ -324,7 +324,7 @@ export class SimulationStrategy implements Strategy {
         return true;
       }
     } else if (this.gameState.getStep() === STEP_NAME.PRS1 || this.gameState.getStep() === STEP_NAME.PRS2) {
-      const creaturesRelicsAndMagi: ClientCard[] = [
+      const creaturesRelicsAndMagi: (ProcessedClientCard|ClientCard)[] = [
         ...this.gameState.getMyCreaturesInPlay(),
         ...this.gameState.getMyRelicsInPlay(),
       ]

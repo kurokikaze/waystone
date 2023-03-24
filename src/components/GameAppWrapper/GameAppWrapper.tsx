@@ -110,9 +110,6 @@ export const GameAppWrapper = ({
 
 	    delayedActions.subscribe({
         next: (transformedAction) => {
-          if (transformedAction.type && transformedAction.type.includes('animation')) {
-            console.dir(transformedAction);
-          }
           store.dispatch(transformedAction);
         },
       });

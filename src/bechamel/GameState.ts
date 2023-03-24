@@ -24,9 +24,6 @@ import {
   EFFECT_TYPE_END_OF_TURN,
   EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
   EFFECT_TYPE_MOVE_ENERGY,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
   EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
   EFFECT_TYPE_START_OF_TURN,
 
@@ -40,10 +37,11 @@ import {
   ZONE_TYPE_MAGI_PILE,
 } from './const'
 import {byName} from 'moonlands/src/cards'
-import {ExpandedClientCard, HiddenCard, SerializedClientState, StateRepresentation} from './types'
+import {ExpandedClientCard, HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation} from './types'
 import { ClientAction, HiddenConvertedCard } from '../clientProtocol'
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame'
 import { EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE } from 'moonlands/dist/const'
+import {getCardDetails} from './common'
 
 const nanoid = () => 'new_nanoid'
 const zonesToConsiderForStaticAbilities = new Set(['inPlay', 'opponentInPlay', 'playerActiveMagi', 'opponentActiveMagi'])
@@ -171,44 +169,55 @@ export class GameState {
     return this.state.zones.playerHand
   }
 
-  public getMyRelicsInPlay(): ExpandedClientCard[] {
-    return this.state.zones.inPlay
+  public getMyRelicsInPlay(): ProcessedClientCard[] {
+    const realState = getCardDetails(this.state)
+    return realState.inPlay
       .map(card => ({
         ...card,
-        _card: byName(card.card),
+        _card: card.card,
       }))
-      .filter<ExpandedClientCard>((card): card is ExpandedClientCard => card._card?.type === TYPE_RELIC && card.owner === this.playerId)
+      .filter<ProcessedClientCard>((card): card is ProcessedClientCard => card._card?.type === TYPE_RELIC && card.data.controller === this.playerId)
   }
 
-  public getMyCreaturesInPlay(): ExpandedClientCard[] {
-    return this.state.zones.inPlay
+  public getMyCreaturesInPlay(): ProcessedClientCard[] {
+    const realState = getCardDetails(this.state)
+    // const processedCards: ProcessedClientCard[] = realState.inPlay
+    // .map(card => ({
+    //   ...card,
+    //   _card: card.card,
+    // }));
+    // return processedCards.filter<ProcessedClientCard>((card): card is ProcessedClientCard => card._card?.type === TYPE_CREATURE && card.data.controller === this.playerId)
+    return realState.inPlay
       .map(card => ({
         ...card,
-        _card: byName(card.card),
+        _card: card.card,
       }))
-      .filter<ExpandedClientCard>((card): card is ExpandedClientCard => card._card?.type === TYPE_CREATURE && card.owner === this.playerId)
+      .filter<ProcessedClientCard>((card): card is ProcessedClientCard => card._card?.type === TYPE_CREATURE && card.data.controller === this.playerId)
   }
 
   public getContinuousEffects() {
     return this.state.continuousEffects;
   }
 
-  public getEnemyCreaturesInPlay(): ExpandedClientCard[] {
-    return this.state.zones.inPlay
+  public getEnemyCreaturesInPlay(): ProcessedClientCard[] {
+    const realState = getCardDetails(this.state)
+    return realState.inPlay
       .map(card => ({
         ...card,
-        _card: byName(card.card),
+        _card: card.card,
       }))
-      .filter<ExpandedClientCard>((card): card is ExpandedClientCard => Boolean(card._card?.type === TYPE_CREATURE && card.owner !== this.playerId))
+      .filter<ProcessedClientCard>((card): card is ProcessedClientCard => Boolean(card._card?.type === TYPE_CREATURE && card.data.controller !== this.playerId))
   }
 
-  public getEnemyRelicsInPlay(): ExpandedClientCard[] {
-    return this.state.zones.inPlay
+
+  public getEnemyRelicsInPlay(): ProcessedClientCard[] {
+    const realState = getCardDetails(this.state)
+    return realState.inPlay
       .map(card => ({
         ...card,
-        _card: byName(card.card),
+        _card: card.card,
       }))
-      .filter<ExpandedClientCard>((card): card is ExpandedClientCard => card._card?.type === TYPE_RELIC && card.owner !== this.playerId)
+      .filter<ProcessedClientCard>((card): card is ProcessedClientCard => card._card?.type === TYPE_RELIC && card.owner !== this.playerId)
   }
 
   public getMyMagi(): ClientCard {

@@ -31,6 +31,12 @@ type PassType = EnrichedAction & {
   generatedBy?: string;
 }
 
+export type ProcessedClientCard = Omit<ClientCard, "card"> & {
+  card: Card,
+  _card: Card,
+  originalCard: Card,
+}
+
 type ConcedeType = EnrichedAction & {
   type: typeof ACTION_CONCEDE;
   player: number;
