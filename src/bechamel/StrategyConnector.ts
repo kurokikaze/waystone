@@ -15,19 +15,6 @@ const STEP_NAMES: Record<number, string> = {
   5: 'Draw',
 }
 
-// export const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
-//   let timeout: NodeJS.Timeout
-
-//   return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-//     new Promise(resolve => {
-//       if (timeout) {
-//         clearTimeout(timeout)
-//       }
-
-//       timeout = setTimeout(() => resolve(func(...args)), waitFor)
-//     })
-// }
-
 export class StrategyConnector {
   private playerId: number = 2
   private gameState?: GameState
@@ -62,7 +49,7 @@ export class StrategyConnector {
         if (this.gameState.hasGameEnded()) {
           console.log(this.gameState.getWinner() === this.playerId ? 'We won' : 'We lost');
           this.io.close();
-          process.exit(0);
+          // process.exit(0);
           return true;
         }
 

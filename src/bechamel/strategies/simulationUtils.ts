@@ -4,6 +4,7 @@ import CardInGame from 'moonlands/src/classes/CardInGame'
 import Zone from 'moonlands/src/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
+import { ExpandedClientCard } from '../types';
 
 type StateShape = State["state"];
 export const booleanGuard = Boolean as any as <T>(x: T | false | undefined | null | "" | 0) => x is T;
@@ -46,20 +47,27 @@ const defaultState: StateShape = {
 export const STEP_ATTACK = 2;
 
 export function createState(
-  myCreatures: any[],
-  enemyCreatures: any[],
+  myCreatures: ExpandedClientCard[],
+  enemyCreatures: ExpandedClientCard[],
   myMagi: any,
   opponentMagi: any,
   playerId: number,
   opponentId: number,
 ): State {
   const myCreaturesCards = myCreatures.map(card => {
+    if (typeof card.card !== 'string') {
+      console.error(`Not-a-string in a card name found, cannot create a creature card.`)
+      console.error(`Actual property: ${JSON.stringify(card.card, null, 2)}`)
+    }
     const creatureCard = byName(card.card)
     if (!creatureCard) {
       return false
     }
     const cardInGame = new CardInGame(creatureCard, playerId).addEnergy(card.data.energy)
     cardInGame.data.attacked = card.data.attacked
+    cardInGame.data.wasAttacked = card.data.wasAttacked
+    cardInGame.data.hasAttacked = card.data.hasAttacked
+    cardInGame.data.controller = card.data.controller
     cardInGame.data.actionsUsed = [...card.data.actionsUsed]
     cardInGame.id = card.id
     return cardInGame
@@ -71,6 +79,9 @@ export function createState(
     }
     const cardInGame = new CardInGame(creatureCard, opponentId).addEnergy(card.data.energy)
     cardInGame.data.attacked = card.data.attacked
+    cardInGame.data.wasAttacked = card.data.wasAttacked
+    cardInGame.data.hasAttacked = card.data.hasAttacked
+    cardInGame.data.controller = card.data.controller
     cardInGame.data.actionsUsed = [...card.data.actionsUsed]
     cardInGame.id = card.id
     return cardInGame

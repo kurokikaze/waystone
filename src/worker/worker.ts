@@ -4,7 +4,6 @@
 declare const self: DedicatedWorkerGlobalScope;
 
 import { State } from 'moonlands';
-import { ACTION_PASS } from 'moonlands/dist/const';
 import { AnyEffectType } from 'moonlands/dist/types';
 import { COMMAND_START } from '../const';
 import { createGame } from '../containedEngine/containedEngine';

@@ -39,6 +39,8 @@ import {
   PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
   PROMPT_TYPE_CHOOSE_CARDS,
   EFFECT_TYPE_PLAY_SPELL,
+  EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+  EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -162,6 +164,8 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectRemoveEnergyFromCreature |
   ClientEffectDiscardEnergyFromCreature |
   ClientEffectMoveEnergy |
+  ClientEffectMoveCardsBetweenZones |
+  ClientEffectMoveCardBetweenZones |
   ClientEffectCreateContinuousEffect |
   ClientEffectPlaySpell |
   ClientEffectCreatureAttacks;
@@ -239,6 +243,26 @@ export type ClientEffectEndOfTurn = {
 export type ClientEffectDraw = {
   type: typeof ACTION_EFFECT,
   effectType: typeof EFFECT_TYPE_DRAW,
+  player: number,
+}
+
+export type ClientEffectMoveCardsBetweenZones = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+  sourceZone: ZoneType,
+  destinationZone: ZoneType,
+  target: (ConvertedCardMinimal | HiddenConvertedCard)[],
+  generatedBy: string,
+  player: number,
+}
+
+export type ClientEffectMoveCardBetweenZones = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+  sourceZone: ZoneType,
+  destinationZone: ZoneType,
+  target: ConvertedCardMinimal | HiddenConvertedCard,
+  generatedBy: string,
   player: number,
 }
 

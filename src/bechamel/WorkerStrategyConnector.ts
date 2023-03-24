@@ -73,8 +73,8 @@ export class WorkerStrategyConnector {
         // console.log(`Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
         const action = this.strategy.requestAction()
         if (action) {
-          // console.log(`Thinking is done, chosen action is:`)
-          // console.dir(action);
+          console.log(`Thinking is done, chosen action is:`)
+          console.dir(action);
           postMessage(action)
         } else {
           console.log('No action returned from request')

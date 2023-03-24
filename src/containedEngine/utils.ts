@@ -82,7 +82,7 @@ import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
 import clone from 'moonlands/dist/clone';
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 import { RestrictionType } from 'moonlands/dist/types';
-import { ClientAction, ClientAttackAction, ClientCommand, ClientEffectCardMovedBetweenZones, ClientEffectCreateContinuousEffect, ClientEffectCreatureAttacks, ClientEffectDiscardEnergyFromCreature, ClientEffectDiscardEnergyFromMagi, ClientEffectDraw, ClientEffectEndOfTurn, ClientEffectMagiIsDefeated, ClientEffectMoveEnergy, ClientEffectPayingEnergyForPower, ClientEffectPlaySpell, ClientEffectRearrangeCardsOfZone, ClientEffectRearrangeEnergyOnCreatures, ClientEffectRemoveEnergyFromCreature, ClientEffectRemoveEnergyFromMagi, ClientEffectReturnCreatureReturningEnergy, ClientEffectStartOfTurn, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptChooseCards, ClientEnterPromptChooseNCardsFromZone, ClientEnterPromptChooseUpToNCardsFromZone, ClientEnterPromptDistributeEnergyOnCreatures, ClientEnterPromptNumber, ClientEnterPromptRearrangeCardsOfZone, ClientEnterPromptRearrangeEnergyOnCreatures, ClientEnterPromptSingleCreatureFiltered, ClientPassAction, ClientPlayAction, ClientPowerAction, ClientResolvePromptAction, ConvertedCardMinimal, HiddenConvertedCard } from '../clientProtocol';
+import { ClientAction, ClientAttackAction, ClientCommand, ClientEffectCardMovedBetweenZones, ClientEffectCreateContinuousEffect, ClientEffectCreatureAttacks, ClientEffectDiscardEnergyFromCreature, ClientEffectDiscardEnergyFromMagi, ClientEffectDraw, ClientEffectEndOfTurn, ClientEffectMagiIsDefeated, ClientEffectMoveCardBetweenZones, ClientEffectMoveCardsBetweenZones, ClientEffectMoveEnergy, ClientEffectPayingEnergyForPower, ClientEffectPlaySpell, ClientEffectRearrangeCardsOfZone, ClientEffectRearrangeEnergyOnCreatures, ClientEffectRemoveEnergyFromCreature, ClientEffectRemoveEnergyFromMagi, ClientEffectReturnCreatureReturningEnergy, ClientEffectStartOfTurn, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptChooseCards, ClientEnterPromptChooseNCardsFromZone, ClientEnterPromptChooseUpToNCardsFromZone, ClientEnterPromptDistributeEnergyOnCreatures, ClientEnterPromptNumber, ClientEnterPromptRearrangeCardsOfZone, ClientEnterPromptRearrangeEnergyOnCreatures, ClientEnterPromptSingleCreatureFiltered, ClientPassAction, ClientPlayAction, ClientPowerAction, ClientResolvePromptAction, ConvertedCardMinimal, HiddenConvertedCard } from '../clientProtocol';
 
 const hiddenZonesHash: Record<ZoneType, boolean> = {
 	[ZONE_TYPE_DECK]: true,
@@ -611,20 +611,37 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						game.getMetaValue(action.target, action.generatedBy) :
 						action.target;
 
-					return {
-						...action,
-						target: (targetCards instanceof Array) ? targetCards.map(convertCardMinimal) : convertCardMinimal(targetCards),
-					};
+          const clientAction: ClientEffectMoveCardsBetweenZones = {
+            type: action.type,
+            effectType: action.effectType,
+            sourceZone: action.sourceZone,
+            destinationZone: action.destinationZone,
+            target: targetCards.map(convertCardMinimal),
+            generatedBy: action.generatedBy,
+            player: action.player || 1000, // no idea why player may be missing here
+          }
+					return clientAction;
 				}
 				case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
 					const targetCard = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
 						action.target;
 
-					return {
-						...action,
-						target: convertCardMinimal(targetCard),
-					};
+          if (!targetCard || !targetCard.id) {
+            console.dir(`Error getting the card from ${action.target}`);
+            console.log('Metadata:');
+            console.dir(game.getSpellMetadata(action.generatedBy));
+          }
+          const clientAction: ClientEffectMoveCardBetweenZones = {
+            type: action.type,
+            effectType: action.effectType,
+            sourceZone: action.sourceZone,
+            destinationZone: action.destinationZone,
+            target: targetCard instanceof Array ? convertCardMinimal(targetCard[0]) : convertCardMinimal(targetCard),
+            generatedBy: action.generatedBy,
+            player: action.player || 1000, // no idea why player may be missing here
+          }
+					return clientAction;
 				}
 				case EFFECT_TYPE_MOVE_ENERGY: {
 					const targetCard = (typeof action.target == 'string') ?

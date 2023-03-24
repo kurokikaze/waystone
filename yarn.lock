@@ -2112,9 +2112,9 @@ mime-types@~2.1.34:
   dependencies:
     mime-db "1.52.0"
 
-"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.4.tar.gz":
-  version "0.15.4"
-  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.4.tar.gz#b23bd1fd3876f5a30f3fa9b23994a0481a708695"
+"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.6.tar.gz":
+  version "0.15.6"
+  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.6.tar.gz#db9198cd97b15c5c0b121e01e5a295ee0048f234"
   dependencies:
     "@babel/preset-env" "^7.11.5"
     "@babel/preset-typescript" "^7.12.7"

@@ -119,13 +119,13 @@ export class GameState {
   state: StateRepresentation
   public constructor(serializedState: SerializedClientState) {
     this.state = {
-      ...serializedState,
-      continuousEffects: [],
+      // continuousEffects: [],
       staticAbilities: [],
       energyPrompt: false,
       turnTimer: false,
       turnSecondsLeft: 0,
       promptAvailableCards: [],
+      ...serializedState,
     }
   }
 
@@ -328,22 +328,6 @@ export class GameState {
             };
             break;
           }
-          // case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
-          //   energyPrompt = {
-          //     freeEnergy: 0,
-          //     cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === window.playerId && byName(card).type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
-          //   };
-          //   promptParams = promptParams || {
-          //     restriction: false,
-          //   };
-          //   break;
-          // }
-          // case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-          //   energyPrompt = {
-          //     freeEnergy: action.amount,
-          //     cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === window.playerId && byName(card).type === TYPE_CREATURE).map(({ id }) => [id, 0])),
-          //   };
-          // }
         }
   
         return {
