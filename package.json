@@ -1,7 +1,7 @@
 {
   "name": "waystone",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,7 @@
     "classnames": "^2.3.2",
     "comlink": "^4.4.1",
     "gsap": "^3.11.4",
-    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.6.tar.gz",
+    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.7.tar.gz",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

@@ -464,3 +464,33 @@ body {
         max-height: 290px;
     }
 }
+
+.region-orothe {
+  background: rgb(166,208,222);
+  background: linear-gradient(145deg, rgba(166,208,222,1) 0%, rgba(35,53,55,1) 100%);
+}
+
+.region-arderial {
+  background: rgb(79,78,83);
+  background: linear-gradient(145deg, rgba(79,78,83,1) 0%, rgba(20,13,67,1) 100%);
+}
+
+.region-naroom {
+  background: rgb(96,153,60);
+  background: linear-gradient(145deg, rgba(96,153,60,1) 0%, rgba(55,50,28,1) 100%); 
+}
+
+.region-cald {
+  background: rgb(197,142,23);
+  background: linear-gradient(145deg, rgba(197,142,23,1) 0%, rgba(87,15,6,1) 100%);
+}
+
+.region-underneath {
+  background: rgb(165,158,119);
+  background: linear-gradient(145deg, rgba(165,158,119,1) 0%, rgba(79,79,47,1) 100%);
+}
+
+.region-universal {
+  background: rgb(246,243,90);
+  background: linear-gradient(145deg, rgba(246,243,90,1) 0%, rgba(104,72,21,1) 100%);
+}

@@ -9,11 +9,18 @@ import {
 	TYPE_SPELL,
 	TYPE_MAGI,
   ACTION_ATTACK,
+  REGION_ARDERIAL,
+  REGION_CALD,
+  REGION_NAROOM,
+  REGION_UNDERNEATH,
+  REGION_OROTHE,
+  REGION_BOGRATH,
+  REGION_UNIVERSAL,
 } from 'moonlands/dist/const.js';
 import {canFirstAttackSecond, canPackHuntWith} from './helpers.js';
 import {camelCase} from '../utils';
 import { DraggedItem, EngineConnector, State } from '../types.js';
-import { CardData, CardType } from 'moonlands/dist/types/index.js';
+import { CardData, CardType, Region } from 'moonlands/dist/types/index.js';
 import MoonlandsCard from 'moonlands/dist/classes/Card';
 import { InGameData } from 'moonlands/dist/classes/CardInGame';
 import { useSelector, useDispatch } from 'react-redux';
@@ -29,6 +36,16 @@ const typeClass: Record<CardType, string> = {
 	[TYPE_RELIC]: 'relic',
 	[TYPE_SPELL]: 'spell',
 	[TYPE_MAGI]: 'magi',
+};
+
+const regionClass: Record<Region, string> = {
+	[REGION_ARDERIAL]: 'region-arderial',
+	[REGION_CALD]: 'region-cald',
+	[REGION_NAROOM]: 'region-naroom',
+	[REGION_OROTHE]: 'region-orothe',
+	[REGION_UNDERNEATH]: 'region-underneath',
+  [REGION_BOGRATH]: 'region-bograth',
+	[REGION_UNIVERSAL]: 'region-universal',
 };
 
 const getCardUrl = (card: {name: string}, useLocket: boolean): string => {
@@ -180,8 +197,11 @@ function Card({
 		drag(ref);
 	}
 
-	const classes = cn(
+  const regionStyle = (!useLocket && card && 'region' in card && card.region) ? regionClass[card.region as Region] : null;
+
+  const classes = cn(
 		'cardHolder',
+    regionStyle,
 		card ? typeClass[card.type as CardType] : null,
 		{
 			'dragging': isDragging,
