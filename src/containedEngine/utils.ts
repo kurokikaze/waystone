@@ -481,8 +481,10 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 				}
 				case EFFECT_TYPE_MAGI_IS_DEFEATED: {
 					return {
-						...action,
+            type: action.type,
+            effectType: action.effectType,
 						target: convertCard(action.target),
+            generatedBy: action.generatedBy,
 					} as ClientEffectMagiIsDefeated;
 				}
 				case EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
@@ -622,6 +624,17 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           }
 					return clientAction;
 				}
+        case EFFECT_TYPE_MAGI_IS_DEFEATED: {
+          action;
+          const clientAction = {
+            type: action.type,
+            effectType: action.effectType,
+            target: convertCardMinimal(action.target),
+            generatedBy: action.generatedBy,
+          }
+
+          return clientAction;
+        }
 				case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
 					const targetCard = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :

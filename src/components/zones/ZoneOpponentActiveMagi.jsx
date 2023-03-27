@@ -32,7 +32,6 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
 	const isOnMagiPrompt = useSelector(getIsOnMagiPrompt);
 	const onMWCPrompt = useSelector(isOnFilteredMagiPrompt);
-
 	const cardClickHandler = (isOnMagiPrompt || onMWCPrompt) ? cardId => {
 		engineConnector.emit({
 			type: ACTION_RESOLVE_PROMPT,
@@ -41,7 +40,10 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 		});
 	} : () => {};
 
-	return (
+  const animationData = useSelector(state => state.animation);
+  const defeatedId = animationData && animationData.type === 'magiDefeated' ? animationData.target : null; 
+
+  return (
 		<div className={cn('zone', 'zone-magi', {'zone-active': active})} data-zone-name={name}>
 			{content.length ? content.map(cardData =>
 				<CardWithAbilities
@@ -49,6 +51,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 					id={cardData.id}
 					card={cardData.card}
 					modifiedData={cardData.modifiedData}
+          isDefeated={defeatedId === cardData.id}
 					data={cardData.data}
 					onClick={cardClickHandler}
 					isOnPrompt={isOnMagiPrompt || onMWCPrompt}

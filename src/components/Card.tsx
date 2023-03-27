@@ -71,6 +71,7 @@ type CardProps = {
 	useLocket: boolean;
 	modifiedData: CardData;
   attackNumber: number,
+  isDefeated?: boolean,
 	pack: string[];
 	target: boolean;
 	connectDragSource: () => void;
@@ -94,6 +95,7 @@ function Card({
 	modifiedData,
 	pack,
 	isOnPrompt,
+  isDefeated,
 	className,
 	attacker,
   attackNumber,
@@ -204,6 +206,7 @@ function Card({
     regionStyle,
 		card ? typeClass[card.type as CardType] : null,
 		{
+      'magiDefeated': isDefeated,
 			'dragging': isDragging,
 			'available': available,
 			'target': target,

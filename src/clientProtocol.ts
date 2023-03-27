@@ -170,7 +170,7 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectPlaySpell |
   ClientEffectCreatureAttacks;
 
-export type ClientEffectPlaySpell = {
+  export type ClientEffectPlaySpell = {
   type: typeof ACTION_EFFECT
   effectType: typeof EFFECT_TYPE_PLAY_SPELL
   card: ConvertedCard

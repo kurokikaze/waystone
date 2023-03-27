@@ -56,3 +56,7 @@
 .cardSlot .addIcon svg {
     filter: drop-shadow(2px 4px 6px black);
 }
+
+.cardSlot .addIcon:hover svg {
+  color: white;
+}

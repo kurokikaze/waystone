@@ -66,6 +66,8 @@ import {
   ClearEntryAnimationAction,
   MinusEnergyOnCreatureAction,
   PlusEnergyOnCreatureAction,
+  START_MAGI_DEFEAT_ANIMATION,
+  StartMagiDefeatAnimationAction,
 } from '../actions';
 
 import {
@@ -156,6 +158,7 @@ type AnimationAction = StartPowerAnimationAction |
   StartPromptResolutionAnimationAction |
   EndPromptResolutionAnimationAction |
   ClearEntryAnimationAction |
+  StartMagiDefeatAnimationAction |
   EndAnimationAction;
 
 type AddToPackAction = {
@@ -574,6 +577,19 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
         ...state,
         lastPositions: positions,
       }
+    }
+    case START_MAGI_DEFEAT_ANIMATION: {
+      const magiDefeatAnimation = {
+        type: 'magiDefeat',
+        source: '',
+        target: action.id,
+      }
+      console.log('Magi defeat animation')
+      console.dir(magiDefeatAnimation)
+      return {
+        ...state,
+        animation: magiDefeatAnimation,
+      };
     }
 		default: {
 			return state;
