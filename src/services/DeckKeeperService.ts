@@ -15,141 +15,95 @@ export class DeckKeeperService {
       window.__TAURI_IPC__ !== undefined
     )
   }
-/**
- * 
-O'Qua
-Whall
-Ebylon
-Water of Life
-Water of Life
-Water of Life
-Dream Balm
-Dream Balm
-Dream Balm
-Corf
-Corf
-Corf
-Hubdra's Spear
-Hubdra's Spear
-Hubdra's Spear
-Abaquist
-Abaquist
-Abaquist
-Orothean Belt
-Platheus
-Platheus
-Platheus
-Giant Parathin
-Giant Parathin
-Giant Parathin
-Undertow
-Undertow
-Undertow
-Deep Hyren
-Deep Hyren
-Deep Hyren
-Megathan
-Megathan
-Megathan
-Bwill
-Bwill
-Bwill
-Robes of the Ages
-Robes of the Ages
-Submerge
-Submerge
-Submerge
-Coral Hyren
-Coral Hyren
- */
+
   static defaultPlayerDeck = [
-    // 'Grega',
-    // 'Magam',
-    // 'Sinder',
-    // 'Fire Chogo',
-    // 'Fire Chogo',
-    // 'Fire Chogo',
-    // 'Fire Grag',
-    // 'Fire Grag',
-    // 'Fire Grag',
-    // 'Arbolit',
-    // 'Arbolit',
-    // 'Arbolit',
-    // 'Magma Hyren',
-    // 'Magma Hyren',
-    // 'Magma Hyren',
-    // 'Quor',
-    // 'Quor',
-    // 'Quor',
-    // 'Lava Aq',
-    // 'Lava Aq',
-    // 'Lava Aq',
-    // 'Lava Arboll',
-    // 'Lava Arboll',
-    // 'Lava Arboll',
-    // 'Diobor',
-    // 'Diobor',
-    // 'Diobor',
-    // 'Drakan',
-    // 'Drakan',
-    // 'Drakan',
-    // 'Thermal Blast',
-    // 'Thermal Blast',
-    // 'Thermal Blast',
-    // 'Flame Geyser',
-    // 'Flame Geyser',
-    // 'Flame Geyser',
+    'Grega',
+    'Magam',
+    'Sinder',
+    'Fire Chogo',
+    'Fire Chogo',
+    'Fire Chogo',
+    'Fire Grag',
+    'Fire Grag',
+    'Fire Grag',
+    'Arbolit',
+    'Arbolit',
+    'Arbolit',
+    'Magma Hyren',
+    'Magma Hyren',
+    'Magma Hyren',
+    'Quor',
+    'Quor',
+    'Quor',
+    'Lava Aq',
+    'Lava Aq',
+    'Lava Aq',
+    'Lava Arboll',
+    'Lava Arboll',
+    'Lava Arboll',
+    'Diobor',
+    'Diobor',
+    'Diobor',
+    'Drakan',
+    'Drakan',
+    'Drakan',
+    'Thermal Blast',
+    'Thermal Blast',
+    'Thermal Blast',
+    'Flame Geyser',
+    'Flame Geyser',
+    'Flame Geyser',
+    'Water of Life',
+    'Dream Balm',
+    'Dream Balm',
+    'Magma Armor',
+    'Magma Armor',
+    'Water of Life',
+    'Water of Life'
+    // 'O\'Qua',
+    // 'Whall',
+    // 'Ebylon',
+    // 'Water of Life',
+    // 'Water of Life',
     // 'Water of Life',
     // 'Dream Balm',
     // 'Dream Balm',
-    // 'Magma Armor',
-    // 'Magma Armor',
-    // 'Water of Life',
-    // 'Water of Life'
-    'O\'Qua',
-    'Whall',
-    'Ebylon',
-    'Water of Life',
-    'Water of Life',
-    'Water of Life',
-    'Dream Balm',
-    'Dream Balm',
-    'Dream Balm',
-    'Corf',
-    'Corf',
-    'Corf',
-    'Hubdra\'s Spear',
-    'Hubdra\'s Spear',
-    'Hubdra\'s Spear',
-    'Abaquist',
-    'Abaquist',
-    'Abaquist',
-    'Orothean Belt',
-    'Platheus',
-    'Platheus',
-    'Platheus',
-    'Giant Parathin',
-    'Giant Parathin',
-    'Giant Parathin',
-    'Undertow',
-    'Undertow',
-    'Undertow',
-    'Deep Hyren',
-    'Deep Hyren',
-    'Deep Hyren',
-    'Megathan',
-    'Megathan',
-    'Megathan',
-    'Bwill',
-    'Bwill',
-    'Bwill',
-    'Robes of the Ages',
-    'Robes of the Ages',
-    'Submerge',
-    'Submerge',
-    'Submerge',
-    'Coral Hyren',
-    'Coral Hyren',
+    // 'Dream Balm',
+    // 'Corf',
+    // 'Corf',
+    // 'Corf',
+    // 'Hubdra\'s Spear',
+    // 'Hubdra\'s Spear',
+    // 'Hubdra\'s Spear',
+    // 'Abaquist',
+    // 'Abaquist',
+    // 'Abaquist',
+    // 'Orothean Belt',
+    // 'Platheus',
+    // 'Platheus',
+    // 'Platheus',
+    // 'Giant Parathin',
+    // 'Giant Parathin',
+    // 'Giant Parathin',
+    // 'Undertow',
+    // 'Undertow',
+    // 'Undertow',
+    // 'Deep Hyren',
+    // 'Deep Hyren',
+    // 'Deep Hyren',
+    // 'Megathan',
+    // 'Megathan',
+    // 'Megathan',
+    // 'Bwill',
+    // 'Bwill',
+    // 'Bwill',
+    // 'Robes of the Ages',
+    // 'Robes of the Ages',
+    // 'Submerge',
+    // 'Submerge',
+    // 'Submerge',
+    // 'Coral Hyren',
+    // 'Coral Hyren',
   ]
 
   static defaultOpponentDeck = [

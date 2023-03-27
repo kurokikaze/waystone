@@ -51,7 +51,8 @@ export const withAbilities = Component => (props) => {
 	const canPackHunt = props.card.data.canPackHunt;
 	const hasEnergize = energizeProperty > 0;
 	const hasAdditionalIcons = hasSeveralAttacks || canAttackDirectly || canPackHunt || hasEnergize;
-  const unableToAttack = props.data.ableToAttack === false || props.data.attacked === Infinity;
+  // ableToAttack can be false only in modifiedData, I guess. There should be no creatures unable to attack by their own text.
+  const unableToAttack = (props.modifiedData && props.modifiedData.ableToAttack === false) || props.data.attacked === Infinity;
 	const showEffects = hasEffects && !props.isOnPrompt && !props.isDragging;
 
 	const powers = (props.modifiedData ? props.modifiedData.powers : props.card.data.powers);

@@ -584,8 +584,6 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
         source: '',
         target: action.id,
       }
-      console.log('Magi defeat animation')
-      console.dir(magiDefeatAnimation)
       return {
         ...state,
         animation: magiDefeatAnimation,

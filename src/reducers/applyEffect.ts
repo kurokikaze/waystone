@@ -1,10 +1,6 @@
 /* global window */
 import {nanoid} from 'nanoid';
 import {
-	TYPE_CREATURE,
-	TYPE_MAGI,
-	TYPE_RELIC,
-
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
@@ -430,7 +426,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 						staticAbilities: action.staticAbilities || [],
 						triggerEffects: action.triggerEffects || [],
 						player: action.player,
-						id: nanoid(),
+						id: action.generatedBy || nanoid(),
 					},
 				],
 			};
