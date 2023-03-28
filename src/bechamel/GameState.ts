@@ -40,7 +40,7 @@ import {byName} from 'moonlands/src/cards'
 import {ExpandedClientCard, HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation} from './types'
 import { ClientAction, HiddenConvertedCard } from '../clientProtocol'
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame'
-import { EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE } from 'moonlands/dist/const'
+import { EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, REGION_UNIVERSAL } from 'moonlands/dist/const'
 import {getCardDetails} from './common'
 
 const nanoid = () => 'new_nanoid'
@@ -166,7 +166,17 @@ export class GameState {
   }
 
   public getPlayableCards(): ClientCard[] {
-    return this.state.zones.playerHand
+    const magi = this.getMyMagi()
+    const magiCard = byName(magi.card);
+    if (!magiCard) return [];
+    return this.state.zones.playerHand.filter(card => {
+      const cardData = byName(card.card);
+      if (!cardData) return false;
+      if (cardData.type === TYPE_RELIC && (cardData.region !== magiCard.region) && cardData.region !== REGION_UNIVERSAL) return false;
+      if (typeof cardData.cost !== 'number') return true;
+      const regionTax = (magiCard.region === cardData.region) ? 0 : 1;
+      return cardData.cost + regionTax <= magi.data.energy; 
+    })
   }
 
   public getMyRelicsInPlay(): ProcessedClientCard[] {

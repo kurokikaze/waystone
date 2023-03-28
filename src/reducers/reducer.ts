@@ -390,12 +390,16 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
           break;
         }
 				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+          const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
+          if (realNumberOfCards === 0) {
+            return state;
+          }
 					promptParams = {
 						zone: action.zone,
 						...(action.restrictions ? {restrictions: action.restrictions} : {}),
 						cards: action.cards,
 						zoneOwner: action.zoneOwner,
-						numberOfCards: action.numberOfCards,
+						numberOfCards: realNumberOfCards,
 					};
 					break;
 				}
@@ -409,12 +413,16 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					break;
 				}
 				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+          const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
+          if (realNumberOfCards === 0) {
+            return state;
+          }
 					promptParams = {
 						zone: action.zone,
 						...(action.restrictions ? {restrictions: action.restrictions} : {}),
 						cards: action.cards,
 						zoneOwner: action.zoneOwner,
-						numberOfCards: action.numberOfCards,
+						numberOfCards: realNumberOfCards,
 					};
 					break;
 				}

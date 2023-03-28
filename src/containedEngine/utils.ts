@@ -274,6 +274,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const zone = game.getMetaValue(action.zone, action.generatedBy);
 					const zoneOwner = game.getMetaValue(action.zoneOwner, action.generatedBy);
 					const numberOfCards = game.getMetaValue(action.numberOfCards, action.generatedBy);
+					const promptPlayer = game.getMetaValue(action.player, action.generatedBy);
 					const cardFilter = game.makeCardFilter(restrictions || []);
 					const zoneContent = game.getZone(zone, zoneOwner).cards;
 					const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
@@ -281,7 +282,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					return {
 						type: ACTION_ENTER_PROMPT,
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						player: action.player,
+						player: promptPlayer,
 						zone,
 						restrictions,
             ...(action.message ? {message: action.message} : {}),

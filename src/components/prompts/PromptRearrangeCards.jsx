@@ -14,10 +14,6 @@ import {
 	getPromptGeneratedBy,
 } from '../../selectors';
 
-// const DraggableTypes = {
-// 	CARD_IMAGE: 'card_image',
-// };
-
 function PromptRearrangeCards({engineConnector}) {
 	const cards = useSelector(getPromptCards);
 	const generatedBy = useSelector(getPromptGeneratedBy);

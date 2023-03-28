@@ -1956,9 +1956,9 @@ micromatch@^4.0.4:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.8.tar.gz":
-  version "0.15.8"
-  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.15.8.tar.gz#e4f8970a1e44e2a78ae4234b6764eb2c7e53b22a"
+"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.16.0.tar.gz":
+  version "0.16.0"
+  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.16.0.tar.gz#6dac619c1d10092fc31f4f643b91ee9d25f4a171"
   dependencies:
     "@babel/preset-env" "^7.11.5"
     "@babel/preset-typescript" "^7.12.7"
