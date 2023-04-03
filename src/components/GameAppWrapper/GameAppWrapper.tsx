@@ -138,6 +138,9 @@ export const GameAppWrapper = ({
               ...action.data,
               player: 2,
             });
+          } else if (action.data && 'botState' in action.data) {
+            // @ts-ignore
+            window.lastBotState = JSON.parse(action.data.botState);
           }
         }
         console.log('Bechamel connected to the engine');

@@ -409,37 +409,43 @@ export class SimulationStrategy implements Strategy {
               }
             }
 
-            const TEMPORARY_OPPONENT_ID = this.playerId + 1
-            const myMagi = this.gameState.getMyMagi()
-            const myCreatures = this.gameState.getMyCreaturesInPlay()
-            const myMagiPile = this.gameState.getMyMagiPile()
-            const myRelics = this.gameState.getMyRelicsInPlay()
-            const opponentMagi = this.gameState.getOpponentMagi()
+            // We need to preserve opponent id because some static effects depend on it
+            const TEMPORARY_OPPONENT_ID = 1;
+            // const myMagi = this.gameState.getMyMagi()
+            // const myCreatures = this.gameState.getMyCreaturesInPlay()
+            // const myMagiPile = this.gameState.getMyMagiPile()
+            // const myRelics = this.gameState.getMyRelicsInPlay()
+            // const opponentMagi = this.gameState.getOpponentMagi()
 
-            const enemyCreatures = this.gameState.getEnemyCreaturesInPlay()
-            const enemyRelics = this.gameState.getEnemyRelicsInPlay()
+            // const enemyCreatures = this.gameState.getEnemyCreaturesInPlay()
+            // const enemyRelics = this.gameState.getEnemyRelicsInPlay()
 
-            const outerSim = createState([...myCreatures, ...myRelics], [...enemyCreatures, ...enemyRelics], myMagi, opponentMagi, this.playerId || 1, TEMPORARY_OPPONENT_ID)
-            outerSim.state.step = this.gameState.getStep()
+            const outerSim = createState(
+              /*[...myCreatures, ...myRelics], [...enemyCreatures, ...enemyRelics], myMagi, opponentMagi,*/
+              this.gameState,
+              this.playerId || 2,
+              TEMPORARY_OPPONENT_ID,
+            )
+            // outerSim.state.step = this.gameState.getStep()
             // All relics are played as soon as they are available
             // No point in waiting really
-            const playableEnrichedCards = this.gameState.getPlayableCards()
-              .map(addCardData).filter(card => card._card.type !== TYPE_RELIC)
+            // const playableEnrichedCards = this.gameState.getPlayableCards()
+            //   .map(addCardData).filter(card => card._card.type !== TYPE_RELIC)
 
-            outerSim.getZone(ZONE_TYPE_HAND, this.playerId).add(playableEnrichedCards.map((card): CardInGame | false => {
-              const baseCard = byName(card.card)
-              if (!baseCard) return false;
-              const gameCard = new CardInGame(baseCard, this.playerId || 2)
-              gameCard.id = card.id
-              return gameCard
-            }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
-            outerSim.getZone(ZONE_TYPE_MAGI_PILE, this.playerId).add(myMagiPile.map(magi => {
-              const baseCard = byName(magi.card)
-              if (!baseCard) return false;
-              const card = new CardInGame(baseCard, this.playerId || 2)
-              card.id = magi.id
-              return card
-            }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
+            // outerSim.getZone(ZONE_TYPE_HAND, this.playerId).add(playableEnrichedCards.map((card): CardInGame | false => {
+            //   const baseCard = byName(card.card)
+            //   if (!baseCard) return false;
+            //   const gameCard = new CardInGame(baseCard, this.playerId || 2)
+            //   gameCard.id = card.id
+            //   return gameCard
+            // }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
+            // outerSim.getZone(ZONE_TYPE_MAGI_PILE, this.playerId).add(myMagiPile.map(magi => {
+            //   const baseCard = byName(magi.card)
+            //   if (!baseCard) return false;
+            //   const card = new CardInGame(baseCard, this.playerId || 2)
+            //   card.id = magi.id
+            //   return card
+            // }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
             const hash = this.hashBuilder.makeHash(outerSim)
             const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
 
@@ -503,8 +509,13 @@ export class SimulationStrategy implements Strategy {
               }
               const enemyCreatures = this.gameState.getEnemyCreaturesInPlay()
 
-              const outerSim = createState(myCreatures, enemyCreatures, myMagi, opponentMagi, this.playerId || 1, TEMPORARY_OPPONENT_ID)
-              outerSim.state.continuousEffects = this.gameState.getContinuousEffects();
+              const outerSim = createState(
+                // myCreatures, enemyCreatures, myMagi, opponentMagi,
+                this.gameState, 
+                this.playerId || 2,
+                1,
+              )
+              // outerSim.state.continuousEffects = this.gameState.getContinuousEffects();
               const hash = this.hashBuilder.makeHash(outerSim)
               const simulationQueue = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
 

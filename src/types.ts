@@ -18,7 +18,7 @@ export type MessageType = {
 
 export type ExtendedCard = Omit<ConvertedCard, "card"> & {card: Card}
 
-type ContinuousEffectType = {
+export type ContinuousEffectType = {
   generatedBy: string,
   expiration: any,
   staticAbilities: any[],

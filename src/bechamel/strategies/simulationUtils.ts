@@ -1,10 +1,16 @@
 import {byName} from 'moonlands/src/cards'
-import {State} from 'moonlands/src'
+import {State, TYPE_RELIC} from 'moonlands/src'
 import CardInGame from 'moonlands/src/classes/CardInGame'
 import Zone from 'moonlands/src/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
-import { ExpandedClientCard, ProcessedClientCard } from '../types';
+import { ExpandedClientCard, ProcessedClientCard, StateRepresentation } from '../types';
+import { GameState } from '../GameState';
+
+const addCardData = (card: any) => ({
+  ...card,
+  _card: byName(card.card),
+})
 
 type StateShape = State["state"];
 export const booleanGuard = Boolean as any as <T>(x: T | false | undefined | null | "" | 0) => x is T;
@@ -47,14 +53,24 @@ const defaultState: StateShape = {
 export const STEP_ATTACK = 2;
 
 export function createState(
-  myCreatures: ProcessedClientCard[],
-  enemyCreatures: ProcessedClientCard[],
-  myMagi: any,
-  opponentMagi: any,
+  // myCreatures: ProcessedClientCard[],
+  // enemyCreatures: ProcessedClientCard[],
+  // myMagi: any,
+  // opponentMagi: any,
+  gameState: GameState,
   playerId: number,
   opponentId: number,
 ): State {
-  const myCreaturesCards = myCreatures.map(card => {
+  const myMagi = gameState.getMyMagi()
+  const myCreatures = gameState.getMyCreaturesInPlay()
+  const myMagiPile = gameState.getMyMagiPile()
+  const myRelics = gameState.getMyRelicsInPlay()
+  const opponentMagi = gameState.getOpponentMagi()
+
+  const enemyCreatures = gameState.getEnemyCreaturesInPlay()
+  const enemyRelics = gameState.getEnemyRelicsInPlay()
+
+  const myCreaturesCards = [...myCreatures, ...myRelics].map(card => {
     const creatureCard = byName(card.card.name)
     if (!creatureCard) {
       return false
@@ -68,7 +84,7 @@ export function createState(
     cardInGame.id = card.id
     return cardInGame
   }).filter(booleanGuard)
-  const enemyCreaturesCards = enemyCreatures.map(card => {
+  const enemyCreaturesCards = [...enemyCreatures, ...enemyRelics].map(card => {
     const creatureCard = byName(card.card.name)
     if (!creatureCard) {
       return false
@@ -114,6 +130,14 @@ export function createState(
     sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).add([myMagiCard])
   }
 
+  sim.getZone(ZONE_TYPE_MAGI_PILE, playerId).add(myMagiPile.map(magi => {
+    const baseCard = byName(magi.card)
+    if (!baseCard) return false;
+    const card = new CardInGame(baseCard, playerId)
+    card.id = magi.id
+    return card
+  }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
+
   const enemyMagiRealCard = byName(opponentMagi?.card)
   if (opponentMagi && enemyMagiRealCard) {
     const enemyMagiCard: CardInGame = new CardInGame(enemyMagiRealCard, opponentId).addEnergy(opponentMagi.data.energy)
@@ -121,6 +145,19 @@ export function createState(
     enemyMagiCard.id = opponentMagi.id
     sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).add([enemyMagiCard])
   }
+  const playableEnrichedCards = gameState.getPlayableCards()
+    .map(addCardData).filter(card => card._card.type !== TYPE_RELIC)
+
+  sim.getZone(ZONE_TYPE_HAND, playerId).add(playableEnrichedCards.map((card): CardInGame | false => {
+    const baseCard = byName(card.card)
+    if (!baseCard) return false;
+    const gameCard = new CardInGame(baseCard, playerId)
+    gameCard.id = card.id
+    return gameCard
+  }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
+
+  sim.state.continuousEffects = gameState.getContinuousEffects();
+  sim.state.step = gameState.getStep()
   return sim
 }
 

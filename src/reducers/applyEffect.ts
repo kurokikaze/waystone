@@ -36,7 +36,7 @@ import {
 import {byName} from 'moonlands/dist/cards';
 
 // @ts-ignore
-import {findInPlay, getZoneName} from './utils.js';
+import {findInPlay, getZoneName, tickDownContinuousEffects} from './utils.js';
 import { ClientEffectAction, HiddenConvertedCard } from '../clientProtocol.js';
 import { State } from '../types.js';
 import { LogEntryType } from 'moonlands/dist/types/log.js';
@@ -173,11 +173,18 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 						playerActiveMagi: state.zones.playerActiveMagi.map(card => ({...card, data: {...card.data, wasAttacked: false, actionsUsed: []}})),
 					},
 					activePlayer: action.player,
+          continuousEffects: tickDownContinuousEffects(state.continuousEffects, false),
 				};
 			} else {
 				return {
 					...state,
+          zones: {
+            ...state.zones,
+						inPlay: state.zones.inPlay.map(card => card.data.controller !== 1 ? ({...card, data: {...card.data, attacked: 0, hasAttacked: false, wasAttacked: false, actionsUsed: []}}) : card),
+						opponentActiveMagi: state.zones.opponentActiveMagi.map(card => ({...card, data: {...card.data, wasAttacked: false, actionsUsed: []}})),
+          },
 					activePlayer: action.player,
+          continuousEffects: tickDownContinuousEffects(state.continuousEffects, true),
 				};
 			}
     }

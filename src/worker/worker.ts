@@ -109,8 +109,6 @@ onmessage = (event) => {
     game.setDeck(2, event.data.opponentDeck);
     game.setup();
 
-    game.enableDebug();
-
     const actionCallback = (action: AnyEffectType) => {
       if (game) {
         const commandPlayerOne = convertServerCommand(action, game, 1);

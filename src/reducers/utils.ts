@@ -8,10 +8,13 @@ import {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
+  EXPIRATION_NEVER,
+  EXPIRATION_ANY_TURNS,
+  EXPIRATION_OPPONENT_TURNS,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types';
 import { HiddenConvertedCard } from '../clientProtocol';
-import { State } from '../types';
+import { State, ContinuousEffectType } from '../types';
 
 const clientZoneNames: Record<ZoneType, string> = {
 	[ZONE_TYPE_DECK]: 'Deck',
@@ -48,3 +51,47 @@ export const getZoneName = (serverZoneType: ZoneType, source: ConvertedCard | Hi
 	const zoneName = clientZoneNames[serverZoneType];
 	return `${zonePrefix}${zoneName}` as keyof State["zones"];
 };
+
+export const tickDownContinuousEffects = (effects: ContinuousEffectType[], opponent: boolean): ContinuousEffectType[] => {
+  let resultingEffects: ContinuousEffectType[] = [];
+  for (const effect of effects) {
+    switch (effect.expiration.type) {
+      case EXPIRATION_NEVER: {
+        resultingEffects.push(effect);
+        break;
+      }
+      case EXPIRATION_ANY_TURNS: {
+        const turns = effect.expiration.turns - 1;
+        if (turns > 0) {
+          resultingEffects.push({
+            ...effect,
+            expiration: {
+              ...effect.expiration,
+              turns,
+            }
+          });
+        }
+        break;
+      }
+      case EXPIRATION_OPPONENT_TURNS: {
+        if (opponent) {
+          const turns = effect.expiration.turns - 1;
+          if (turns > 0) {
+            resultingEffects.push({
+              ...effect,
+              expiration: {
+                ...effect.expiration,
+                turns,
+              }
+            });
+          }
+        } else {
+          resultingEffects.push(effect);
+        }
+        break;
+      }
+    }
+  }
+
+  return resultingEffects;
+}

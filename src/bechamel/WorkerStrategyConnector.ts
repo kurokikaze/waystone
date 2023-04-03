@@ -1,6 +1,5 @@
 import { GameState } from "./GameState"
 import {Strategy} from './strategies/Strategy'
-import { SerializedClientState } from "./types"
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Energize',
@@ -28,6 +27,7 @@ export class WorkerStrategyConnector {
   
         strategy.setup(this.gameState, this.playerId)
         console.log('We got the game data')
+        console.log(`We are player ${this.playerId}`)
         if (this.gameState.playerPriority(this.playerId) || this.gameState.isInPromptState(this.playerId)) {
           this.requestAndSendAction()
         }
