@@ -9,6 +9,7 @@ import {
 import Card from '../Card.tsx';
 import {withAbilities} from '../CardAbilities.jsx';
 import {
+  ANIMATION_MAGI_DEFEATED,
 	STEP_ATTACK,
 } from '../../const';
 import {useCardData, useZoneContent, getCardDetails} from '../common';
@@ -41,7 +42,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 	} : () => {};
 
   const animationData = useSelector(state => state.animation);
-  const defeatedId = animationData && animationData.type === 'magiDefeated' ? animationData.target : null; 
+  const defeatedId = animationData && animationData.type === ANIMATION_MAGI_DEFEATED ? animationData.target : null; 
 
   return (
 		<div className={cn('zone', 'zone-magi', {'zone-active': active})} data-zone-name={name}>

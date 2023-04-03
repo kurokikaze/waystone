@@ -1,5 +1,7 @@
 import {useSelector} from 'react-redux';
+import {byName} from 'moonlands/dist/cards';
 import {
+  REGION_UNIVERSAL,
 	TYPE_CREATURE,
 	TYPE_RELIC,
 	TYPE_SPELL,
@@ -16,12 +18,20 @@ import {useCardData, useZoneContent} from '../common';
 
 import {withView} from '../CardView.jsx';
 
-const canCast = (cardType, cardCost, magiEnergy, currentStep, relics, cardName) => 
-	(cardCost <= magiEnergy) && (
-		(cardType == TYPE_CREATURE && currentStep == STEP_CREATURES) ||
-		(cardType == TYPE_SPELL && [STEP_PRS_FIRST, STEP_PRS_SECOND].includes(currentStep)) ||
-		(cardType == TYPE_RELIC && [STEP_PRS_FIRST, STEP_PRS_SECOND].includes(currentStep) && !relics.includes(cardName))
-	);
+const canCastFull = (card, magi, magiEnergy, currentStep, relics) => {
+  const magiCard = byName(magi.card)
+  const regionTax = (card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) ? 0 : 1;
+  if (card.card.cost + regionTax > magiEnergy) {
+    return false;
+  }
+  if (card.card.type == TYPE_SPELL) return (currentStep === STEP_PRS_FIRST || currentStep === STEP_PRS_SECOND);
+  if (card.card.type == TYPE_RELIC) return (
+    (currentStep === STEP_PRS_FIRST || currentStep === STEP_PRS_SECOND) &&
+    (card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) &&
+    !relics.includes(card.card.name)
+    );
+  if (card.card.type === TYPE_CREATURE) return currentStep == STEP_CREATURES;
+}
 
 const relicsHash = cards
 	.filter(card => card.type === TYPE_RELIC)
@@ -50,7 +60,7 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 					card={cardData.card}
 					data={cardData.data}
 					onClick={onCardClick}
-					available={ourTurn && cardData.card && canCast(cardData.card.type, cardData.card.cost + (cardData.card.region === magi?.region ? 1 : 0), magiEnergy, currentStep, relics, cardData.card.name)}
+					available={ourTurn && cardData.card && canCastFull(cardData, magi, magiEnergy, currentStep, relics)}
 				/>,
 			) : null}
 		</div>

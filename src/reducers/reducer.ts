@@ -76,6 +76,7 @@ import {
 	MESSAGE_TYPE_SPELL,
 	MESSAGE_TYPE_PROMPT_RESOLUTION,
   MESSAGE_TYPE_CREATURE,
+  ANIMATION_MAGI_DEFEATED,
 } from '../const';
 
 import {applyEffect} from './applyEffect';
@@ -587,14 +588,13 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
       }
     }
     case START_MAGI_DEFEAT_ANIMATION: {
-      const magiDefeatAnimation = {
-        type: 'magiDefeat',
-        source: '',
-        target: action.id,
-      }
       return {
         ...state,
-        animation: magiDefeatAnimation,
+        animation: {
+          type: ANIMATION_MAGI_DEFEATED,
+          source: '',
+          target: action.id,
+        },
       };
     }
 		default: {

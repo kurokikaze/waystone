@@ -13,6 +13,7 @@ import Card from '../Card.tsx';
 import {isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy} from '../../selectors';
 import {withAbilities} from '../CardAbilities.jsx';
 import {useZoneContent, useCardData} from '../common';
+import {ANIMATION_MAGI_DEFEATED} from '../../const';
 
 const CardWithAbilities = withAbilities(Card);
 
@@ -31,7 +32,7 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
 	const isOnMWCPrompt = useSelector(isOnFilteredMagiPrompt);
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
 	const animation = useSelector(getAnimation);
-  const defeatedId = animation && animation.type === 'magiDefeated' ? animation.target : null;
+  const defeatedId = animation && animation.type === ANIMATION_MAGI_DEFEATED ? animation.target : null;
 	const cardClickHandler = (isOnMagiPrompt || isOnMWCPrompt) ? cardId => {
 		engineConnector.emit({
 			type: ACTION_RESOLVE_PROMPT,
