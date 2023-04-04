@@ -103,7 +103,9 @@ export const getStartingCards = (state: State) => state.promptParams?.startingCa
 export const getAvailableCards = (state: State) => state.promptParams?.availableCards;
 export const getPromptGeneratedBy = (state: State) => state.promptGeneratedBy;
 export const getPromptNumberOfCards = (state: State) => state.promptParams?.numberOfCards;
-export const getPromptMin = (state: State) => state.promptParams?.min || 1;
+export const getPromptMin = (state: State) => {
+  return typeof state.promptParams?.min == 'number' ? state.promptParams?.min : 1; 
+};
 export const getPromptMax = (state: State) => state.promptParams?.max;
 export const getCards = (state: State) => state.promptParams?.cards;
 export const getPromptParams = (state: State) => state.promptParams;

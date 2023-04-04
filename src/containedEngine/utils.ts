@@ -675,10 +675,13 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						action.amount;
 
 					return {
-						...action,
+            type: action.type,
+            effectType: action.effectType,
 						target: convertCard(target),
 						source: convertCard(source),
-						amount,
+            amount,
+            generatedBy: action.generatedBy,
+            player: action.player,
 					} as ClientEffectMoveEnergy;
 				}
 				case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {

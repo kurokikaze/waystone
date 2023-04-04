@@ -32,7 +32,7 @@ function PromptChooseCards({engineConnector}) {
 			<h1>Choose number from {min} to {max}</h1>
 			<div className="cardsRow">
 				<select onChange={event => setValue(event.target.value)}>
-					{options.map(value => <option key={value} value={value}>{value}</option>)}
+					{options.map(value => <option key={`value_${value}`} value={value}>{value}</option>)}
 				</select>
 			</div>
 			<div className="buttonHolder">

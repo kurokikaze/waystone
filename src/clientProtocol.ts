@@ -232,6 +232,8 @@ export type ClientEffectMoveEnergy = {
   source: ConvertedCard,
   target: ConvertedCard,
   amount: number,
+  generatedBy: string,
+  player: number,
 }
 
 export type ClientEffectEndOfTurn = {

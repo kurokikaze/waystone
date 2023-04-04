@@ -390,6 +390,38 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				log: [...state.log, ...newLogEntries],
 			};
 		}
+    case EFFECT_TYPE_MOVE_ENERGY: {
+      const energyChange = (card: ConvertedCard): ConvertedCard => {
+        if (card.id === action.source.id) {
+          return {
+            ...card,
+            data: {
+              ...card.data,
+              energy: card.data.energy - action.amount,
+            }
+          }
+        } else if (card.id === action.target.id) {
+          return {
+            ...card,
+            data: {
+              ...card.data,
+              energy: card.data.energy + action.amount,
+            }
+          }
+        }
+        return card;
+      };
+
+      return {
+        ...state,
+        zones: {
+          ...state.zones,
+          playerActiveMagi: state.zones.playerActiveMagi.map(energyChange),
+          opponentActiveMagi: state.zones.opponentActiveMagi.map(energyChange),
+          inPlay: state.zones.inPlay.map(energyChange),          
+        }
+      }
+    }
 		case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 			const magiFound = findInPlay(state, action.target.id);
 			const newLogEntry: LogEntryType | null = magiFound ? {
