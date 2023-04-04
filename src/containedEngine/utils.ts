@@ -41,6 +41,7 @@ import {
 	EFFECT_TYPE_DAMAGE_STEP,
 	EFFECT_TYPE_DEAL_DAMAGE,
 	EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
+  EFFECT_TYPE_DIE_ROLLED,
 
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_MAGI_PILE,
@@ -436,6 +437,15 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             card: convertCard(action.card),
             generatedBy: action.generatedBy,
           } as ClientEffectPlaySpell;
+        }
+        case EFFECT_TYPE_DIE_ROLLED: {
+          return {
+            type: action.type,
+            effectType: action.effectType,
+            result: action.result,
+            generatedBy: action.generatedBy,
+            player: action.player,
+          };
         }
         case EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE: {
           if (!action.target) {

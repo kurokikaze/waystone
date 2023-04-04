@@ -1,3 +1,4 @@
+import { LOG_ENTRY_DIE_ROLLED } from 'moonlands/dist/const';
 import {
 	LOG_ENTRY_PLAY,
 	LOG_ENTRY_DRAW,
@@ -46,5 +47,7 @@ export const mapEntryToText = (entry: LogEntryType): string => {
 			return `Magi ${entry.card} is defeated`;
 		case LOG_ENTRY_NUMBER_CHOICE:
 			return `Player ${entry.player} chooses number ${entry.number}`;
-	}
+    case LOG_ENTRY_DIE_ROLLED:
+      return `Player ${entry.player} rolled ${entry.result}`;
+    }
 };

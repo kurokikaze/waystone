@@ -28,9 +28,12 @@ import {
 	LOG_ENTRY_MAGI_ENERGY_LOSS,
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
+  LOG_ENTRY_DIE_ROLLED,
+
 	ZONE_TYPE_DECK,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+  EFFECT_TYPE_DIE_ROLLED,
 } from 'moonlands/dist/const';
 
 import {byName} from 'moonlands/dist/cards';
@@ -260,6 +263,17 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				log: [...state.log, ...newLogEntries],
 			};                    
 		}
+    case EFFECT_TYPE_DIE_ROLLED: {
+      const newLogEntry: LogEntryType = {
+        type: LOG_ENTRY_DIE_ROLLED,
+        result: action.result,
+        player: action.player,
+      }
+      return {
+        ...state,
+        log: [...state.log, newLogEntry],
+      }
+    }
 		case EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {
 			if (action.zone === ZONE_TYPE_DECK) {
 				switch (action.zoneOwner) {

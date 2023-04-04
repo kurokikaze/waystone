@@ -50,8 +50,12 @@ export const GameAppWrapper = ({
   const breakRef = useRef<Function>(() => {});
 
   useEffect(() => {
-    appWindow.setResizable(false);
-    appWindow.setSize(new LogicalSize(1111, 660));
+    try {
+      appWindow.setResizable(false);
+      appWindow.setSize(new LogicalSize(1111, 660));
+    } catch(e) {
+
+    }
     if (!botRef.current) {
       const bechamel = new BotWorker();
       botRef.current = bechamel

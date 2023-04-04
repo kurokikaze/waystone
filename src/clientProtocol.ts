@@ -41,6 +41,7 @@ import {
   EFFECT_TYPE_PLAY_SPELL,
   EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
   EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+  EFFECT_TYPE_DIE_ROLLED,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -168,6 +169,7 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectMoveCardBetweenZones |
   ClientEffectCreateContinuousEffect |
   ClientEffectPlaySpell |
+  ClientEffectDieRolled |
   ClientEffectCreatureAttacks;
 
   export type ClientEffectPlaySpell = {
@@ -246,6 +248,14 @@ export type ClientEffectDraw = {
   type: typeof ACTION_EFFECT,
   effectType: typeof EFFECT_TYPE_DRAW,
   player: number,
+}
+
+export type ClientEffectDieRolled = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_DIE_ROLLED,
+  result: number,
+  player: number,
+  generatedBy: string,
 }
 
 export type ClientEffectMoveCardsBetweenZones = {
