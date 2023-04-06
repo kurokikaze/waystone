@@ -76,7 +76,7 @@ export const tickDownContinuousEffects = (effects: ContinuousEffectType[], oppon
       case EXPIRATION_OPPONENT_TURNS: {
         if (opponent) {
           const turns = effect.expiration.turns - 1;
-          if (turns > 0) {
+          if (turns >= 0) {
             resultingEffects.push({
               ...effect,
               expiration: {
@@ -84,6 +84,36 @@ export const tickDownContinuousEffects = (effects: ContinuousEffectType[], oppon
                 turns,
               }
             });
+          }
+        } else {
+          resultingEffects.push(effect);
+        }
+        break;
+      }
+    }
+  }
+
+  return resultingEffects;
+}
+
+export const cleanupContinuousEffects = (effects: ContinuousEffectType[], opponent: boolean): ContinuousEffectType[] => {
+  let resultingEffects: ContinuousEffectType[] = [];
+  for (const effect of effects) {
+    switch (effect.expiration.type) {
+      case EXPIRATION_NEVER: {
+        resultingEffects.push(effect);
+        break;
+      }
+      case EXPIRATION_ANY_TURNS: {
+        if (effect.expiration.turns > 0) {
+          resultingEffects.push(effect);
+        }
+        break;
+      }
+      case EXPIRATION_OPPONENT_TURNS: {
+        if (opponent) {
+          if (effect.expiration.turns > 0) {
+            resultingEffects.push(effect);
           }
         } else {
           resultingEffects.push(effect);

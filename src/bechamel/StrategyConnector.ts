@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ACTION_PASS } from "moonlands/dist/const"
+import { ACTION_PASS, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE } from "moonlands/dist/const"
 import {Socket} from "socket.io-client"
 import { ClientAction, ClientPassAction, FromClientPassAction } from "../clientProtocol"
 import { GameState } from "./GameState"

@@ -167,7 +167,8 @@ onmessage = (event) => {
       }, game);
       if (convertedCommand) {
         game?.update(convertedCommand);
-        if (game.state.activePlayer === 2) {
+        const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+        if (activePlayer === 2) {
           // Support bechamel with the priority events
           postMessage({
             for: 2,

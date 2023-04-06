@@ -1122,6 +1122,8 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
             const cards = zoneContent.filter(card => actionCards.includes(card.id));
             return {
               type: action.type,
+              zone: action.zone,
+              zoneOwner: action.zoneOwner,
               cards,
               player: action.player,
             };

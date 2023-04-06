@@ -1,4 +1,6 @@
+import { ACTION_RESOLVE_PROMPT } from "moonlands"
 import { GameState } from "./GameState"
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE } from "./const"
 import {Strategy} from './strategies/Strategy'
 
 const STEP_NAMES: Record<number, string> = {
@@ -69,7 +71,7 @@ export class WorkerStrategyConnector {
     if (this.strategy && this.gameState && this.playerId &&
         (this.gameState.playerPriority(this.playerId) || inPromptState)
     ) {
-      if (currentStep !== 5) {
+      if (currentStep !== 5 && this.gameState.playerPriority(this.playerId)) {
         // console.log(`Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
         const action = this.strategy.requestAction()
         if (action) {
@@ -78,6 +80,23 @@ export class WorkerStrategyConnector {
           postMessage(action)
         } else {
           console.log('No action returned from request')
+        }
+      } else if (!this.gameState.playerPriority(this.playerId) && inPromptState) {
+        console.log('Prompted outside of our turn.');
+        if (this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+          const cards = this.gameState.state.promptParams.cards || [];
+          const resultCards = cards?.slice(0, this.gameState.state.promptParams.numberOfCards);
+          postMessage({
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+            zone: this.gameState.state.promptParams.zone,
+            zoneOwner: this.gameState.state.promptParams.zoneOwner,
+            cards: resultCards.map(({id}) => id),
+            generatedBy: this.gameState.state.promptGeneratedBy,
+            player: this.playerId,
+          });
+        } else {
+          console.log(`We are prompted outside of our turn, the prompt type is ${this.gameState.getPromptType()}`)
         }
       }
     }

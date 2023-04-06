@@ -67,6 +67,7 @@ function PromptChooseCards({engineConnector}) {
             </div>
           ))}
         </div>
+        <div><pre>{JSON.stringify(zoneOwner, null, 2)}</pre></div>
         <div className="buttonHolder">
           <button onClick={handleSend} disabled={numberOfCards !== selected.length}>OK</button>
         </div>

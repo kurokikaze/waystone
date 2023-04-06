@@ -4,6 +4,8 @@ import MagiPowerIcon from './MagiPowerIcon.jsx';
 import Ability from './icons/Ability.tsx';
 import Attack from './icons/Attack.tsx';
 import Dagger from './icons/Dagger.tsx';
+import Shield from './icons/Shield.tsx';
+import Shovel from './icons/Shovel.tsx';
 import Energize from './icons/Energize.tsx';
 import Velociraptor from './icons/Velociraptor.tsx';
 
@@ -53,6 +55,8 @@ export const withAbilities = Component => (props) => {
 	const hasAdditionalIcons = hasSeveralAttacks || canAttackDirectly || canPackHunt || hasEnergize;
   // ableToAttack can be false only in modifiedData, I guess. There should be no creatures unable to attack by their own text.
   const unableToAttack = (props.modifiedData && props.modifiedData.ableToAttack === false) || props.data.attacked === Infinity;
+  const cannotBeAttacked = (props.modifiedData && props.modifiedData.canBeAttacked === false);
+  const isBurrowed = (props.data && props.data.burrowed === true);
 	const showEffects = hasEffects && !props.isOnPrompt && !props.isDragging;
 
 	const powers = (props.modifiedData ? props.modifiedData.powers : props.card.data.powers);
@@ -90,6 +94,8 @@ export const withAbilities = Component => (props) => {
 					{unableToAttack && <PowerIcon icon={<Attack />} number="&#10006;" />}
 					{canAttackDirectly && <PowerIcon icon={<Dagger />} />}
 					{canPackHunt && <PowerIcon icon={<Velociraptor/>} active={stillHasAttacks} activeColor='rgb(131, 49, 131)' />}
+					{cannotBeAttacked && <PowerIcon icon={<Shield />} />}
+					{isBurrowed && <PowerIcon icon={<Shovel />} />}
 					{showAbilities && <PowerIcon active={hasUnusedAbilities && props.actionsAvailable} />}
 				</div>
 				<div className='cardName'><div className='innerName'>{props.card.name}</div></div>

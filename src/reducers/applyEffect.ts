@@ -39,7 +39,7 @@ import {
 import {byName} from 'moonlands/dist/cards';
 
 // @ts-ignore
-import {findInPlay, getZoneName, tickDownContinuousEffects} from './utils.js';
+import {cleanupContinuousEffects, findInPlay, getZoneName, tickDownContinuousEffects} from './utils.js';
 import { ClientEffectAction, HiddenConvertedCard } from '../clientProtocol.js';
 import { State } from '../types.js';
 import { LogEntryType } from 'moonlands/dist/types/log.js';
@@ -194,7 +194,8 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 		case EFFECT_TYPE_END_OF_TURN: {
 			return {
 				...state,
-				turnTimer: false, 
+				turnTimer: false,
+        continuousEffects: cleanupContinuousEffects(state.continuousEffects, action.player === 2),
 			};
 		}
     case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
