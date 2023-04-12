@@ -4,7 +4,7 @@ import {State} from 'moonlands/src/index'
 import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE} from '../const';
 import {PlayerActionType, SimulationEntity} from '../types';
 import { HashBuilder } from './HashBuilder';
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE } from 'moonlands/dist/const';
+import { PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_RELIC, TYPE_RELIC } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -279,6 +279,54 @@ export class ActionExtractor {
           const action = {
             type: ACTION_RESOLVE_PROMPT,
             promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+            target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        })
+        return simulationQueue
+      }
+      case PROMPT_TYPE_RELIC: {
+        const allRelics: CardInGame[] = sim.getZone(ZONE_TYPE_IN_PLAY).cards
+          .filter((card: CardInGame) => card.card.type === TYPE_RELIC)
+        const simulationQueue: SimulationEntity[] = []
+        allRelics.forEach(relic => {
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_RELIC,
+            target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(relic.id),
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        })
+        return simulationQueue
+      }
+      case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+        const allCreatures: CardInGame[] = sim.getZone(ZONE_TYPE_IN_PLAY).cards
+          .filter((card: CardInGame) => card.card.type === TYPE_CREATURE && card.id !== sim.state.promptGeneratedBy)
+        const simulationQueue: SimulationEntity[] = []
+        allCreatures.forEach(creature => {
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
             playerId: innerSim.state.promptPlayer,
