@@ -26,7 +26,7 @@ import {createState, getStateScore, booleanGuard} from './simulationUtils'
 import {HashBuilder} from './HashBuilder';
 import {ExpandedClientCard, ProcessedClientCard, SimulationEntity} from '../types';
 import {ActionExtractor} from './ActionExtractor';
-import { ClientAttackAction, ClientPassAction, ClientPlayAction, ClientPowerAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
+import { C2SAction, ClientAttackAction, ClientPassAction, ClientPlayAction, ClientPowerAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -69,7 +69,7 @@ export class SimulationStrategy implements Strategy {
   private hashBuilder: HashBuilder
   private graph: string = ''
 
-  private actionsOnHold: any[] = []
+  private actionsOnHold: C2SAction[] = []
   private StoredTree: SimulationEntity[] = []
 
   constructor() {
@@ -130,7 +130,7 @@ export class SimulationStrategy implements Strategy {
       promptType: type || this.gameState?.getPromptType(),
       target,
       player: this.playerId,
-    }
+    } as C2SAction
   }
 
   private resolveNumberPrompt(number: number, type?: string) {
@@ -139,10 +139,10 @@ export class SimulationStrategy implements Strategy {
       promptType: type || this.gameState?.getPromptType(),
       number,
       player: this.playerId,
-    }
+    } as C2SAction
   }
 
-  private simulationActionToClientAction(simAction: any) {
+  private simulationActionToClientAction(simAction: any): C2SAction {
     switch(simAction.type) {
       case ACTION_PLAY: {
         return this.play(simAction.payload.card.id)
@@ -171,9 +171,10 @@ export class SimulationStrategy implements Strategy {
       default: {
         console.log('No transformer for sim action')
         console.dir(simAction)
-        break
+        return this.pass()
       }
     }
+    return this.pass()
   }
 
   private simulateAttacksQueue(simulationQueue: SimulationEntity[], initialScore: number, opponentId: number) {
@@ -318,7 +319,7 @@ export class SimulationStrategy implements Strategy {
       const ids = new Set(playableCards.map(({id}) => id))
       if (
         action.type === ACTION_PLAY &&
-        !ids.has(action.payload.card)
+        !ids.has(action.payload.card.id)
       ) {
         console.log(`Failed summon, passing. Dropping ${this.actionsOnHold.length} actions on hold.`)
         return true;
@@ -350,7 +351,7 @@ export class SimulationStrategy implements Strategy {
     return false
   }
 
-  public requestAction() {
+  public requestAction(): C2SAction {
     if (this.shouldClearHeldActions()) {
       this.actionsOnHold = []
     }
@@ -360,10 +361,10 @@ export class SimulationStrategy implements Strategy {
     }
 
     if (this.actionsOnHold.length) {
-      const action = this.actionsOnHold.shift()
+      const action = this.actionsOnHold.shift()!
       
       // If we are passing at the creatures step, clear the actions on hold
-      if (action.type === ACTION_PASS && this.gameState.getStep() === STEP_NAME.CREATURES) {
+      if (action && action.type === ACTION_PASS && this.gameState.getStep() === STEP_NAME.CREATURES) {
         this.actionsOnHold = []
       }
       return action
@@ -373,7 +374,7 @@ export class SimulationStrategy implements Strategy {
       if (this.gameState.waitingForCardSelection()) {
         return {
           type: ACTION_RESOLVE_PROMPT,
-          promptType: PROMPT_TYPE_CHOOSE_CARDS,
+          // promptType: PROMPT_TYPE_CHOOSE_CARDS,
           cards: this.gameState.getStartingCards(),
           player: this.playerId,
         }
@@ -382,7 +383,7 @@ export class SimulationStrategy implements Strategy {
       if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_MAY_ABILITY) {
         return {
           type: ACTION_RESOLVE_PROMPT,
-          promptType: PROMPT_TYPE_MAY_ABILITY,
+          // promptType: PROMPT_TYPE_MAY_ABILITY,
           useEffect: false,
           player: this.playerId,
         }
@@ -533,5 +534,6 @@ export class SimulationStrategy implements Strategy {
         }
       }
     }
+    return this.pass()
   }
 }

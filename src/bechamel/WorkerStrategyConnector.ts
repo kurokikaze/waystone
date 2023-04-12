@@ -1,6 +1,6 @@
 import { ACTION_RESOLVE_PROMPT } from "moonlands"
 import { GameState } from "./GameState"
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE } from "./const"
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE } from "./const"
 import {Strategy} from './strategies/Strategy'
 
 const STEP_NAMES: Record<number, string> = {
@@ -83,20 +83,36 @@ export class WorkerStrategyConnector {
         }
       } else if (!this.gameState.playerPriority(this.playerId) && inPromptState) {
         console.log('Prompted outside of our turn.');
-        if (this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
-          const cards = this.gameState.state.promptParams.cards || [];
-          const resultCards = cards?.slice(0, this.gameState.state.promptParams.numberOfCards);
-          postMessage({
-            type: ACTION_RESOLVE_PROMPT,
-            promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-            zone: this.gameState.state.promptParams.zone,
-            zoneOwner: this.gameState.state.promptParams.zoneOwner,
-            cards: resultCards.map(({id}) => id),
-            generatedBy: this.gameState.state.promptGeneratedBy,
-            player: this.playerId,
-          });
-        } else {
-          console.log(`We are prompted outside of our turn, the prompt type is ${this.gameState.getPromptType()}`)
+        switch(this.gameState.getPromptType()) {
+          case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+            const cards = this.gameState.state.promptParams.cards || [];
+            const resultCards = cards?.slice(0, this.gameState.state.promptParams.numberOfCards);
+            postMessage({
+              type: ACTION_RESOLVE_PROMPT,
+              promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+              zone: this.gameState.state.promptParams.zone,
+              zoneOwner: this.gameState.state.promptParams.zoneOwner,
+              cards: resultCards.map(({id}) => id),
+              generatedBy: this.gameState.state.promptGeneratedBy,
+              player: this.playerId,
+            });
+            break;
+          }
+          // This is probably a Giant Vulbor
+          case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+            postMessage({
+              type: ACTION_RESOLVE_PROMPT,
+              promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+              zone: this.gameState.state.promptParams.zone,
+              zoneOwner: this.gameState.state.promptParams.zoneOwner,
+              cards: [],
+              generatedBy: this.gameState.state.promptGeneratedBy,
+              player: this.playerId,
+            });
+            break;
+          }
+          default:
+            console.log(`We are prompted outside of our turn, the prompt type is ${this.gameState.getPromptType()}`)
         }
       }
     }

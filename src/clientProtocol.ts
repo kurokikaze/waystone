@@ -450,6 +450,7 @@ export type ClientResolvePromptAction = {
   player: number,
   zone?: ZoneType,
   zoneOwner?: number,
+  useEffect?: boolean,
   cards?: string[],
 }
 

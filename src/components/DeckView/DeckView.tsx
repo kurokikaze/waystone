@@ -20,6 +20,7 @@ type Props = {
 	ourCards: string[]
 	addToDeck: (card: string) => void
 	removeFromDeck: (card: string) => void
+	onClearRegions: () => void
 	onMagiEditor: (place: number|null) => void
 	magiEditor: number | null
 }
@@ -39,7 +40,7 @@ function MagiView({name, id, chosenMagi, onMagiEditor}: MagiViewProps) {
 	</div>);
 }
 
-export default function DeckView({ourCards, addToDeck, removeFromDeck, onMagiEditor, magiEditor}: Props) {
+export default function DeckView({ourCards, addToDeck, onClearRegions, removeFromDeck, onMagiEditor, magiEditor}: Props) {
 	const magiOne = ourCards[0];
 	const magiTwo = ourCards[1];
 	const magiThree = ourCards[2];
@@ -58,6 +59,7 @@ export default function DeckView({ourCards, addToDeck, removeFromDeck, onMagiEdi
 				<MagiView name={magiTwo} id={1} onMagiEditor={onMagiEditor} chosenMagi={magiEditor === 1} />
 				<MagiView name={magiThree} id={2} onMagiEditor={onMagiEditor} chosenMagi={magiEditor === 2} />
 			</div>
+      <div className='commands'><span onClick={onClearRegions}>Keep only the cards of Magi regions</span></div>
 			<div className='deckView'>
 				<ul>
 					{distinctCards.map(card => <li key={card}>

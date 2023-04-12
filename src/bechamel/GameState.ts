@@ -35,6 +35,7 @@ import {
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
   ZONE_TYPE_MAGI_PILE,
+  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 } from './const'
 import {byName} from 'moonlands/src/cards'
 import {ExpandedClientCard, HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation} from './types'
@@ -282,6 +283,12 @@ export class GameState {
         };
       }
       case ACTION_PASS: {
+        postMessage({
+          botState: JSON.stringify({
+            ...state,
+            step: action.newStep,
+          }, null, 2),
+        })
         return {
           ...state,
           step: action.newStep,
@@ -340,6 +347,16 @@ export class GameState {
             break;
           }
           case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+            promptParams = {
+              zone: action.zone,
+              restrictions: action.restrictions,
+              cards: action.cards,
+              zoneOwner: action.zoneOwner,
+              numberOfCards: action.numberOfCards,
+            };
+            break;
+          }
+          case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
             promptParams = {
               zone: action.zone,
               restrictions: action.restrictions,

@@ -251,11 +251,12 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const cardFilter = game.makeCardFilter(restrictions || []);
 					const zoneContent = game.getZone(zone, zoneOwner).cards;
 					const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
+          const promptPlayer = game.getMetaValue(action.player, action.generatedBy);
 
 					return {
 						type: ACTION_ENTER_PROMPT,
 						promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-						player: action.player,
+						player: promptPlayer,
 						zone,
 						restrictions,
 						cards: cards.map(convertCard),

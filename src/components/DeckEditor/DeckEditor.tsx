@@ -7,9 +7,9 @@ import Input from 'antd/es/input';
 import Spin from 'antd/es/spin';
 import Button from 'antd/es/button';
 import Space from 'antd/es/space';
-import { cards } from 'moonlands/dist/cards';
+import { byName, cards } from 'moonlands/dist/cards';
 import cn from 'classnames';
-import { TYPE_MAGI } from 'moonlands/dist/const';
+import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/dist/const';
 
 import Add from '../icons/Add';
 import CardFilter, { CardFilterType, defaultFilter } from '../CardFilter/CardFilter.jsx';
@@ -18,6 +18,7 @@ import { camelCase } from '../../utils';
 
 import './style.css';
 import Card from 'moonlands/dist/classes/Card';
+import { Region } from 'moonlands/dist/types';
 
 export type DeckType = {
   cards: string[]
@@ -85,6 +86,30 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 		name,
 	}));
 
+  const onClearRegions = useCallback(() => {
+    const fullCards = deck.cards.map(card => byName(card));
+    const magi = fullCards.filter(card => card?.type === TYPE_MAGI)
+    const magiRegions = new Set<Region>([...magi.map(card => card?.region || REGION_ARDERIAL), REGION_UNIVERSAL])
+    const newCards: string[] = []
+    magi.forEach(card => {
+      if (card) {
+        newCards.push(card.name)
+      }
+    })
+    fullCards.forEach(card => {
+      if (card?.type !== TYPE_MAGI) {
+        if (card?.region && magiRegions.has(card?.region)) {
+          newCards.push(card.name)
+        }
+      }
+    })
+    setDeck({
+      ...deck, 
+      cards: newCards,
+    })
+  }, [
+    deck,
+  ])
 	const filterFunction = useCallback(
 		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && filter.types.includes(card.type),
 		[filter, search]
@@ -143,7 +168,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 					</Col>
 					<Col span={8}>
 						<div className='deckHolder'>
-							<DeckView ourCards={deck.cards} addToDeck={addToDeck} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
+							<DeckView ourCards={deck.cards} addToDeck={addToDeck} onClearRegions={onClearRegions} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
 						</div>
 						<div>
 							<Space>
