@@ -215,10 +215,7 @@ export class SimulationStrategy implements Strategy {
         simulationQueue.push(...ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder))
       }
     }
-    // console.log(`Done ${counter} attack simulations`)
-    // console.log(`Best found score is ${bestAction.score} (initial is ${initialScore})`)
-    // console.log('Actions corresponding to the score: ')
-    // console.log(JSON.stringify(bestAction.action))
+
     return bestAction.action[0]
   }
 

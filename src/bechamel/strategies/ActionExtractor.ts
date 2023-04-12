@@ -1,9 +1,10 @@
 import CardInGame from 'moonlands/src/classes/CardInGame';
 import {State} from 'moonlands/src/index'
 // import { RestrictionObjectType } from 'moonlands/src/types';
-import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK} from '../const';
+import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE} from '../const';
 import {PlayerActionType, SimulationEntity} from '../types';
 import { HashBuilder } from './HashBuilder';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -451,6 +452,65 @@ export class ActionExtractor {
 
         return simulationQueue
       }
+      case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+        // const myMagi: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
+        const simulationQueue: SimulationEntity[] = []
+        if (sim.state.promptParams.zone) {
+          const zoneCards = sim.getZone(sim.state.promptParams.zone, sim.state.promptParams.zoneOwner).cards;
+
+          // We don't want to check all combinations, we can be asked to discard 3 cards from a hand of 13,
+          // and suddenly we're facing 286 branches on this prompt alone
+          // Sure, for more competitive bot I can add this, but for the start this will do
+          const promptCards = (sim.state.promptParams.numberOfCards || 1)
+          const numberOfVariants = Math.floor(zoneCards.length / promptCards)
+          for (let i = 0; i < numberOfVariants; i++) {
+            const innerSim = sim.clone()
+            const cards = innerSim.getZone(sim.state.promptParams.zone, sim.state.promptParams.zoneOwner).cards.slice(i * promptCards, promptCards);
+            const action = {
+              type: ACTION_RESOLVE_PROMPT,
+              promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+              cards: cards,
+              generatedBy: innerSim.state.promptGeneratedBy,
+              playerId: innerSim.state.promptPlayer,
+            }
+            simulationQueue.push({
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            })
+          }
+        }
+        return simulationQueue
+      }
+      case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+        const simulationQueue: SimulationEntity[] = []
+        if (sim.state.promptParams.zone) {
+          const zoneCards = sim.getZone(sim.state.promptParams.zone, sim.state.promptParams.zoneOwner).cards;
+
+          const promptCards = (sim.state.promptParams.numberOfCards || 1)
+          // const numberOfVariants = Math.floor(zoneCards.length / promptCards)
+          const upperBound = Math.min(promptCards, zoneCards.length)
+          for (let i = 0; i < upperBound; i++) {
+            const innerSim = sim.clone()
+            const cards = innerSim.getZone(sim.state.promptParams.zone, sim.state.promptParams.zoneOwner).cards.slice(0, i);
+            const action = {
+              type: ACTION_RESOLVE_PROMPT,
+              promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+              cards: cards,
+              generatedBy: innerSim.state.promptGeneratedBy,
+              playerId: innerSim.state.promptPlayer,
+            }
+            simulationQueue.push({
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            })
+          }
+        }
+        return simulationQueue
+      }
       default: {
         console.log(`No handler for ${sim.state.promptType} prompt types`)
         return []
@@ -460,7 +520,6 @@ export class ActionExtractor {
 
   public static getAllAttackPatterns(sim: State, attacker: number, opponent: number): AttackPattern[] {
     const creatures = sim.getZone(ZONE_TYPE_IN_PLAY).cards.filter((card: CardInGame) => card.card.type === TYPE_CREATURE)
-    console.dir(sim.state);
     const attackers = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === attacker && sim.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK) === true)
     const defenders = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== attacker && sim.modifyByStaticAbilities(card, PROPERTY_CAN_BE_ATTACKED) === true)
 
