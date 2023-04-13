@@ -4,7 +4,7 @@ import {State} from 'moonlands/src/index'
 import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE} from '../const';
 import {PlayerActionType, SimulationEntity} from '../types';
 import { HashBuilder } from './HashBuilder';
-import { PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_RELIC, TYPE_RELIC } from 'moonlands/dist/const';
+import { PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_RELIC, SELECTOR_CREATURES_OF_PLAYER, TYPE_RELIC } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -433,6 +433,141 @@ export class ActionExtractor {
             }
           )
         }
+
+        return simulationQueue
+      }
+      // PROMPT_TYPE_POWER_ON_MAGI is not in PromptTypeType yet
+      /* case PROMPT_TYPE_POWER_ON_MAGI: {
+        const myMagi: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
+
+        const simulationQueue: SimulationEntity[] = []
+        if (myMagi && myMagi.card.data.powers && myMagi.card.data.powers.length) {
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+            // @ts-ignore
+            power: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card?.card.data.powers[0],
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        }
+
+        return simulationQueue
+      } */
+      // Just so the bot won't stop if it encounters this prompt
+      case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+        const simulationQueue: SimulationEntity[] = []
+
+        const innerSim = sim.clone()
+        const action = {
+          type: ACTION_RESOLVE_PROMPT,
+          promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+          cards: innerSim.state.promptParams?.cards?.map(({id}) => id) || [],
+          generatedBy: innerSim.state.promptGeneratedBy,
+          playerId: innerSim.state.promptPlayer,
+        }
+        simulationQueue.push(
+          {
+            sim: innerSim,
+            action,
+            actionLog: [...actionLog, action],
+            previousHash,
+          }
+        )
+
+        return simulationQueue
+      }
+      case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
+        const myMagi: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
+        const iHaveCreatures: boolean = sim.useSelector(SELECTOR_CREATURES_OF_PLAYER, playerId).length > 0;
+
+        const simulationQueue: SimulationEntity[] = []
+        if (myMagi && !iHaveCreatures) {
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+            target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card,
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        }
+        const opponentMagi: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).card
+        const opponentHasCreatures: boolean = sim.useSelector(SELECTOR_CREATURES_OF_PLAYER, opponentId).length > 0;
+        if (opponentMagi && !opponentHasCreatures) {
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+            target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).card,
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        }
+
+        return simulationQueue
+      }
+      case PROMPT_TYPE_PLAYER: {
+        const simulationQueue: SimulationEntity[] = []
+
+        const innerSim = sim.clone()
+        const action = {
+          type: ACTION_RESOLVE_PROMPT,
+          promptType: PROMPT_TYPE_PLAYER,
+          player: playerId,
+          generatedBy: innerSim.state.promptGeneratedBy,
+          playerId: innerSim.state.promptPlayer,
+        }
+        simulationQueue.push(
+          {
+            sim: innerSim,
+            action,
+            actionLog: [...actionLog, action],
+            previousHash,
+          }
+        )
+
+        const oppInnerSim = sim.clone()
+        const oppAction = {
+          type: ACTION_RESOLVE_PROMPT,
+          promptType: PROMPT_TYPE_PLAYER,
+          player: opponentId,
+          generatedBy: oppInnerSim.state.promptGeneratedBy,
+          playerId: oppInnerSim.state.promptPlayer,
+        }
+        simulationQueue.push(
+          {
+            sim: oppInnerSim,
+            action: oppAction,
+            actionLog: [...actionLog, oppAction],
+            previousHash,
+          }
+        )
 
         return simulationQueue
       }
