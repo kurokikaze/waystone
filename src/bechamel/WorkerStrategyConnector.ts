@@ -1,7 +1,8 @@
 import { ACTION_RESOLVE_PROMPT } from "moonlands"
 import { GameState } from "./GameState"
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE } from "./const"
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED } from "./const"
 import {Strategy} from './strategies/Strategy'
+import { ClientResolvePromptAction } from "../clientProtocol"
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Energize',
@@ -114,6 +115,27 @@ export class WorkerStrategyConnector {
           default:
             console.log(`We are prompted outside of our turn, the prompt type is ${this.gameState.getPromptType()}`)
         }
+      } else if (currentStep == 5 && this.gameState.playerPriority(this.playerId) && inPromptState) {
+        // This is a special case for Gar trigger
+        switch (this.gameState.getPromptType()) {
+          case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+            const cards = this.gameState.getCardsForFilteredPrompt();
+            postMessage({
+              type: ACTION_RESOLVE_PROMPT,
+              promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+              zone: this.gameState.state.promptParams.zone,
+              zoneOwner: this.gameState.state.promptParams.zoneOwner,
+              target: cards[0].id,
+              generatedBy: this.gameState.state.promptGeneratedBy,
+              player: this.playerId,
+            } as ClientResolvePromptAction);
+            break;
+          }
+          default: {
+            console.log(`We are prompted on the DRAW step, the prompt type is ${this.gameState.getPromptType()}`)
+          }
+        }
+              
       }
     }
   }

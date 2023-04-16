@@ -41,7 +41,7 @@ import {byName} from 'moonlands/src/cards'
 import {ExpandedClientCard, HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation} from './types'
 import { ClientAction, HiddenConvertedCard } from '../clientProtocol'
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame'
-import { EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, REGION_UNIVERSAL, EFFECT_TYPE_DISCARD_RESHUFFLED } from 'moonlands/dist/const'
+import { EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, REGION_UNIVERSAL, EFFECT_TYPE_DISCARD_RESHUFFLED, RESTRICTION_CREATURE_NAME, RESTRICTION_TYPE, RESTRICTION_ENERGY_EQUALS, RESTRICTION_OWN_CREATURE } from 'moonlands/dist/const'
 import {getCardDetails} from './common'
 import { tickDownContinuousEffects } from '../reducers/utils'
 import { State } from '../types'
@@ -91,6 +91,8 @@ type Card = {
   },
   owner: number
 }
+
+type ProcessedCardFilter = (card: ProcessedClientCard, id: number, arr: ProcessedClientCard[]) => boolean
 
 export const findInPlay = (state: StateRepresentation, id: string) => {
 	const cardPlayerInPlay = state.zones.inPlay.find(card => card.id === id);
@@ -192,6 +194,42 @@ export class GameState {
       .filter<ProcessedClientCard>((card): card is ProcessedClientCard => card._card?.type === TYPE_RELIC && card.data.controller === this.playerId)
   }
 
+  private makeProcessedCardFilter(): ProcessedCardFilter {
+    if (this.state.promptParams.restriction) {
+      // Simple filter
+      switch (this.state.promptParams.restriction) {
+        case RESTRICTION_CREATURE_NAME: {
+          return (card: ProcessedClientCard) => card.card.name === this.state.promptParams.restrictionValue;
+        }
+        default: {
+          return () => false;
+        }
+      }
+    } else {
+      // Right now - only Gar's
+      return (card: ProcessedClientCard) => {
+        if (!(this.state.promptParams.restrictions instanceof Array)) return true
+
+        for (let restriction of this.state.promptParams.restrictions) {
+          switch (restriction.type) {
+            case RESTRICTION_OWN_CREATURE: {
+              if (card.data.controller !== this.playerId || card.card.type !== TYPE_CREATURE) {
+                return false;
+              }
+            }
+            case RESTRICTION_ENERGY_EQUALS: {
+              if (card.data.energy !== restriction.value) {
+                return false;
+              }
+            }
+          }
+        }
+
+        return true;
+      };
+    }
+  }
+
   public getMyCreaturesInPlay(): ProcessedClientCard[] {
     const realState = getCardDetails(this.state)
     // const processedCards: ProcessedClientCard[] = realState.inPlay
@@ -206,6 +244,15 @@ export class GameState {
         _card: card.card,
       }))
       .filter<ProcessedClientCard>((card): card is ProcessedClientCard => card._card?.type === TYPE_CREATURE && card.data.controller === this.playerId)
+  }
+
+  public getCardsForFilteredPrompt(): ProcessedClientCard[] {
+    const realState = getCardDetails(this.state)
+    const filter = this.makeProcessedCardFilter()
+    return realState.inPlay.map(card => ({
+      ...card,
+      _card: card.card,
+    }) as ProcessedClientCard).filter(filter);
   }
 
   public getContinuousEffects() {

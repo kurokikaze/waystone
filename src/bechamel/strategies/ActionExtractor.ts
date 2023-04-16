@@ -1,10 +1,10 @@
 import CardInGame from 'moonlands/src/classes/CardInGame';
 import {State} from 'moonlands/src/index'
 // import { RestrictionObjectType } from 'moonlands/src/types';
-import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE} from '../const';
+import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES} from '../const';
 import {PlayerActionType, SimulationEntity} from '../types';
 import { HashBuilder } from './HashBuilder';
-import { PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_RELIC, SELECTOR_CREATURES_OF_PLAYER, TYPE_RELIC } from 'moonlands/dist/const';
+import { PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_RELIC, SELECTOR_CREATURES_OF_PLAYER, TYPE_RELIC } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -484,6 +484,128 @@ export class ActionExtractor {
           }
         )
 
+        return simulationQueue
+      }
+      case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+        const simulationQueue: SimulationEntity[] = []
+
+        const enemyCreatures = sim.getZone(ZONE_TYPE_IN_PLAY).cards.filter(
+          card => card.card.type === TYPE_CREATURE && sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === opponentId
+        )
+        const ids: [string, number][] = enemyCreatures.map(card => [card.id, card.data.energy])
+        ids.sort((a,b) => a[1] - b[1])
+
+        let damageLeft = sim.state.promptParams.amount;
+        if (typeof damageLeft == 'number') {
+          const damageMap: Record<string, number> = {}
+          let lastDamagedId: string | null = null;
+
+          while (damageLeft > 0 && ids.length) {
+            const creature = ids.shift()!
+
+            const damageWeCanDeal = Math.min(creature[1], damageLeft)
+            lastDamagedId = creature[0]
+            damageMap[lastDamagedId] = damageWeCanDeal
+            damageLeft -= damageWeCanDeal
+          }
+
+          // Maybe we had more than enough damage for everyone?
+          // If so, pile the rest on the last creature
+          if (damageLeft > 0 && lastDamagedId) {
+            damageMap[lastDamagedId] = damageMap[lastDamagedId] + damageLeft
+          }
+
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+            damageOnCreatures: damageMap,
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        }
+        return simulationQueue
+      }
+      case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+        const simulationQueue: SimulationEntity[] = []
+
+        const enemyCreatures = sim.getZone(ZONE_TYPE_IN_PLAY).cards.filter(
+          card => card.card.type === TYPE_CREATURE && sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === playerId
+        )
+        const ids: [string, number][] = enemyCreatures.map(card => [card.id, card.data.energy])
+        ids.sort((a,b) => a[1] - b[1])
+
+        let energyLeft = sim.state.promptParams.amount;
+        if (typeof energyLeft == 'number') {
+          const energyMap: Record<string, number> = {}
+          let lastEnergyId: string | null = null;
+
+          while (energyLeft > 0 && ids.length) {
+            const creature = ids.shift()!
+
+            const energyWeCanGive = Math.min(creature[1], energyLeft)
+            lastEnergyId = creature[0]
+            energyMap[lastEnergyId] = energyWeCanGive
+            energyLeft -= energyWeCanGive
+          }
+
+          // Maybe we had more than enough energy for everyone?
+          // If so, pile the rest on the last creature
+          if (energyLeft > 0 && lastEnergyId) {
+            energyMap[lastEnergyId] = energyMap[lastEnergyId] + energyLeft
+          }
+
+          const innerSim = sim.clone()
+          const action = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+            energyOnCreatures: energyMap,
+            generatedBy: innerSim.state.promptGeneratedBy,
+            playerId: innerSim.state.promptPlayer,
+          }
+          simulationQueue.push(
+            {
+              sim: innerSim,
+              action,
+              actionLog: [...actionLog, action],
+              previousHash,
+            }
+          )
+        }
+        return simulationQueue
+      }
+      case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
+        const simulationQueue: SimulationEntity[] = []
+
+        const myCreatures = sim.getZone(ZONE_TYPE_IN_PLAY).cards.filter(
+          card => card.card.type === TYPE_CREATURE && sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === playerId
+        )
+        const ids: [string, number][] = myCreatures.map(card => [card.id, card.data.energy])
+        const energyDistribution = Object.fromEntries(ids)
+        const innerSim = sim.clone()
+        const action = {
+          type: ACTION_RESOLVE_PROMPT,
+          promptType: PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+          energyOnCreatures: energyDistribution,
+          generatedBy: innerSim.state.promptGeneratedBy,
+          playerId: innerSim.state.promptPlayer,
+        }
+        simulationQueue.push(
+          {
+            sim: innerSim,
+            action,
+            actionLog: [...actionLog, action],
+            previousHash,
+          }
+        )
         return simulationQueue
       }
       case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {

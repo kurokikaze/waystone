@@ -93,6 +93,7 @@ type PromptParamsType = {
   numberOfCards?: number;
   restrictions?: RestrictionObjectType[] | null;
   restriction?: RestrictionType;
+  restrictionValue?: any;
   amount?: number;
   zone?: ZoneType;
   zoneOwner?: number;

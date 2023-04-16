@@ -16,7 +16,7 @@
     "classnames": "^2.3.2",
     "comlink": "^4.4.1",
     "gsap": "^3.11.4",
-    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.17.2.tar.gz",
+    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.17.4.tar.gz",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
