@@ -60,7 +60,7 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 					card={cardData.card}
 					data={cardData.data}
 					onClick={onCardClick}
-					available={ourTurn && cardData.card && canCastFull(cardData, magi, magiEnergy, currentStep, relics)}
+					available={ourTurn && cardData.card && magi && canCastFull(cardData, magi, magiEnergy, currentStep, relics)}
 				/>,
 			) : null}
 		</div>

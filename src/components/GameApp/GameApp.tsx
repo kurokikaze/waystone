@@ -149,7 +149,7 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
                 <div className='discardCounter' onClick={handleOpponentDiscardClick}>{cardsInOpponentDiscard}</div>
               </div>
               <ZoneOpponentActiveMagi zoneId='opponentActiveMagi' name='Opponent Active Magi' engineConnector={engineConnector} />
-              <ZonePlayerRelics  zoneId='opponentRelics' name='Opponent Relics' />
+              <ZonePlayerRelics  zoneId='opponentRelics' name='Opponent Relics' engineConnector={engineConnector} />
             </div>
             <ZoneOpponentInPlay zoneId='opponentInPlay' name='Opponent in play' engineConnector={engineConnector} />
             <ZonePlayerInPlay zoneId='playerInPlay' name='Player in play' engineConnector={engineConnector} />
