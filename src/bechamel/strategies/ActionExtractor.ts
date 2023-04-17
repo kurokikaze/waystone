@@ -213,14 +213,14 @@ export class ActionExtractor {
     switch(sim.state.promptType) {
       case PROMPT_TYPE_MAY_ABILITY: {
         const actionYes = {
-          action: ACTION_RESOLVE_PROMPT,
+          type: ACTION_RESOLVE_PROMPT,
           promptType: PROMPT_TYPE_MAY_ABILITY,
           generatedBy: sim.state.promptGeneratedBy,
           useEffect: true,
           player: sim.state.promptPlayer,
         }
         const actionNo = {
-          action: ACTION_RESOLVE_PROMPT,
+          type: ACTION_RESOLVE_PROMPT,
           promptType: PROMPT_TYPE_MAY_ABILITY,
           generatedBy: sim.state.promptGeneratedBy,
           useEffect: false,
@@ -257,7 +257,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -281,7 +281,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -305,7 +305,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_RELIC,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(relic.id),
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -329,7 +329,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -354,7 +354,7 @@ export class ActionExtractor {
               promptType: PROMPT_TYPE_NUMBER,
               number: i,
               generatedBy: sim.state.promptGeneratedBy,
-              playerId: sim.state.promptPlayer,
+              player: sim.state.promptPlayer,
             }
             simulationQueue.push(
               {
@@ -379,7 +379,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -403,7 +403,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_SINGLE_MAGI,
             target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -422,7 +422,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_SINGLE_MAGI,
             target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).card,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -449,7 +449,7 @@ export class ActionExtractor {
             // @ts-ignore
             power: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card?.card.data.powers[0],
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -473,7 +473,7 @@ export class ActionExtractor {
           promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
           cards: innerSim.state.promptParams?.cards?.map(({id}) => id) || [],
           generatedBy: innerSim.state.promptGeneratedBy,
-          playerId: innerSim.state.promptPlayer,
+          player: innerSim.state.promptPlayer,
         }
         simulationQueue.push(
           {
@@ -521,7 +521,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
             damageOnCreatures: damageMap,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -569,7 +569,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
             energyOnCreatures: energyMap,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -596,7 +596,7 @@ export class ActionExtractor {
           promptType: PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
           energyOnCreatures: energyDistribution,
           generatedBy: innerSim.state.promptGeneratedBy,
-          playerId: innerSim.state.promptPlayer,
+          player: innerSim.state.promptPlayer,
         }
         simulationQueue.push(
           {
@@ -620,7 +620,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
             target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -640,7 +640,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
             target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).card,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -661,9 +661,9 @@ export class ActionExtractor {
         const action = {
           type: ACTION_RESOLVE_PROMPT,
           promptType: PROMPT_TYPE_PLAYER,
-          player: playerId,
+          targetPlayer: playerId,
           generatedBy: innerSim.state.promptGeneratedBy,
-          playerId: innerSim.state.promptPlayer,
+          player: innerSim.state.promptPlayer,
         }
         simulationQueue.push(
           {
@@ -678,9 +678,9 @@ export class ActionExtractor {
         const oppAction = {
           type: ACTION_RESOLVE_PROMPT,
           promptType: PROMPT_TYPE_PLAYER,
-          player: opponentId,
+          targetPlayer: opponentId,
           generatedBy: oppInnerSim.state.promptGeneratedBy,
-          playerId: oppInnerSim.state.promptPlayer,
+          player: oppInnerSim.state.promptPlayer,
         }
         simulationQueue.push(
           {
@@ -703,7 +703,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_SINGLE_MAGI,
             target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -722,7 +722,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_SINGLE_MAGI,
             target: innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).card,
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -743,7 +743,7 @@ export class ActionExtractor {
             promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
-            playerId: innerSim.state.promptPlayer,
+            player: innerSim.state.promptPlayer,
           }
           simulationQueue.push(
             {
@@ -776,7 +776,7 @@ export class ActionExtractor {
               promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
               cards: cards,
               generatedBy: innerSim.state.promptGeneratedBy,
-              playerId: innerSim.state.promptPlayer,
+              player: innerSim.state.promptPlayer,
             }
             simulationQueue.push({
               sim: innerSim,
@@ -804,7 +804,7 @@ export class ActionExtractor {
               promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
               cards: cards,
               generatedBy: innerSim.state.promptGeneratedBy,
-              playerId: innerSim.state.promptPlayer,
+              player: innerSim.state.promptPlayer,
             }
             simulationQueue.push({
               sim: innerSim,

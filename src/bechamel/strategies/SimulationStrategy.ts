@@ -458,11 +458,14 @@ export class SimulationStrategy implements Strategy {
               return this.pass()
             }
 
-            this.actionsOnHold = bestActions.slice(1).map(action => this.simulationActionToClientAction(action))
-            if (this.actionsOnHold.length) {
+            this.actionsOnHold = bestActions.slice(1).filter(action =>
+              (action.type === ACTION_PLAY && action.payload.player === this.playerId) ||
+              action.player === this.playerId
+            ).map(action => this.simulationActionToClientAction(action))
+            // if (this.actionsOnHold.length) {
               // console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
               // console.dir(this.actionsOnHold)
-            }
+            // }
             const bestAction = bestActions[0]
             // console.log('Chosen action:')
             // console.log(JSON.stringify(bestAction, null, 2))

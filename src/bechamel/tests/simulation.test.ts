@@ -58,6 +58,42 @@ describe('Simulations', () => {
     console.dir(strategy.requestAction())
   })
 
+  it('test', () => {
+    const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const weebo = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
+		const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
+		const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
+		const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
+		const gumGum = new CardInGame(byName('Gum-Gum') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
+		const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
+		const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion, gumGum]);
+
+    // @ts-ignore
+		const gameState = new State({
+			zones,
+			step: STEP_NAME.PRS1,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
+    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+
+    const serializedState = gameState.serializeData(ACTIVE_PLAYER) as SerializedClientState
+
+    const stateRepresentation = new GameState(serializedState)
+    stateRepresentation.setPlayerId(ACTIVE_PLAYER)
+
+    const strategy = new SimulationStrategy()
+
+    strategy.setup(stateRepresentation, ACTIVE_PLAYER)
+
+    console.dir(strategy.requestAction())
+  })
   // it('doesn\'t see some prompts', () => {
   //   const stateRepresentation = new GameState({
   //     "staticAbilities":[],
