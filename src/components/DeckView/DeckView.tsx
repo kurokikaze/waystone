@@ -46,8 +46,8 @@ function MagiView({name, id, chosenMagi, onMagiEditor}: MagiViewProps) {
 		>
 		</div>
 		<CardView name={name} className='deckView' top={false} />
-		{magi && <div className='startingEnergy'>{magi.data.startingEnergy}</div>}
-		{magi && <div className='energizeRate'>+{magi.data.energize}</div>}
+		{magi && <Tooltip title='Starting energy' placement='bottom'><div className='startingEnergy'>{magi.data.startingEnergy}</div></Tooltip>}
+		{magi && <Tooltip title='Energize rate' placement='bottom'><div className='energizeRate'>+{magi.data.energize}</div></Tooltip>}
 	</div>);
 }
 

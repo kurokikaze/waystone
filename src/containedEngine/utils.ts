@@ -392,6 +392,9 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
         promptAction.targetCard = convertCard(action.target) as ConvertedCard | HiddenConvertedCard;
         promptAction.target = promptAction.targetCard.id;
       }
+      if ('number' in action) {
+        promptAction.number = (typeof action.number == 'string' ? parseInt(action.number, 10) : action.number) || 0;
+      }
       return promptAction;
     }
 		case ACTION_POWER: {
@@ -1132,6 +1135,11 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
           }
 				}
         case PROMPT_TYPE_CHOOSE_CARDS: {
+          // Will do for now
+          // @ts-ignore
+          return action as ClientAction;
+        }
+        case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
           // Will do for now
           // @ts-ignore
           return action as ClientAction;

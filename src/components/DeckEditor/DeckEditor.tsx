@@ -44,7 +44,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 
   useEffect(() => {
     appWindow.setResizable(false);
-    appWindow.setSize(new LogicalSize(1250, 816));
+    appWindow.setSize(new LogicalSize(1350, 816));
   }, []);
 
 	const handleSave = useCallback(() => {
