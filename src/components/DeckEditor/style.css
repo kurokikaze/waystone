@@ -44,6 +44,7 @@
 
 .cardSlot {
     width: 270px;
+    height: 399px;
     position: relative;
 }
 
@@ -59,4 +60,26 @@
 
 .cardSlot .addIcon:hover svg {
   color: white;
+}
+
+.deckHolderCol {
+  border-left: 1px solid #ccc;
+  box-shadow: -10px 0px 10px 1px #ccc;
+  background-color: #cde;
+}
+
+.addIcon:hover svg {
+  fill: #72b01d;
+}
+
+.addIcon:active svg {
+  position: relative;
+  width: 53px;
+  height: 53px;
+  left: 2px;
+  top: 2px;
+  transition: width .2s;
+  transition: height .2s;
+  transition: left .2s;
+  transition: top .2s;
 }

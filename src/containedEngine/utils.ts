@@ -730,6 +730,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						...action,
 						target,
 						source: action.source ? convertCardMinimal(action.source) : action.source,
+						triggerSource: action.triggerSource ? convertCardMinimal(action.triggerSource) : action.triggerSource,
 						amount,
 					} as ClientEffectDiscardEnergyFromCreature;
 				}

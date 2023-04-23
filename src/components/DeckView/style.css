@@ -3,6 +3,31 @@
     font-size: 1.1em;
 }
 
+.deckView ul {
+  padding-left: 10px;
+}
+
+.simpleCard {
+  margin-left: 10px;
+  display: flex;
+}
+
+.simpleCard .typeIcon {
+  margin-right: 15px; 
+}
+
+.cardActions {
+  display: flex;
+}
+
+.cardActions .cardAdd.active:hover svg {
+  fill: #72b01d;
+}
+
+.cardActions .cardRemove:hover svg {
+  fill: #f95738;
+}
+
 .deckView li {
     display: flex;
     flex-direction: row;
@@ -71,4 +96,8 @@
 
 .magiVignette.chosenMagi {
     box-shadow: 0 0 11px 9px green;
+}
+
+.cardRemove, .cardAdd {
+  margin: 0 10px;
 }

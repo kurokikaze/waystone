@@ -19,6 +19,7 @@ import { camelCase } from '../../utils';
 import './style.css';
 import Card from 'moonlands/dist/classes/Card';
 import { Region } from 'moonlands/dist/types';
+import { Tooltip } from 'antd';
 
 export type DeckType = {
   cards: string[]
@@ -81,11 +82,6 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 		setMagiEditor(null);
 	}, [deck, magiEditor]);
 
-	const setName = (name: string) => setDeck(oldDeck => ({
-		...oldDeck,
-		name,
-	}));
-
   const onClearRegions = useCallback(() => {
     const fullCards = deck.cards.map(card => byName(card));
     const magi = fullCards.filter(card => card?.type === TYPE_MAGI)
@@ -110,6 +106,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
   }, [
     deck,
   ])
+
 	const filterFunction = useCallback(
 		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && filter.types.includes(card.type),
 		[filter, search]
@@ -150,7 +147,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 										<div className={cn('cardImage', {'canAdd': canAdd(card.name)})}>
 											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
 										</div>
-										{canAdd(card.name) && <div onClick={() => addToDeck(card.name)} className='addIcon'><Add size={50} fillColor={'green'} /></div>}
+										{canAdd(card.name) && <div onClick={() => addToDeck(card.name)} className='addIcon'><Add size={50} fillColor={'#3f7d20'} /></div>}
 									</div>)}
 								</div>
 							</div>}
@@ -160,19 +157,19 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 										<div className={cn('cardImage', {'canAdd': canSelectMagi(card.name)})}>
 											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
 										</div>
-										{canSelectMagi(card.name) && <div onClick={() => setMagi(card.name)} className='addIcon'><Add size={50} fillColor={'green'} /></div>}
+										{canSelectMagi(card.name) && <div onClick={() => setMagi(card.name)} className='addIcon'><Add size={50} fillColor={'#3f7d20'} /></div>}
 									</div>)}
 								</div>
 							</div>}
 						</div>
 					</Col>
-					<Col span={8}>
+					<Col span={8} className='deckHolderCol'>
 						<div className='deckHolder'>
 							<DeckView ourCards={deck.cards} addToDeck={addToDeck} onClearRegions={onClearRegions} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
 						</div>
 						<div>
 							<Space>
-								<Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button>
+								<Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
 								<Button loading={savingNew} onClick={onClose} type="default">Close</Button>
 							</Space>
 						</div>
