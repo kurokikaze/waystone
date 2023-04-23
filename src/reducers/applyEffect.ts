@@ -34,6 +34,7 @@ import {
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_DIE_ROLLED,
+  EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 } from 'moonlands/dist/const';
 
 import {byName} from 'moonlands/dist/cards';
@@ -273,6 +274,26 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
       return {
         ...state,
         log: [...state.log, newLogEntry],
+      }
+    }
+    case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+      return {
+        ...state,
+        zones: {
+          ...state.zones,
+          inPlay: state.zones.inPlay.map(card => {
+            if (card.id in action.energyOnCreatures) {
+              return {
+                ...card,
+                data: {
+                  ...card.data,
+                  energy: card.data.energy + action.energyOnCreatures[card.id],
+                }
+              }
+            }
+            return card;
+          })
+        }
       }
     }
 		case EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {

@@ -119,8 +119,9 @@ onmessage = (event) => {
               for: 1,
               action: commandPlayerOne,
             });
-          } catch(_) {
+          } catch(err) {
             console.error('Error converting the server command')
+            console.dir(err)
             console.dir(commandPlayerOne)
           }
         }

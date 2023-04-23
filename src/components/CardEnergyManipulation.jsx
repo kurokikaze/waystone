@@ -15,7 +15,7 @@ export const withEnergyManipulation = Component => ({ id, data, ...props }) => {
 	const dispatch = useDispatch();
 	const freeEnergy = useSelector(state => state.energyPrompt.freeEnergy);
 	const currentEnergy = useSelector(state => state.energyPrompt.cards[id]) || 0;
-	const restriction = useSelector(state => state.promptParams.restriction);
+	const restriction = useSelector(state => state.promptParams?.restriction);
 	const generatedBy = useSelector(getPromptGeneratedBy);
 
 	const handlePlusEnergy = () => {

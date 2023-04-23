@@ -511,14 +511,14 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             player: action.player,
 					} as ClientEffectRearrangeEnergyOnCreatures;
 				}
-				case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-					const energyOnCreatures = game.getMetaValue(action.energyOnCreatures, action.generatedBy) || {};
-					return {
-						...action,
-						// source: convertCard(action.source),
-						energyOnCreatures,
-					};
-				}
+				// case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+				// 	const energyOnCreatures = game.getMetaValue(action.energyOnCreatures, action.generatedBy) || {};
+				// 	return {
+				// 		...action,
+				// 		source: convertCard(action.source),
+				// 		energyOnCreatures,
+				// 	};
+				// }
 				case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE: {
 					const fromCard = (typeof action.from == 'string') ?
 						game.getMetaValue(action.from, action.generatedBy) :
@@ -830,6 +830,20 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						amount,
 					};
 				}
+        case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+          const energyOnCreatures: Record<string, number> = game.getMetaValue(action.energyOnCreatures, action.generatedBy);
+          return {
+            type: ACTION_EFFECT,
+            effectType: EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+            // @ts-ignore
+            source: action.source ? convertCardMinimal(action.source) : action.source,
+            energyOnCreatures,
+            // @ts-ignore
+            power: action?.power,
+            generatedBy: action.generatedBy,
+            player: action.player,
+          }
+        }
 				case EFFECT_TYPE_DISCARD_RESHUFFLED: {
 					return {
 						...action,
@@ -1140,6 +1154,11 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
           return action as ClientAction;
         }
         case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
+          // Will do for now
+          // @ts-ignore
+          return action as ClientAction;
+        }
+        case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
           // Will do for now
           // @ts-ignore
           return action as ClientAction;

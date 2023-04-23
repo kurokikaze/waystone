@@ -42,6 +42,7 @@ import {
   EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
   EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
   EFFECT_TYPE_DIE_ROLLED,
+  EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -165,6 +166,7 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectRemoveEnergyFromCreature |
   ClientEffectDiscardEnergyFromCreature |
   ClientEffectMoveEnergy |
+  ClientEffectDistributeEnergyOnCreatures |
   ClientEffectMoveCardsBetweenZones |
   ClientEffectMoveCardBetweenZones |
   ClientEffectCreateContinuousEffect |
@@ -254,6 +256,17 @@ export type ClientEffectDieRolled = {
   type: typeof ACTION_EFFECT,
   effectType: typeof EFFECT_TYPE_DIE_ROLLED,
   result: number,
+  player: number,
+  generatedBy: string,
+}
+
+export type ClientEffectDistributeEnergyOnCreatures = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+  energyOnCreatures: Record<string, number>,
+  power?: boolean,
+  spell?: boolean,
+  source?: ConvertedCard,
   player: number,
   generatedBy: string,
 }

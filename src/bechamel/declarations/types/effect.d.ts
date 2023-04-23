@@ -9,6 +9,7 @@ interface ActionEffect {
     generatedBy: string;
     player?: number;
     spell?: boolean;
+    power?: boolean;
     triggerSource?: CardInGame;
     triggeredId?: string[];
     replacedBy?: string[];
