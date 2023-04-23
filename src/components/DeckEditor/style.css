@@ -16,6 +16,13 @@
     grid-template-rows: auto;
     grid-column-gap: 10px;
     grid-row-gap: 30px;
+    justify-items: center;
+}
+
+.commands {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
 @media screen and (max-width: 1600px) {

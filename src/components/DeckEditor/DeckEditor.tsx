@@ -44,7 +44,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 
   useEffect(() => {
     appWindow.setResizable(false);
-    appWindow.setSize(new LogicalSize(1350, 816));
+    appWindow.setSize(new LogicalSize(1080, 816));
   }, []);
 
 	const handleSave = useCallback(() => {
@@ -167,11 +167,9 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 						<div className='deckHolder'>
 							<DeckView ourCards={deck.cards} addToDeck={addToDeck} onClearRegions={onClearRegions} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
 						</div>
-						<div>
-							<Space>
-								<Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
-								<Button loading={savingNew} onClick={onClose} type="default">Close</Button>
-							</Space>
+						<div className='commands'>
+              <Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
+              <Button loading={savingNew} onClick={onClose} type="default">Close</Button>
 						</div>
 					</Col>
 				</Row>
