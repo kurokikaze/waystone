@@ -76,6 +76,7 @@ import {
   EFFECT_TYPE_START_STEP,
   PROMPT_TYPE_PLAYER,
   EFFECT_TYPE_PLAY_SPELL,
+  PROMPT_TYPE_POWER_ON_MAGI,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types/common.js';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
@@ -369,6 +370,9 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             generatedBy: action.generatedBy,
             player: promptPlayer,
           };
+        }
+        case PROMPT_TYPE_POWER_ON_MAGI: {
+          const magi = game.getMetaValue(action?.magi, action.generatedBy);
         }
         default: {
           // @ts-ignore
@@ -1063,6 +1067,15 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
 
           return null;
 				}
+        case PROMPT_TYPE_POWER_ON_MAGI: {
+          if (action.power) {
+            return {
+              type: action.type,
+              power: game.state.promptParams?.magi.card.data.powers.find(power => power.name === action.power),
+              player: action.player,
+            }
+          }
+        }
 				case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
           if (action.target) {
             let target = game.getZone(ZONE_TYPE_IN_PLAY, null).byId(action.target);

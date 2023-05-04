@@ -35,6 +35,7 @@ type Pack = {
 export type ExpandedPromptParams = Omit<Omit<Omit<PromptParams, "promptType">, "zoneOwner">, "restrictionValue"> & {
   amount?: number
   cards?: ConvertedCard[]
+  magi?: ConvertedCard,
   startingCards?: string[]
   availableCards?: string[]
   restrictionValue?: string | string[] | number | boolean

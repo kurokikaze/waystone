@@ -92,7 +92,7 @@ const handleEditOpponentDeck = useCallback(() => {
   return (
     <div>
       {mode === MODE_GAME ? <div>
-        <GameAppWrapper playerDeck={playerDeck} opponentDeck={opponentDeck} />
+        <GameAppWrapper playerDeck={playerDeck} opponentDeck={opponentDeck} onReturnToBase={handleReturnToBase} />
       </div> : null}
       {mode === MODE_BASE ? <>
         <div className="row">

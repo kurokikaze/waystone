@@ -89,6 +89,7 @@ export type HiddenCard = {
 type PromptParamsType = {
   cards?: ConvertedCard[];
   source?: CardInGame;
+  magi?: CardInGame; 
   availableCards?: string[];
   numberOfCards?: number;
   restrictions?: RestrictionObjectType[] | null;

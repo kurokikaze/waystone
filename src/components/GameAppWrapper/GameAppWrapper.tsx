@@ -35,11 +35,13 @@ var emptyEngineConnector: EngineConnector = {
 type GameAppWrapperProps = {
   playerDeck: string[]
   opponentDeck: string[]
+  onReturnToBase: () => void
 }
 
 export const GameAppWrapper = ({
   playerDeck,
   opponentDeck,
+  onReturnToBase,
 }: GameAppWrapperProps) => {
   const actionsObservableRef = useRef<Observable<ClientAction>>()
 
@@ -152,6 +154,6 @@ export const GameAppWrapper = ({
     }
   }, []);
   return (<Provider store={store}>
-    <GameApp engineConnector={engineConnector} onBreak={breakRef.current} />
+    <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} />
   </Provider>)
 }

@@ -1,14 +1,17 @@
-/* global window */
 import {useRef, useEffect} from 'react';
 import {useSelector} from 'react-redux';
 import cn from 'classnames';
+import Button from 'antd/es/button';
+import { getWinner } from '../../selectors';
 
-// import './style.css';
+type EndgameOverlayProps = {
+  onReturnToBase: () => void,
+}
 
-const getWinner = state => state.winner;
-
-function PromptOverlay() {
-	const overlay = useRef();
+function EndgameOverlay({
+  onReturnToBase,
+}: EndgameOverlayProps) {
+	const overlay = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -27,8 +30,9 @@ function PromptOverlay() {
 			<p>
 				{`Player ${winner} has won`}
 			</p>
+      <p><Button onClick={onReturnToBase}>Return to the main menu</Button></p>
 		</div>
 	);
 }
 
-export default PromptOverlay;
+export default EndgameOverlay;

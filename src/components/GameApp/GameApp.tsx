@@ -1,13 +1,12 @@
-/* global window */
+// Will have to convert them all to TS someday
 // @ts-nocheck
 import {useState, useCallback} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import {
 	ACTION_PASS,
 	ACTION_PLAY,
-  ACTION_PLAYER_WINS,
 } from 'moonlands/dist/const';
 
 // @ts-ignore-next
@@ -30,8 +29,7 @@ import ActionCardView from '../ActionCardView.jsx';
 
 // @ts-ignore
 import StepBoard from '../StepBoard/StepBoard.jsx';
-// @ts-ignore
-import EndgameOverlay from '../EndgameOverlay/EndgameOverlay.jsx';
+import EndgameOverlay from '../EndgameOverlay/EndgameOverlay.tsx';
 
 import "./style.css";
 import "../../assets/style.css";
@@ -66,7 +64,13 @@ import { EngineConnector, MessageType } from '../../types';
 
 const EnhancedPowerMessage = withSingleCardData(PowerMessage);
 
-function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBreak: Function}) {
+type AppProps = {
+  engineConnector: EngineConnector,
+  onBreak: Function,
+  onReturnToBase: () => void,
+}
+
+function App({engineConnector, onBreak, onReturnToBase}: AppProps) {
 	const [discardShown, setDiscardShown] = useState(false);
 	const [opponentDiscardShown, setOpponentDiscardShown] = useState(false);
 
@@ -180,7 +184,7 @@ function App({engineConnector, onBreak}: {engineConnector: EngineConnector, onBr
               <ZoneDiscard zoneId='opponentDiscard' name='Opponent discard' />
             </div>}
             {prompt && <PromptOverlay engineConnector={engineConnector} />}
-            {gameEnded && <EndgameOverlay />}
+            {gameEnded && <EndgameOverlay onReturnToBase={onReturnToBase} />}
           </>
 				</DndProvider>
 			</div>

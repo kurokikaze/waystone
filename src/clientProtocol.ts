@@ -43,6 +43,7 @@ import {
   EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
   EFFECT_TYPE_DIE_ROLLED,
   EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+  PROMPT_TYPE_POWER_ON_MAGI,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -136,6 +137,11 @@ export type ClientEnterPromptSingleCreatureFiltered = ClientEnterPromptInterface
   restrictionValue: string | string[] | number
 }
 
+export type ClientEnterPromptPowerOnMagi = ClientEnterPromptInterface & {
+  promptType: typeof PROMPT_TYPE_POWER_ON_MAGI,
+  magi: ConvertedCard,
+}
+
 export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptChooseUpToNCardsFromZone |
   ClientEnterPromptNumber |
@@ -145,7 +151,8 @@ export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptAnyCreatureExceptSource |
   ClientEnterPromptSingleCreatureFiltered |
   ClientEnterPromptRearrangeEnergyOnCreatures |
-  ClientEnterPromptChooseCards;
+  ClientEnterPromptChooseCards |
+  ClientEnterPromptPowerOnMagi;
 
 export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectReturnCreatureReturningEnergy |
@@ -465,6 +472,7 @@ export type ClientResolvePromptAction = {
   zoneOwner?: number,
   useEffect?: boolean,
   cards?: string[],
+  power?: string,
 }
 
 type CommonAction = ClientAttackAction | ClientEnterPromptAction | ClientEffectAction

@@ -84,6 +84,7 @@ import {findInPlay} from './utils';
 import { ClientAction } from '../clientProtocol';
 import { LogEntryType } from 'moonlands/dist/types';
 import { ExpandedPromptParams, MessageType, State } from '../types';
+import { PROMPT_TYPE_POWER_ON_MAGI } from 'moonlands/src/const';
 
 const INITIAL_STATE = 'setInitialState';
 
@@ -442,7 +443,16 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						freeEnergy: action.amount,
 						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 					};
+          break;
 				}
+        case PROMPT_TYPE_POWER_ON_MAGI: {
+          promptParams = {
+            magi: action?.magi,
+            // availableCards: action?.promptParams.availableCards,
+          }
+          break;
+        }
+
 			}
 
 			return {

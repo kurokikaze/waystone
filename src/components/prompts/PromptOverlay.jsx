@@ -24,9 +24,11 @@ import PromptEnergyDistribution from './PromptEnergyDistribution.jsx';
 import PromptDamageDistribution from './PromptDamageDistribution.jsx';
 import PromptRearrangeCards from './PromptRearrangeCards.jsx';
 import PromptChoosePlayer from './PromptChoosePlayer';
+import PromptChoosePowerOnMagi from './PromptChoosePowerOnMagi.tsx';
 import {getPromptType, getPromptMessage} from '../../selectors'; 
 
 import './style.css';
+import { PROMPT_TYPE_POWER_ON_MAGI } from 'moonlands/dist/const.js';
 
 function PromptOverlay({engineConnector}) {
 	const promptType = useSelector(getPromptType);
@@ -55,6 +57,7 @@ function PromptOverlay({engineConnector}) {
 			{promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES && <PromptDamageDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE && <PromptRearrangeCards engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_PLAYER && <PromptChoosePlayer engineConnector={engineConnector} />}
+      {promptType === PROMPT_TYPE_POWER_ON_MAGI && <PromptChoosePowerOnMagi engineConnector={engineConnector} />}
 		</div>
 	);
 }

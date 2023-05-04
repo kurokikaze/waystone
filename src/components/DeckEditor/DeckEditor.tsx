@@ -6,7 +6,7 @@ import Col from 'antd/es/col';
 import Input from 'antd/es/input';
 import Spin from 'antd/es/spin';
 import Button from 'antd/es/button';
-import Space from 'antd/es/space';
+
 import { byName, cards } from 'moonlands/dist/cards';
 import cn from 'classnames';
 import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/dist/const';
@@ -33,6 +33,7 @@ type DeckEditorProps = {
 }
 
 const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
+  console.dir(cards.map(card => card.name))
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [savingNew, setSavingNew] = useState(false);

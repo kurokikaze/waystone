@@ -3,102 +3,102 @@
 /// <reference lib="webworker" />
 declare const self: DedicatedWorkerGlobalScope;
 
-import { State } from 'moonlands';
+import { ACTION_PLAYER_WINS, State } from 'moonlands';
 import { AnyEffectType } from 'moonlands/dist/types';
 import { COMMAND_START } from '../const';
 import { createGame } from '../containedEngine/containedEngine';
 import convertClientCommands, { convertServerCommand } from '../containedEngine/utils';
-const caldDeck = [
-	'Grega',
-	'Magam',
-	'Sinder',
-	'Fire Chogo',
-	'Fire Chogo',
-	'Fire Chogo',
-	'Fire Grag',
-	'Fire Grag',
-	'Fire Grag',
-	'Arbolit',
-	'Arbolit',
-	'Arbolit',
-	'Magma Hyren',
-	'Magma Hyren',
-	'Magma Hyren',
-	'Quor',
-	'Quor',
-	'Quor',
-	'Lava Aq',
-	'Lava Aq',
-	'Lava Aq',
-	'Lava Arboll',
-	'Lava Arboll',
-	'Lava Arboll',
-	'Diobor',
-	'Diobor',
-	'Diobor',
-	'Drakan',
-	'Drakan',
-	'Drakan',
-	'Thermal Blast',
-	'Thermal Blast',
-	'Thermal Blast',
-	'Flame Geyser',
-	'Flame Geyser',
-	'Flame Geyser',
-	'Cave Hyren',
-	'Cave Hyren',
-	'Cave Hyren',
-	'Magma Armor',
-	'Magma Armor',
-	'Fire Flow',
-	'Fire Flow',
-];
+// const caldDeck = [
+// 	'Grega',
+// 	'Magam',
+// 	'Sinder',
+// 	'Fire Chogo',
+// 	'Fire Chogo',
+// 	'Fire Chogo',
+// 	'Fire Grag',
+// 	'Fire Grag',
+// 	'Fire Grag',
+// 	'Arbolit',
+// 	'Arbolit',
+// 	'Arbolit',
+// 	'Magma Hyren',
+// 	'Magma Hyren',
+// 	'Magma Hyren',
+// 	'Quor',
+// 	'Quor',
+// 	'Quor',
+// 	'Lava Aq',
+// 	'Lava Aq',
+// 	'Lava Aq',
+// 	'Lava Arboll',
+// 	'Lava Arboll',
+// 	'Lava Arboll',
+// 	'Diobor',
+// 	'Diobor',
+// 	'Diobor',
+// 	'Drakan',
+// 	'Drakan',
+// 	'Drakan',
+// 	'Thermal Blast',
+// 	'Thermal Blast',
+// 	'Thermal Blast',
+// 	'Flame Geyser',
+// 	'Flame Geyser',
+// 	'Flame Geyser',
+// 	'Cave Hyren',
+// 	'Cave Hyren',
+// 	'Cave Hyren',
+// 	'Magma Armor',
+// 	'Magma Armor',
+// 	'Fire Flow',
+// 	'Fire Flow',
+// ];
 
-const naroomDeck =[
-	'Pruitt',
-	'Poad',
-	'Yaki',
-	'Leaf Hyren',
-	'Leaf Hyren',
-	'Leaf Hyren',
-	'Weebo',
-	'Weebo',
-	'Weebo',
-	'Arboll',
-	'Arboll',
-	'Arboll',
-	'Giant Carillion',
-	'Giant Carillion',
-	'Giant Carillion',
-	'Giant Parathin',
-	'Giant Parathin',
-	'Giant Parathin',
-	'Balamant',
-	'Balamant',
-	'Balamant',
-	'Grow',
-	'Grow',
-	'Grow',
-	'Giant Parathin',
-	'Giant Parathin',
-	'Giant Parathin',
-	'Syphon Stone',
-	'Syphon Stone',
-	'Syphon Stone',
-	'Carillion',
-	'Carillion',
-	'Carillion',
-	'Rudwot',
-	'Rudwot',
-	'Rudwot',
-	'Stagadan',
-	'Stagadan',
-	'Stagadan',
-	'Robe of Vines',
-	'Robe of Vines',
-	'Robe of Vines',
-	'Sea Barl',
-];
+// const naroomDeck =[
+// 	'Pruitt',
+// 	'Poad',
+// 	'Yaki',
+// 	'Leaf Hyren',
+// 	'Leaf Hyren',
+// 	'Leaf Hyren',
+// 	'Weebo',
+// 	'Weebo',
+// 	'Weebo',
+// 	'Arboll',
+// 	'Arboll',
+// 	'Arboll',
+// 	'Giant Carillion',
+// 	'Giant Carillion',
+// 	'Giant Carillion',
+// 	'Giant Parathin',
+// 	'Giant Parathin',
+// 	'Giant Parathin',
+// 	'Balamant',
+// 	'Balamant',
+// 	'Balamant',
+// 	'Grow',
+// 	'Grow',
+// 	'Grow',
+// 	'Giant Parathin',
+// 	'Giant Parathin',
+// 	'Giant Parathin',
+// 	'Syphon Stone',
+// 	'Syphon Stone',
+// 	'Syphon Stone',
+// 	'Carillion',
+// 	'Carillion',
+// 	'Carillion',
+// 	'Rudwot',
+// 	'Rudwot',
+// 	'Rudwot',
+// 	'Stagadan',
+// 	'Stagadan',
+// 	'Stagadan',
+// 	'Robe of Vines',
+// 	'Robe of Vines',
+// 	'Robe of Vines',
+// 	'Sea Barl',
+// ];
 
 var game: State | null = null;
 onmessage = (event) => {
@@ -108,6 +108,8 @@ onmessage = (event) => {
     game.setDeck(1, event.data.playerDeck);
     game.setDeck(2, event.data.opponentDeck);
     game.setup();
+
+    let closing = false;
 
     const actionCallback = (action: AnyEffectType) => {
       if (game) {
@@ -138,6 +140,12 @@ onmessage = (event) => {
             console.dir(commandPlayerTwo)
           }
         }
+
+        if (action.type === ACTION_PLAYER_WINS && !closing) {
+          // Just in case there are additional actions
+          setTimeout(() => close(), 500);
+          closing = true;
+        }
       }
     }
     game.setOnAction(actionCallback);
@@ -152,7 +160,7 @@ onmessage = (event) => {
       for: 2,
       state: serializedStateTwo,
     });
-  } else if (event.data.special === 'refresh') {
+  } else if (event.data && event.data.special === 'refresh') {
     if (game) {
     const serializedState = game.serializeData(1);
       postMessage({
