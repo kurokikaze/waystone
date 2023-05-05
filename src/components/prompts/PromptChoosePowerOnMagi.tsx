@@ -29,7 +29,7 @@ function PromptChoosePowerOnMagi({engineConnector}: Props) {
 	return (
 		<div className="promptWindow promptEnergyManipulation">
       {magiPowers.map(power => 
-			<div className="buttonHolder">
+			<div key={power.name} className="buttonHolder">
         <button onClick={() => handleSend(power.name)}>{power.name}</button>
         <p>{power.text}</p>
       </div>
