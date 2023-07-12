@@ -44,9 +44,11 @@ import {
   EFFECT_TYPE_DIE_ROLLED,
   EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
   PROMPT_TYPE_POWER_ON_MAGI,
+  PROMPT_TYPE_ALTERNATIVE,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
+import { AlternativeType } from "moonlands/dist/types/prompt"
 
 export type HiddenConvertedCard = {
 	id: string,
@@ -142,6 +144,12 @@ export type ClientEnterPromptPowerOnMagi = ClientEnterPromptInterface & {
   magi: ConvertedCard,
 }
 
+export type ClientEnterPromptAlternatives = ClientEnterPromptInterface & {
+  promptType: typeof PROMPT_TYPE_ALTERNATIVE
+  alternatives: AlternativeType[]
+  generatedBy: string | undefined // Except we cannot have prompts from undefined... probably
+}
+
 export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptChooseUpToNCardsFromZone |
   ClientEnterPromptNumber |
@@ -152,6 +160,7 @@ export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptSingleCreatureFiltered |
   ClientEnterPromptRearrangeEnergyOnCreatures |
   ClientEnterPromptChooseCards |
+  ClientEnterPromptAlternatives |
   ClientEnterPromptPowerOnMagi;
 
 export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
@@ -469,6 +478,7 @@ export type ClientResolvePromptAction = {
   number?: number,
   player: number,
   zone?: ZoneType,
+  alternative?: string,
   zoneOwner?: number,
   useEffect?: boolean,
   cards?: string[],

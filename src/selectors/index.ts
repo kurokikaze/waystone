@@ -119,6 +119,7 @@ export const getTimer = (state: State) => state.turnTimer;
 export const getTimerSeconds = (state: State) => state.turnSecondsLeft;
 export const getCurrentStep = (state: State) => state.step;
 export const getGameEnded = (state: State) => state.gameEnded;
+export const getAlternatives = (state: State) => state.promptParams?.alternatives || [];
 
 export const getCardsCountInOurDiscard = (state: State) => state.zones.playerDiscard.length;
 export const getCardsCountInOpponentDiscard = (state: State) => state.zones.opponentDiscard.length;

@@ -2,6 +2,7 @@ import Card from "moonlands/dist/classes/Card"
 import { ConvertedCard, InGameData } from "moonlands/dist/classes/CardInGame"
 import { LogEntryType, PromptParams, PromptTypeType } from "moonlands/dist/types"
 import { C2SAction, ClientCommand, HiddenConvertedCard } from "./clientProtocol"
+import { AlternativeType } from "moonlands/dist/types/prompt"
 
 export type EngineConnector = {
   emit: (action: C2SAction) => void
@@ -38,6 +39,7 @@ export type ExpandedPromptParams = Omit<Omit<Omit<PromptParams, "promptType">, "
   magi?: ConvertedCard,
   startingCards?: string[]
   availableCards?: string[]
+  alternatives?: AlternativeType[]
   restrictionValue?: string | string[] | number | boolean
   zoneOwner?: number
 }

@@ -28,7 +28,8 @@ import {
 	LOG_ENTRY_TARGETING,
 	LOG_ENTRY_NUMBER_CHOICE,
 	LOG_ENTRY_PLAY,
-  PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_ALTERNATIVE,
 } from 'moonlands/dist/const';
 import {byName} from 'moonlands/dist/cards';
 
@@ -47,27 +48,27 @@ import {
 	DISMISS_PACK,
 	PLUS_ENERGY_ON_CREATURE,
 	MINUS_ENERGY_ON_CREATURE,
-  StartPowerAnimationAction,
-  EndAttackAnimationAction,
-  EndPowerAnimationAction,
-  EndRelicAnimationAction,
-  StartAttackAnimationAction,
-  StartRelicAnimationAction,
-  EndSpellAnimationAction,
-  StartSpellAnimationAction,
-  StartPromptResolutionAnimationAction,
-  EndPromptResolutionAnimationAction,
-  EndAnimationAction,
-  START_CREATURE_ANIMATION,
-  EndCreatureAnimationAction,
-  END_CREATURE_ANIMATION,
-  StartCreatureAnimationAction,
-  CLEAR_ENTRY_ANIMATION,
-  ClearEntryAnimationAction,
-  MinusEnergyOnCreatureAction,
-  PlusEnergyOnCreatureAction,
-  START_MAGI_DEFEAT_ANIMATION,
-  StartMagiDefeatAnimationAction,
+	StartPowerAnimationAction,
+	EndAttackAnimationAction,
+	EndPowerAnimationAction,
+	EndRelicAnimationAction,
+	StartAttackAnimationAction,
+	StartRelicAnimationAction,
+	EndSpellAnimationAction,
+	StartSpellAnimationAction,
+	StartPromptResolutionAnimationAction,
+	EndPromptResolutionAnimationAction,
+	EndAnimationAction,
+	START_CREATURE_ANIMATION,
+	EndCreatureAnimationAction,
+	END_CREATURE_ANIMATION,
+	StartCreatureAnimationAction,
+	CLEAR_ENTRY_ANIMATION,
+	ClearEntryAnimationAction,
+	MinusEnergyOnCreatureAction,
+	PlusEnergyOnCreatureAction,
+	START_MAGI_DEFEAT_ANIMATION,
+	StartMagiDefeatAnimationAction,
 } from '../actions';
 
 import {
@@ -75,8 +76,8 @@ import {
 	MESSAGE_TYPE_RELIC,
 	MESSAGE_TYPE_SPELL,
 	MESSAGE_TYPE_PROMPT_RESOLUTION,
-  MESSAGE_TYPE_CREATURE,
-  ANIMATION_MAGI_DEFEATED,
+	MESSAGE_TYPE_CREATURE,
+	ANIMATION_MAGI_DEFEATED,
 } from '../const';
 
 import {applyEffect} from './applyEffect';
@@ -112,7 +113,7 @@ export const defaultState: State = {
 		source: 'TestSource',
 		power: 'Power Name',
 	},
-  step: null,
+	step: null,
 	log: [],
 	turnTimer: false,
 	turnSecondsLeft: null,
@@ -120,9 +121,9 @@ export const defaultState: State = {
 	winner: null,
 	packs: [],
 	energyPrompt: {
-    freeEnergy: 0,
-    cards: {},
-  },
+		freeEnergy: 0,
+		cards: {},
+	},
 	prompt: false,
 	promptPlayer: null,
 	promptType: null,
@@ -130,48 +131,41 @@ export const defaultState: State = {
 	promptParams: null,
 	promptGeneratedBy: null,
 	promptAvailableCards: [],
-  activePlayer: 0,
-  lastPositions: {},
+	activePlayer: 0,
+	lastPositions: {},
 };
 
-// type TimeNotificationAction = {
-//   type: typeof ACTION_TIME_NOTIFICATION,
-// }
-
-// type TimerTickAction = {
-//   type: typeof ACTION_TIMER_TICK,
-// }
 
 type InitialStateAction = {
-  type: typeof INITIAL_STATE,
-  state: State,
+	type: typeof INITIAL_STATE,
+	state: State,
 }
 
 type AnimationAction = StartPowerAnimationAction |
-  EndPowerAnimationAction |
-  StartAttackAnimationAction |
-  EndAttackAnimationAction |
-  StartSpellAnimationAction |
-  EndSpellAnimationAction |
-  StartRelicAnimationAction |
-  EndRelicAnimationAction |
-  StartCreatureAnimationAction |
-  EndCreatureAnimationAction |
-  StartPromptResolutionAnimationAction |
-  EndPromptResolutionAnimationAction |
-  ClearEntryAnimationAction |
-  StartMagiDefeatAnimationAction |
-  EndAnimationAction;
+	EndPowerAnimationAction |
+	StartAttackAnimationAction |
+	EndAttackAnimationAction |
+	StartSpellAnimationAction |
+	EndSpellAnimationAction |
+	StartRelicAnimationAction |
+	EndRelicAnimationAction |
+	StartCreatureAnimationAction |
+	EndCreatureAnimationAction |
+	StartPromptResolutionAnimationAction |
+	EndPromptResolutionAnimationAction |
+	ClearEntryAnimationAction |
+	StartMagiDefeatAnimationAction |
+	EndAnimationAction;
 
 type AddToPackAction = {
-  type: typeof ADD_TO_PACK,
-  leader: string,
-  hunter: string,
+	type: typeof ADD_TO_PACK,
+	leader: string,
+	hunter: string,
 }
 
 type DismissPackAction = {
-  type: typeof DISMISS_PACK,
-  leader: string,
+	type: typeof DISMISS_PACK,
+	leader: string,
 }
 
 type InternalAction = /*TimeNotificationAction | TimerTickAction |*/ InitialStateAction | AnimationAction | AddToPackAction | DismissPackAction | PlusEnergyOnCreatureAction | MinusEnergyOnCreatureAction;
@@ -180,12 +174,12 @@ type ReducerAction = ClientAction | InternalAction
 
 const reducer = (state = defaultState, action: ReducerAction): State => {
 	switch (action.type) {
-    case INITIAL_STATE: {
-      return {
-        ...state,
-        ...action.state
-      };
-    }
+		case INITIAL_STATE: {
+			return {
+			...state,
+			...action.state
+			};
+		}
 		// case ACTION_TIME_NOTIFICATION: {
 		// 	return {
 		// 		...state,
@@ -289,7 +283,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: null,
 			};
 		}
-    case START_CREATURE_ANIMATION: {
+		case START_CREATURE_ANIMATION: {
 			return {
 				...state,
 				message: {
@@ -384,18 +378,18 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					};
 					break;
 				}
-        case PROMPT_TYPE_CHOOSE_CARDS: {
-          promptParams = {
-            startingCards: action?.promptParams.startingCards,
-            availableCards: action?.promptParams.availableCards,
-          }
-          break;
-        }
+				case PROMPT_TYPE_CHOOSE_CARDS: {
+					promptParams = {
+					startingCards: action?.promptParams.startingCards,
+					availableCards: action?.promptParams.availableCards,
+					}
+					break;
+				}
 				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-          const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
-          if (realNumberOfCards === 0) {
-            return state;
-          }
+					const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
+					if (realNumberOfCards === 0) {
+						return state;
+					}
 					promptParams = {
 						zone: action.zone,
 						...(action.restrictions ? {restrictions: action.restrictions} : {}),
@@ -415,10 +409,10 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					break;
 				}
 				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-          const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
-          if (realNumberOfCards === 0) {
-            return state;
-          }
+					const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
+					if (realNumberOfCards === 0) {
+						return state;
+					}
 					promptParams = {
 						zone: action.zone,
 						...(action.restrictions ? {restrictions: action.restrictions} : {}),
@@ -443,16 +437,21 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						freeEnergy: action.amount,
 						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 					};
-          break;
+					break;
 				}
-        case PROMPT_TYPE_POWER_ON_MAGI: {
-          promptParams = {
-            magi: action?.magi,
-            // availableCards: action?.promptParams.availableCards,
-          }
-          break;
-        }
-
+				case PROMPT_TYPE_POWER_ON_MAGI: {
+					promptParams = {
+					magi: action?.magi,
+					// availableCards: action?.promptParams.availableCards,
+					}
+					break;
+				}
+				case PROMPT_TYPE_ALTERNATIVE: {
+					promptParams = {
+						alternatives: action.alternatives,
+					}
+					break;
+				}
 			}
 
 			return {
@@ -496,23 +495,23 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			var promptLogEntry: LogEntryType | null = null;
 
 			if (
-        action.target && 
-        (
-          state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
-          state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
-          state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
-          state.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
-          state.promptType === PROMPT_TYPE_SINGLE_MAGI
-        )
+				action.target && 
+				(
+					state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
+					state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
+					state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
+					state.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
+					state.promptType === PROMPT_TYPE_SINGLE_MAGI
+				)
 			) {
 				const target = findInPlay(state, action.target);
-        if (target) {
-          promptLogEntry = {
-            type: LOG_ENTRY_TARGETING,
-            card: target.card,
-            player: action.player,
-          };
-        }
+				if (target) {
+					promptLogEntry = {
+					type: LOG_ENTRY_TARGETING,
+					card: target.card,
+					player: action.player,
+					};
+				}
 			} else if (state.promptType === PROMPT_TYPE_NUMBER) {
 				promptLogEntry = {
 					type: LOG_ENTRY_NUMBER_CHOICE,
@@ -539,27 +538,27 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				zones: {
 					...state.zones,
 					inPlay: state.zones.inPlay.map(card => {
-            if (attackerIds.includes(card.id)) { 
-               return {
-                ...card,
-                data: {
-                  ...card.data,
-                  attacked: card.data.attacked + 1,
-                  hasAttacked: true,
-                },
-						  }
-            }
-            if (card.id === action.target) {
-              return {
-                ...card,
-                data: {
-                  ...card.data,
-                  wasAttacked: true,
-                },
-						  }
-            }
-            return card;
-          }),
+						if (attackerIds.includes(card.id)) { 
+							return {
+								...card,
+								data: {
+									...card.data,
+									attacked: card.data.attacked + 1,
+									hasAttacked: true,
+								},
+							}
+						}
+						if (card.id === action.target) {
+							return {
+								...card,
+								data: {
+								...card.data,
+								wasAttacked: true,
+								},
+							}
+						}
+						return card;
+					}),
 				},
 			};
 		}
@@ -590,23 +589,23 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				},
 			};
 		}
-    case CLEAR_ENTRY_ANIMATION: {
-      const { [action.id]: [], ...positions} = state.lastPositions;
-      return {
-        ...state,
-        lastPositions: positions,
-      }
-    }
-    case START_MAGI_DEFEAT_ANIMATION: {
-      return {
-        ...state,
-        animation: {
-          type: ANIMATION_MAGI_DEFEATED,
-          source: '',
-          target: action.id,
-        },
-      };
-    }
+		case CLEAR_ENTRY_ANIMATION: {
+			const { [action.id]: [], ...positions} = state.lastPositions;
+			return {
+			...state,
+			lastPositions: positions,
+			}
+		}
+		case START_MAGI_DEFEAT_ANIMATION: {
+			return {
+			...state,
+			animation: {
+				type: ANIMATION_MAGI_DEFEATED,
+				source: '',
+				target: action.id,
+			},
+			};
+		}
 		default: {
 			return state;
 		}

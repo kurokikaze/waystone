@@ -12,6 +12,7 @@ import {
 	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
   PROMPT_TYPE_PLAYER,
+  PROMPT_TYPE_ALTERNATIVE,
 } from 'moonlands/src/const.ts';
 
 import PromptChooseCards from './PromptChooseCards.jsx';
@@ -24,6 +25,7 @@ import PromptEnergyDistribution from './PromptEnergyDistribution.jsx';
 import PromptDamageDistribution from './PromptDamageDistribution.jsx';
 import PromptRearrangeCards from './PromptRearrangeCards.jsx';
 import PromptChoosePlayer from './PromptChoosePlayer';
+import PromptAlternatives from './PromptAlternatives.tsx';
 import PromptChoosePowerOnMagi from './PromptChoosePowerOnMagi.tsx';
 import {getPromptType, getPromptMessage} from '../../selectors'; 
 
@@ -57,7 +59,8 @@ function PromptOverlay({engineConnector}) {
 			{promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES && <PromptDamageDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE && <PromptRearrangeCards engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_PLAYER && <PromptChoosePlayer engineConnector={engineConnector} />}
-      {promptType === PROMPT_TYPE_POWER_ON_MAGI && <PromptChoosePowerOnMagi engineConnector={engineConnector} />}
+			{promptType === PROMPT_TYPE_POWER_ON_MAGI && <PromptChoosePowerOnMagi engineConnector={engineConnector} />}
+			{promptType === PROMPT_TYPE_ALTERNATIVE && <PromptAlternatives engineConnector={engineConnector} />}
 		</div>
 	);
 }
