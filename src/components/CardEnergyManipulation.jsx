@@ -30,13 +30,16 @@ export const withEnergyManipulation = Component => ({ id, data, ...props }) => {
 		}
 	};
 	
+	const thisIsNotTheSource = restriction !== RESTRICTION_EXCEPT_SOURCE || id !== generatedBy;
+	const card = byName(data.card.name);
+	const ableToParticipate = !card || !card.data.energyStasis;
 	return <div>
 		<Component
 			id={id}
 			data={data}
 			{...props}
 		/>
-		{(restriction !== RESTRICTION_EXCEPT_SOURCE || id !== generatedBy) && <div className="energyManipulation">
+		{(thisIsNotTheSource && ableToParticipate) && <div className="energyManipulation">
 			<SimpleButton name="-" style={{ color: currentEnergy === 0 ? '#ccc': '#000', cursor: 'pointer' }} onClick={handleMinusEnergy} disabled={currentEnergy === 0} />
 			<div className="currentEnergy">{currentEnergy}</div>
 			<SimpleButton name="+" style={{ color: currentEnergy === 0 ? '#ccc': '#000', cursor: 'pointer' }} onClick={handlePlusEnergy} disabled={freeEnergy === 0} />

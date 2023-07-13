@@ -8,14 +8,16 @@ import {
 	TYPE_RELIC,
 	TYPE_SPELL,
 	TYPE_MAGI,
-  ACTION_ATTACK,
-  REGION_ARDERIAL,
-  REGION_CALD,
-  REGION_NAROOM,
-  REGION_UNDERNEATH,
-  REGION_OROTHE,
-  REGION_BOGRATH,
-  REGION_UNIVERSAL,
+
+	ACTION_ATTACK,
+	
+	REGION_ARDERIAL,
+	REGION_CALD,
+	REGION_NAROOM,
+	REGION_UNDERNEATH,
+	REGION_OROTHE,
+	REGION_BOGRATH,
+	REGION_UNIVERSAL,
 } from 'moonlands/dist/const.js';
 import {canFirstAttackSecond, canPackHuntWith} from './helpers.js';
 import {camelCase} from '../utils';
@@ -44,7 +46,7 @@ const regionClass: Record<Region, string> = {
 	[REGION_NAROOM]: 'region-naroom',
 	[REGION_OROTHE]: 'region-orothe',
 	[REGION_UNDERNEATH]: 'region-underneath',
-  [REGION_BOGRATH]: 'region-bograth',
+	[REGION_BOGRATH]: 'region-bograth',
 	[REGION_UNIVERSAL]: 'region-universal',
 };
 
@@ -64,23 +66,23 @@ type CardProps = {
 	data: InGameData;
 	onClick: (id: string) => void;
 	draggable: boolean;
-  droppable: boolean;
+	droppable: boolean;
 	isDragging: boolean;
 	available: boolean;
-  guarded: boolean;
+	guarded: boolean;
 	useLocket: boolean;
 	modifiedData: CardData;
-  attackNumber: number,
-  isDefeated?: boolean,
+	attackNumber: number,
+	isDefeated?: boolean,
 	pack: string[];
 	target: boolean;
 	connectDragSource: () => void;
 	connectDropTarget: () => void;
-  onPackHunt: (leader: string, hunter: string) => void;
+	onPackHunt: (leader: string, hunter: string) => void;
 	isOnPrompt: boolean;
 	className: string;
 	attacker: boolean;
-  engineConnector: EngineConnector;
+	engineConnector: EngineConnector;
 }
 
 function Card({
@@ -136,19 +138,19 @@ function Card({
 
 
 	const ref = useRef(null);
-  const dispatch = useDispatch();
+	const dispatch = useDispatch();
 
-  const prevPos: [number, number] | undefined = useSelector((state: State) => state.lastPositions[id]);
-  useLayoutEffect(() => {
-    // Appearance
-    if (ref.current && prevPos instanceof Array) {
-      dispatch(clearEntryAnimation(id));
-      const tl = gsap.timeline({});
-      const myBox = (ref.current as HTMLElement)?.getBoundingClientRect();
-      tl.from(ref.current, {x: prevPos[0] - myBox.left, y: prevPos[1] - myBox.top, duration: 0.2 });
-      return () => {tl.clear()};
-    }
-  }, [id]);
+	const prevPos: [number, number] | undefined = useSelector((state: State) => state.lastPositions[id]);
+	useLayoutEffect(() => {
+		// Appearance
+		if (ref.current && prevPos instanceof Array) {
+			dispatch(clearEntryAnimation(id));
+			const tl = gsap.timeline({});
+			const myBox = (ref.current as HTMLElement)?.getBoundingClientRect();
+			tl.from(ref.current, {x: prevPos[0] - myBox.left, y: prevPos[1] - myBox.top, duration: 0.2 });
+			return () => {tl.clear()};
+		}
+	}, [id]);
 
   const [{isDragging}, drag] = useDrag(() => ({
 		// "type" is required. It is used by the "accept" specification of drop targets.
@@ -206,7 +208,7 @@ function Card({
     regionStyle,
 		card ? typeClass[card.type as CardType] : null,
 		{
-      'magiDefeated': isDefeated,
+			'magiDefeated': isDefeated,
 			'dragging': isDragging,
 			'available': available,
 			'target': target,
@@ -220,8 +222,8 @@ function Card({
 		<div
 			className={classes}
 			data-id={id}
-      data-prev-x={prevPos ? prevPos[0] : null}
-      data-prev-y={prevPos ? prevPos[1] : null}
+			data-prev-x={prevPos ? prevPos[0] : null}
+			data-prev-y={prevPos ? prevPos[1] : null}
 			onClick={() => onClick && onClick(id)}
 			ref={ref}
 		>

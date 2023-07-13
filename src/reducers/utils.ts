@@ -13,8 +13,9 @@ import {
   EXPIRATION_OPPONENT_TURNS,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types';
-import { HiddenConvertedCard } from '../clientProtocol';
+import { ClientEffectAddEnergyToCreature, ClientEffectRemoveEnergyFromCreature, HiddenConvertedCard } from '../clientProtocol';
 import { State, ContinuousEffectType } from '../types';
+import { byName } from 'moonlands/dist/cards';
 
 const clientZoneNames: Record<ZoneType, string> = {
 	[ZONE_TYPE_DECK]: 'Deck',
@@ -124,4 +125,24 @@ export const cleanupContinuousEffects = (effects: ContinuousEffectType[], oppone
   }
 
   return resultingEffects;
+}
+
+export const affectRemoveEnergy = (state: State, card: ConvertedCard, action: ClientEffectRemoveEnergyFromCreature): number => {
+  const gameCard = byName(card.card);
+  const source = action.source ? findInPlay(state, action.source.id) : null;
+  if (gameCard && gameCard.data.energyStasis && source && source.data.controller === card.data.controller) {
+    // For the Colossus
+    return card.data.energy;
+  }
+  return card.data.energy - action.amount;
+}
+
+export const affectAddEnergy = (state: State, card: ConvertedCard, action: ClientEffectAddEnergyToCreature): number => {
+  const gameCard = byName(card.card) 
+  const source = action.source ? findInPlay(state, action.source.id) : null;
+  if (gameCard && gameCard.data.energyStasis && source && source.data.controller === card.data.controller) {
+    // For the Colossus
+    return card.data.energy;
+  }
+  return card.data.energy + action.amount;
 }

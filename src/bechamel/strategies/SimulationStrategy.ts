@@ -502,21 +502,18 @@ export class SimulationStrategy implements Strategy {
             const opponentMagi = this.gameState.getOpponentMagi()
             if (opponentMagi) {
               const TEMPORARY_OPPONENT_ID = this.playerId + 1
-              const myMagi = this.gameState.getMyMagi()
               const myCreatures = this.gameState.getMyCreaturesInPlay()
 
               if (myCreatures.length == 0) {
                 return this.pass()
               }
-              const enemyCreatures = this.gameState.getEnemyCreaturesInPlay()
 
               const outerSim = createState(
-                // myCreatures, enemyCreatures, myMagi, opponentMagi,
                 this.gameState, 
                 this.playerId || 2,
                 1,
               )
-              // outerSim.state.continuousEffects = this.gameState.getContinuousEffects();
+
               const hash = this.hashBuilder.makeHash(outerSim)
               const simulationQueue = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
 

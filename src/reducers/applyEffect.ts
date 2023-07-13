@@ -40,7 +40,7 @@ import {
 import {byName} from 'moonlands/dist/cards';
 
 // @ts-ignore
-import {cleanupContinuousEffects, findInPlay, getZoneName, tickDownContinuousEffects} from './utils.js';
+import {affectAddEnergy, affectRemoveEnergy, cleanupContinuousEffects, findInPlay, getZoneName, tickDownContinuousEffects} from './utils.js';
 import { ClientEffectAction, HiddenConvertedCard } from '../clientProtocol.js';
 import { State } from '../types.js';
 import { LogEntryType } from 'moonlands/dist/types/log.js';
@@ -219,9 +219,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 			const idsToFind = (action.target instanceof Array) ? action.target.map(({id}) => id) : [action.target.id];
 
 			const inPlay = [...(state.zones.inPlay || [])]
-				.map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: card.data.energy - action.amount}} : card);
-			// const opponentActiveMagi = [...(state.zones.opponentActiveMagi || [])]
-			// 	.map(card => card.id == action.target.id ? {...card, data: {...card.data, energy: card.data.energy - action.amount}} : card);
+				.map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: affectRemoveEnergy(state, card, action)}} : card);
 
 			return {
 				...state,
@@ -416,7 +414,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				.filter(Boolean)
 				.map(card => ({type: LOG_ENTRY_CREATURE_ENERGY_GAIN, card: card?.card || 'unknown card', amount: action.amount}));
 
-			const inPlay = [...(state.zones.inPlay || [])].map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: card.data.energy + action.amount}} : card);
+			const inPlay = [...(state.zones.inPlay || [])].map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: affectAddEnergy(state, card, action)}} : card);
 
 			return {
 				...state,

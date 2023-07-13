@@ -49,7 +49,7 @@ const getPacks = state => state.packs;
 
 function ZonePlayerInPlay({
 	name,
-  engineConnector,
+	engineConnector,
 }) {
 	const packs = useSelector(getPacks);
 	const rawContent = useSelector(getCardDetails);
@@ -66,12 +66,12 @@ function ZonePlayerInPlay({
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
 
 	const SelectedCard = (
-    isOnPrompt && (
-      promptType === PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES ||
-      promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES ||
-      promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
-    )
-  )
+		isOnPrompt && (
+			promptType === PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES ||
+			promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES ||
+			promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
+		)
+	)
 		? CardWithEnergyManipulation
 		: CardWithAbilities;
 
@@ -125,7 +125,7 @@ function ZonePlayerInPlay({
 						actionsAvailable={prsAvailable}
 						onAbilityUse={abilityUseHandler}
 						onPackHunt={onAddToPack}
-            engineConnector={engineConnector} // Just make onAttack
+						engineConnector={engineConnector} // Just make onAttack
 						className={cn({'attackTarget': animation && animation.target === cardData.id})}
 					/>
 					{packs.some(({leader}) => leader === cardData.id) ? 

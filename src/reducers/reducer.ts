@@ -427,9 +427,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						freeEnergy: 0,
 						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
 					};
-					promptParams = promptParams || {
-						// restriction: false,
-					};
+					promptParams = promptParams || {};
 					break;
 				}
 				case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
@@ -441,8 +439,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				}
 				case PROMPT_TYPE_POWER_ON_MAGI: {
 					promptParams = {
-					magi: action?.magi,
-					// availableCards: action?.promptParams.availableCards,
+						magi: action?.magi,
 					}
 					break;
 				}
