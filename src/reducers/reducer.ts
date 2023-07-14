@@ -451,7 +451,8 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					break;
 				}
 				case PROMPT_TYPE_PAYMENT_SOURCE: {
-					console.dir(action);
+					// A bit of a hack
+					action.message = `Select who should pay ${action.amount} energy for a creature`;
 					promptParams = {
 						paymentType: action.paymentType,
 						paymentAmount: action.amount,

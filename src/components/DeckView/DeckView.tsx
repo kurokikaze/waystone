@@ -16,6 +16,7 @@ import Creature from '../icons/Creature';
 import Relic from '../icons/Relic';
 import Spell from '../icons/Spell';
 import { REGION_ARDERIAL } from 'moonlands/dist/const';
+import { MAX_COPIES_IN_DECK } from '../../const';
 
 type MagiViewProps = {
 	name: string
@@ -23,8 +24,6 @@ type MagiViewProps = {
 	chosenMagi: boolean
 	onMagiEditor: (place: number|null) => void
 }
-
-const MAX_COPIES_IN_DECK = 10;
 
 type Props = {
 	ourCards: string[]

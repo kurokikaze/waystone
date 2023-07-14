@@ -20,8 +20,7 @@ import './style.css';
 import Card from 'moonlands/dist/classes/Card';
 import { Region } from 'moonlands/dist/types';
 import { Tooltip } from 'antd';
-
-const MAX_COPIES_IN_DECK = 10;
+import { MAX_COPIES_IN_DECK } from '../../const';
 
 export type DeckType = {
   cards: string[]

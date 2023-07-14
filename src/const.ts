@@ -5,6 +5,8 @@ export const STEP_CREATURES = 3;
 export const STEP_PRS_SECOND = 4;
 export const STEP_DRAW = 5;
 
+export const MAX_COPIES_IN_DECK = 3;
+
 export const MESSAGE_TYPE_POWER = 'messages/power';
 export const MESSAGE_TYPE_RELIC = 'messages/relic';
 export const MESSAGE_TYPE_SPELL = 'messages/spell';
