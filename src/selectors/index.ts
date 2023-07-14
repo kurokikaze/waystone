@@ -5,6 +5,7 @@ import {
 	TYPE_RELIC,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_SINGLE_MAGI,
+	TYPE_CREATURE,
 } from 'moonlands/dist/const';
 
 import {
@@ -13,6 +14,7 @@ import {
 } from '../const';
 import { State } from '../types';
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
+import { byName } from 'moonlands/dist/cards';
 
 const relicsHash: Record<string, boolean> = {};
 
@@ -33,6 +35,19 @@ export function isPromptActive(state: State) {
 export function getMagiEnergy(state: State) {
   const activeMagi = zoneContent('playerActiveMagi', state)
 	return activeMagi.length ? activeMagi[0].data?.energy : 0;
+}
+
+export function getMaxPaymentSourceEnergy(state: State) {
+	const activeMagi = zoneContent('playerActiveMagi', state)
+	const paymentCardEnergies = state.zones.inPlay.filter(card => {
+		
+		if (card.data.controller !== 1) return false;
+		const cardData = byName(card.card);
+
+		return cardData && cardData.data.paymentSource?.includes(TYPE_CREATURE);
+	}).map(card => card.data.energy);
+	const fullArray: number[] = activeMagi.length && activeMagi[0].data?.energy ? [activeMagi[0].data?.energy, ...paymentCardEnergies] : paymentCardEnergies;
+	return Math.max(...fullArray) || 0;
 }
 
 export function getMagiCard(state: State) {

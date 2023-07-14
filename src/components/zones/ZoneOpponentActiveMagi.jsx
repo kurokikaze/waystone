@@ -52,14 +52,14 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 					id={cardData.id}
 					card={cardData.card}
 					modifiedData={cardData.modifiedData}
-          isDefeated={defeatedId === cardData.id}
+					isDefeated={defeatedId === cardData.id}
 					data={cardData.data}
 					onClick={cardClickHandler}
 					isOnPrompt={isOnMagiPrompt || onMWCPrompt}
 					droppable={active}
 					target={active}
 					guarded={guarded}
-          engineConnector={engineConnector}
+					engineConnector={engineConnector}
 				/>,
 			) : null}
 		</div>

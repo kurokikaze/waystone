@@ -30,6 +30,7 @@ import {
 	LOG_ENTRY_PLAY,
 	PROMPT_TYPE_CHOOSE_CARDS,
 	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_PAYMENT_SOURCE,
 } from 'moonlands/dist/const';
 import {byName} from 'moonlands/dist/cards';
 
@@ -448,6 +449,13 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						alternatives: action.alternatives,
 					}
 					break;
+				}
+				case PROMPT_TYPE_PAYMENT_SOURCE: {
+					console.dir(action);
+					promptParams = {
+						paymentType: action.paymentType,
+						paymentAmount: action.amount,
+					}
 				}
 			}
 

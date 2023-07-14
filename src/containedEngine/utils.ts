@@ -77,6 +77,7 @@ import {
 	PROMPT_TYPE_PLAYER,
 	EFFECT_TYPE_PLAY_SPELL,
 	PROMPT_TYPE_POWER_ON_MAGI,
+	PROMPT_TYPE_PAYMENT_SOURCE,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types/common.js';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
@@ -385,6 +386,16 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						generatedBy: action.generatedBy,
 						player: parseInt(game.getMetaValue(action.player, action.generatedBy), 10),
 					};
+				}
+				case PROMPT_TYPE_PAYMENT_SOURCE: {
+					return {
+						type: action.type,
+						promptType: action.promptType,
+						paymentType: action.paymentType,
+						amount: action.amount,
+						generatedBy: action.generatedBy,
+						player: action.player,
+					}
 				}
 				default: {
 					// @ts-ignore
@@ -894,7 +905,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 							Object.entries(ability).map(([k, v]) => [k, game.getMetaValue(v, action.generatedBy)]),
 						),
 					)
-					console.dir(staticAbilities);
+					// console.dir(staticAbilities);
 					return {
 						type: action.type,
 						effectType: action.effectType,
@@ -1177,34 +1188,42 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
 				}
 				case PROMPT_TYPE_CHOOSE_CARDS: {
 					// Will do for now
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
 				}
 				case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
 					// Will do for now
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
 				}
 				case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 					// Will do for now
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
 				}
 				case PROMPT_TYPE_NUMBER: {
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
 				}
 				case PROMPT_TYPE_MAY_ABILITY: {
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
 				}
 				case PROMPT_TYPE_PLAYER: {
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
 				}
 				case PROMPT_TYPE_ALTERNATIVE: {
-					// @ts-ignore
-					return action as ClientAction;
+					return action as AnyEffectType;
+				}
+				case PROMPT_TYPE_PAYMENT_SOURCE: {
+					if (!action.target) return action as AnyEffectType;
+
+					let target = game.getZone(ZONE_TYPE_IN_PLAY, null).byId(action.target);
+					if (!target) {
+						target = game.getZone(ZONE_TYPE_ACTIVE_MAGI, game.players[0]).byId(action.target);
+					}
+					if (!target) {
+						target = game.getZone(ZONE_TYPE_ACTIVE_MAGI, game.players[1]).byId(action.target);
+					}
+					return {
+						...action,
+						target, 
+					} as AnyEffectType;
 				}
 			}
 			// change target string to CardInGame
@@ -1235,7 +1254,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
 				if (!power) {
 					return null
 				}
-				
+
 				/*
 				type PowerActionType = EnrichedAction & {
 						type: typeof ACTION_POWER;
@@ -1244,7 +1263,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
 						player: number;
 						generatedBy?: string;
 				}
- */
+				*/
 				return {
 					type: action.type,
 					power,

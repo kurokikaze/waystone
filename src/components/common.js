@@ -13,6 +13,7 @@ import {
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+	PROMPT_TYPE_PAYMENT_SOURCE,
 
 	RESTRICTION_TYPE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
@@ -22,7 +23,7 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_ENERGY_EQUALS,
-  RESTRICTION_CREATURE_WAS_ATTACKED,
+	RESTRICTION_CREATURE_WAS_ATTACKED,
 
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_OWN_MAGI,
@@ -222,6 +223,7 @@ export const FILTERED_CREATURE_PROMPTS = [
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+	PROMPT_TYPE_PAYMENT_SOURCE,
 ];
 
 export const UNFILTERED_RELIC_PROMPTS = [
@@ -275,6 +277,14 @@ export const getPromptFilter = (promptType, promptParams) => {
 			} else {
 				return () => true;
 			}
+		case PROMPT_TYPE_PAYMENT_SOURCE: {
+			return card => {
+				const canPayAtAll = card.card.data?.paymentSource && card.card.data?.paymentSource.includes(promptParams.paymentType);
+				const haveEnoughEnergy = card.data.energy >= promptParams.paymentAmount;
+
+				return canPayAtAll && haveEnoughEnergy;
+			}
+		}
 		default:
 			return () => true;
 	}

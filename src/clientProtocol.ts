@@ -1,3 +1,4 @@
+import { TYPE_CREATURE } from "@moonlands_old/dist"
 import { ConvertedCard } from "moonlands/dist/classes/CardInGame"
 import {
   ACTION_ATTACK,
@@ -45,6 +46,9 @@ import {
   EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
   PROMPT_TYPE_POWER_ON_MAGI,
   PROMPT_TYPE_ALTERNATIVE,
+  PROMPT_TYPE_PAYMENT_SOURCE,
+  TYPE_RELIC,
+  TYPE_SPELL,
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -150,6 +154,12 @@ export type ClientEnterPromptAlternatives = ClientEnterPromptInterface & {
   generatedBy: string | undefined // Except we cannot have prompts from undefined... probably
 }
 
+export type ClientEnterPromptPaymentSource = ClientEnterPromptInterface & {
+  promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE,
+  paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC;
+  amount: number;
+}
+
 export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptChooseUpToNCardsFromZone |
   ClientEnterPromptNumber |
@@ -161,6 +171,7 @@ export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptRearrangeEnergyOnCreatures |
   ClientEnterPromptChooseCards |
   ClientEnterPromptAlternatives |
+  ClientEnterPromptPaymentSource |
   ClientEnterPromptPowerOnMagi;
 
 export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |

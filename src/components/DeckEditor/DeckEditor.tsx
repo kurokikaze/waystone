@@ -21,6 +21,8 @@ import Card from 'moonlands/dist/classes/Card';
 import { Region } from 'moonlands/dist/types';
 import { Tooltip } from 'antd';
 
+const MAX_COPIES_IN_DECK = 10;
+
 export type DeckType = {
   cards: string[]
   name: string
@@ -119,7 +121,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 	);
 
 	const canAdd = useCallback((card: string) => {
-		return deck.cards.filter((c: string): boolean => c === card).length < 3 && deck.cards.length < 43;
+		return deck.cards.filter((c: string): boolean => c === card).length < MAX_COPIES_IN_DECK && deck.cards.length < 43;
 	}, [deck]);
 
 	const canSelectMagi = useCallback((card: string) => {

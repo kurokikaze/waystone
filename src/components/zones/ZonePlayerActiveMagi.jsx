@@ -6,6 +6,7 @@ import {
 	ACTION_RESOLVE_PROMPT,
 	ACTION_POWER,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+	PROMPT_TYPE_PAYMENT_SOURCE,
 	TYPE_CREATURE,
 } from 'moonlands/dist/const';
 import {byName} from 'moonlands/dist/cards';
@@ -13,6 +14,7 @@ import Card from '../Card.tsx';
 import {isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy} from '../../selectors';
 import {withAbilities} from '../CardAbilities.jsx';
 import {useZoneContent, useCardData} from '../common';
+import {getMagiEnergy} from '../../selectors';
 import {ANIMATION_MAGI_DEFEATED} from '../../const';
 
 const CardWithAbilities = withAbilities(Card);
@@ -20,8 +22,12 @@ const CardWithAbilities = withAbilities(Card);
 const playerHasCreatures = state => state.zones.inPlay.some(card => byName(card.card).type === TYPE_CREATURE && card.data.controller === 1);
 
 const isOnFilteredMagiPrompt = (state) => {
-	const isOnMWCPrompt = state.prompt && state.promptType === PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
-	return isOnMWCPrompt && !playerHasCreatures(state);
+	if (!state.prompt) return false;
+	const isOnMWCPrompt = state.promptType === PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
+	if (isOnMWCPrompt) return !playerHasCreatures(state);
+	const isOnPaymentPrompt = state.promptType === PROMPT_TYPE_PAYMENT_SOURCE;
+	if (isOnPaymentPrompt) return getMagiEnergy(state) >= state.promptParams.paymentAmount;
+	return false;
 };
 
 function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
@@ -29,11 +35,11 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
 	const content = useCardData(rawContent);
 	const active = useSelector(isPRSAvailable);
 	const isOnMagiPrompt = useSelector(getIsOnMagiPrompt);
-	const isOnMWCPrompt = useSelector(isOnFilteredMagiPrompt);
+	const isOnFilteredPrompt = useSelector(isOnFilteredMagiPrompt);
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
 	const animation = useSelector(getAnimation);
-  const defeatedId = animation && animation.type === ANIMATION_MAGI_DEFEATED ? animation.target : null;
-	const cardClickHandler = (isOnMagiPrompt || isOnMWCPrompt) ? cardId => {
+	const defeatedId = animation && animation.type === ANIMATION_MAGI_DEFEATED ? animation.target : null;
+	const cardClickHandler = (isOnMagiPrompt || isOnFilteredPrompt) ? cardId => {
 		engineConnector.emit({
 			type: ACTION_RESOLVE_PROMPT,
 			target: cardId,
@@ -56,9 +62,9 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
 					card={cardData.card}
 					modifiedData={cardData.modifiedData}
 					data={cardData.data}
-          isDefeated={cardData.id === defeatedId}
+					isDefeated={cardData.id === defeatedId}
 					onClick={cardClickHandler}
-					isOnPrompt={isOnMagiPrompt || isOnMWCPrompt}
+					isOnPrompt={isOnMagiPrompt || isOnFilteredPrompt}
 					target={active && cardData.card.data.powers && cardData.card.data.powers.length > cardData.data.actionsUsed.length}
 					onAbilityUse={abilityUseHandler}
 					actionsAvailable={active}

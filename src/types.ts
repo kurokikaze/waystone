@@ -3,6 +3,7 @@ import { ConvertedCard, InGameData } from "moonlands/dist/classes/CardInGame"
 import { LogEntryType, PromptParams, PromptTypeType } from "moonlands/dist/types"
 import { C2SAction, ClientCommand, HiddenConvertedCard } from "./clientProtocol"
 import { AlternativeType } from "moonlands/dist/types/prompt"
+import { TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from "moonlands"
 
 export type EngineConnector = {
   emit: (action: C2SAction) => void
@@ -40,6 +41,8 @@ export type ExpandedPromptParams = Omit<Omit<Omit<PromptParams, "promptType">, "
   startingCards?: string[]
   availableCards?: string[]
   alternatives?: AlternativeType[]
+  paymentType?: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC;
+  paymentAmount?: number;
   restrictionValue?: string | string[] | number | boolean
   zoneOwner?: number
 }

@@ -459,7 +459,7 @@ export class ActionExtractor {
         return simulationQueue
       }
       // PROMPT_TYPE_POWER_ON_MAGI is not in PromptTypeType yet
-      /* case PROMPT_TYPE_POWER_ON_MAGI: {
+      case PROMPT_TYPE_POWER_ON_MAGI: {
         const myMagi: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
 
         const simulationQueue: SimulationEntity[] = []
@@ -484,7 +484,7 @@ export class ActionExtractor {
         }
 
         return simulationQueue
-      } */
+      }
       // Just so the bot won't stop if it encounters this prompt
       case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
         const simulationQueue: SimulationEntity[] = []

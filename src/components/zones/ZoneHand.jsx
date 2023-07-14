@@ -1,14 +1,14 @@
 import {useSelector} from 'react-redux';
 import {byName} from 'moonlands/dist/cards';
 import {
-  REGION_UNIVERSAL,
+	REGION_UNIVERSAL,
 	TYPE_CREATURE,
 	TYPE_RELIC,
 	TYPE_SPELL,
 } from 'moonlands/src/const.ts';
 import {cards} from 'moonlands/src/cards.ts';
 import Card from '../Card.tsx';
-import {getCurrentStep, isOurTurn, getActivePlayerMagi, getMagiEnergy} from '../../selectors';
+import {getCurrentStep, isOurTurn, getActivePlayerMagi, getMagiEnergy, getMaxPaymentSourceEnergy} from '../../selectors';
 import {
 	STEP_CREATURES,
 	STEP_PRS_FIRST,
@@ -18,19 +18,20 @@ import {useCardData, useZoneContent} from '../common';
 
 import {withView} from '../CardView.jsx';
 
-const canCastFull = (card, magi, magiEnergy, currentStep, relics) => {
-  const magiCard = byName(magi.card)
-  const regionTax = (card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) ? 0 : 1;
-  if (card.card.cost + regionTax > magiEnergy) {
-    return false;
-  }
-  if (card.card.type == TYPE_SPELL) return (currentStep === STEP_PRS_FIRST || currentStep === STEP_PRS_SECOND);
-  if (card.card.type == TYPE_RELIC) return (
-    (currentStep === STEP_PRS_FIRST || currentStep === STEP_PRS_SECOND) &&
-    (card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) &&
-    !relics.includes(card.card.name)
-    );
-  if (card.card.type === TYPE_CREATURE) return currentStep == STEP_CREATURES;
+const canCastFull = (card, magi, magiEnergy, maxCreaturePaymentEnergy, currentStep, relics) => {
+	const magiCard = byName(magi.card)
+	const paymentSource = card.card.type == TYPE_CREATURE ? maxCreaturePaymentEnergy : magiEnergy;
+	const regionTax = (card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) ? 0 : 1;
+	if (card.card.cost + regionTax > paymentSource) {
+		return false;
+	}
+	if (card.card.type == TYPE_SPELL) return (currentStep === STEP_PRS_FIRST || currentStep === STEP_PRS_SECOND);
+	if (card.card.type == TYPE_RELIC) return (
+		(currentStep === STEP_PRS_FIRST || currentStep === STEP_PRS_SECOND) &&
+		(card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) &&
+		!relics.includes(card.card.name)
+	);
+	if (card.card.type === TYPE_CREATURE) return currentStep == STEP_CREATURES;
 }
 
 const relicsHash = cards
@@ -49,10 +50,11 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 	const ourTurn = useSelector(isOurTurn);
 	const relics = useSelector(getRelics);
 	const magiEnergy = useSelector(getMagiEnergy);
+	const maxCreaturePaymentEnergy = useSelector(getMaxPaymentSourceEnergy);
 	const magi = useSelector(getActivePlayerMagi);
 
 	return (
-		<div className={`zone ${ourTurn ? 'zone-active' : ''}`} data-zone-name={name}>
+		<div className={`zone ${ourTurn ? 'zone-active' : ''}`} data-zone-name={name} data-max-payment={maxCreaturePaymentEnergy}>
 			{content.length ? content.map(cardData =>
 				<CardWithView
 					key={cardData.id}
@@ -60,7 +62,7 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 					card={cardData.card}
 					data={cardData.data}
 					onClick={onCardClick}
-					available={ourTurn && cardData.card && magi && canCastFull(cardData, magi, magiEnergy, currentStep, relics)}
+					available={ourTurn && cardData.card && magi && canCastFull(cardData, magi, magiEnergy, maxCreaturePaymentEnergy, currentStep, relics)}
 				/>,
 			) : null}
 		</div>

@@ -24,6 +24,8 @@ type MagiViewProps = {
 	onMagiEditor: (place: number|null) => void
 }
 
+const MAX_COPIES_IN_DECK = 10;
+
 type Props = {
 	ourCards: string[]
 	addToDeck: (card: string) => void
@@ -117,8 +119,8 @@ export default function DeckView({ourCards, addToDeck, onClearRegions, removeFro
                 <div className='cardActions'>
                   <div className='cardCount'>[{deckCards.filter(c => c === card).length}]</div>
                   <div className='cardRemove' onClick={() => removeFromDeck(card)}><Remove size={20} color={'#990033'} /></div>
-                  {deckCards.filter(c => c === card).length < 3 && ourCards.length < 43 && <div className='cardAdd active' onClick={() => addToDeck(card)}><Add size={20} fillColor='#3f7d20' /></div>}
-                  {(deckCards.filter(c => c === card).length === 3 || ourCards.length >= 43) && <div className='cardAdd'><Add size={20} fillColor='grey' /></div>}
+                  {deckCards.filter(c => c === card).length < MAX_COPIES_IN_DECK && ourCards.length < 43 && <div className='cardAdd active' onClick={() => addToDeck(card)}><Add size={20} fillColor='#3f7d20' /></div>}
+                  {(deckCards.filter(c => c === card).length === MAX_COPIES_IN_DECK || ourCards.length >= 43) && <div className='cardAdd'><Add size={20} fillColor='grey' /></div>}
                 </div>
               </li>)
             })
