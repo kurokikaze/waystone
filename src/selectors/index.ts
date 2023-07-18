@@ -9,6 +9,7 @@ import {
 } from 'moonlands/dist/const';
 
 import {
+	ANIMATION_CREATURE_DISCARDED,
 	STEP_PRS_FIRST,
 	STEP_PRS_SECOND,
 } from '../const';
@@ -136,7 +137,7 @@ export const getCurrentStep = (state: State) => state.step;
 export const getGameEnded = (state: State) => state.gameEnded;
 export const getAlternatives = (state: State) => state.promptParams?.alternatives || [];
 export const getMyRelicNames = (state: State) => state.zones.inPlay.filter(cardData => cardData.data.controller === 1 && relicsHash[cardData.card]).map(cardData => cardData.card);
-
+export const getDefeatedCreatureId = (state: State) => state.animation && state.animation.type === ANIMATION_CREATURE_DISCARDED ? state.animation.target : null
 export const getCardsCountInOurDiscard = (state: State) => state.zones.playerDiscard.length;
 export const getCardsCountInOpponentDiscard = (state: State) => state.zones.opponentDiscard.length;
 export const getCardsCountInOurDeck = (state: State) => state.zones.playerDeck.length;

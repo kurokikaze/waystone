@@ -9,6 +9,7 @@ import {
 import Card from '../Card.tsx';
 import {withAbilities} from '../CardAbilities.jsx';
 import {
+	ANIMATION_CREATURE_DISCARDED,
 	STEP_ATTACK,
 } from '../../const';
 import {
@@ -34,7 +35,7 @@ const CardWithEnergyManipulation = withEnergyManipulation(Card);
 
 function ZoneOpponentInPlay({
 	name,
-  engineConnector,
+	engineConnector,
 }) {
 	const rawContent = useSelector(getCardDetails);
 	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller !== 1);
@@ -50,6 +51,7 @@ function ZoneOpponentInPlay({
 	const isOnUnfilteredPrompt = isOnCreaturePrompt && UNFILTERED_CREATURE_PROMPTS.includes(promptType);
 	const isOnFilteredPrompt = isOnCreaturePrompt && FILTERED_CREATURE_PROMPTS.includes(promptType);
 	const animation = useSelector(getAnimation);
+	const defeatedId = (animation && animation.type === ANIMATION_CREATURE_DISCARDED) ? animation.target : null;
 
 	const SelectedCard = (promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES)
 		? CardWithEnergyManipulation
@@ -71,6 +73,7 @@ function ZoneOpponentInPlay({
 						id={cardData.id}
 						card={cardData.card}
 						data={cardData.data}
+						isDefeated={defeatedId === cardData.id}
 						modifiedData={cardData.card.data}
 						onClick={cardClickHandler}
 						isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}

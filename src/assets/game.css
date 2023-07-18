@@ -77,6 +77,9 @@ body {
     opacity: 0;
 }
 
+.fadedFully {
+    display: none;
+}
 
 .cardHolder .energyGain {
     position: absolute;
@@ -168,6 +171,12 @@ body {
 
 .zone-magi .cardHolder {
     position: relative;
+    width: 94px;
+    height: 94px;
+    border-radius: 47px;
+    /* overflow: hidden; */
+}
+.zone-magi .cutAround {
     width: 94px;
     height: 94px;
     border-radius: 47px;
@@ -523,6 +532,10 @@ body {
   -o-filter: grayscale(100%);
   opacity: 0;
   transition: all 1s ease-out;
+}
+
+.zone-creatures .magiDefeated {
+    transition: all .6s ease-out;
 }
 
 @media (max-width: 900px) {

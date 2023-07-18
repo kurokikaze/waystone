@@ -14,6 +14,7 @@ export const MESSAGE_TYPE_CREATURE = 'messages/creature';
 export const MESSAGE_TYPE_PROMPT_RESOLUTION = 'messages/prompt_resolution';
 
 export const ANIMATION_MAGI_DEFEATED = 'magiDefeated';
+export const ANIMATION_CREATURE_DISCARDED = 'creatureDiscarded';
 export const ACTION_TIMER_TICK = 'actions/timer_tick';
 export const CLIENT_ACTION = 'clientAction';
 

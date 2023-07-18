@@ -72,6 +72,8 @@ import {
 	StartMagiDefeatAnimationAction,
 	MARK_ENERGY_ANIMATION_AS_DONE,
 	MarkEnergyAnimationAction,
+	START_CREATURE_DISCARD_ANIMATION,
+	StartCreatureDiscardAnimationAction,
 } from '../actions';
 
 import {
@@ -81,6 +83,7 @@ import {
 	MESSAGE_TYPE_PROMPT_RESOLUTION,
 	MESSAGE_TYPE_CREATURE,
 	ANIMATION_MAGI_DEFEATED,
+	ANIMATION_CREATURE_DISCARDED,
 } from '../const';
 
 import {applyEffect} from './applyEffect';
@@ -161,6 +164,7 @@ type AnimationAction = StartPowerAnimationAction |
 	EndPromptResolutionAnimationAction |
 	ClearEntryAnimationAction |
 	StartMagiDefeatAnimationAction |
+	StartCreatureDiscardAnimationAction |
 	MarkEnergyAnimationAction |
 	EndAnimationAction;
 
@@ -620,6 +624,16 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			...state,
 				animation: {
 					type: ANIMATION_MAGI_DEFEATED,
+					source: '',
+					target: action.id,
+				},
+			};
+		}
+		case START_CREATURE_DISCARD_ANIMATION: {
+			return {
+			...state,
+				animation: {
+					type: ANIMATION_CREATURE_DISCARDED,
 					source: '',
 					target: action.id,
 				},

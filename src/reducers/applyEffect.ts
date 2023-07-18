@@ -475,11 +475,14 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 		}
 		case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 			const magiFound = findInPlay(state, action.target.id);
-			const newLogEntry: LogEntryType | null = magiFound ? {
+			if (!magiFound) {
+				return state;
+			}
+			const newLogEntry: LogEntryType | null = {
 				type: LOG_ENTRY_MAGI_ENERGY_GAIN,
 				card: magiFound.card,
 				amount: action.amount,
-			} : null;
+			};
 			const playerActiveMagi = [...(state.zones.playerActiveMagi || [])]
 				.map(card => card.id == action.target.id ? {...card, data: {...card.data, energy: card.data.energy + action.amount}} : card);
 			const opponentActiveMagi = [...(state.zones.opponentActiveMagi || [])]
@@ -492,7 +495,12 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					playerActiveMagi,
 					opponentActiveMagi,
 				},
-				log: newLogEntry ? [...state.log, newLogEntry] : state.log,
+				log: [...state.log, newLogEntry],
+				energyLosses: [
+					...state.energyLosses,
+					{value: action.amount, card: action.target.id, ttl: 2, id: state.energyLossId},
+				],
+				energyLossId: state.energyLossId + 1,
 			};
 		}
 		case EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
