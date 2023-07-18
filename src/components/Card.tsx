@@ -21,7 +21,7 @@ import {
 } from 'moonlands/dist/const.js';
 import {canFirstAttackSecond, canPackHuntWith} from './helpers.js';
 import {camelCase} from '../utils';
-import { DraggedItem, EngineConnector, State } from '../types.js';
+import { DraggedItem, EnergyLossRecord, EngineConnector, State } from '../types.js';
 import { CardData, CardType, Region } from 'moonlands/dist/types/index.js';
 import MoonlandsCard from 'moonlands/dist/classes/Card';
 import { InGameData } from 'moonlands/dist/classes/CardInGame';
@@ -97,16 +97,16 @@ function Card({
 	modifiedData,
 	pack,
 	isOnPrompt,
-  isDefeated,
+	isDefeated,
 	className,
 	attacker,
-  attackNumber,
+	attackNumber,
 	target,
 	onPackHunt,
-  engineConnector,
+	engineConnector,
 	useLocket = false,
 }: CardProps) {
-  useLayoutEffect(() => {
+	useLayoutEffect(() => {
 		const attacker = document.querySelector('.attackSource');
 		const target = document.querySelector('.attackTarget');
 		if (attacker && target) {
@@ -136,6 +136,18 @@ function Card({
 		}
 	}, [attacker, attackNumber]);
 
+	const energyChange = useSelector((state: State) => state.energyLosses.filter(loss => loss.card === id));
+	const energyEffectsShown = useSelector((state: State) => state.energyAnimationsShown);
+
+	const damage: EnergyLossRecord[] = []
+	const energyGain: EnergyLossRecord[] = []
+	energyChange.forEach(energyChangeRecord => {
+		if (energyChangeRecord.value < 0) {
+			damage.push(energyChangeRecord);
+		} else if (energyChangeRecord.value > 0) {
+			energyGain.push(energyChangeRecord);
+		}
+	})
 
 	const ref = useRef(null);
 	const dispatch = useDispatch();
@@ -151,6 +163,31 @@ function Card({
 			return () => {tl.clear()};
 		}
 	}, [id]);
+
+	useLayoutEffect(() => {
+		setTimeout(() => {
+			if (ref.current) {
+				(ref.current as HTMLElement).querySelectorAll('.energyDamage').forEach(node => {
+					const id =	parseInt(node.getAttribute('data-effect-id') || '0', 10);
+					if (!node.classList.contains('fadeAway') && !energyEffectsShown.has(id)) {
+						node.classList.add('fadeAway');
+						console.log(`Effect #${id} was shown and marked`);
+						console.log(`Current values: ${[...energyEffectsShown.values()].join(', ')}`);
+						energyEffectsShown.add(id);
+					}
+				});
+				(ref.current as HTMLElement).querySelectorAll('.energyGain').forEach(node => {
+					const id =	parseInt(node.getAttribute('data-effect-id') || '0', 10);
+					if (!node.classList.contains('fadeAway') && !energyEffectsShown.has(id)) {
+						node.classList.add('fadeAway');
+						console.log(`Effect #${id} was shown and marked`);
+						console.log(`Current values: ${[...energyEffectsShown.values()].join(', ')}`);
+						energyEffectsShown.add(id);
+					}
+				});
+			}
+		}, 0)
+	}, [energyChange]);
 
   const [{isDragging}, drag] = useDrag(() => ({
 		// "type" is required. It is used by the "accept" specification of drop targets.
@@ -184,7 +221,7 @@ function Card({
 					source: item.id,
 					target: id,
 					additionalAttackers: item.pack ? item.pack.hunters : [],
-          player: 1,
+					player: 1,
 				});
 			} else if (canPackHunt) {
 				onPackHunt(id, item.id);
@@ -201,11 +238,11 @@ function Card({
 		drag(ref);
 	}
 
-  const regionStyle = (!useLocket && card && 'region' in card && card.region) ? regionClass[card.region as Region] : null;
+	const regionStyle = (!useLocket && card && 'region' in card && card.region) ? regionClass[card.region as Region] : null;
 
-  const classes = cn(
+	const classes = cn(
 		'cardHolder',
-    regionStyle,
+		regionStyle,
 		card ? typeClass[card.type as CardType] : null,
 		{
 			'magiDefeated': isDefeated,
@@ -227,15 +264,19 @@ function Card({
 			onClick={() => onClick && onClick(id)}
 			ref={ref}
 		>
-			<img src={getCardUrl(card, useLocket)} alt={card ? card.name : ''} />
-			{data && <>
-				{(card && data.energy && data.energy !== card.cost) ? <div className="startingEnergy">
-					{card.cost}
-				</div> : null}
-				<div className="cardEnergy">
-					{data.energy || ''}
-				</div>
-			</>}
+			<div className="cutAround">
+				<img src={getCardUrl(card, useLocket)} alt={card ? card.name : ''} />
+				{data && <>
+					{(card && data.energy && data.energy !== card.cost) ? <div className="startingEnergy">
+						{card.cost}
+					</div> : null}
+					<div className="cardEnergy">
+						{data.energy || ''}
+					</div>
+				</>}
+			</div>
+			{damage.filter(({id}) => !energyEffectsShown.has(id)).map(({id, value}) => <div key={id} data-effect-id={id} className='energyDamage'>{value}</div>)}
+			{energyGain.filter(({id}) => !energyEffectsShown.has(id)).map(({id, value}) => <div key={id} data-effect-id={id} className='energyGain'>{value}</div>)}
 		</div>
 	);
 }

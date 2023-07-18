@@ -262,6 +262,11 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					inPlay,
 				},
 				log: [...state.log, ...newLogEntries],
+				energyLosses: [
+					...state.energyLosses,
+					...idsToFind.map((id, index) => ({value: -action.amount, card: id, ttl: 2, id: state.energyLossId + index})),
+				],
+				energyLossId: state.energyLossId + idsToFind.length,
 			};										
 		}
 		case EFFECT_TYPE_DIE_ROLLED: {
@@ -369,6 +374,11 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					opponentActiveMagi,
 				},
 				log: [...state.log, newLogEntry],
+				energyLosses: [
+					...state.energyLosses,
+					{value: -action.amount, card: action.target.id, ttl: 2, id: state.energyLossId},
+				],
+				energyLossId: state.energyLossId + 1,
 			};
 		}
 		case EFFECT_TYPE_MOVE_ENERGY: {
@@ -416,6 +426,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 
 			const inPlay = [...(state.zones.inPlay || [])].map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: affectAddEnergy(state, card, action)}} : card);
 
+			const shouldShow = action.source !== false && action.source !== null;
 			return {
 				...state,
 				zones: {
@@ -423,6 +434,11 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					inPlay,
 				},
 				log: [...state.log, ...newLogEntries],
+				energyLosses: shouldShow ? [
+					...state.energyLosses,
+					...idsToFind.map((id, index) => ({value: action.amount, card: id, ttl: 2, id: state.energyLossId + index})),
+				] : state.energyLosses,
+				energyLossId: shouldShow ? state.energyLossId + idsToFind.length : state.energyLossId,
 			};
 		}
 		case EFFECT_TYPE_MOVE_ENERGY: {

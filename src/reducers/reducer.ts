@@ -70,6 +70,8 @@ import {
 	PlusEnergyOnCreatureAction,
 	START_MAGI_DEFEAT_ANIMATION,
 	StartMagiDefeatAnimationAction,
+	MARK_ENERGY_ANIMATION_AS_DONE,
+	MarkEnergyAnimationAction,
 } from '../actions';
 
 import {
@@ -121,6 +123,8 @@ export const defaultState: State = {
 	gameEnded: false,
 	winner: null,
 	packs: [],
+	energyLosses: [],
+	energyLossId: 0,
 	energyPrompt: {
 		freeEnergy: 0,
 		cards: {},
@@ -134,6 +138,7 @@ export const defaultState: State = {
 	promptAvailableCards: [],
 	activePlayer: 0,
 	lastPositions: {},
+	energyAnimationsShown: new Set<number>(),
 };
 
 
@@ -156,6 +161,7 @@ type AnimationAction = StartPowerAnimationAction |
 	EndPromptResolutionAnimationAction |
 	ClearEntryAnimationAction |
 	StartMagiDefeatAnimationAction |
+	MarkEnergyAnimationAction |
 	EndAnimationAction;
 
 type AddToPackAction = {
@@ -218,6 +224,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				...state,
 				step: action.newStep,
 				packs: [],
+				energyLosses: state.energyLosses.map(loss => ({...loss, ttl: loss.ttl - 1})).filter(loss => loss.ttl > 0),
 			};
 		}
 		/* Animations */
@@ -598,18 +605,24 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 		case CLEAR_ENTRY_ANIMATION: {
 			const { [action.id]: [], ...positions} = state.lastPositions;
 			return {
-			...state,
-			lastPositions: positions,
+				...state,
+				lastPositions: positions,
 			}
+		}
+		case MARK_ENERGY_ANIMATION_AS_DONE: {
+			// This is stupid, but should work
+			// Maybe it is better to move this in a context
+			state.energyAnimationsShown.add(action.id);
+			return state;
 		}
 		case START_MAGI_DEFEAT_ANIMATION: {
 			return {
 			...state,
-			animation: {
-				type: ANIMATION_MAGI_DEFEATED,
-				source: '',
-				target: action.id,
-			},
+				animation: {
+					type: ANIMATION_MAGI_DEFEATED,
+					source: '',
+					target: action.id,
+				},
 			};
 		}
 		default: {

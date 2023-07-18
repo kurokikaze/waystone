@@ -11,8 +11,8 @@ import {
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
 	ACTION_RESOLVE_PROMPT,
-  EFFECT_TYPE_PLAY_CREATURE,
-  EFFECT_TYPE_MAGI_IS_DEFEATED,
+	EFFECT_TYPE_PLAY_CREATURE,
+	EFFECT_TYPE_MAGI_IS_DEFEATED,
 } from 'moonlands/dist/const';
 
 import { 
@@ -24,7 +24,7 @@ import {
 	endRelicAnimation,
 	startSpellAnimation,
 	endSpellAnimation,
-  startCreatureAnimation,
+	startCreatureAnimation,
 	endCreatureAnimation,
 	endStepAnimation,
 	startPromptResolutionAnimation,
@@ -35,9 +35,9 @@ import {
 	START_ATTACK_ANIMATION,
 	START_PROMPT_RESOLUTION_ANIMATION,
 	END_STEP_ANIMATION,
-  START_CREATURE_ANIMATION,
-  startMagiDefeatAnimation,
-  START_MAGI_DEFEAT_ANIMATION,
+	START_CREATURE_ANIMATION,
+	startMagiDefeatAnimation,
+	START_MAGI_DEFEAT_ANIMATION,
 } from './actions';
 import { ClientCommand } from './clientProtocol';
 import { Action, Store } from 'redux';
@@ -124,7 +124,7 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 };
 
 const TIMERS_BY_EVENT = {
-  [START_MAGI_DEFEAT_ANIMATION]: MAGI_DEFEATED_TIMEOUT,
+	[START_MAGI_DEFEAT_ANIMATION]: MAGI_DEFEATED_TIMEOUT,
 	[START_PROMPT_RESOLUTION_ANIMATION]: PROMPT_RESOLUTION_TIMEOUT,
 	[START_POWER_ANIMATION]: POWER_MESSAGE_TIMEOUT,
 	[START_RELIC_ANIMATION]: RELIC_MESSAGE_TIMEOUT,
@@ -167,7 +167,7 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, bre
     break$.subscribe({
       next: () => {
         if (delaying) {
-          console.log('Break applied');
+          // console.log('Break applied');
           clearTimeout(timeout);
           delaying = false;
           streamActions();

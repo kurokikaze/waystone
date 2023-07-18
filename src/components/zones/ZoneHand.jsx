@@ -6,9 +6,15 @@ import {
 	TYPE_RELIC,
 	TYPE_SPELL,
 } from 'moonlands/src/const.ts';
-import {cards} from 'moonlands/src/cards.ts';
 import Card from '../Card.tsx';
-import {getCurrentStep, isOurTurn, getActivePlayerMagi, getMagiEnergy, getMaxPaymentSourceEnergy} from '../../selectors';
+import {
+	getCurrentStep,
+	isOurTurn,
+	getActivePlayerMagi,
+	getMagiEnergy,
+	getMaxPaymentSourceEnergy,
+	getMyRelicNames
+} from '../../selectors';
 import {
 	STEP_CREATURES,
 	STEP_PRS_FIRST,
@@ -19,7 +25,7 @@ import {useCardData, useZoneContent} from '../common';
 import {withView} from '../CardView.jsx';
 
 const canCastFull = (card, magi, magiEnergy, maxCreaturePaymentEnergy, currentStep, relics) => {
-	const magiCard = byName(magi.card)
+	const magiCard = byName(magi.card);
 	const paymentSource = card.card.type == TYPE_CREATURE ? maxCreaturePaymentEnergy : magiEnergy;
 	const regionTax = (card.card.region === magiCard.region || card.card.region === REGION_UNIVERSAL) ? 0 : 1;
 	if (card.card.cost + regionTax > paymentSource) {
@@ -34,21 +40,14 @@ const canCastFull = (card, magi, magiEnergy, maxCreaturePaymentEnergy, currentSt
 	if (card.card.type === TYPE_CREATURE) return currentStep == STEP_CREATURES;
 }
 
-const relicsHash = cards
-	.filter(card => card.type === TYPE_RELIC)
-	.map(card => card.name)
-	.reduce((acc, cardName) => ({...acc, [cardName]: true}), {});
-
 const CardWithView = withView(Card, true);
-
-const getRelics = state => state.zones.inPlay.filter(cardData => cardData.data.controller === state.playerId && relicsHash[cardData.card]).map(cardData => cardData.card);
 
 function ZoneHand({ name, zoneId, onCardClick }) {
 	const rawContent = useZoneContent(zoneId);
 	const content = useCardData(rawContent);
 	const currentStep = useSelector(getCurrentStep);
 	const ourTurn = useSelector(isOurTurn);
-	const relics = useSelector(getRelics);
+	const relics = useSelector(getMyRelicNames);
 	const magiEnergy = useSelector(getMagiEnergy);
 	const maxCreaturePaymentEnergy = useSelector(getMaxPaymentSourceEnergy);
 	const magi = useSelector(getActivePlayerMagi);
@@ -61,7 +60,11 @@ function ZoneHand({ name, zoneId, onCardClick }) {
 					id={cardData.id}
 					card={cardData.card}
 					data={cardData.data}
-					onClick={onCardClick}
+					onClick={() => {
+						if (ourTurn && cardData.card && magi && canCastFull(cardData, magi, magiEnergy, maxCreaturePaymentEnergy, currentStep, relics)) {
+							onCardClick(cardData.id)
+						}
+					}}
 					available={ourTurn && cardData.card && magi && canCastFull(cardData, magi, magiEnergy, maxCreaturePaymentEnergy, currentStep, relics)}
 				/>,
 			) : null}

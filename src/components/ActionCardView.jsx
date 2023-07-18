@@ -12,9 +12,9 @@ function ActionCardView() {
 		(message.type === MESSAGE_TYPE_POWER || message.type === MESSAGE_TYPE_RELIC || message.type === MESSAGE_TYPE_SPELL);
 
 	const relic = message && message.type === MESSAGE_TYPE_RELIC;
-  const spell = message && message.type === MESSAGE_TYPE_SPELL;
+	const spell = message && message.type === MESSAGE_TYPE_SPELL;
 	const relicCard = relic ? message.card.card : null;
-  const spellCard = spell ? message.card.card : null;
+	const spellCard = spell ? message.card.card : null;
 	const source = useSelector(getPowerSource(message?.source || ''));
 	let power = null;
 	let sourceCard = null;

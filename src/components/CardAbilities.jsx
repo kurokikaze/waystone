@@ -53,10 +53,10 @@ export const withAbilities = Component => (props) => {
 	const canPackHunt = props.card.data.canPackHunt;
 	const hasEnergize = energizeProperty > 0;
 	const hasAdditionalIcons = hasSeveralAttacks || canAttackDirectly || canPackHunt || hasEnergize;
-  // ableToAttack can be false only in modifiedData, I guess. There should be no creatures unable to attack by their own text.
-  const unableToAttack = (props.modifiedData && props.modifiedData.ableToAttack === false) || props.data.attacked === Infinity;
-  const cannotBeAttacked = (props.modifiedData && props.modifiedData.canBeAttacked === false);
-  const isBurrowed = (props.data && props.data.burrowed === true);
+
+	const unableToAttack = props.data.ableToAttack === false || (props.modifiedData && props.modifiedData.ableToAttack === false) || props.data.attacked === Infinity;
+	const cannotBeAttacked = (props.modifiedData && props.modifiedData.canBeAttacked === false);
+	const isBurrowed = (props.data && props.data.burrowed === true);
 	const showEffects = hasEffects && !props.isOnPrompt && !props.isDragging;
 
 	const powers = (props.modifiedData ? props.modifiedData.powers : props.card.data.powers);
@@ -64,11 +64,11 @@ export const withAbilities = Component => (props) => {
 	const AbilityComponent = isOpponent ? OpponentCardAbility : CardAbility;
 
 	return <>
-		{(showAbilities || showEffects || hasAdditionalIcons) && <div className='cardAbilityHolder'>
+		{(showAbilities || showEffects || hasAdditionalIcons) && <div className='cardAbilityHolder cardViewHolder'>
 			{hasAbilities && (props.actionsAvailable || isOpponent) && <div className='cardAbilities'>
 				{powers.map(({name, text, cost}, i) =>
 					<AbilityComponent 
-						key={i}
+						key={name}
 						name={name}
 						text={text}
 						cost={cost}
@@ -80,7 +80,7 @@ export const withAbilities = Component => (props) => {
 			</div>}
 			{hasEffects && <div className='cardAbilities'>
 				{allEffects.map(({name, text}, i) =>
-					<p key={i}><b>Effect &mdash; {name}</b>: {text}</p>
+					<p key={name}><b>Effect &mdash; {name}</b>: {text}</p>
 				)}
 			</div>}
 			<div className='abilityIconHolder'>

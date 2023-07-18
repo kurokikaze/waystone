@@ -56,6 +56,13 @@ type AnimationStateType = {
 
 type LastPositionsMap = Record<string, [number, number]>;
 
+export type EnergyLossRecord = {
+  value: number;
+  card: string;
+  ttl: number;
+  id: number;
+}
+
 export type State = {
 	zones: {
 		playerHand: ConvertedCard[],
@@ -84,6 +91,8 @@ export type State = {
 	winner: number | null,
   activePlayer: number,
 	packs: Pack[],
+  energyLosses: EnergyLossRecord[],
+  energyLossId: number;
 	energyPrompt: {
     freeEnergy: number,
     cards: Record<string, number>
@@ -96,6 +105,7 @@ export type State = {
 	promptGeneratedBy: string | null,
 	promptAvailableCards: string[] | null,
   lastPositions: LastPositionsMap,
+  energyAnimationsShown: Set<number>,
 }
 
 export type DraggedItem = {

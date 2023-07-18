@@ -378,7 +378,6 @@ const gameStaticAbilities = [
 	},
 ];
 
-
 export const getCardDetails = state => {
 	const baseCards = state.zones.inPlay;
 

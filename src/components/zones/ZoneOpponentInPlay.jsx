@@ -66,21 +66,22 @@ function ZoneOpponentInPlay({
 	return (
 		<div className={cn('zone', 'zone-creatures', {'zone-active' : active})} data-zone-name={name} data-items={content.length}>
 			{content.length ? content.map(cardData =>
-				<SelectedCard
-					key={cardData.id}
-					id={cardData.id}
-					card={cardData.card}
-					data={cardData.data}
-					modifiedData={cardData.card.data}
-					onClick={cardClickHandler}
-					isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}
-					droppable={active && cardData.card.type === TYPE_CREATURE}
-					target={active && cardData.card.type === TYPE_CREATURE}
-          engineConnector={engineConnector}
-					className={cn({'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
-					attacker={animation && animation.source === cardData.id}
-          attackNumber={cardData.data.attacked}
-				/>,
+				<div key={cardData.id}>
+					<SelectedCard	
+						id={cardData.id}
+						card={cardData.card}
+						data={cardData.data}
+						modifiedData={cardData.card.data}
+						onClick={cardClickHandler}
+						isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}
+						droppable={active && cardData.card.type === TYPE_CREATURE}
+						target={active && cardData.card.type === TYPE_CREATURE}
+						engineConnector={engineConnector}
+						className={cn({'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
+						attacker={animation && animation.source === cardData.id}
+						attackNumber={cardData.data.attacked}
+					/>
+				</div>,
 			) : null}
 		</div>
 	);

@@ -398,7 +398,7 @@ export type ClientEffectAddEnergyToCreature = {
   effectType: typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
   amount: number,
   target: ConvertedCard | ConvertedCard[],
-  source: ConvertedCard | null,
+  source: ConvertedCard | null | false,
   player: number,
   generatedBy: string,
 }

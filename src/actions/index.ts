@@ -20,8 +20,8 @@ export const END_ANIMATION = 'actions/end_animation';
 export const ADD_TO_PACK = 'actions/add_to_pack';
 export const DISMISS_PACK = 'actions/dismiss_pack';
 
-export const CLEAR_ENTRY_ANIMATION = 'actions/clear_entry_animation'
-
+export const CLEAR_ENTRY_ANIMATION = 'actions/clear_entry_animation';
+export const MARK_ENERGY_ANIMATION_AS_DONE = 'actions/mark_energy_animation_as_done';
 export const MINUS_ENERGY_ON_CREATURE = 'actions/minus_energy_on_creature';
 export const PLUS_ENERGY_ON_CREATURE = 'actions/plus_energy_on_creature';
 
@@ -130,6 +130,10 @@ export const startMagiDefeatAnimation = (id: string) => ({
   type: START_MAGI_DEFEAT_ANIMATION as typeof START_MAGI_DEFEAT_ANIMATION,
   id,
 })
+export const markEnergyAnimationDone = (id: number) => ({
+  type: MARK_ENERGY_ANIMATION_AS_DONE as typeof MARK_ENERGY_ANIMATION_AS_DONE,
+  id,
+})
 
 export type StartPowerAnimationAction = ReturnType<typeof startPowerAnimation>
 export type EndPowerAnimationAction = ReturnType<typeof endPowerAnimation>
@@ -151,3 +155,4 @@ export type DismissPackAction = ReturnType<typeof dismissPack>
 export type ClearEntryAnimationAction = ReturnType<typeof clearEntryAnimation>
 export type PlusEnergyOnCreatureAction = ReturnType<typeof plusEnergyOnCreature>
 export type MinusEnergyOnCreatureAction = ReturnType<typeof minusEnergyOnCreature>
+export type MarkEnergyAnimationAction = ReturnType<typeof markEnergyAnimationDone>

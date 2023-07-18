@@ -101,7 +101,7 @@ function App({engineConnector, onBreak, onReturnToBase}: AppProps) {
 	);
 	const prompt: boolean = useSelector(isPromptActive);
 	const ourTurn: boolean = useSelector(isOurTurn);
-  const currentPlayer: number = useSelector((state: {activePlayer: number}) => state.activePlayer);
+	const currentPlayer: number = useSelector((state: {activePlayer: number}) => state.activePlayer);
 	// const timer = useSelector(getTimer);
 	const currentStep = useSelector(getCurrentStep);
 	const message: MessageType | null = useSelector(getMessage);

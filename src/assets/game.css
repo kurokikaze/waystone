@@ -41,7 +41,62 @@ body {
     width: 64px;
     height: 94px;
     border-radius: 3px;
+}
+
+.cardHolder .cutAround {
     overflow: hidden;
+    height: 100%;
+    border-radius: 6px;
+}
+
+.zone-relics .cardViewHolder {
+    margin: 0 -6px;
+}
+.zone-relics .cardViewHolder:nth-child(even) {
+    margin-top: -52px;
+}
+
+.cardHolder .energyDamage {
+    position: absolute;
+    top: 0;
+    opacity: 1;
+    width: 100%;
+    transition: top 1s, opacity 1s;
+    font-size: 2.5em;
+    color: red;
+    text-align: center;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+/* .cardHolder .energyDamage::before {
+    content: '-';
+    display: inline-block;
+} */
+
+.cardHolder .energyDamage.fadeAway {
+    top: -80px;
+    opacity: 0;
+}
+
+
+.cardHolder .energyGain {
+    position: absolute;
+    top: 0;
+    opacity: 1;
+    width: 100%;
+    transition: top 1s, opacity 1s;
+    font-size: 2.5em;
+    color: green;
+    text-align: center;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+.cardHolder .energyGain::before {
+    content: '+';
+    display: inline-block;
+}
+
+.cardHolder .energyGain.fadeAway {
+    top: -80px;
+    opacity: 0;
 }
 
 .cardHolder .cardEnergy {
@@ -78,12 +133,12 @@ body {
     position: relative;
     width: 80px;
     height: 62px;
-    overflow: hidden;
+    /* overflow: hidden; */
     border-radius: 6px;
 }
 
 .zone-creatures .cardHolder.relic {
-    overflow: hidden;
+    /* overflow: hidden; */
     height: 100px;
     border-radius: 3px;
 }
@@ -163,10 +218,10 @@ body {
 }
 
 .zone-magi .cardHolder img {
-    width: 124px;
+    width: 129px;
     height: auto;
-    top: -17px;
-    left: -15px;
+    top: -21px;
+    left: -16px;
     position: relative;
 }
 
@@ -225,6 +280,8 @@ body {
 .zone-relics {
     max-width: 380px;
     min-width: 380px;
+    min-height: 90px;
+    margin-top: 20px;
     justify-content: center;
     align-items: center;
 }

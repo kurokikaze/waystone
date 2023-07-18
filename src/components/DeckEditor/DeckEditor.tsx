@@ -34,7 +34,6 @@ type DeckEditorProps = {
 }
 
 const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
-  console.dir(cards.map(card => card.name))
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [savingNew, setSavingNew] = useState(false);
@@ -51,8 +50,8 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 
 	const handleSave = useCallback(() => {
 		setSaving(true);
-    onSave(deck.cards);
-    setSaving(false);
+		onSave(deck.cards);
+		setSaving(false);
 	}, [deck]);
 
 	const removeFromDeck = useCallback((name: string) => {
@@ -74,13 +73,13 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 
 	const setMagi = useCallback((card: string) => {
 		const cards = [...deck.cards];
-    if (typeof magiEditor == 'number') {
-      cards[magiEditor] = card;
-      setDeck({
-        ...deck,
-        cards,
-      });
-    }
+		if (typeof magiEditor == 'number') {
+		cards[magiEditor] = card;
+			setDeck({
+				...deck,
+				cards,
+			});
+		}
 		setMagiEditor(null);
 	}, [deck, magiEditor]);
 
@@ -170,8 +169,8 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 							<DeckView ourCards={deck.cards} addToDeck={addToDeck} onClearRegions={onClearRegions} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
 						</div>
 						<div className='commands'>
-              <Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
-              <Button loading={savingNew} onClick={onClose} type="default">Close</Button>
+							<Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
+							<Button onClick={onClose} type="default">Close</Button>
 						</div>
 					</Col>
 				</Row>
