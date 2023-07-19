@@ -27,6 +27,7 @@ import MoonlandsCard from 'moonlands/dist/classes/Card';
 import { InGameData } from 'moonlands/dist/classes/CardInGame';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearEntryAnimation } from '../actions/index.js';
+import { CREATURE_DISCARD_TIMEOUT } from '../addAnimations.js';
 
 const DraggableTypes = {
 	CARD: 'card',
@@ -167,13 +168,15 @@ function Card({
 	useLayoutEffect(() => {
 		setTimeout(() => {
 			if (ref.current) {
+				let cleanupNeeded = false;
 				(ref.current as HTMLElement).querySelectorAll('.energyDamage').forEach(node => {
-					const id =	parseInt(node.getAttribute('data-effect-id') || '0', 10);
+					const id = parseInt(node.getAttribute('data-effect-id') || '0', 10);
 					if (!node.classList.contains('fadeAway') && !energyEffectsShown.has(id)) {
 						node.classList.add('fadeAway');
 						console.log(`Effect #${id} was shown and marked`);
 						console.log(`Current values: ${[...energyEffectsShown.values()].join(', ')}`);
 						energyEffectsShown.add(id);
+						cleanupNeeded = true;
 					}
 				});
 				(ref.current as HTMLElement).querySelectorAll('.energyGain').forEach(node => {
@@ -183,8 +186,18 @@ function Card({
 						console.log(`Effect #${id} was shown and marked`);
 						console.log(`Current values: ${[...energyEffectsShown.values()].join(', ')}`);
 						energyEffectsShown.add(id);
+						cleanupNeeded = true;
 					}
 				});
+				// Cleanup of the elements, so they won't stay over the ability tooltip
+				if (cleanupNeeded) {
+					setTimeout(() => {
+						if (ref.current) {
+							(ref.current as HTMLElement).querySelectorAll('.energyGain.fadeAway').forEach(node => node.classList.add('fadedFully'));
+							(ref.current as HTMLElement).querySelectorAll('.energyDamage.fadeAway').forEach(node => node.classList.add('fadedFully'));
+						}
+					}, CREATURE_DISCARD_TIMEOUT);
+				}
 			}
 		}, 0)
 	}, [energyChange]);

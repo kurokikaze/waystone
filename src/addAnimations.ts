@@ -13,6 +13,7 @@ import {
 	ACTION_RESOLVE_PROMPT,
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_MAGI_IS_DEFEATED,
+	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 } from 'moonlands/dist/const';
 
 import { 
@@ -29,6 +30,7 @@ import {
 	endStepAnimation,
 	startPromptResolutionAnimation,
 	endPromptResolutionAnimation,
+	startCreatureDiscardAnimation,
 	START_POWER_ANIMATION,
 	START_RELIC_ANIMATION,
 	START_SPELL_ANIMATION,
@@ -38,12 +40,14 @@ import {
 	START_CREATURE_ANIMATION,
 	startMagiDefeatAnimation,
 	START_MAGI_DEFEAT_ANIMATION,
+	START_CREATURE_DISCARD_ANIMATION,
 } from './actions';
 import { ClientCommand } from './clientProtocol';
 import { Action, Store } from 'redux';
 import { getPowerSource } from './selectors/index';
 
 const MAGI_DEFEATED_TIMEOUT = 1000;
+export const CREATURE_DISCARD_TIMEOUT = 600;
 const POWER_MESSAGE_TIMEOUT = 10000;
 const RELIC_MESSAGE_TIMEOUT = 3000;
 const CREATURE_MESSAGE_TIMEOUT = 1000;
@@ -58,14 +62,14 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 	}
 	switch(action.type) {
 		case ACTION_RESOLVE_PROMPT:
-      const state = store.getState();
-      if (!action.target) {
-        return [action]
-      }
-      const card = getPowerSource(action.target)(state);
-      if (!card) {
-        return [action]
-      }
+			const state = store.getState();
+			if (!action.target) {
+				return [action]
+			}
+			const card = getPowerSource(action.target)(state);
+			if (!card) {
+				return [action]
+			}
 			return (action.player !== 1) ? [
 				startPromptResolutionAnimation(action.target ? (getPowerSource(action.target)(state)?.card || '') : (action.number || 0).toString()),
 				endPromptResolutionAnimation(),
@@ -92,12 +96,12 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 						endRelicAnimation(),
 						action,
 					] : [action];
-        case EFFECT_TYPE_PLAY_CREATURE:
-          return (action.player !== 1) ? [
-            startCreatureAnimation(action.card, action.player), 
-            endCreatureAnimation(),
-            action,
-          ] : [action];
+				case EFFECT_TYPE_PLAY_CREATURE:
+					return (action.player !== 1) ? [
+						startCreatureAnimation(action.card, action.player), 
+						endCreatureAnimation(),
+						action,
+					] : [action];
 				case EFFECT_TYPE_PLAY_SPELL:
 					return (action.player !== 1) ? [
 						startSpellAnimation(action.card, action.player), 
@@ -109,12 +113,18 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 						endStepAnimation(),
 						action,
 					];
-        case EFFECT_TYPE_MAGI_IS_DEFEATED: {
-          return [
-            startMagiDefeatAnimation(action.target.id),
-            action,
-          ];
-        }
+				case EFFECT_TYPE_MAGI_IS_DEFEATED: {
+					return [
+						startMagiDefeatAnimation(action.target.id),
+						action,
+					];
+				}
+				case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
+					return [
+						startCreatureDiscardAnimation(action.target.id),
+						action,
+					];
+				}
 			}
 			return [action];
 		}
@@ -125,6 +135,7 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 
 const TIMERS_BY_EVENT = {
 	[START_MAGI_DEFEAT_ANIMATION]: MAGI_DEFEATED_TIMEOUT,
+	[START_CREATURE_DISCARD_ANIMATION]: CREATURE_DISCARD_TIMEOUT,
 	[START_PROMPT_RESOLUTION_ANIMATION]: PROMPT_RESOLUTION_TIMEOUT,
 	[START_POWER_ANIMATION]: POWER_MESSAGE_TIMEOUT,
 	[START_RELIC_ANIMATION]: RELIC_MESSAGE_TIMEOUT,

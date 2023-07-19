@@ -12,6 +12,8 @@ export const START_CREATURE_ANIMATION = 'actions/start_creature_animation';
 export const END_CREATURE_ANIMATION = 'actions/end_creature_animation';
 export const START_MAGI_DEFEAT_ANIMATION = 'actions/start_magi_defeat_animation';
 export const END_MAGI_DEFEAT_ANIMATION = 'actions/end_magi_defeat_animation';
+export const START_CREATURE_DISCARD_ANIMATION = 'actions/start_creature_discard_animation';
+export const END_CREATURE_DISCARD_ANIMATION = 'actions/end_creature_discard_animation';
 export const START_PROMPT_RESOLUTION_ANIMATION = 'actions/start_prompt_resolution_animation';
 export const END_PROMPT_RESOLUTION_ANIMATION = 'actions/end_prompt_resolution_animation';
 export const END_STEP_ANIMATION = 'actions/end_step_animation';
@@ -130,6 +132,10 @@ export const startMagiDefeatAnimation = (id: string) => ({
   type: START_MAGI_DEFEAT_ANIMATION as typeof START_MAGI_DEFEAT_ANIMATION,
   id,
 })
+export const startCreatureDiscardAnimation = (id: string) => ({
+  type: START_CREATURE_DISCARD_ANIMATION as typeof START_CREATURE_DISCARD_ANIMATION,
+  id,
+})
 export const markEnergyAnimationDone = (id: number) => ({
   type: MARK_ENERGY_ANIMATION_AS_DONE as typeof MARK_ENERGY_ANIMATION_AS_DONE,
   id,
@@ -147,6 +153,7 @@ export type StartPromptResolutionAnimationAction = ReturnType<typeof startPrompt
 export type EndPromptResolutionAnimationAction = ReturnType<typeof endPromptResolutionAnimation>
 export type StartCreatureAnimationAction = ReturnType<typeof startCreatureAnimation>
 export type StartMagiDefeatAnimationAction = ReturnType<typeof startMagiDefeatAnimation>
+export type StartCreatureDiscardAnimationAction = ReturnType<typeof startCreatureDiscardAnimation>
 export type EndCreatureAnimationAction = ReturnType<typeof endCreatureAnimation>
 export type EndStepAnimationAction = ReturnType<typeof endStepAnimation>
 export type EndAnimationAction = ReturnType<typeof endAnimation>

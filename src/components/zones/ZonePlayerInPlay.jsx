@@ -12,6 +12,7 @@ import {
 } from 'moonlands/dist/const';
 import Card from '../Card.tsx';
 import {
+	ANIMATION_CREATURE_DISCARDED,
 	STEP_ATTACK,
 } from '../../const';
 import {
@@ -27,6 +28,7 @@ import {
 	getPromptType,
 	getPromptParams,
 	getPromptGeneratedBy,
+	getDefeatedCreatureId,
 } from '../../selectors';
 import {
 	UNFILTERED_CREATURE_PROMPTS,
@@ -106,6 +108,8 @@ function ZonePlayerInPlay({
 		power: powerName,
 	});
 
+	const defeatedId = useSelector(getDefeatedCreatureId);
+
 	return (
 		<div className={cn('zone', 'zone-player-creatures', 'zone-creatures', {'zone-active' : active})} data-zone-name={name}>
 			{content.filter(({id}) => !packs.some(pack => pack.hunters.includes(id))).map(cardData =>
@@ -116,6 +120,7 @@ function ZonePlayerInPlay({
 						data={cardData.data}
 						modifiedData={cardData.card.data}
 						onClick={cardClickHandler}
+						isDefeated={defeatedId === cardData.id}
 						isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}
 						draggable={active && cardData.card.type === TYPE_CREATURE && cardData.data.attacked < cardData.card.data.attacksPerTurn}
 						target={active && hasPackHunters && cardData.data.attacked < cardData.card.data.attacksPerTurn && !packs.some(({leader}) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
