@@ -1166,9 +1166,9 @@ micromatch@^4.0.4:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.19.6.tar.gz":
+"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.19.7.tar.gz":
   version "0.19.6"
-  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.19.6.tar.gz#9d9c0fcbea9cf6a49f49b60684070e8b556bdece"
+  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.19.7.tar.gz#400c4a606b7925444fa19954ca25902ca2e439a5"
   dependencies:
     nanoid "^3.0.0"
 
