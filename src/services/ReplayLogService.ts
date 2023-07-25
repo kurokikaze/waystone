@@ -1,4 +1,4 @@
-import { BaseDirectory, writeTextFile } from "@tauri-apps/api/fs"
+import { BaseDirectory, exists, writeTextFile } from "@tauri-apps/api/fs"
 
 export class ReplayLogService {
     static REPLAYS_DIR = 'replays'
@@ -12,9 +12,16 @@ export class ReplayLogService {
         )
     }
 
+    private async createReplayFileIfNotExists(replayName: string, replayContents: string[]) {
+        const deckFileExists = await exists(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, { dir: BaseDirectory.AppConfig });
+        if (!deckFileExists) {
+            await this.saveReplay(replayName, replayContents);
+        }
+    }
+
     public async saveReplay(replayName: string, replayContents: string[]) {
         if (this.isTauri()) {
-            await writeTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, replayContents.join("\n"), { dir: BaseDirectory.AppConfig })
+            await writeTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, "[\n" + replayContents.join(",\n") + "\n]", { dir: BaseDirectory.AppConfig })
         }
     }
 }

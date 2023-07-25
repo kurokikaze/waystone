@@ -92,6 +92,7 @@ export const GameAppWrapper = ({
               fullLog.push(JSON.stringify(message.data));
               subscriber.next(message.data.action);
               if (message.data.action.type === ACTION_PLAYER_WINS) {
+                console.log('Trying to save the replay');
                 (new ReplayLogService()).saveReplay('testReplay', fullLog);
                 subscriber.complete();
               }
