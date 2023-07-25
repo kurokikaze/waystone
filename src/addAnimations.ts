@@ -56,7 +56,7 @@ const ATTACK_MESSAGE_TIMEOUT = 800;
 const PROMPT_RESOLUTION_TIMEOUT = 600;
 const STEP_TIMEOUT = 500;
 
-const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) => {
+const convertAction = (action: ClientCommand, store: Store<any, Action<any>>, onlyEnemy = true) => {
 	if (!('type' in action)) {
 		return action;
 	}
@@ -70,7 +70,7 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 			if (!card) {
 				return [action]
 			}
-			return (action.player !== 1) ? [
+			return (action.player !== 1 || !onlyEnemy) ? [
 				startPromptResolutionAnimation(action.target ? (getPowerSource(action.target)(state)?.card || '') : (action.number || 0).toString()),
 				endPromptResolutionAnimation(),
 				action,
@@ -82,7 +82,7 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 				action,
 			] : [action];
 		case ACTION_ATTACK: {
-			return (action.player === 2) ? [
+			return (action.player === 2 || !onlyEnemy) ? [
 				startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, 2), 
 				endAttackAnimation(action.source),
 				action,
@@ -91,19 +91,19 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>) =>
 		case ACTION_EFFECT: {
 			switch(action.effectType) {
 				case EFFECT_TYPE_PLAY_RELIC:
-					return (action.player !== 1) ? [
+					return (action.player !== 1 || !onlyEnemy) ? [
 						startRelicAnimation(action.card, action.player), 
 						endRelicAnimation(),
 						action,
 					] : [action];
 				case EFFECT_TYPE_PLAY_CREATURE:
-					return (action.player !== 1) ? [
+					return (action.player !== 1 || !onlyEnemy) ? [
 						startCreatureAnimation(action.card, action.player), 
 						endCreatureAnimation(),
 						action,
 					] : [action];
 				case EFFECT_TYPE_PLAY_SPELL:
-					return (action.player !== 1) ? [
+					return (action.player !== 1 || !onlyEnemy) ? [
 						startSpellAnimation(action.card, action.player), 
 						endSpellAnimation(),
 						action,
@@ -149,7 +149,7 @@ const convertTimer = (type: any) => {
 	return TIMERS_BY_EVENT[type] || 0;
 };
 
-export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>) {
+export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>, onlyEnemy = true) {
   const actionsStorage: ClientCommand[] = []
   let delaying: boolean = false;
   let timeout: ReturnType<typeof setTimeout> = 0;
@@ -188,7 +188,7 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, bre
 
     action$.subscribe({
       next: (action) => {
-        const convertedActions = convertAction(action, store);
+        const convertedActions = convertAction(action, store, onlyEnemy);
         actionsStorage.push(...convertedActions);
         if (!delaying) {
           streamActions()

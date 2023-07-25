@@ -16,7 +16,6 @@ import rootReducer from '../../reducers';
 import GameApp from "../GameApp/GameApp"
 import Worker from "../../worker/worker?worker"
 import BotWorker from "../../worker/botWorker?worker"
-import { ReplayLogService } from "../../services/ReplayLogService";
 
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(
@@ -67,7 +66,6 @@ export const GameAppWrapper = ({
 
     if (!engineRef.current && !actionsObservableRef.current) {
       const engine = new Worker();
-      const fullLog: string[] = []
       console.log('Created the worker')
       const actionsObservable = new Observable<ClientAction>(subscriber => {
         const onmessage = (message: any) => {
@@ -77,7 +75,6 @@ export const GameAppWrapper = ({
               console.log('Setting the initial state');
               console.dir(message.data.state);
               store.dispatch({type: 'setInitialState', state: enrichState(message.data.state, 1)});
-              fullLog.push(JSON.stringify(message.data));
             } else if (botRef.current) {
               console.log('Sending initial state to the bot')
               botRef.current.postMessage({
@@ -89,12 +86,12 @@ export const GameAppWrapper = ({
           } else if (message.data && 'action' in message.data) {
             if (message.data.for === 1) {
               // console.dir(message.data.action);
-              fullLog.push(JSON.stringify(message.data));
               subscriber.next(message.data.action);
               if (message.data.action.type === ACTION_PLAYER_WINS) {
-                (new ReplayLogService()).saveReplay('testReplay', fullLog);
                 subscriber.complete();
               }
+
+              // store.dispatch(message.data.action);
             } else if (botRef.current) {
               botRef.current.postMessage(message.data.action);
             }
@@ -113,7 +110,7 @@ export const GameAppWrapper = ({
           observer.next({});
         }
       });
-      const delayedActions = addAnimations(actionsObservable, breakObservable, store, true);
+      const delayedActions = addAnimations(actionsObservable, breakObservable, store);
 
 	    delayedActions.subscribe({
         next: (transformedAction) => {

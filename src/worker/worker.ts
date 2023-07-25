@@ -114,7 +114,7 @@ onmessage = (event) => {
     const actionCallback = (action: AnyEffectType) => {
       if (game) {
         const commandPlayerOne = convertServerCommand(action, game, 1);
-        // console.log(JSON.parse(JSON.stringify(command)))
+
         if (commandPlayerOne) {
           try {
             postMessage({
@@ -128,7 +128,7 @@ onmessage = (event) => {
           }
         }
         const commandPlayerTwo = convertServerCommand(action, game, 2);
-        // console.log(JSON.parse(JSON.stringify(command)))
+
         if (commandPlayerTwo) {
           try {
             postMessage({
