@@ -501,5 +501,8 @@ export type ClientAction = CommonAction | ClientPassAction | ClientPlayAction | 
 
 // @deprecated Merged into ClientAction
 export type ClientCommand = ClientEnterPromptAction | ClientEffectAction | ClientAction;
-
+export type ClientMessage = {
+  for: number,
+  action: ClientAction,
+}
 export type C2SAction = CommonAction | FromClientPlayAction | FromClientPowerAction | FromClientPassAction | ClientResolvePromptAction;

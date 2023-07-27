@@ -107,23 +107,24 @@ export default function DeckView({ourCards, addToDeck, onClearRegions, removeFro
 				<MagiView name={magiTwo} id={1} onMagiEditor={onMagiEditor} chosenMagi={magiEditor === 1} />
 				<MagiView name={magiThree} id={2} onMagiEditor={onMagiEditor} chosenMagi={magiEditor === 2} />
 			</div>
-      <div className='commands'><button onClick={onClearRegions}>Keep only the cards of Magi regions</button></div>
+				<div className='commands'><button onClick={onClearRegions}>Keep only the cards of Magi regions</button></div>
 			<div className='deckView'>
 				<ul>
 					{distinctCards.map(card => {
-            const fullCard = byName(card)
-            const invalidCard = fullCard && fullCard.type == TYPE_RELIC && fullCard.region !== REGION_UNIVERSAL && !magiRegions.has(fullCard.region)
-            return (<li key={card}>
-                <SimpleCardView card={card} className={cn('deckView', {'startingCard': startingCards.has(card)})} startingCard={startingCards.has(card)} invalidCard={Boolean(invalidCard)}/>
-                <div className='cardActions'>
-                  <div className='cardCount'>[{deckCards.filter(c => c === card).length}]</div>
-                  <div className='cardRemove' onClick={() => removeFromDeck(card)}><Remove size={20} color={'#990033'} /></div>
-                  {deckCards.filter(c => c === card).length < MAX_COPIES_IN_DECK && ourCards.length < 43 && <div className='cardAdd active' onClick={() => addToDeck(card)}><Add size={20} fillColor='#3f7d20' /></div>}
-                  {(deckCards.filter(c => c === card).length === MAX_COPIES_IN_DECK || ourCards.length >= 43) && <div className='cardAdd'><Add size={20} fillColor='grey' /></div>}
-                </div>
-              </li>)
-            })
-          }
+						const fullCard = byName(card)
+						const invalidCard = fullCard && fullCard.type == TYPE_RELIC && fullCard.region !== REGION_UNIVERSAL && !magiRegions.has(fullCard.region)
+
+						return (<li key={card}>
+							<SimpleCardView card={card} className={cn('deckView', {'startingCard': startingCards.has(card)})} startingCard={startingCards.has(card)} invalidCard={Boolean(invalidCard)}/>
+							<div className='cardActions'>
+							<div className='cardCount'>[{deckCards.filter(c => c === card).length}]</div>
+							<div className='cardRemove' onClick={() => removeFromDeck(card)}><Remove size={20} color={'#990033'} /></div>
+							{deckCards.filter(c => c === card).length < MAX_COPIES_IN_DECK && ourCards.length < 43 && <div className='cardAdd active' onClick={() => addToDeck(card)}><Add size={20} fillColor='#3f7d20' /></div>}
+							{(deckCards.filter(c => c === card).length === MAX_COPIES_IN_DECK || ourCards.length >= 43) && <div className='cardAdd'><Add size={20} fillColor='grey' /></div>}
+							</div>
+						</li>)
+						})
+					}
 				</ul>
 			</div>
 		</div>
