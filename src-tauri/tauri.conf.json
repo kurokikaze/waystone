@@ -19,7 +19,7 @@
       },
       "fs": {
         "all": true,
-        "scope": ["$APPDATA/*", "$APPDATA/decks/*"]
+        "scope": ["$APPDATA/*", "$APPDATA/decks/*", "$APPDATA/replays/*"]
       },
       "window": {
         "setResizable": true,

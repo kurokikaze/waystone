@@ -25,7 +25,7 @@ export class ReplayLogService {
     }
 
     public async readReplay(replay: string):Promise<ClientMessage[]> {
-        const contentRaw = await readTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replay}.log`, { dir: BaseDirectory.AppConfig });
+        const contentRaw = await readTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replay}`, { dir: BaseDirectory.AppConfig });
         const replayContent = JSON.parse(contentRaw) as ClientMessage[];
         return replayContent;
     }
