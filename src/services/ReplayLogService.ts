@@ -1,7 +1,7 @@
 import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/api/fs"
-import { async } from "rxjs";
 import { booleanGuard } from "../bechamel/strategies/simulationUtils";
-import { ClientAction, ClientMessage } from "../clientProtocol";
+import { ClientMessage } from "../clientProtocol";
+import testReplay from './testReplay.json';
 
 export class ReplayLogService {
     static REPLAYS_DIR = 'replays'
@@ -21,13 +21,16 @@ export class ReplayLogService {
             console.dir(entries);
             return entries.map(entry => entry.name).filter(booleanGuard);
         }
-        return [];
+        return ['testReplay'];
     }
 
     public async readReplay(replay: string):Promise<ClientMessage[]> {
-        const contentRaw = await readTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replay}`, { dir: BaseDirectory.AppConfig });
-        const replayContent = JSON.parse(contentRaw) as ClientMessage[];
-        return replayContent;
+        if (this.isTauri()) {
+            const contentRaw = await readTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replay}`, { dir: BaseDirectory.AppConfig });
+            const replayContent = JSON.parse(contentRaw) as ClientMessage[];
+            return replayContent;
+        }
+        return new Promise((resolve) => resolve(testReplay as ClientMessage[]));
     }
 
     private async createReplayFileIfNotExists(replayName: string, replayContents: string[]) {

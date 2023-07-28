@@ -25,7 +25,7 @@ const ReplayList: React.FC<ReplayListProps> = ({
 	}, []);
 
 	return (
-		<>
+		<div className='appHolder'>
 			<Space direction='vertical' style={{ width: 800 }}>
 				<Divider orientation="left">Default Size</Divider>
 				{loading ? <Spin /> : <List
@@ -34,14 +34,14 @@ const ReplayList: React.FC<ReplayListProps> = ({
 					dataSource={data}
 					renderItem={(item) => (
 						<List.Item>
-							<Typography.Text mark>{item}</Typography.Text>
+							<Typography.Text>{item}</Typography.Text>
 							<Button onClick={() => onReplayClick(item)}>Play</Button>
 						</List.Item>
 					)}
 				/>}
 				<Button onClick={onReturnToBase} disabled={loading}>Return</Button>
 			</Space>
-		</>
+		</div>
 	);
 }
 export default ReplayList;

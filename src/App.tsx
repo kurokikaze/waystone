@@ -115,8 +115,7 @@ function App() {
       {mode === MODE_REPLAY ? <div>
         <ReplayAppWrapper replayName={chosenReplay} onReturnToBase={handleReturnToBase} />
       </div> : null}
-      {mode === MODE_BASE ? <>
-        <div className="row">
+      {mode === MODE_BASE ? <div className="appHolder"><div className="row">
             <MoonlandsLogo />
         </div>
 
@@ -127,7 +126,7 @@ function App() {
         <p><Button disabled={loading} onClick={handleEditOpponentDeck}>Edit opponent deck</Button></p>
         <p><Button disabled={loading} onClick={handleStartGame} type="primary">Start game</Button></p>
         <p><Button disabled={loading} onClick={handleOpenReplays}>Replays</Button></p>
-      </> : null}
+      </div> : null}
       {mode === MODE_EDITOR ? <DeckEditor deckContents={editedDeck} onSave={handleSave} onClose={handleReturnToBase} /> : null}
     </div>
   );

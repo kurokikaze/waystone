@@ -5,10 +5,10 @@ import { Provider } from "react-redux"
 import { createStore, compose, applyMiddleware } from "redux";
 import { createEpicMiddleware } from "redux-observable";
 import thunk from "redux-thunk";
-import { Observable } from "rxjs";
+import { Observable, Subscriber } from "rxjs";
 import Spin from "antd/es/spin";
 import addAnimations from "../../addAnimations";
-import { C2SAction, ClientAction } from "../../clientProtocol";
+import { C2SAction, ClientAction, ClientMessage } from "../../clientProtocol";
 import { defaultState } from "../../reducers/reducer";
 import { EngineConnector } from "../../types";
 import { enrichState } from "../../utils";
@@ -43,14 +43,17 @@ export const ReplayAppWrapper = ({
 	const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
 	const [loading, setLoading] = useState(true);
-	const breakRef = useRef<Function>(() => { });
+	const [playing, setPlaying] = useState(true);
+	const replayDataSaved = useRef<ClientMessage[]>()
+	const actionSubscriber = useRef<Subscriber<ClientAction>>()
 
-	const loadReplay = async (replayName: string) => {
-		const replayData = await (new ReplayLogService()).readReplay(replayName);
-
-		const actionsObservable = new Observable<ClientAction>(subscriber => {
-			setInterval(() => {
-				const messageData = replayData.shift();
+	const startPlayback = (speed = 100) => {
+		if (replayDataSaved.current && actionSubscriber.current) {
+			saveInterval(setInterval(() => {
+				if (!replayDataSaved.current) {
+					throw new Error('Replay stopped prematurely');
+				}
+				const messageData = replayDataSaved.current.shift();
 				if (messageData && 'state' in messageData) {
 					const data = messageData;
 					if (data.for === 1) {
@@ -61,15 +64,30 @@ export const ReplayAppWrapper = ({
 					}
 				} else if (messageData && 'action' in messageData) {
 					if (messageData.for === 1) {
-						// @ts-ignore
-						subscriber.next(messageData.action);
+						actionSubscriber.current?.next(messageData.action);
 						if (messageData.action.type === ACTION_PLAYER_WINS) {
-							subscriber.complete();
+							actionSubscriber.current?.complete();
 						}
 					}
 				}
-			}, 100);
+			}, speed));
+			setPlaying(true);
+		}
+	}
+
+	const [interval, saveInterval] = useState<ReturnType<typeof setInterval>>()
+	const breakRef = useRef<Function>(() => { });
+
+	const loadReplay = async (replayName: string) => {
+		const replayData = await (new ReplayLogService()).readReplay(replayName);
+		replayDataSaved.current = replayData;
+
+		const actionsObservable = new Observable<ClientAction>(subscriber => {
+			actionSubscriber.current = subscriber;
+
+			startPlayback();
 		});
+
 		const breakObservable = new Observable<{}>(observer => {
 			breakRef.current = () => {
 				observer.next({});
@@ -92,7 +110,19 @@ export const ReplayAppWrapper = ({
 
 		}
 		const realEngineConnector = {
-			emit: (_action: any) => () => { }
+			emit: (action: any) => () => {
+				switch (action.type) {
+					case 'actions/pause': {
+						clearInterval(interval);
+						setPlaying(false);
+						break;
+					}
+					case 'actions/play': {
+						startPlayback();
+						break;
+					}
+				}
+			}
 		};
 		setEngineConnector(realEngineConnector);
 		loadReplay(replayName);
