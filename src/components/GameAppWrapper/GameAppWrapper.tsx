@@ -93,7 +93,9 @@ export const GameAppWrapper = ({
               subscriber.next(message.data.action);
               if (message.data.action.type === ACTION_PLAYER_WINS) {
                 console.log('Trying to save the replay');
-                (new ReplayLogService()).saveReplay('testReplay', fullLog);
+                const replayDate = new Date();
+                const replayName = `${replayDate.getDate()}-${replayDate.getMonth() + 1}-${replayDate.getFullYear} ${replayDate.getHours()}-${replayDate.getMinutes()}`;
+                (new ReplayLogService()).saveReplay(replayName, fullLog);
                 subscriber.complete();
               }
             } else if (botRef.current) {
