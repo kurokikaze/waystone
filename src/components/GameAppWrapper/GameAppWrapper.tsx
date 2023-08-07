@@ -94,7 +94,7 @@ export const GameAppWrapper = ({
               if (message.data.action.type === ACTION_PLAYER_WINS) {
                 console.log('Trying to save the replay');
                 const replayDate = new Date();
-                const replayName = `${replayDate.getDate()}-${replayDate.getMonth() + 1}-${replayDate.getFullYear} ${replayDate.getHours()}-${replayDate.getMinutes()}`;
+                const replayName = `${replayDate.getDate().toString().padStart(2, '0')}-${(replayDate.getMonth() + 1).toString().padStart(2, '0')}-${replayDate.getFullYear()} ${replayDate.getHours()}-${replayDate.getMinutes()}`;
                 (new ReplayLogService()).saveReplay(replayName, fullLog);
                 subscriber.complete();
               }
