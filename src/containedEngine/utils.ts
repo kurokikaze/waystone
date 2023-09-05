@@ -678,7 +678,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					return clientAction;
 				}
 				case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
-					const targetCard = (typeof action.target == 'string') ?
+					const targetCard = (typeof action.target === 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
 						action.target;
 

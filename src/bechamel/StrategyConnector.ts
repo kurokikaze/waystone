@@ -54,6 +54,7 @@ export class StrategyConnector {
         }
 
         if (action.type === 'display/priority') {
+          // console.log('Got priority action')
           if (action.player === this.playerId) {
             this.requestAndSendAction()
           }
@@ -73,7 +74,7 @@ export class StrategyConnector {
         (this.gameState.playerPriority(this.playerId) || inPromptState)
     ) {
       if (currentStep !== 5) {
-        console.log(`Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
+        // console.log(`[${this.playerId}] Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
         const action = this.strategy.requestAction()
         if (action) {
           this.io.emit('clientAction', action)

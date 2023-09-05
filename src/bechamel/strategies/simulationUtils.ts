@@ -4,8 +4,8 @@ import CardInGame from 'moonlands/src/classes/CardInGame'
 import Zone from 'moonlands/src/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
-import { ExpandedClientCard, ProcessedClientCard, StateRepresentation } from '../types';
 import { GameState } from '../GameState';
+import Card from 'moonlands/src/classes/Card';
 
 const addCardData = (card: any) => ({
   ...card,
@@ -53,10 +53,6 @@ const defaultState: StateShape = {
 export const STEP_ATTACK = 2;
 
 export function createState(
-  // myCreatures: ProcessedClientCard[],
-  // enemyCreatures: ProcessedClientCard[],
-  // myMagi: any,
-  // opponentMagi: any,
   gameState: GameState,
   playerId: number,
   opponentId: number,
@@ -155,6 +151,16 @@ export function createState(
     gameCard.id = card.id
     return gameCard
   }).filter<CardInGame>((a): a is CardInGame => a instanceof CardInGame))
+
+  const myDeckCardIds = gameState.getMyDeckCards()
+
+  // stuff the deck with the wild cards
+  // const wildCard = new Card('<Wild>', TYPE_CREATURE, REGION_BOGRATH, 10, {})
+  sim.getZone(ZONE_TYPE_DECK, playerId).add(myDeckCardIds.map(id => {
+    const card = new CardInGame(byName('Grega') as Card, playerId);
+    card.id = id;
+    return card;
+  }));
 
   sim.state.continuousEffects = gameState.getContinuousEffects();
   sim.state.step = gameState.getStep()

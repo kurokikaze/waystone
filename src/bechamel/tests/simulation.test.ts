@@ -1,5 +1,5 @@
 // globals describe, it
-import {State} from 'moonlands/src'
+import {ACTION_PLAY, ACTION_PLAYER_WINS, State} from 'moonlands/src'
 import {byName} from 'moonlands/src/cards';
 import Card from 'moonlands/src/classes/Card';
 import CardInGame from 'moonlands/src/classes/CardInGame';
@@ -7,7 +7,11 @@ import {SimulationStrategy} from '../strategies/SimulationStrategy'
 import {GameState} from '../GameState';
 import {createZones} from '../strategies/simulationUtils';
 import {SerializedClientState} from '../types';
-import { ZONE_TYPE_ACTIVE_MAGI } from 'moonlands';
+import { ACTION_ATTACK, ACTION_EFFECT, EFFECT_TYPE_DRAW, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND } from 'moonlands';
+import { createGame } from '../../containedEngine/containedEngine';
+import { StrategyConnector } from '../StrategyConnector';
+import { AnyEffectType } from 'moonlands/dist/types';
+import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -55,10 +59,10 @@ describe('Simulations', () => {
 
     strategy.setup(stateRepresentation, ACTIVE_PLAYER)
 
-    console.dir(strategy.requestAction())
+    // console.dir(strategy.requestAction())
   })
 
-  it('test', () => {
+  it('Killing Adis', () => {
     const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 
@@ -66,25 +70,26 @@ describe('Simulations', () => {
 		const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
 		const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
 		const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
-		const gumGum = new CardInGame(byName('Gum-Gum') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
+		// const gumGum = new CardInGame(byName('Gum-Gum') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
 		const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
-		const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
-		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion, gumGum]);
+		const adis = new CardInGame(byName('Adis') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion]);
 
     // @ts-ignore
 		const gameState = new State({
 			zones,
-			step: STEP_NAME.PRS1,
+			step: STEP_NAME.ATTACK,
 			activePlayer: ACTIVE_PLAYER,
 		});
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
-    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
 
     const serializedState = gameState.serializeData(ACTIVE_PLAYER) as SerializedClientState
 
+    // console.dir(serializedState.zones.opponentActiveMagi)
     const stateRepresentation = new GameState(serializedState)
     stateRepresentation.setPlayerId(ACTIVE_PLAYER)
 
@@ -92,269 +97,260 @@ describe('Simulations', () => {
 
     strategy.setup(stateRepresentation, ACTIVE_PLAYER)
 
-    console.dir(strategy.requestAction())
-  })
-  // it('doesn\'t see some prompts', () => {
-  //   const stateRepresentation = new GameState({
-  //     "staticAbilities":[],
-  //     "energyPrompt":false,
-  //     "turnTimer":false,
-  //     "turnSecondsLeft":0,
-  //     "promptAvailableCards":[],
-  //     "zones":{
-  //       "playerHand":[],
-  //       "opponentHand":[
-  //         {
-  //           "id":"6pJG-DVHihIKRkt_k0d6_",
-  //           "owner":1,
-  //           "card":null,
-  //           "data":null,
-  //         },
-  //         {
-  //           "id":"2eIFHRnaUluPZZlS_mGt0",
-  //           "owner":1,
-  //           "card":null,
-  //           "data":null,
-  //         },
-  //         {
-  //           "id":"VpNhwSd-l5Rxt9zhAGjUu",
-  //           "owner":1,
-  //           "card":null,
-  //           "data":null,
-  //         },
-  //         {
-  //           "id":"gpuy-gRAq-dR4lpY6xlo7",
-  //           "owner":1,
-  //           "card":null,
-  //           "data":null,
-  //         }
-  //       ],
-  //       "playerDeck":[
-  //         {"card":null,"data":{},"owner":2,"id":"NKBekrVNbBQMspcP6IbWh"},
-  //         {"card":null,"data":{},"owner":2,"id":"MF_vvZUdgWoCBiZQZ5AJw"},
-  //         {"card":null,"data":{},"owner":2,"id":"JG5Dlr13SmL-Za9SkhFej"},
-  //         {"card":null,"data":{},"owner":2,"id":"gzhljTSppS5CX-J2vQHjp"},
-  //         {"card":null,"data":{},"owner":2,"id":"xDKSNLfG_5ty9hx2G2aPX"},
-  //         {"card":null,"data":{},"owner":2,"id":"N9sNqya31rIzpkZeOEqEC"},
-  //         {"card":null,"data":{},"owner":2,"id":"pepqEKvaH8i_4Q3Et9N3N"},
-  //         {"card":null,"data":{},"owner":2,"id":"SFqnFyk6d5JRv93rJzedl"},
-  //         {"card":null,"data":{},"owner":2,"id":"5jlshMDPl2_-1j_vFjvHn"},
-  //         {"card":null,"data":{},"owner":2,"id":"pU7Iu98LY2NoVZfBsYAf4"},
-  //         {"card":null,"data":{},"owner":2,"id":"iD6rWfSKO207KAiFTbxWY"},
-  //         {"card":null,"data":{},"owner":2,"id":"vg43VL3wC_uXFANsNWo3z"},
-  //         {"card":null,"data":{},"owner":2,"id":"n9V0skmcu-QI-iWBAmU9M"},
-  //         {"card":null,"data":{},"owner":2,"id":"zVuzfBpceewzVrs4MPn0c"},
-  //         {"card":null,"data":{},"owner":2,"id":"A3VxRSFUSSb4HVDJ_T-im"},
-  //         {"card":null,"data":{},"owner":2,"id":"2aocgL4eg43vExJJwRBIQ"},
-  //         {"card":null,"data":{},"owner":2,"id":"y4FPbdydSZ2mr1Q--9buE"},
-  //         {"card":null,"data":{},"owner":2,"id":"OlIP-xv3Eshoj94foNeEi"},
-  //         {"card":null,"data":{},"owner":2,"id":"KiQV7vZmQtkwru7xfkFnS"},
-  //         {"card":null,"data":{},"owner":2,"id":"JuqbEc70NT8M3yT9l9sUk"},
-  //         {"card":null,"data":{},"owner":2,"id":"ZoL4zk1ekwg6Q5bRsjjHC"},
-  //         {"card":null,"data":{},"owner":2,"id":"0V_yh4m3ZRldsYflGvyST"},
-  //         {"card":null,"data":{},"owner":2,"id":"vMeUaV9pdz6W2PNZq5seS"},
-  //         {"card":null,"data":{},"owner":2,"id":"0mvHEPzMF0SWE0VojeAmB"},
-  //         {"card":null,"data":{},"owner":2,"id":"Ay3LTY5M2iTOceFMv0MG9"},
-  //         {"card":null,"data":{},"owner":2,"id":"GHUVE3GyXOeOL0wSHpwvp"},
-  //         {"card":null,"data":{},"owner":2,"id":"0j_RER2CqhLrutmstUFDi"},
-  //         {"card":null,"data":{},"owner":2,"id":"pUmAhG6xPm1WBf69TYtLF"},
-  //         {"card":null,"data":{},"owner":2,"id":"KgjSt3NA_BnyZPT36mB6h"},
-  //         {"card":null,"data":{},"owner":2,"id":"ebHmA5uI7BRk2BK05ODfZ"},
-  //         {"card":null,"data":{},"owner":2,"id":"jWi4yprvHPk-RvFuoufTx"},
-  //         {"card":null,"data":{},"owner":2,"id":"nn2XhBVIAu6Awpw0mbjFE"},
-  //         {"card":null,"data":{},"owner":2,"id":"cQ8hPo3x9BjOoefUqEUKF"},
-  //         {"card":null,"data":{},"owner":2,"id":"2Tb6iuxuOjTDgz-fjvewe"},
-  //         {"card":null,"data":{},"owner":2,"id":"Y95T7b4Ibah48I3I1Kord"},
-  //         {"card":null,"data":{},"owner":2,"id":"3TOaBhXTzWV03j5S0n6LF"},
-  //         {"card":null,"data":{},"owner":2,"id":"XN45Qoki_EOd0gt-p_G7Q"},
-  //         {"card":null,"data":{},"owner":2,"id":"tom__yF0ggEM1NL7NEcZP"},
-  //         {"card":null,"data":{},"owner":2,"id":"mZbb8FrZkR7mRqNmzKM2U"},
-  //         {"card":null,"data":{},"owner":2,"id":"tJScgYp_YXhTF0rb8QANa"}
-  //       ],
-  //       "opponentDeck":[
-  //         {"card":null,"data":{},"owner":1,"id":"uWlMaOOsXPoFzb2m3hn3t"},
-  //         {"card":null,"data":{},"owner":1,"id":"ty2NARKi70_c1RGGNu7sG"},
-  //         {"card":null,"data":{},"owner":1,"id":"R12GZBQ09-hWlhbJu1sMN"},
-  //         {"card":null,"data":{},"owner":1,"id":"dETrwXT1VIpz-qaknBsCk"},
-  //         {"card":null,"data":{},"owner":1,"id":"LF08KZ07-ULvz3ZZwfuPI"},
-  //         {"card":null,"data":{},"owner":1,"id":"buxiQFzW21Y5LS-3awReW"},
-  //         {"card":null,"data":{},"owner":1,"id":"HrrL5ypZ7Pf6n6isjCRyI"},
-  //         {"card":null,"data":{},"owner":1,"id":"ar801bnZGX_4oce3A8jjT"},
-  //         {"card":null,"data":{},"owner":1,"id":"HRzwxzU2NBTwt2EfDeSUS"},
-  //         {"card":null,"data":{},"owner":1,"id":"D8py4088tacmN5lqCebYX"},
-  //         {"card":null,"data":{},"owner":1,"id":"zuaTo6WxKDmWuIuXhqmbA"},
-  //         {"card":null,"data":{},"owner":1,"id":"BklZSjmBKHLQSHUd5-n_S"},
-  //         {"card":null,"data":{},"owner":1,"id":"xWUV-Hxszflqc2MThlYp3"},
-  //         {"card":null,"data":{},"owner":1,"id":"uQqs6oxyf0eCo_zM31jg-"},
-  //         {"card":null,"data":{},"owner":1,"id":"GelLMZjoR6Yt-sjNQoIFZ"},
-  //         {"card":null,"data":{},"owner":1,"id":"mjOkPLQnPzQYzqYmId1dn"},
-  //         {"card":null,"data":{},"owner":1,"id":"NZ6sxHyN2Yqc6xiEkE8sO"},
-  //         {"card":null,"data":{},"owner":1,"id":"m8r0SZAZe9t8D6MpAOUUY"},
-  //         {"card":null,"data":{},"owner":1,"id":"c1BEjtJR5M2bzJ-aP5sSO"},
-  //         {"card":null,"data":{},"owner":1,"id":"If3nPMZXgVP0U2DJsSxz6"},
-  //         {"card":null,"data":{},"owner":1,"id":"MNyFUi9aqmZOwL9kMLn4f"},
-  //         {"card":null,"data":{},"owner":1,"id":"b585xe9NAdaM3EbalTB2Y"},
-  //         {"card":null,"data":{},"owner":1,"id":"rErYQ7iDsdwJxLeLE2rTF"},
-  //         {"card":null,"data":{},"owner":1,"id":"aP0FHHFZhZRuI5306dkDX"},
-  //         {"card":null,"data":{},"owner":1,"id":"I-WOCE3_qglPgzFoW__b3"},
-  //         {"card":null,"data":{},"owner":1,"id":"sjc1TWrBZgeWJxwRy4hOK"},
-  //         {"card":null,"data":{},"owner":1,"id":"boMoJ4rKsFasH519vZWGQ"},
-  //         {"card":null,"data":{},"owner":1,"id":"HLqH9LkxB-JI_GZSK_hXL"},
-  //         {"card":null,"data":{},"owner":1,"id":"xT3SkCoKGKPX61f_UxW8n"},
-  //         {"card":null,"data":{},"owner":1,"id":"7gZGsiCjBzhX-7QG9U6cv"},
-  //         {"card":null,"data":{},"owner":1,"id":"idwo4YV0rByMFINb3U5CO"},
-  //         {"card":null,"data":{},"owner":1,"id":"gqYQK6lB7z_iJQhagc_qt"},
-  //         {"card":null,"data":{},"owner":1,"id":"ysCesxA-NqY_Tahz8am50"}
-  //       ],
-  //       "playerActiveMagi":[],
-  //       "opponentActiveMagi":[
-  //         {
-  //           "id":"PJOq54Av96WS7nnm4NiuS",
-  //           "owner":1,
-  //           "card":"Nimbulo",
-  //           "data":{
-  //             "energy":8,
-  //             "controller":1,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false,
-  //             "wasAttacked":false,
-  //           }
-  //         }
-  //       ],
-  //       "playerMagiPile":[
-  //         {
-  //           "card":"Ebylon",
-  //           "data":{
-  //             "energy":0,
-  //             "controller":2,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false,
-  //             "wasAttacked":false,
-  //           },
-  //           "owner":2,
-  //           "id":"aNoU4H1pbiSitFQgK2s7g",
-  //         },{
-  //           "card":"O'Qua",
-  //           "data":{
-  //             "energy":0,
-  //             "controller":2,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false,
-  //             "wasAttacked":false,
-  //           },
-  //           "owner":2,
-  //           "id":"NkCTjDJqBeIHT3RH-xhlw",
-  //         },
-  //         {
-  //           "card":"Whall",
-  //           "data":{
-  //             "energy":0,
-  //             "controller":2,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false,
-  //             "wasAttacked":false,
-  //           },
-  //           "owner":2,
-  //           "id":"lf_CB9hEWyHTgE4uUM-In"
-  //         }
-  //       ],
-  //       "opponentMagiPile":[
-  //         {
-  //           "card":null,
-  //           "data":{},
-  //           "owner":1,
-  //           "id":"Bx3JmZsn8C9OzXJ1P8dnt",
-  //         },
-  //         {
-  //           "card":null,
-  //           "data":{},
-  //           "owner":1,
-  //           "id":"F7Ee2BRkPwDXJrube7Q54",
-  //         }
-  //       ],
-  //       "inPlay":[
-  //         {
-  //           "id":"wgLtjs5lmfvOnAtvYExch",
-  //           "owner":1,
-  //           "card":"Storm Ring",
-  //           "data":{
-  //             "energy":0,
-  //             "controller":1,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false,
-  //             "wasAttacked":false,
-  //           }
-  //         },
-  //         {
-  //           "id":"ySpDz2KzClaJaZRvCsuY9",
-  //           "owner":1,
-  //           "card":"Lovian",
-  //           "data":{
-  //             "energy":4,
-  //             "controller":1,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false
-  //             ,"wasAttacked":false,
-  //           }
-  //         },
-  //         {
-  //           "id":"dKXoQDDtPdQGK_XOzYsNd",
-  //           "owner":1,
-  //           "card":"Thunder Vashp",
-  //           "data":{
-  //             "energy":2,
-  //             "controller":1,
-  //             "attacked":0,
-  //             "actionsUsed":[],
-  //             "energyLostThisTurn":0,
-  //             "defeatedCreature":false,
-  //             "hasAttacked":false,
-  //             "wasAttacked":false,
-  //           }
-  //         }
-  //       ],
-  //       "playerDefeatedMagi":[],
-  //       "opponentDefeatedMagi":[],
-  //       "playerDiscard":[],
-  //       "opponentDiscard":[]
-  //     },
-  //     "continuousEffects":[],
-  //     "step":0,
-  //     "turn":1,
-  //     "goesFirst":1,
-  //     "activePlayer":1,
-  //     "prompt":false,
-  //     "promptType":null,
-  //     "promptMessage":null,
-  //     "promptPlayer":null,
-  //     "promptGeneratedBy":null,
-  //     "promptParams":{},
-  //     "log":[],
-  //     "gameEnded":false,
-  //     "winner":null,
-  //   });
-  //   stateRepresentation.setPlayerId(2);
-    
-  //   const strategy = new SimulationStrategy()
+    const action = strategy.requestAction();
 
-  //   strategy.setup(stateRepresentation, 2)
-  // })
+    expect(action.type).toEqual(ACTION_ATTACK);
+    // Not sure why expect does not filter out other C2S actions
+    if (action.type === ACTION_ATTACK) {
+      expect(action.target).toEqual(adis.id);
+    }
+  })
 })
+
+describe('Simulations', () => {
+  it('Cald vs Naroom', (done) => {
+    const deckOne = [
+      'Grega',
+      'Magam',
+      'Sinder',
+      'Fire Chogo',
+      'Fire Chogo',
+      'Fire Chogo',
+      'Fire Grag',
+      'Fire Grag',
+      'Fire Grag',
+      'Arbolit',
+      'Arbolit',
+      'Arbolit',
+      'Magma Hyren',
+      'Magma Hyren',
+      'Magma Hyren',
+      'Quor',
+      'Quor',
+      'Quor',
+      'Lava Aq',
+      'Lava Aq',
+      'Lava Aq',
+      'Lava Arboll',
+      'Lava Arboll',
+      'Lava Arboll',
+      'Diobor',
+      'Diobor',
+      'Diobor',
+      'Drakan',
+      'Drakan',
+      'Drakan',
+      'Thermal Blast',
+      'Thermal Blast',
+      'Thermal Blast',
+      'Flame Geyser',
+      'Flame Geyser',
+      'Flame Geyser',
+      'Water of Life',
+      'Dream Balm',
+      'Dream Balm',
+      'Magma Armor',
+      'Magma Armor',
+      'Water of Life',
+      'Water of Life'
+    ];
+
+	  const deckTwo = [
+      'Evu',
+      'Tryn',
+      'Yaki',
+      'Bhatar',
+      'Timber Hyren',
+      'Twee',
+      'Balamant Pup',
+      'Balamant Pup',
+      'Balamant Pup',
+      'Rudwot',
+      'Rudwot',
+      'Arboll',
+      'Arboll',
+      'Carillion',
+      'Carillion',
+      'Carillion',
+      'Furok',
+      'Furok',
+      'Leaf Hyren',
+      'Leaf Hyren',
+      'Plith',
+      'Plith',
+      'Weebo',
+      'Weebo',
+      'Ancestral Flute',
+      'Ancestral Flute',
+      'Ancestral Flute',
+      'Robe of Vines',
+      'Robe of Vines',
+      'Water of Life',
+      'Water of Life',
+      "Hyren's Call",
+      "Orwin's Gaze",
+      "Orwin's Gaze",
+      'Vortex of Knowledge',
+      'Vortex of Knowledge',
+      'Grow',
+      'Grow',
+      'Grow',
+      'Giant Carillion',
+      'Giant Carillion',
+      'Giant Carillion',
+      'Weebo'
+    ]
+
+    const game = createGame()
+    game.setPlayers(1,2);
+    game.setDeck(1, deckOne);
+    game.setDeck(2, deckTwo);
+
+    game.setup();
+
+    let gameDataCallbackOne: Function = () => {};
+    let actionCallbackOne: Function = () => {};
+
+    let gameDataCallbackTwo: Function = () => {};
+    let actionCallbackTwo: Function = () => {};
+    
+    const connectorOne = {
+      on: (type: string, callback: Function) => {
+        if (type == 'gameData') {
+          gameDataCallbackOne = callback;
+        } else if (type == 'action') {
+          actionCallbackOne = callback;
+        }
+      },
+      emit: (type: string, action: any) => {
+        // console.log(`Connector one emitting "${type}"`)
+        // console.dir(action);
+        if (type === 'clientAction') {
+          const convertedCommand = convertClientCommands({
+            ...action,
+            player: 1,
+          }, game);
+          if (convertedCommand) {
+            if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
+              console.log(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.name} [${action.payload.card.id}]`)
+              console.dir(action?.payload?.card);
+              debugger;
+              expect(true).toEqual(false);
+            }
+              game.update(convertedCommand);
+            const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+          if (activePlayer === 1) {
+            // Support bechamel with the priority events
+            // setTimeout(() => {
+              actionCallbackOne({
+                type: 'display/priority',
+                player: 1,
+              })
+            // }, 0);
+          } else if (activePlayer === 2) {
+            // setTimeout(() => {
+              actionCallbackTwo({
+                type: 'display/priority',
+                player: 2,
+              })
+            // }, 0);
+          }
+          }
+        }
+      },
+      close: () => {
+        console.log(`Closing the connection`);
+      }
+    }
+
+    const connectorTwo = {
+      on: (type: string, callback: Function) => {
+        if (type == 'gameData') {
+          gameDataCallbackTwo = callback;
+        } else if (type == 'action') {
+          actionCallbackTwo = callback;
+        }
+      },
+      emit: (_type: string, action: any) => {
+        const convertedCommand = convertClientCommands({
+          ...action,
+          player: 2,
+        }, game);
+        if (convertedCommand) {
+          if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
+            console.error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.card} [${action.payload.card.id}]`)
+            console.log(game.getZone(ZONE_TYPE_HAND, 2).cards.map(card => `[${card.id}] ${card.card.name}`).join(', '))
+            console.dir(action?.payload?.card);
+            expect(true).toEqual(false);
+          }
+          game.update(convertedCommand);
+          const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+          if (activePlayer === 1) {
+            // Support bechamel with the priority events
+            // setTimeout(() => {
+              actionCallbackOne({
+                type: 'display/priority',
+                player: 1,
+              })
+            // }, 0);
+          } else if (activePlayer === 2) {
+            // setTimeout(() => {
+              actionCallbackTwo({
+                type: 'display/priority',
+                player: 2,
+              })
+            // }, 0)
+          }
+        }
+      },
+      close: () => {
+        console.log(`Closing the connection`);
+      }
+    }
+
+    const strategyConnectorOne = new StrategyConnector(connectorOne);
+    strategyConnectorOne.connect(new SimulationStrategy())
+    const strategyConnectorTwo = new StrategyConnector(connectorTwo);
+    strategyConnectorTwo.connect(new SimulationStrategy())
+
+    game.debug = false;
+    game.setOnAction((action: AnyEffectType) => {
+      // console.log(`Action from an engine`);
+      // console.dir(action);
+
+      if (action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES && action.destinationZone === ZONE_TYPE_HAND) {
+        // @ts-ignore
+        // if (typeof action.target == 'string') {
+        //   console.log(`Drawing a card "${action.target}"`);
+        // } else {
+        //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
+        // }
+      } 
+      // try {
+        const commandForBotOne = convertServerCommand(action, game, 1);
+        actionCallbackOne(commandForBotOne);
+      // } catch(e) {
+      //   console.log(`Error converting command`)
+      //   console.dir(action);
+      //   throw e;
+      // }
+
+      try {
+        const commandForBotTwo = convertServerCommand(action, game, 2);
+        actionCallbackTwo(commandForBotTwo);
+      } catch(e) {
+        console.log(`Error converting command`)
+        console.dir(action);
+        throw e;
+      }
+
+      if (action.type === ACTION_PLAYER_WINS) {
+        done();
+      }
+    });
+
+    gameDataCallbackOne({playerId: 1, state: game.serializeData(1)})
+    gameDataCallbackTwo({playerId: 2, state: game.serializeData(2)})
+  });
+})
+

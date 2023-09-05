@@ -171,7 +171,8 @@ export class GameState {
   }
 
   public getPlayableCards(): ClientCard[] {
-    const magi = this.getMyMagi()
+    const magi = this.getMyMagi();
+    if (!magi) return [];
     const magiCard = byName(magi.card);
     if (!magiCard) return [];
     return this.state.zones.playerHand.filter(card => {
@@ -228,6 +229,10 @@ export class GameState {
         return true;
       };
     }
+  }
+
+  public getMyDeckCards(): string[] {
+    return this.state.zones.playerDeck.map(({id}) => id);
   }
 
   public getMyCreaturesInPlay(): ProcessedClientCard[] {
@@ -300,6 +305,10 @@ export class GameState {
     return this.state.zones.opponentActiveMagi[0]
   }
 
+  public getOpponentId(): number {
+    return this.state.opponentId;
+  }
+
   private getZoneName = (serverZoneType: string, source: Card | ConvertedCard | HiddenConvertedCard): keyof typeof this.state.zones => {
     if (!(serverZoneType in clientZoneNames)) {
       throw new Error(`Unknown zone: ${serverZoneType}`);
@@ -330,12 +339,12 @@ export class GameState {
         };
       }
       case ACTION_PASS: {
-        postMessage({
-          botState: JSON.stringify({
-            ...state,
-            step: action.newStep,
-          }, null, 2),
-        })
+        // postMessage({
+        //   botState: JSON.stringify({
+        //     ...state,
+        //     step: action.newStep,
+        //   }, null, 2),
+        // })
         return {
           ...state,
           step: action.newStep,
@@ -507,9 +516,9 @@ export class GameState {
       }
       case EFFECT_TYPE_START_OF_TURN: {
         this.turnNumber += 1;
-        postMessage({
-          botState: JSON.stringify(state, null, 2),
-        })
+        // postMessage({
+        //   botState: JSON.stringify(state, null, 2),
+        // })
         if (action.player === this.playerId) {
           return {
             ...state,

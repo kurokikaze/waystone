@@ -5,6 +5,7 @@ import CardInGame, { ConvertedCard } from 'moonlands/src/classes/CardInGame'
 import { AnyEffectType, ContinuousEffectType, LogEntryType, PromptTypeType, RestrictionObjectType, RestrictionType, ZoneType } from 'moonlands/src/types'
 import { ResolvePromptType } from 'moonlands/src/types/resolvePrompt'
 import { ACTION_ATTACK, ACTION_CONCEDE, ACTION_NONE, COST_X } from './const'
+import { C2SAction } from '../clientProtocol'
 
 export type Challenge = {
   deck: string
@@ -131,6 +132,7 @@ export type SerializedClientState = {
   promptParams: PromptParamsType;
   log: LogEntryType[];
   gameEnded: boolean;
+  opponentId: number;
   winner: number | null;
 }
 
@@ -165,6 +167,7 @@ export type StateRepresentation = {
   promptMessage: string | null,
   promptParams: PromptParamsType,
   promptGeneratedBy: string | null,
+  opponentId: number,
   promptAvailableCards: [],
 }
 
@@ -193,9 +196,19 @@ export type AttackType = {
 
 export type PlayerActionType = PassType | PowerActionType | NormalPlayType | ResolvePromptType | AttackType
 
+export type ActionOnHold = {
+  action: AnyEffectType,
+  hash: string
+}
+
+export type C2SActionOnHold = {
+  action: C2SAction,
+  hash: string
+}
+
 export type SimulationEntity = {
   sim: State,
   action: any,
-  actionLog: any[],
+  actionLog: ActionOnHold[],
   previousHash: string,
 }
