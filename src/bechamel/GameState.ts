@@ -148,6 +148,10 @@ export class GameState {
     return (this.state.prompt && this.state.promptPlayer === playerId)
   }
 
+  public isInMyPromptState(): boolean {
+    return (this.state.prompt && this.state.promptPlayer === this.playerId)
+  }
+
   public waitingForTarget(byId: string, playerId: number): boolean {
     return this.isInPromptState(playerId) && this.state.promptGeneratedBy === byId
   }

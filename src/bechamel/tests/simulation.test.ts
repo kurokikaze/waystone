@@ -208,6 +208,9 @@ describe('Simulations', () => {
 
     game.setup();
 
+    // @ts-ignore
+    console.dir(game.twister);
+
     let gameDataCallbackOne: Function = () => {};
     let actionCallbackOne: Function = () => {};
 

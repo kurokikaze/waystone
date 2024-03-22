@@ -154,7 +154,13 @@ export const hideIfNecessary = (card: CardInGame, targetZone: ZoneType, isOppone
 };
 
 export function convertServerCommand(initialAction: AnyEffectType, game: State, playerId: number, overrideHiding = false): ClientCommand | any | null {
-	var action: AnyEffectType = clone(initialAction);
+	try {
+		var action: AnyEffectType = clone(initialAction);
+	} catch(e) {
+		console.log(`Error converting command`)
+		console.dir(initialAction)
+		throw new Error();
+	}
 	switch(action.type) {
 		case ACTION_PASS: {
 			const step = game.state.step;

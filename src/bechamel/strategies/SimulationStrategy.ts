@@ -371,6 +371,12 @@ export class SimulationStrategy implements Strategy {
         return true
       }
     }
+
+    if (this.gameState.isInMyPromptState() && action.type !== ACTION_RESOLVE_PROMPT) {
+      console.log('Non-prompt action in the prompt state')
+      return true
+    }
+
     return false
   }
 

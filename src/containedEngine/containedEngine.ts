@@ -37,14 +37,17 @@ export const createGame = (): State => {
     new Zone('In play', ZONE_TYPE_IN_PLAY, null),
   ];
 
-  const zones = createZones(1, 2)
+  const zones: any[] = []; //createZones(1, 2)
   const game = new State({
     ...defaultState,
     zones,
     activePlayer: 1,
   });
 
-  game.setPlayers(1, 2)
+  // @ts-ignore
+  game.initiatePRNG(12345);
+  // game.setPlayers(1, 2);
+  // game.setup();
   game.enableDebug();
 
   return game
