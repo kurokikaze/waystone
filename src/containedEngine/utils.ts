@@ -688,8 +688,10 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						game.getMetaValue(action.target, action.generatedBy) :
 						action.target;
 
-					if (!targetCard || !targetCard.id) {
+					if (!targetCard || (!targetCard.id && !targetCard.length)) {
 						console.dir(`Error getting the card from ${action.target}`);
+						console.log('Action')
+						console.dir(action);
 						console.log('Metadata:');
 						console.dir(game.getSpellMetadata(action.generatedBy));
 					}

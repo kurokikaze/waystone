@@ -206,6 +206,8 @@ describe('Simulations', () => {
     game.setDeck(1, deckOne);
     game.setDeck(2, deckTwo);
 
+    // @ts-ignore
+    game.initiatePRNG(12345);
     game.setup();
 
     // @ts-ignore
@@ -262,7 +264,7 @@ describe('Simulations', () => {
         }
       },
       close: () => {
-        console.log(`Closing the connection`);
+        // console.log(`Closing the connection`);
       }
     }
 
@@ -307,7 +309,7 @@ describe('Simulations', () => {
         }
       },
       close: () => {
-        console.log(`Closing the connection`);
+        // console.log(`Closing the connection`);
       }
     }
 

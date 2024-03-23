@@ -201,9 +201,10 @@ export class RandomStrategy implements Strategy {
             const enemyCreatures = this.gameState.getEnemyCreaturesInPlay()
             const opponentMagi = this.gameState.getOpponentMagi()
             if (myCreatures.length) {
-              const randomMy = myCreatures[Math.floor(Math.random() * myCreatures.length)]
+              const randomValue = 0.5; // Math.random()
+              const randomMy = myCreatures[Math.floor(randomValue * myCreatures.length)]
               if (enemyCreatures.length) {
-                const randomOpponent = enemyCreatures[Math.floor(Math.random() * enemyCreatures.length)]
+                const randomOpponent = enemyCreatures[Math.floor(randomValue * enemyCreatures.length)]
                 if (randomMy._card?.data.canAttackMagiDirectly && randomMy.data.energy <= opponentMagi.data.energy) {
                   return this.attack(randomMy.id, opponentMagi.id)
                 } else {
