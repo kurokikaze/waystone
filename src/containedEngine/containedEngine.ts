@@ -29,7 +29,7 @@ export const createGame = (): State => {
   });
 
   // @ts-ignore
-  game.initiatePRNG(12345);
+  game.initiatePRNG(3);
   // game.setPlayers(1, 2);
   // game.setup();
   game.enableDebug();

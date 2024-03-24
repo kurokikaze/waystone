@@ -30,7 +30,7 @@ export class StrategyConnector {
       this.gameState.setPlayerId(data.playerId)
 
       strategy.setup(this.gameState, this.playerId)
-      console.log('We got the game data')
+
       if (this.gameState.playerPriority(this.playerId) || this.gameState.isInPromptState(this.playerId)) {
         this.requestAndSendAction()
       }
