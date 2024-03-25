@@ -134,7 +134,13 @@ export const affectRemoveEnergy = (state: State, card: ConvertedCard, action: Cl
     // For the Colossus
     return card.data.energy;
   }
-  return card.data.energy - action.amount;
+  let energyLossThreshold = card.data.energyLossThreshold || 0;
+  // This is a hacky way to represent burrowing, but will do for now
+  if (card.data.burrowed) {
+    energyLossThreshold = 2;
+  }
+  const energyLoss = card.data.energy - action.amount;
+  return (energyLossThreshold > 0) ? Math.min(energyLoss, energyLossThreshold) : energyLoss;
 }
 
 export const affectAddEnergy = (state: State, card: ConvertedCard, action: ClientEffectAddEnergyToCreature): number => {

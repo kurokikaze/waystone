@@ -173,8 +173,6 @@ function Card({
 					const id = parseInt(node.getAttribute('data-effect-id') || '0', 10);
 					if (!node.classList.contains('fadeAway') && !energyEffectsShown.has(id)) {
 						node.classList.add('fadeAway');
-						console.log(`Effect #${id} was shown and marked`);
-						console.log(`Current values: ${[...energyEffectsShown.values()].join(', ')}`);
 						energyEffectsShown.add(id);
 						cleanupNeeded = true;
 					}
@@ -183,8 +181,6 @@ function Card({
 					const id =	parseInt(node.getAttribute('data-effect-id') || '0', 10);
 					if (!node.classList.contains('fadeAway') && !energyEffectsShown.has(id)) {
 						node.classList.add('fadeAway');
-						console.log(`Effect #${id} was shown and marked`);
-						console.log(`Current values: ${[...energyEffectsShown.values()].join(', ')}`);
 						energyEffectsShown.add(id);
 						cleanupNeeded = true;
 					}

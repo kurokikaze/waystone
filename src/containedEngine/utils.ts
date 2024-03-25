@@ -907,18 +907,19 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					} as ClientEffectDraw;
 				}
 				case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
-					console.dir(action.staticAbilities || []);
 					const staticAbilities = (action.staticAbilities || []).map(ability =>
 						Object.fromEntries(
 							Object.entries(ability).map(([k, v]) => [k, game.getMetaValue(v, action.generatedBy)]),
 						),
 					)
-					// console.dir(staticAbilities);
 					return {
 						type: action.type,
 						effectType: action.effectType,
 						generatedBy: action.generatedBy,
-						expiration: action.expiration,
+						expiration: {
+							...action.expiration,
+							turns: typeof action.expiration.turns == 'string' ? game.getMetaValue(action.expiration.turns, action.generatedBy): action.expiration.turns,
+						},
 						staticAbilities,
 						triggerEffects: action.triggerEffects || [],
 						player: action.player,
