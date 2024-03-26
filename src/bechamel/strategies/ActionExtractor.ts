@@ -345,7 +345,7 @@ export class ActionExtractor {
           const innerSim = sim.clone()
           const action: AnyEffectType = {
             type: ACTION_RESOLVE_PROMPT,
-            promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+            promptType: PROMPT_TYPE_SINGLE_CREATURE,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
             player: innerSim.state.promptPlayer,
@@ -448,9 +448,11 @@ export class ActionExtractor {
         return simulationQueue
       }
       case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
+        const promptPlayer = sim.state.promptPlayer;
         const myCreatures: CardInGame[] = sim.getZone(ZONE_TYPE_IN_PLAY).cards
-          .filter((card: CardInGame) => card.card.type === TYPE_CREATURE && card.owner === playerId)
+          .filter((card: CardInGame) => card.card.type === TYPE_CREATURE && sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptPlayer)
         const simulationQueue: SimulationEntity[] = []
+        // console.log(`My creatures for the prompt: ${myCreatures.map(creature=>`${creature.card.name}(${creature.id})`).join(' ')}`)
         myCreatures.forEach(creature => {
           const innerSim = sim.clone()
           const action: AnyEffectType = {

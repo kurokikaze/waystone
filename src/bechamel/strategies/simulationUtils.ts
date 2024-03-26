@@ -155,7 +155,6 @@ export function createState(
   const myDeckCardIds = gameState.getMyDeckCards()
 
   // stuff the deck with the wild cards
-  // const wildCard = new Card('<Wild>', TYPE_CREATURE, REGION_BOGRATH, 10, {})
   sim.getZone(ZONE_TYPE_DECK, playerId).add(myDeckCardIds.map(id => {
     const card = new CardInGame(byName('Grega') as Card, playerId);
     card.id = id;

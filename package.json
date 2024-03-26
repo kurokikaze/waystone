@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "node --experimental-vm-modules .\\node_modules\\jest\\bin\\jest.js",
+    "test-debug": "node --inspect-brk --experimental-vm-modules .\\node_modules\\jest\\bin\\jest.js",
     "tauri": "tauri"
   },
   "dependencies": {

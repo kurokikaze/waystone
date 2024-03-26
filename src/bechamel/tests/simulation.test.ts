@@ -357,5 +357,255 @@ describe('Simulations', () => {
     gameDataCallbackOne({playerId: 1, state: game.serializeData(1)})
     gameDataCallbackTwo({playerId: 2, state: game.serializeData(2)})
   });
+
+  it('Cald vs GumGums', (done) => {
+    const deckOne = [
+      'Grega',
+      'Magam',
+      'Sinder',
+      'Fire Chogo',
+      'Fire Chogo',
+      'Fire Chogo',
+      'Fire Grag',
+      'Fire Grag',
+      'Fire Grag',
+      'Arbolit',
+      'Arbolit',
+      'Arbolit',
+      'Magma Hyren',
+      'Magma Hyren',
+      'Magma Hyren',
+      'Quor',
+      'Quor',
+      'Quor',
+      'Lava Aq',
+      'Lava Aq',
+      'Lava Aq',
+      'Lava Arboll',
+      'Lava Arboll',
+      'Lava Arboll',
+      'Diobor',
+      'Diobor',
+      'Diobor',
+      'Drakan',
+      'Drakan',
+      'Drakan',
+      'Thermal Blast',
+      'Thermal Blast',
+      'Thermal Blast',
+      'Flame Geyser',
+      'Flame Geyser',
+      'Flame Geyser',
+      'Water of Life',
+      'Dream Balm',
+      'Dream Balm',
+      'Magma Armor',
+      'Magma Armor',
+      'Water of Life',
+      'Water of Life'
+    ];
+
+	  const deckTwo = [
+      'Evu',
+      'Tryn',
+      'Yaki',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      "Gum-Gum",
+      "Gum-Gum",
+      "Gum-Gum",
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum',
+      'Gum-Gum'
+    ]
+
+    const game = createGame()
+    game.setPlayers(1,2);
+    game.setDeck(1, deckOne);
+    game.setDeck(2, deckTwo);
+
+    // @ts-ignore
+    game.initiatePRNG(12345);
+    game.setup();
+
+    // @ts-ignore
+    console.dir(game.twister);
+
+    let gameDataCallbackOne: Function = () => {};
+    let actionCallbackOne: Function = () => {};
+
+    let gameDataCallbackTwo: Function = () => {};
+    let actionCallbackTwo: Function = () => {};
+    
+    const connectorOne = {
+      on: (type: string, callback: Function) => {
+        if (type == 'gameData') {
+          gameDataCallbackOne = callback;
+        } else if (type == 'action') {
+          actionCallbackOne = callback;
+        }
+      },
+      emit: (type: string, action: any) => {
+        // console.log(`Connector one emitting "${type}"`)
+        // console.dir(action);
+        if (type === 'clientAction') {
+          const convertedCommand = convertClientCommands({
+            ...action,
+            player: 1,
+          }, game);
+          if (convertedCommand) {
+            if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
+              console.log(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.name} [${action.payload.card.id}]`)
+              console.dir(action?.payload?.card);
+              debugger;
+              expect(true).toEqual(false);
+            }
+              game.update(convertedCommand);
+            const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+          if (activePlayer === 1) {
+            // Support bechamel with the priority events
+            // setTimeout(() => {
+              actionCallbackOne({
+                type: 'display/priority',
+                player: 1,
+              })
+            // }, 0);
+          } else if (activePlayer === 2) {
+            // setTimeout(() => {
+              actionCallbackTwo({
+                type: 'display/priority',
+                player: 2,
+              })
+            // }, 0);
+          }
+          }
+        }
+      },
+      close: () => {
+        // console.log(`Closing the connection`);
+      }
+    }
+
+    const connectorTwo = {
+      on: (type: string, callback: Function) => {
+        if (type == 'gameData') {
+          gameDataCallbackTwo = callback;
+        } else if (type == 'action') {
+          actionCallbackTwo = callback;
+        }
+      },
+      emit: (_type: string, action: any) => {
+        const convertedCommand = convertClientCommands({
+          ...action,
+          player: 2,
+        }, game);
+        if (convertedCommand) {
+          if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
+            console.error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.card} [${action.payload.card.id}]`)
+            console.log(game.getZone(ZONE_TYPE_HAND, 2).cards.map(card => `[${card.id}] ${card.card.name}`).join(', '))
+            console.dir(action?.payload?.card);
+            expect(true).toEqual(false);
+          }
+          game.update(convertedCommand);
+          const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+          if (activePlayer === 1) {
+            // Support bechamel with the priority events
+            // setTimeout(() => {
+              actionCallbackOne({
+                type: 'display/priority',
+                player: 1,
+              })
+            // }, 0);
+          } else if (activePlayer === 2) {
+            // setTimeout(() => {
+              actionCallbackTwo({
+                type: 'display/priority',
+                player: 2,
+              })
+            // }, 0)
+          }
+        }
+      },
+      close: () => {
+        // console.log(`Closing the connection`);
+      }
+    }
+
+    const strategyConnectorOne = new StrategyConnector(connectorOne);
+    strategyConnectorOne.connect(new SimulationStrategy())
+    const strategyConnectorTwo = new StrategyConnector(connectorTwo);
+    strategyConnectorTwo.connect(new SimulationStrategy())
+
+    game.debug = false;
+    game.setOnAction((action: AnyEffectType) => {
+      // console.log(`Action from an engine`);
+      // console.dir(action);
+
+      if (action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES && action.destinationZone === ZONE_TYPE_HAND) {
+        // @ts-ignore
+        // if (typeof action.target == 'string') {
+        //   console.log(`Drawing a card "${action.target}"`);
+        // } else {
+        //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
+        // }
+      } 
+      // try {
+        const commandForBotOne = convertServerCommand(action, game, 1);
+        actionCallbackOne(commandForBotOne);
+      // } catch(e) {
+      //   console.log(`Error converting command`)
+      //   console.dir(action);
+      //   throw e;
+      // }
+
+      try {
+        const commandForBotTwo = convertServerCommand(action, game, 2);
+        actionCallbackTwo(commandForBotTwo);
+      } catch(e) {
+        console.log(`Error converting command`)
+        console.dir(action);
+        throw e;
+      }
+
+      if (action.type === ACTION_PLAYER_WINS) {
+        done();
+      }
+    });
+
+    gameDataCallbackOne({playerId: 1, state: game.serializeData(1)})
+    gameDataCallbackTwo({playerId: 2, state: game.serializeData(2)})
+  });
 })
 

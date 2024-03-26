@@ -9,7 +9,7 @@ import {
   ACTION_PLAY,
   ACTION_POWER,
   ACTION_RESOLVE_PROMPT,
-  TYPE_CREATURE, TYPE_RELIC,
+  TYPE_CREATURE, TYPE_RELIC, PROPERTY_CONTROLLER,
 } from "../const";
 import {ClientCard, GameState} from "../GameState";
 import {Strategy} from './Strategy';
@@ -283,8 +283,13 @@ export class SimulationStrategy implements Strategy {
         } catch(e: any) {
           debugger;
           console.log('Error applying action')
+          console.dir(workEntity.action)
           console.log(`Message: ${e.message}`)
-          console.dir(workEntity.action.payload.card)
+          console.dir(workEntity.sim.state.promptType)
+          console.dir(workEntity.sim.state.promptPlayer)
+          console.log(`Controller: ${workEntity.sim.modifyByStaticAbilities(workEntity.action.target, PROPERTY_CONTROLLER)}`)
+          console.dir(workEntity.actionLog)
+          console.dir(workEntity.sim.state.continuousEffects);
           console.dir(e.stack)
         }
         const score = getStateScore(workEntity.sim, this.playerId, opponentId)

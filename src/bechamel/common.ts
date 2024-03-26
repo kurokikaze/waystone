@@ -22,7 +22,7 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_ENERGY_EQUALS,
-  RESTRICTION_CREATURE_WAS_ATTACKED,
+	RESTRICTION_CREATURE_WAS_ATTACKED,
 
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_OWN_MAGI,
@@ -65,7 +65,6 @@ import {
 } from 'moonlands/src/const';
 import { PromptParams, PromptType, RestrictionType, StaticAbilityType } from 'moonlands/src/types';
 
-// import { getZoneContent } from '../selectors';
 import { ExpandedClientCard, StateRepresentation } from './types';
 
 export const cardMatchesSelector = (card, selector, selectorParameter = null, source) => {
@@ -249,8 +248,8 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): CardFil
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === 1);
 		case RESTRICTION_OPPONENT_CREATURE:
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) !== 1);
-    case RESTRICTION_CREATURE_WAS_ATTACKED:
-      return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
+		case RESTRICTION_CREATURE_WAS_ATTACKED:
+			return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
 	}
 };
 
@@ -371,7 +370,7 @@ const gameStaticAbilities = [
 	},
 ];
 
-type StaticAbilityExpanded = StaticAbilityType & {player: number}
+type StaticAbilityExpanded = StaticAbilityType & { player: number }
 
 export const getCardDetails = (state: StateRepresentation) => {
 	const baseCards = state.zones.inPlay;
