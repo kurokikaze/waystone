@@ -6,7 +6,7 @@ export default function RelicMessage ({card}) {
 		<div className="BaseMessage">
 			<MessageIcon icon={<Relic />} />
 			<div className='BaseMessage__message'>
-				Opponent plays relic <span className="RelicMessage__relic">{JSON.stringify(card)}</span>
+				Opponent plays relic <span className="RelicMessage__relic">{card}</span>
 			</div>
 		</div>
 	);
