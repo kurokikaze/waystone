@@ -1,12 +1,12 @@
 // globals describe, it
-import {ACTION_PLAY, ACTION_PLAYER_WINS, State} from 'moonlands/src'
-import {byName} from 'moonlands/src/cards';
+import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/src'
+import { byName } from 'moonlands/src/cards';
 import Card from 'moonlands/src/classes/Card';
 import CardInGame from 'moonlands/src/classes/CardInGame';
-import {SimulationStrategy} from '../strategies/SimulationStrategy'
-import {GameState} from '../GameState';
-import {createZones} from '../strategies/simulationUtils';
-import {SerializedClientState} from '../types';
+import { SimulationStrategy } from '../strategies/SimulationStrategy'
+import { GameState } from '../GameState';
+import { createZones } from '../strategies/simulationUtils';
+import { SerializedClientState } from '../types';
 import { ACTION_ATTACK, ACTION_EFFECT, EFFECT_TYPE_DRAW, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND } from 'moonlands';
 import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
@@ -25,27 +25,27 @@ const STEP_NAME = {
 describe('Simulations', () => {
   it('test', () => {
     const ACTIVE_PLAYER = 422;
-		const NON_ACTIVE_PLAYER = 1310;
+    const NON_ACTIVE_PLAYER = 1310;
 
-		const weebo = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
-		const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
-		const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
-		const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
-		const lavaBalamant = new CardInGame(byName('Lava Balamant') as Card, NON_ACTIVE_PLAYER).addEnergy(5);
-		const kelthet = new CardInGame(byName('Kelthet') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
-		const lavaAq = new CardInGame(byName('Lava Aq') as Card, NON_ACTIVE_PLAYER).addEnergy(2);
-		const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
-		const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
-		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion, lavaBalamant, kelthet, lavaAq]);
+    const weebo = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
+    const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
+    const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
+    const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
+    const lavaBalamant = new CardInGame(byName('Lava Balamant') as Card, NON_ACTIVE_PLAYER).addEnergy(5);
+    const kelthet = new CardInGame(byName('Kelthet') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
+    const lavaAq = new CardInGame(byName('Lava Aq') as Card, NON_ACTIVE_PLAYER).addEnergy(2);
+    const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
+    const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
+    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion, lavaBalamant, kelthet, lavaAq]);
 
     // @ts-ignore
-		const gameState = new State({
-			zones,
-			step: STEP_NAME.PRS1,
-			activePlayer: ACTIVE_PLAYER,
-		});
+    const gameState = new State({
+      zones,
+      step: STEP_NAME.PRS1,
+      activePlayer: ACTIVE_PLAYER,
+    });
 
-		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
@@ -64,25 +64,25 @@ describe('Simulations', () => {
 
   it('Killing Adis', () => {
     const ACTIVE_PLAYER = 422;
-		const NON_ACTIVE_PLAYER = 1310;
+    const NON_ACTIVE_PLAYER = 1310;
 
-		const weebo = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
-		const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
-		const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
-		const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
-		// const gumGum = new CardInGame(byName('Gum-Gum') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
-		const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
-		const adis = new CardInGame(byName('Adis') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
-		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion]);
+    const weebo = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
+    const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
+    const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
+    const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
+    // const gumGum = new CardInGame(byName('Gum-Gum') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
+    const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
+    const adis = new CardInGame(byName('Adis') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
+    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion]);
 
     // @ts-ignore
-		const gameState = new State({
-			zones,
-			step: STEP_NAME.ATTACK,
-			activePlayer: ACTIVE_PLAYER,
-		});
+    const gameState = new State({
+      zones,
+      step: STEP_NAME.ATTACK,
+      activePlayer: ACTIVE_PLAYER,
+    });
 
-		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
@@ -155,7 +155,7 @@ describe('Simulations', () => {
       'Water of Life'
     ];
 
-	  const deckTwo = [
+    const deckTwo = [
       'Evu',
       'Tryn',
       'Yaki',
@@ -202,7 +202,7 @@ describe('Simulations', () => {
     ]
 
     const game = createGame()
-    game.setPlayers(1,2);
+    game.setPlayers(1, 2);
     game.setDeck(1, deckOne);
     game.setDeck(2, deckTwo);
 
@@ -213,12 +213,12 @@ describe('Simulations', () => {
     // @ts-ignore
     console.dir(game.twister);
 
-    let gameDataCallbackOne: Function = () => {};
-    let actionCallbackOne: Function = () => {};
+    let gameDataCallbackOne: Function = () => { };
+    let actionCallbackOne: Function = () => { };
 
-    let gameDataCallbackTwo: Function = () => {};
-    let actionCallbackTwo: Function = () => {};
-    
+    let gameDataCallbackTwo: Function = () => { };
+    let actionCallbackTwo: Function = () => { };
+
     const connectorOne = {
       on: (type: string, callback: Function) => {
         if (type == 'gameData') {
@@ -242,24 +242,24 @@ describe('Simulations', () => {
               debugger;
               expect(true).toEqual(false);
             }
-              game.update(convertedCommand);
+            game.update(convertedCommand);
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
-          if (activePlayer === 1) {
-            // Support bechamel with the priority events
-            // setTimeout(() => {
+            if (activePlayer === 1) {
+              // Support bechamel with the priority events
+              // setTimeout(() => {
               actionCallbackOne({
                 type: 'display/priority',
                 player: 1,
               })
-            // }, 0);
-          } else if (activePlayer === 2) {
-            // setTimeout(() => {
+              // }, 0);
+            } else if (activePlayer === 2) {
+              // setTimeout(() => {
               actionCallbackTwo({
                 type: 'display/priority',
                 player: 2,
               })
-            // }, 0);
-          }
+              // }, 0);
+            }
           }
         }
       },
@@ -293,17 +293,17 @@ describe('Simulations', () => {
           if (activePlayer === 1) {
             // Support bechamel with the priority events
             // setTimeout(() => {
-              actionCallbackOne({
-                type: 'display/priority',
-                player: 1,
-              })
+            actionCallbackOne({
+              type: 'display/priority',
+              player: 1,
+            })
             // }, 0);
           } else if (activePlayer === 2) {
             // setTimeout(() => {
-              actionCallbackTwo({
-                type: 'display/priority',
-                player: 2,
-              })
+            actionCallbackTwo({
+              type: 'display/priority',
+              player: 2,
+            })
             // }, 0)
           }
         }
@@ -330,10 +330,10 @@ describe('Simulations', () => {
         // } else {
         //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
         // }
-      } 
+      }
       // try {
-        const commandForBotOne = convertServerCommand(action, game, 1);
-        actionCallbackOne(commandForBotOne);
+      const commandForBotOne = convertServerCommand(action, game, 1);
+      actionCallbackOne(commandForBotOne);
       // } catch(e) {
       //   console.log(`Error converting command`)
       //   console.dir(action);
@@ -343,7 +343,7 @@ describe('Simulations', () => {
       try {
         const commandForBotTwo = convertServerCommand(action, game, 2);
         actionCallbackTwo(commandForBotTwo);
-      } catch(e) {
+      } catch (e) {
         console.log(`Error converting command`)
         console.dir(action);
         throw e;
@@ -354,8 +354,8 @@ describe('Simulations', () => {
       }
     });
 
-    gameDataCallbackOne({playerId: 1, state: game.serializeData(1)})
-    gameDataCallbackTwo({playerId: 2, state: game.serializeData(2)})
+    gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
+    gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
   });
 
   it('Cald vs GumGums', (done) => {
@@ -405,7 +405,7 @@ describe('Simulations', () => {
       'Water of Life'
     ];
 
-	  const deckTwo = [
+    const deckTwo = [
       'Evu',
       'Tryn',
       'Yaki',
@@ -452,23 +452,20 @@ describe('Simulations', () => {
     ]
 
     const game = createGame()
-    game.setPlayers(1,2);
+    game.setPlayers(1, 2);
     game.setDeck(1, deckOne);
     game.setDeck(2, deckTwo);
 
     // @ts-ignore
-    game.initiatePRNG(12345);
+    game.initiatePRNG(2);
     game.setup();
 
-    // @ts-ignore
-    console.dir(game.twister);
+    let gameDataCallbackOne: Function = () => { };
+    let actionCallbackOne: Function = () => { };
 
-    let gameDataCallbackOne: Function = () => {};
-    let actionCallbackOne: Function = () => {};
+    let gameDataCallbackTwo: Function = () => { };
+    let actionCallbackTwo: Function = () => { };
 
-    let gameDataCallbackTwo: Function = () => {};
-    let actionCallbackTwo: Function = () => {};
-    
     const connectorOne = {
       on: (type: string, callback: Function) => {
         if (type == 'gameData') {
@@ -492,24 +489,24 @@ describe('Simulations', () => {
               debugger;
               expect(true).toEqual(false);
             }
-              game.update(convertedCommand);
+            game.update(convertedCommand);
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
-          if (activePlayer === 1) {
-            // Support bechamel with the priority events
-            // setTimeout(() => {
+            if (activePlayer === 1) {
+              // Support bechamel with the priority events
+              // setTimeout(() => {
               actionCallbackOne({
                 type: 'display/priority',
                 player: 1,
               })
-            // }, 0);
-          } else if (activePlayer === 2) {
-            // setTimeout(() => {
+              // }, 0);
+            } else if (activePlayer === 2) {
+              // setTimeout(() => {
               actionCallbackTwo({
                 type: 'display/priority',
                 player: 2,
               })
-            // }, 0);
-          }
+              // }, 0);
+            }
           }
         }
       },
@@ -543,17 +540,17 @@ describe('Simulations', () => {
           if (activePlayer === 1) {
             // Support bechamel with the priority events
             // setTimeout(() => {
-              actionCallbackOne({
-                type: 'display/priority',
-                player: 1,
-              })
+            actionCallbackOne({
+              type: 'display/priority',
+              player: 1,
+            })
             // }, 0);
           } else if (activePlayer === 2) {
             // setTimeout(() => {
-              actionCallbackTwo({
-                type: 'display/priority',
-                player: 2,
-              })
+            actionCallbackTwo({
+              type: 'display/priority',
+              player: 2,
+            })
             // }, 0)
           }
         }
@@ -580,10 +577,10 @@ describe('Simulations', () => {
         // } else {
         //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
         // }
-      } 
+      }
       // try {
-        const commandForBotOne = convertServerCommand(action, game, 1);
-        actionCallbackOne(commandForBotOne);
+      const commandForBotOne = convertServerCommand(action, game, 1);
+      actionCallbackOne(commandForBotOne);
       // } catch(e) {
       //   console.log(`Error converting command`)
       //   console.dir(action);
@@ -593,7 +590,7 @@ describe('Simulations', () => {
       try {
         const commandForBotTwo = convertServerCommand(action, game, 2);
         actionCallbackTwo(commandForBotTwo);
-      } catch(e) {
+      } catch (e) {
         console.log(`Error converting command`)
         console.dir(action);
         throw e;
@@ -604,8 +601,8 @@ describe('Simulations', () => {
       }
     });
 
-    gameDataCallbackOne({playerId: 1, state: game.serializeData(1)})
-    gameDataCallbackTwo({playerId: 2, state: game.serializeData(2)})
+    gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
+    gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
   });
 })
 

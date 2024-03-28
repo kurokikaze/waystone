@@ -11,7 +11,7 @@ export class HashBuilder {
   public makeHash(sim: State): string {
     const battlefieldCards = sim.getZone(ZONE_TYPE_IN_PLAY).cards
     let cardHashes: string[] = []
-    battlefieldCards.forEach(card => {
+    for (const card of battlefieldCards) {
       const attacks = sim.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN)
       const attacked = card.data.attacked
       const attackPart = card.card.type === TYPE_CREATURE ? `(${attacked}/${attacks})` : '*'
@@ -21,12 +21,12 @@ export class HashBuilder {
         powersPart = `[${card.data.actionsUsed.map((action: string) => this.convertHash(action)).join(',')}]`
       }
       cardHashes.push(`#${this.convertHash(card.id)}${attackPart}${powersPart}:${energyPart}`)
-    })
+    }
     const handCards = sim.getZone(ZONE_TYPE_HAND, sim.players[0]).cards
     const handHashes: string[] = []
-    handCards.forEach(card => {
+    for (const card of handCards) {
       handHashes.push(this.convertHash(card.id).toString())
-    })
+    }
     const ourMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, sim.players[0]).card
     const ourMagiHash = ourMagi ? `@${ourMagi.data.energy}[${ourMagi.data.actionsUsed.map((action: string) => this.convertHash(action)).join(',')}]` : 'X'
     const enemyMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, sim.players[1]).card

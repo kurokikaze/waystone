@@ -33,7 +33,6 @@ const DraggableTypes = {
 	CARD: 'card',
 };
 
-// type ClassTypesType = Record<CardType, string>
 const typeClass: Record<CardType, string> = {
 	[TYPE_CREATURE]: 'creature',
 	[TYPE_RELIC]: 'relic',
