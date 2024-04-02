@@ -1,9 +1,9 @@
 /* global window */
-import {useState} from 'react';
-import {useSelector} from 'react-redux';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import cn from 'classnames';
 import Card from '../Card.tsx';
-import {withView} from '../CardView.jsx';
+import { withView } from '../CardView.jsx';
 import Expand from '../icons/Expand';
 import Contract from '../icons/Contract';
 import {
@@ -19,15 +19,15 @@ import {
 	getPromptGeneratedBy,
 } from '../../selectors';
 
-function PromptChooseCards({engineConnector}) {
-  const [contracted, setContracted] = useState(false);
+function PromptChooseCards({ engineConnector }) {
+	const [contracted, setContracted] = useState(false);
 	const cards = useSelector(getPromptCards);
 	const zone = useSelector(getPromptZone);
 	const message = useSelector(getPromptMessage);
 	const zoneOwner = useSelector(getPromptZoneOwner);
 	const numberOfCards = useSelector(getPromptNumberOfCards);
 	const generatedBy = useSelector(getPromptGeneratedBy);
-	
+
 	const [selected, setSelected] = useState([]);
 
 	const CardDisplay = (cards.length > 4) ? withView(Card) : Card;
@@ -45,33 +45,32 @@ function PromptChooseCards({engineConnector}) {
 	};
 
 	const triggerElement = cardName =>
-		setSelected(selected => selected.includes(cardName) ? selected.filter(e => e !== cardName): [...selected, cardName]);
+		setSelected(selected => selected.includes(cardName) ? selected.filter(e => e !== cardName) : [...selected, cardName]);
 
 	return (
-		<div className={cn("promptWindow promptChooseCards", {"promptContracted": contracted})}>
+		<div className={cn("promptWindow promptChooseCards", { "promptContracted": contracted })}>
 			<h1>Choose {numberOfCards} card(s)</h1>
-      <div style={{position: 'relative', top: 20, right: 20 }}>
-        {contracted ? <div onClick={() => setContracted(false)}><Expand size={20} /></div> : <div onClick={() => setContracted(true)}><Contract size={20} /></div>}
-      </div>
-      {contracted ? null : <>
-        {message && <h3>{message}</h3>}
-        <div className={cn('cardsRow', {'smallCards': cards.length > 4})}>
-          {cards.map(({card, id}) => (
-            <div className={cn('zoneCardSelect', {'chosen': selected.includes(id)})} key={id}>
-              <CardDisplay
-                id={`card_${card}`}
-                card={{name: card}}
-                data={{}}
-                onClick={() => triggerElement(id)}
-              />
-            </div>
-          ))}
-        </div>
-        <div><pre>{JSON.stringify(zoneOwner, null, 2)}</pre></div>
-        <div className="buttonHolder">
-          <button onClick={handleSend} disabled={numberOfCards !== selected.length}>OK</button>
-        </div>
-      </>}
+			<div style={{ position: 'absolute', top: 20, right: 20 }}>
+				{contracted ? <div onClick={() => setContracted(false)}><Expand size={20} /></div> : <div onClick={() => setContracted(true)}><Contract size={20} /></div>}
+			</div>
+			<div className='prompt-content'>
+				{message && <h3>{message}</h3>}
+				<div className={cn('cardsRow', { 'smallCards': cards.length > 4 })}>
+					{cards.map(({ card, id }) => (
+						<div className={cn('zoneCardSelect', { 'chosen': selected.includes(id) })} key={id}>
+							<CardDisplay
+								id={`card_${card}`}
+								card={{ name: card }}
+								data={{}}
+								onClick={() => triggerElement(id)}
+							/>
+						</div>
+					))}
+				</div>
+				<div className="buttonHolder">
+					<button onClick={handleSend} disabled={numberOfCards !== selected.length}>OK</button>
+				</div>
+			</div>
 		</div>
 	);
 }

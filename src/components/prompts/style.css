@@ -10,7 +10,7 @@
 }
 
 .promptOverlay.prompt-animation {
-  opacity: 1;
+    opacity: 1;
 }
 
 .promptMessage {
@@ -49,11 +49,11 @@
 }
 
 .promptWindow.promptChooseCards .cardSelect.notAvailable {
-  filter: grayscale(100%);
+    filter: grayscale(100%);
 }
 
 .promptWindow.promptChooseCards .cardSelect.notAvailable .cardHolder {
-  cursor: default;
+    cursor: default;
 }
 
 .promptWindow .cardHolder {
@@ -63,8 +63,19 @@
     overflow: hidden;
 }
 
+.promptOverlay .promptWindow {
+    transition: max-height 0.25s ease-in;
+    max-height: 80%;
+}
+
 .promptOverlay .promptWindow.promptContracted {
-  min-height: 65px;
+    transition: max-height 0.25s ease-in;
+    max-height: 65px;
+    min-height: 0;
+}
+
+.promptOverlay .promptWindow.promptContracted .prompt-content {
+    visibility: hidden;
 }
 
 .promptWindow .cardHolder img {
