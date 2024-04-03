@@ -3,8 +3,6 @@ import {nanoid} from 'nanoid';
 import {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
@@ -18,6 +16,7 @@ import {
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 	EFFECT_TYPE_DISCARD_RESHUFFLED,
 	EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
 
 	LOG_ENTRY_CREATURE_ENERGY_LOSS,
 	LOG_ENTRY_CREATURE_ENERGY_GAIN,
@@ -29,12 +28,15 @@ import {
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
 	LOG_ENTRY_DIE_ROLLED,
+	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 
 	ZONE_TYPE_DECK,
 	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DIE_ROLLED,
 	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
 } from 'moonlands/dist/const';
 
 import {byName} from 'moonlands/dist/cards';
@@ -77,6 +79,17 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				...state,
 				log: [...state.log, discardLogEntry],
 			};
+		}
+		case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
+			const discardLogEntry: LogEntryType = {
+				type: LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
+				card: action.target.card,
+				player: action.player,
+			}
+			return {
+				...state,
+				log: [...state.log, discardLogEntry],
+			}
 		}
 		case EFFECT_TYPE_CREATURE_ATTACKS: {
 			const attackSource = findInPlay(state, action.source.id);
@@ -244,7 +257,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				},
 			};
 		}
-		case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
+		case EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
 			const idsToFind = (action.target instanceof Array) ? action.target.map(({id}) => id) : [action.target.id];
 
 			const newLogEntries: LogEntryType[] = idsToFind
@@ -253,7 +266,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				.map(card => ({type: LOG_ENTRY_CREATURE_ENERGY_LOSS, card: card?.card || 'unknown card', amount: action.amount}));
 
 			const inPlay = [...state.zones.inPlay]
-				.map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: Math.max(card.data.energy - action.amount, 0)}} : card);
+				.map(card => idsToFind.includes(card.id) ? {...card, data: {...card.data, energy: card.data.energy - action.amount}} : card);
 
 			return {
 				...state,
@@ -351,7 +364,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				...state,
 			};
 		}
-		case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
+		case EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI: {
 			const magiFound = findInPlay(state, action.target.id);
 
 			if (!magiFound) {
@@ -363,8 +376,8 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				amount: action.amount,
 			};
 
-			const playerActiveMagi = [...state.zones.playerActiveMagi].map(card => card.id == action.target.id ? {...card, data: {...card.data, energy: Math.max(card.data.energy - action.amount, 0)}} : card);
-			const opponentActiveMagi = [...state.zones.opponentActiveMagi].map(card => card.id == action.target.id ? {...card, data: {...card.data, energy: Math.max(card.data.energy - action.amount, 0)}} : card);
+			const playerActiveMagi = [...state.zones.playerActiveMagi].map(card => card.id == action.target.id ? {...card, data: {...card.data, energy: card.data.energy - action.amount}} : card);
+			const opponentActiveMagi = [...state.zones.opponentActiveMagi].map(card => card.id == action.target.id ? {...card, data: {...card.data, energy: card.data.energy - action.amount}} : card);
 
 			return {
 				...state,

@@ -1,4 +1,3 @@
-import { LOG_ENTRY_DIE_ROLLED } from 'moonlands/dist/const';
 import {
 	LOG_ENTRY_PLAY,
 	LOG_ENTRY_DRAW,
@@ -14,8 +13,10 @@ import {
 	LOG_ENTRY_CREATURE_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
+	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
+	LOG_ENTRY_DIE_ROLLED
 } from 'moonlands/src/const';
-import {LogEntryType} from 'moonlands/src/types';
+import { LogEntryType } from 'moonlands/src/types';
 
 export const mapEntryToText = (entry: LogEntryType): string => {
 	switch (entry.type) {
@@ -42,12 +43,14 @@ export const mapEntryToText = (entry: LogEntryType): string => {
 		case LOG_ENTRY_MAGI_ENERGY_GAIN:
 			return `Magi ${entry.card} gains ${entry.amount} energy`;
 		case LOG_ENTRY_ATTACK:
-			return `${entry.source} attacks ${entry.target}${entry.packHuntAttack ? ' (pack hunt attack)' :  ''}`;
+			return `${entry.source} attacks ${entry.target}${entry.packHuntAttack ? ' (pack hunt attack)' : ''}`;
 		case LOG_ENTRY_MAGI_DEFEATED:
 			return `Magi ${entry.card} is defeated`;
 		case LOG_ENTRY_NUMBER_CHOICE:
 			return `Player ${entry.player} chooses number ${entry.number}`;
-    case LOG_ENTRY_DIE_ROLLED:
-      return `Player ${entry.player} rolled ${entry.result}`;
-    }
+		case LOG_ENTRY_DIE_ROLLED:
+			return `Player ${entry.player} rolled ${entry.result}`;
+		case LOG_ENTRY_CARD_DISCARDED_FROM_HAND:
+			return `Player ${entry.player} discards ${entry.card} from hand`
+	}
 };

@@ -409,6 +409,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						zoneOwner: action.zoneOwner,
 						numberOfCards: realNumberOfCards,
 					};
+					console.dir(promptParams)
 					break;
 				}
 				case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {

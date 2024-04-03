@@ -1,5 +1,5 @@
 /* global window */
-import React, {useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import cn from 'classnames';
 import {useSelector} from 'react-redux';
 import { LogEntryType } from 'moonlands/src/types';

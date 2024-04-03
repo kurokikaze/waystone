@@ -49,10 +49,14 @@ import {
   PROMPT_TYPE_PAYMENT_SOURCE,
   TYPE_RELIC,
   TYPE_SPELL,
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, 
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+  EFFECT_TYPE_DISCARD_CARD_FROM_HAND
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
 import { AlternativeType } from "moonlands/dist/types/prompt"
+// import { EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI } from "moonlands/src/const"
 
 export type HiddenConvertedCard = {
 	id: string,
@@ -187,11 +191,14 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectAddEnergyToCreature |
   ClientEffectDiscardReshuffled |
   ClientEffectDiscardEnergyFromMagi |
+  ClientEffectEnergyDiscardedFromCreature |
+  ClientEffectEnergyDiscardedFromMagi |
   ClientEffectDiscardCreatureFromPlay |
   ClientEffectRemoveEnergyFromMagi |
   ClientEffectForbidAttackToCreature |
   ClientEffectRemoveEnergyFromCreature |
   ClientEffectDiscardEnergyFromCreature |
+  ClientEffectDiscardCardFromHand |
   ClientEffectMoveEnergy |
   ClientEffectDistributeEnergyOnCreatures |
   ClientEffectMoveCardsBetweenZones |
@@ -363,6 +370,15 @@ export type ClientEffectDiscardCreatureFromPlay = {
   generatedBy: string,
 }
 
+export type ClientEffectDiscardCardFromHand = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+  target: ConvertedCard,
+  player: number,
+  generatedBy: string,
+}
+
+
 export type ClientEffectDiscardEnergyFromCreature = {
   type: typeof ACTION_EFFECT,
   effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -376,6 +392,26 @@ export type ClientEffectDiscardEnergyFromCreature = {
 export type ClientEffectDiscardEnergyFromMagi = {
   type: typeof ACTION_EFFECT,
   effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+  amount: number,
+  target: ConvertedCard,
+  source: ConvertedCard | null,
+  player: number,
+  generatedBy: string,
+}
+
+export type ClientEffectEnergyDiscardedFromCreature = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+  amount: number,
+  target: ConvertedCardMinimal | ConvertedCardMinimal[],
+  source: ConvertedCardMinimal | null,
+  player: number,
+  generatedBy: string,
+}
+
+export type ClientEffectEnergyDiscardedFromMagi = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
   amount: number,
   target: ConvertedCard,
   source: ConvertedCard | null,

@@ -42,6 +42,7 @@ import {
 	EFFECT_TYPE_DEAL_DAMAGE,
 	EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 	EFFECT_TYPE_DIE_ROLLED,
+	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
 
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_MAGI_PILE,
@@ -78,6 +79,8 @@ import {
 	EFFECT_TYPE_PLAY_SPELL,
 	PROMPT_TYPE_POWER_ON_MAGI,
 	PROMPT_TYPE_PAYMENT_SOURCE,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
 } from 'moonlands/dist/const.js';
 import { ZoneType } from 'moonlands/dist/types/common.js';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
@@ -85,7 +88,7 @@ import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
 import clone from 'moonlands/dist/clone';
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 import { RestrictionType } from 'moonlands/dist/types';
-import { ClientAction, ClientAttackAction, ClientCommand, ClientEffectCardMovedBetweenZones, ClientEffectCreateContinuousEffect, ClientEffectCreatureAttacks, ClientEffectDiscardEnergyFromCreature, ClientEffectDiscardEnergyFromMagi, ClientEffectDraw, ClientEffectEndOfTurn, ClientEffectMagiIsDefeated, ClientEffectMoveCardBetweenZones, ClientEffectMoveCardsBetweenZones, ClientEffectMoveEnergy, ClientEffectPayingEnergyForPower, ClientEffectPlaySpell, ClientEffectRearrangeCardsOfZone, ClientEffectRearrangeEnergyOnCreatures, ClientEffectRemoveEnergyFromCreature, ClientEffectRemoveEnergyFromMagi, ClientEffectReturnCreatureReturningEnergy, ClientEffectStartOfTurn, ClientEnterPromptAlternatives, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptChooseCards, ClientEnterPromptChooseNCardsFromZone, ClientEnterPromptChooseUpToNCardsFromZone, ClientEnterPromptDistributeEnergyOnCreatures, ClientEnterPromptNumber, ClientEnterPromptRearrangeCardsOfZone, ClientEnterPromptRearrangeEnergyOnCreatures, ClientEnterPromptSingleCreatureFiltered, ClientPassAction, ClientPlayAction, ClientPowerAction, ClientResolvePromptAction, ConvertedCardMinimal, HiddenConvertedCard } from '../clientProtocol';
+import { ClientAction, ClientAttackAction, ClientCommand, ClientEffectCardMovedBetweenZones, ClientEffectCreateContinuousEffect, ClientEffectCreatureAttacks, ClientEffectDiscardCardFromHand, ClientEffectDiscardEnergyFromCreature, ClientEffectDiscardEnergyFromMagi, ClientEffectDraw, ClientEffectEndOfTurn, ClientEffectEnergyDiscardedFromCreature, ClientEffectEnergyDiscardedFromMagi, ClientEffectMagiIsDefeated, ClientEffectMoveCardBetweenZones, ClientEffectMoveCardsBetweenZones, ClientEffectMoveEnergy, ClientEffectPayingEnergyForPower, ClientEffectPlaySpell, ClientEffectRearrangeCardsOfZone, ClientEffectRearrangeEnergyOnCreatures, ClientEffectRemoveEnergyFromCreature, ClientEffectRemoveEnergyFromMagi, ClientEffectReturnCreatureReturningEnergy, ClientEffectStartOfTurn, ClientEnterPromptAlternatives, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptChooseCards, ClientEnterPromptChooseNCardsFromZone, ClientEnterPromptChooseUpToNCardsFromZone, ClientEnterPromptDistributeEnergyOnCreatures, ClientEnterPromptNumber, ClientEnterPromptRearrangeCardsOfZone, ClientEnterPromptRearrangeEnergyOnCreatures, ClientEnterPromptSingleCreatureFiltered, ClientPassAction, ClientPlayAction, ClientPowerAction, ClientResolvePromptAction, ConvertedCardMinimal, HiddenConvertedCard } from '../clientProtocol';
 import { PROMPT_TYPE_ALTERNATIVE } from 'moonlands/src/const';
 
 const hiddenZonesHash: Record<ZoneType, boolean> = {
@@ -100,10 +103,10 @@ const hiddenZonesHash: Record<ZoneType, boolean> = {
 
 const NUMBER_OF_STEPS = 6;
 
-const index = (obj: MetaDataRecord, is: string|[string,string], value = ''): string => {
+const index = (obj: MetaDataRecord, is: string | [string, string], value = ''): string => {
 	// Stupid temporary guard
 	if (is === '') {
-		return obj.toString(); 
+		return obj.toString();
 	}
 	const correctIs = (typeof is == 'string') ? is.split('.') : is;
 	if (is.length == 1 && value !== undefined)
@@ -118,7 +121,7 @@ const templateMessage = (message: string, metadata: MetaDataRecord) => {
 	return message.replace(/\$\{(.+?)\}/g, (_match, p1) => index(metadata, p1));
 };
 
-type HiddenCardInGame = CardInGame & {card: null, data: null}
+type HiddenCardInGame = CardInGame & { card: null, data: null }
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard | HiddenConvertedCard => {
 	if (!cardInGame.card) {
@@ -128,7 +131,7 @@ const convertCard = (cardInGame: CardInGame): ConvertedCard | HiddenConvertedCar
 			card: null,
 			data: null,
 		}
-	}	
+	}
 	return {
 		id: cardInGame.id,
 		owner: cardInGame.owner,
@@ -141,7 +144,7 @@ const convertCardMinimal = (cardInGame: CardInGame): ConvertedCardMinimal => ({
 	id: cardInGame.id,
 });
 
-export const hideIfNecessary = (card: CardInGame, targetZone: ZoneType, isOpponent: boolean) : CardInGame | HiddenCardInGame => {
+export const hideIfNecessary = (card: CardInGame, targetZone: ZoneType, isOpponent: boolean): CardInGame | HiddenCardInGame => {
 	if (hiddenZonesHash[targetZone] && isOpponent) {
 		return {
 			...card,
@@ -156,12 +159,12 @@ export const hideIfNecessary = (card: CardInGame, targetZone: ZoneType, isOppone
 export function convertServerCommand(initialAction: AnyEffectType, game: State, playerId: number, overrideHiding = false): ClientCommand | any | null {
 	try {
 		var action: AnyEffectType = clone(initialAction);
-	} catch(e) {
+	} catch (e) {
 		console.log(`Error converting command`)
 		console.dir(initialAction)
 		throw new Error();
 	}
-	switch(action.type) {
+	switch (action.type) {
 		case ACTION_PASS: {
 			const step = game.state.step;
 
@@ -213,14 +216,14 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 				action.message = templateMessage(action.message, metaData);
 			}
 
-			switch(action.promptType) {
+			switch (action.promptType) {
 				case PROMPT_TYPE_NUMBER: {
 					return {
 						type: action.type,
 						promptType: action.promptType,
 						min: parseInt(game.getMetaValue(action.min, action.generatedBy), 10),
 						max: parseInt(game.getMetaValue(action.max, action.generatedBy), 10),
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						player: action.player,
 					} as ClientEnterPromptNumber;
 				}
@@ -228,7 +231,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					return {
 						type: action.type,
 						promptType: action.promptType,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						amount: parseInt(game.getMetaValue(action.amount, action.generatedBy), 10),
 						player: action.player,
 					} as ClientEnterPromptDistributeEnergyOnCreatures;
@@ -237,11 +240,12 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					return {
 						type: action.type,
 						promptType: action.promptType,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						player: action.player,
 					} as ClientEnterPromptRearrangeEnergyOnCreatures;
 				}
 				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+					debugger;
 					const restrictions = action.restrictions || (action.restriction ? [
 						{
 							type: game.getMetaValue(action.restriction, action.generatedBy) as RestrictionType,
@@ -265,7 +269,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						restrictions,
 						cards: cards.map(convertCard),
 						zoneOwner,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						numberOfCards,
 					} as ClientEnterPromptChooseUpToNCardsFromZone;
 				}
@@ -291,7 +295,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						player: promptPlayer,
 						zone,
 						restrictions,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						cards: cards.map(convertCard),
 						zoneOwner,
 						numberOfCards,
@@ -309,7 +313,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
 						player: action.player,
 						zone,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						cards: cards.map(convertCard),
 						zoneOwner,
 						numberOfCards,
@@ -334,7 +338,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						promptType: action.promptType,
 						promptParams: action.promptParams,
 						generatedBy: action.generatedBy,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						player: action.player,
 					}
 				}
@@ -344,7 +348,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						promptType: action.promptType,
 						restrictions: action.restrictions,
 						restriction: action.restriction,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						restrictionValue: action.restrictionValue,
 						player: action.player,
 					} as ClientEnterPromptSingleCreatureFiltered;
@@ -357,11 +361,11 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						promptType: action.promptType,
 						source: convertCard(actionSource),
 						promptParams: action.promptParams,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						generatedBy: action.generatedBy,
 						player: action.player,
 					} as ClientEnterPromptAnyCreatureExceptSource;
-				} 
+				}
 				case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
 					const actionSource = game.getMetaValue(action.source, action.generatedBy);
 					const promptPlayer = action.player || actionSource.owner;
@@ -369,7 +373,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						type: action.type,
 						promptType: action.promptType,
 						promptParams: action.promptParams,
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						generatedBy: action.generatedBy,
 						player: promptPlayer,
 					};
@@ -409,7 +413,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						type: action.type,
 						promptType: action.promptType,
 						promptParams: 'promptParams' in action ? action.promptParams : {},
-						...(action.message ? {message: action.message} : {}),
+						...(action.message ? { message: action.message } : {}),
 						generatedBy: action.generatedBy,
 						player: action.player,
 					}
@@ -518,7 +522,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const amount: number = (typeof action.amount == 'string') ?
 						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
 						action.amount;
-										
+
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
 
 					return {
@@ -592,7 +596,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const amount = (typeof action.amount == 'string') ?
 						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
 						action.amount;
-										
+
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
 
 					return {
@@ -604,6 +608,26 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						generatedBy: action.generatedBy,
 					} as ClientEffectDiscardEnergyFromMagi;
 				}
+				case EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI: {
+					const targetCard = (typeof action.target == 'string') ?
+						game.getMetaValue(action.target, action.generatedBy) :
+						action.target;
+
+					const amount = (typeof action.amount == 'string') ?
+						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
+						action.amount;
+
+					const target = (targetCard.length) ? targetCard[0] : targetCard;
+
+					return {
+						type: action.type,
+						effectType: action.effectType,
+						target: convertCard(target),
+						source: action.source ? convertCard(action.source) : null,
+						amount,
+						generatedBy: action.generatedBy,
+					} as ClientEffectEnergyDiscardedFromMagi;
+				}
 				case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
 					const targetCard = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
@@ -612,7 +636,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const amount = (typeof action.amount == 'string') ?
 						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
 						action.amount;
-										
+
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
 
 					return {
@@ -740,7 +764,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
 					// @ts-ignore will be fixed in a future moonlands update
 					const sourceCard: CardInGame | null = (typeof action?.source == 'string') ?
-					// @ts-ignore will be fixed in a future moonlands update
+						// @ts-ignore will be fixed in a future moonlands update
 						game.getMetaValue(action?.source, action.generatedBy) :
 						action.target;
 
@@ -761,7 +785,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const amount = (typeof action.amount == 'string') ?
 						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
 						action.amount;
-										
+
 					const target = (targetCard instanceof Array) ? targetCard.map(convertCardMinimal) : convertCardMinimal(targetCard);
 
 					return {
@@ -772,6 +796,25 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						amount,
 					} as ClientEffectDiscardEnergyFromCreature;
 				}
+				case EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
+					const targetCard = (typeof action.target == 'string') ?
+						game.getMetaValue(action.target, action.generatedBy) :
+						action.target;
+
+					const amount = (typeof action.amount == 'string') ?
+						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
+						action.amount;
+
+					const target = (targetCard instanceof Array) ? targetCard.map(convertCardMinimal) : convertCardMinimal(targetCard);
+
+					return {
+						...action,
+						target,
+						source: action.source ? convertCardMinimal(action.source) : action.source,
+						triggerSource: action.triggerSource ? convertCardMinimal(action.triggerSource) : action.triggerSource,
+						amount,
+					} as ClientEffectEnergyDiscardedFromCreature;
+				}
 				case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
 					const targetCard: CardInGame | CardInGame[] = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
@@ -780,7 +823,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const amount = (typeof action.amount == 'string') ?
 						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
 						action.amount;
-										
+
 					const target = (targetCard instanceof Array) ? targetCard.map(convertCardMinimal) : convertCardMinimal(targetCard);
 
 					return {
@@ -791,6 +834,17 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						amount,
 					} as ClientEffectRemoveEnergyFromCreature;
 				}
+				// @ts-ignore
+				case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
+					return {
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+						// @ts-ignore
+						target: convertCard(action.target),
+						// @ts-ignore
+						player: action.player,
+					} as ClientEffectDiscardCardFromHand;
+				}
 				case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
 					const targetCard = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
@@ -799,7 +853,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const amount = (typeof action.amount == 'string') ?
 						parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
 						action.amount;
-										
+
 					const target = (targetCard instanceof Array) ? targetCard.map(convertCardMinimal) : convertCardMinimal(targetCard);
 
 					return {
@@ -847,10 +901,10 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						action.target;
 					// @ts-ignore
 					const sourceCard: CardInGame | undefined = (typeof action.source == 'string') ?
-					// @ts-ignore
+						// @ts-ignore
 						game.getMetaValue(action.source, action.generatedBy) :
 						action.target;
-										
+
 					const target = (targetCard.length) ? targetCard[0] : targetCard;
 
 					const amount = (typeof action.amount == 'string') ?
@@ -860,7 +914,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					return {
 						type: action.type,
 						effectType: action.effectType,
-						...(sourceCard ? {source: convertCardMinimal(sourceCard)} : {}),
+						...(sourceCard ? { source: convertCardMinimal(sourceCard) } : {}),
 						target: convertCardMinimal(target),
 						amount,
 					};
@@ -918,7 +972,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 						generatedBy: action.generatedBy,
 						expiration: {
 							...action.expiration,
-							turns: typeof action.expiration.turns == 'string' ? game.getMetaValue(action.expiration.turns, action.generatedBy): action.expiration.turns,
+							turns: typeof action.expiration.turns == 'string' ? game.getMetaValue(action.expiration.turns, action.generatedBy) : action.expiration.turns,
 						},
 						staticAbilities,
 						triggerEffects: action.triggerEffects || [],
@@ -1018,7 +1072,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 					const targetCard = (typeof action.target == 'string') ?
 						game.getMetaValue(action.target, action.generatedBy) :
 						action.target;
-										
+
 					const target = (targetCard instanceof Array) ? targetCard.map(convertCardMinimal) : convertCardMinimal(targetCard);
 
 					const convertedAction: ClientEffectReturnCreatureReturningEnergy = {
@@ -1231,7 +1285,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
 					}
 					return {
 						...action,
-						target, 
+						target,
 					} as AnyEffectType;
 				}
 			}
