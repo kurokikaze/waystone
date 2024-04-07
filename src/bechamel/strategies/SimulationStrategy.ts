@@ -1,4 +1,4 @@
-import {byName} from 'moonlands/src/cards'
+import { byName } from 'moonlands/src/cards'
 import { AnyEffectType } from 'moonlands/src/types';
 import CardInGame from 'moonlands/src/classes/CardInGame';
 
@@ -11,13 +11,14 @@ import {
   ACTION_RESOLVE_PROMPT,
   TYPE_CREATURE, TYPE_RELIC, PROPERTY_CONTROLLER,
 } from "../const";
-import {ClientCard, GameState} from "../GameState";
-import {Strategy} from './Strategy';
-import {createState, getStateScore} from './simulationUtils'
-import {HashBuilder} from './HashBuilder';
-import {ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity} from '../types';
-import {ActionExtractor} from './ActionExtractor';
-import { C2SAction, ClientAttackAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
+import { ClientCard, GameState } from "../GameState";
+import { Strategy } from './Strategy';
+import { createState, getStateScore } from './simulationUtils'
+import { HashBuilder } from './HashBuilder';
+import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
+import { ActionExtractor } from './ActionExtractor';
+import { C2SAction, ClientAction, ClientAttackAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -137,17 +138,21 @@ export class SimulationStrategy implements Strategy {
     } as C2SAction
   }
 
-  private resolveCardsPrompt(cards: CardInGame[], type?: string): C2SAction {
+  private resolveCardsPrompt(cards: CardInGame[], type: string, zone: string, zoneOwner: number): C2SAction {
     return {
       type: ACTION_RESOLVE_PROMPT,
       promptType: type || this.gameState?.getPromptType(),
-      cards: cards.map(({id}) => id),
+      zone,
+      zoneOwner,
+      cards: cards.map(({ id }) => id),
+      // This is needed so we know which cards we selected if ids change (from inside the sim to the outside)
+      cardNames: cards.map(({ card }) => card),
       player: this.playerId,
     } as C2SAction
   }
 
   private simulationActionToClientAction(simAction: AnyEffectType): C2SAction {
-    switch(simAction.type) {
+    switch (simAction.type) {
       case ACTION_PLAY: {
         if ('payload' in simAction) {
           return this.play(simAction.payload.card.id, `Play the card ${simAction.payload.card.card.name}`)
@@ -175,7 +180,8 @@ export class SimulationStrategy implements Strategy {
           return this.resolveNumberPrompt(simAction.number)
         }
         if ('cards' in simAction && simAction.cards instanceof Array) {
-          return this.resolveCardsPrompt(simAction.cards);
+          // @ts-ignore
+          return this.resolveCardsPrompt(simAction.cards, '', simAction.zone, simAction.zoneOwner);
         }
         console.log('No transformer for ACTION_RESOLVE_PROMPT action')
         console.dir(simAction)
@@ -195,7 +201,7 @@ export class SimulationStrategy implements Strategy {
 
   private simulateAttacksQueue(simulationQueue: SimulationEntity[], initialScore: number, opponentId: number): AnyEffectType {
     const hashes = new Set<string>()
-    let bestAction: {score: number, action: AnyEffectType[] } = {
+    let bestAction: { score: number, action: AnyEffectType[] } = {
       score: initialScore,
       action: [this.pass()]
     }
@@ -212,7 +218,7 @@ export class SimulationStrategy implements Strategy {
       if (workEntity) {
         try {
           workEntity.sim.update(workEntity.action)
-        } catch(e: any) {
+        } catch (e: any) {
           debugger;
           console.error('Error applying action')
           if ('payload' in workEntity.action) {
@@ -225,7 +231,7 @@ export class SimulationStrategy implements Strategy {
         const score = getStateScore(workEntity.sim, this.playerId, opponentId)
         if (score > bestAction.score) {
           bestAction.score = score
-          bestAction.action = workEntity?.actionLog.map(({action}) => action) || []
+          bestAction.action = workEntity?.actionLog.map(({ action }) => action) || []
         }
         const hash = this.hashBuilder.makeHash(workEntity.sim)
         if (hashes.has(hash)) {
@@ -267,11 +273,11 @@ export class SimulationStrategy implements Strategy {
       return [{
         action: this.pass(),
         hash: '*',
-    }]
+      }]
     }
     // Simulation itself
     let counter = 0
-    
+
     this.leaves.clear()
 
     while (simulationQueue.length && counter <= SimulationStrategy.failsafe) {
@@ -280,23 +286,17 @@ export class SimulationStrategy implements Strategy {
       if (workEntity && workEntity.action) {
         try {
           workEntity.sim.update(workEntity.action)
-        } catch(e: any) {
-          debugger;
+        } catch (e: any) {
           console.log('Error applying action')
           console.dir(workEntity.action)
           console.log(`Message: ${e.message}`)
-          console.dir(workEntity.sim.state.promptType)
-          console.dir(workEntity.sim.state.promptPlayer)
-          console.log(`Controller: ${workEntity.sim.modifyByStaticAbilities(workEntity.action.target, PROPERTY_CONTROLLER)}`)
-          console.dir(workEntity.actionLog)
-          console.dir(workEntity.sim.state.continuousEffects);
           console.dir(e.stack)
         }
         const score = getStateScore(workEntity.sim, this.playerId, opponentId)
         const hash = this.hashBuilder.makeHash(workEntity.sim)
         try {
           this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)}"]\n`
-        } catch (_e) {}
+        } catch (_e) { }
         if (hashes.has(hash)) {
           continue
         }
@@ -315,13 +315,13 @@ export class SimulationStrategy implements Strategy {
       }
     }
 
-    let bestAction: {score: number, actions: ActionOnHold[] } = {
+    let bestAction: { score: number, actions: ActionOnHold[] } = {
       score: initialScore,
       actions: []
     }
 
     this.leaves.forEach((value: Leaf) => {
-      if (!value.isPrompt && (value.score > bestAction.score)|| (value.score == bestAction.score && value.actionLog.length < bestAction.actions.length)) {
+      if (!value.isPrompt && (value.score > bestAction.score) || (value.score == bestAction.score && value.actionLog.length < bestAction.actions.length)) {
         bestAction.score = value.score
         bestAction.actions = value.actionLog
       }
@@ -341,10 +341,10 @@ export class SimulationStrategy implements Strategy {
     if (!this.actionsOnHold.length) return false
     if (!this.gameState) return false
 
-    const {action} = this.actionsOnHold[0]
+    const { action } = this.actionsOnHold[0]
     if (this.gameState.getStep() === STEP_NAME.CREATURES) {
       const playableCards = this.gameState.getPlayableCards()
-      const ids = new Set(playableCards.map(({id}) => id))
+      const ids = new Set(playableCards.map(({ id }) => id))
       if (
         action.type === ACTION_PLAY &&
         'payload' in action &&
@@ -354,7 +354,7 @@ export class SimulationStrategy implements Strategy {
         return true;
       }
     } else if (this.gameState.getStep() === STEP_NAME.PRS1 || this.gameState.getStep() === STEP_NAME.PRS2) {
-      const creaturesRelicsAndMagi: (ProcessedClientCard|ClientCard)[] = [
+      const creaturesRelicsAndMagi: (ProcessedClientCard | ClientCard)[] = [
         ...this.gameState.getMyCreaturesInPlay(),
         ...this.gameState.getMyRelicsInPlay(),
       ]
@@ -362,7 +362,7 @@ export class SimulationStrategy implements Strategy {
       if (myMagi) {
         creaturesRelicsAndMagi.push(myMagi)
       }
-      const ids = new Set(creaturesRelicsAndMagi.map(({id}) => id))
+      const ids = new Set(creaturesRelicsAndMagi.map(({ id }) => id))
       if (
         action.type === ACTION_POWER &&
         !ids.has(action.source)
@@ -385,6 +385,38 @@ export class SimulationStrategy implements Strategy {
     return false
   }
 
+
+  private fixCardPromptResolution(action: C2SAction): C2SAction {
+    const promptAvailableCards = this.gameState?.state.promptParams.cards?.map(({id}) => id);
+
+    if ('cards' in action && action.cards && action.cards.some(card => !promptAvailableCards?.includes(card as unknown as string))) {
+      const availableCardPairs: Record<string, string[]> = {}
+      for (let card of this.gameState?.state.promptParams.cards!) {
+        if (!(card.card in availableCardPairs)) {
+          availableCardPairs[card.card] = []
+        }
+        availableCardPairs[card.card].push(card.id)
+      }
+
+      const newCards: string[] = []
+      // @ts-ignore
+      for (const cardName of action.cardNames) {
+        if (!(cardName in availableCardPairs) || availableCardPairs[cardName].length == 0) {
+          throw new Error(`Cannot find ${cardName} in the prompt zone`)
+        }
+        const newId = availableCardPairs[cardName].pop()!
+        newCards.push(newId)
+      }
+
+      return {
+        ...action,
+        cards: newCards,
+      } as C2SAction;
+    }
+
+    return action;
+  }
+
   public requestAction(): C2SAction {
     if (this.shouldClearHeldActions()) {
       this.actionsOnHold = []
@@ -395,15 +427,15 @@ export class SimulationStrategy implements Strategy {
     }
 
     if (this.actionsOnHold.length) {
-      const {action, hash} = this.actionsOnHold.shift()!
+      const { action, hash } = this.actionsOnHold.shift()!
 
-      const testSim = createState(
-        this.gameState,
-        this.playerId || 2,
-        this.gameState.getOpponentId(),
-      )
+      // const testSim = createState(
+      //   this.gameState,
+      //   this.playerId || 2,
+      //   this.gameState.getOpponentId(),
+      // )
 
-      const checkHash = this.hashBuilder.makeHash(testSim);
+      // const checkHash = this.hashBuilder.makeHash(testSim);
 
       // If we are passing at the creatures step, clear the actions on hold
       if (action && action.type === ACTION_PASS && this.gameState.getStep() === STEP_NAME.CREATURES) {
@@ -414,6 +446,9 @@ export class SimulationStrategy implements Strategy {
       //   console.error(`Action hash: ${hash}, state hash: ${checkHash}`);
       // }
 
+      if (action.type == ACTION_RESOLVE_PROMPT && this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+        return this.fixCardPromptResolution(action)
+      }
       return action
     }
 
@@ -442,9 +477,22 @@ export class SimulationStrategy implements Strategy {
 
       if (this.gameState.playerPriority(this.playerId)) {
         const step = this.gameState.getStep()
-        switch(step) {
-          case STEP_NAME.PRS1: 
+        switch (step) {
+          case STEP_NAME.ENERGIZE: {
+            if (this.gameState.isInMyPromptState()) {
+              if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+                console.log(`Game makes us choose N cards from the zone on Energize step`)
+                console.dir(this.gameState.state.promptParams)
+              }
+            }
+          }
+          case STEP_NAME.PRS1:
           case STEP_NAME.PRS2: {
+            if (this.gameState.isInMyPromptState()) {
+              if (this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+                return this.resolveChooseCardsPrompt()
+              }
+            }
             const playable = this.gameState.getPlayableCards()
               .map(addCardData)
               .filter((card: any) => card._card.type === TYPE_RELIC)
@@ -485,10 +533,10 @@ export class SimulationStrategy implements Strategy {
               return this.pass()
             }
 
-            this.actionsOnHold = bestActions.slice(1).filter(({action}) =>
+            this.actionsOnHold = bestActions.slice(1).filter(({ action }) =>
               (action.type === ACTION_PLAY && 'payload' in action && action.payload.player === this.playerId) ||
               ('player' in action && action.player === this.playerId)
-            ).map(({action, hash}) => ({
+            ).map(({ action, hash }) => ({
               action: this.simulationActionToClientAction(action),
               hash,
             }));
@@ -496,8 +544,8 @@ export class SimulationStrategy implements Strategy {
             // console.log('Saving the graph data as ' + finalHash);
             // console.log(btoa(this.graph));
             // if (this.actionsOnHold.length) {
-              // console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
-              // console.dir(this.actionsOnHold)
+            // console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
+            // console.dir(this.actionsOnHold)
             // }
             const bestAction = bestActions[0]
             // if (bestAction.type === ACTION_PLAY) {
@@ -545,7 +593,7 @@ export class SimulationStrategy implements Strategy {
               }
 
               const outerSim = createState(
-                this.gameState, 
+                this.gameState,
                 this.playerId || 2,
                 TEMPORARY_OPPONENT_ID,
               )
@@ -564,6 +612,14 @@ export class SimulationStrategy implements Strategy {
                 return this.simulationActionToClientAction(bestAction)
               }
             }
+            // We get here if we accidentally (yeah) killed opposing Adis. It's ATTACK step, we're in the prompt state.
+            // Or it's someone like Gum-Gum.
+            if (this.gameState.isInMyPromptState()) {
+              if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+                return this.resolveChooseCardsPrompt()
+              }
+              throw new Error(`Unexpected prompt type in ATTACK step: ${this.gameState.getPromptType()}`);
+            }
             return this.pass()
           }
           default:
@@ -572,5 +628,20 @@ export class SimulationStrategy implements Strategy {
       }
     }
     return this.pass()
+  }
+
+  resolveChooseCardsPrompt() {
+    if (!this.gameState) {
+      throw new Error('Trying to resolve prompt without gameState present')
+    }
+    const availableCards = this.gameState.state.promptParams.cards || []
+    // The conversion to CardInGame is OK because resolveCardPrompt only cares about card ids
+    return this.resolveCardsPrompt(
+      availableCards.slice(0, this.gameState.state.promptParams.numberOfCards || 0)
+        .map(card => card as unknown as CardInGame),
+      this.gameState.state.promptType || '',
+      this.gameState.state.promptParams.zone || ZONE_TYPE_IN_PLAY,
+      this.gameState.state.promptParams.zoneOwner || 0,
+    )
   }
 }

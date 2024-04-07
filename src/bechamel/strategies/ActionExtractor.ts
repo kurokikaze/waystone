@@ -926,6 +926,9 @@ export class ActionExtractor {
               type: ACTION_RESOLVE_PROMPT,
               // promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
               cards: cards,
+              // @ts-ignore
+              zone: innerSim.state.promptParams.zone,
+              zoneOwner: innerSim.state.promptParams.zoneOwner,
               generatedBy: innerSim.state.promptGeneratedBy,
               player: innerSim.state.promptPlayer as number,
             }

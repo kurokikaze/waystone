@@ -108,7 +108,7 @@ describe('Simulations', () => {
 })
 
 describe('Simulations', () => {
-  it('Cald vs Naroom', (done) => {
+  it.only('Cald vs Naroom', (done) => {
     const deckOne = [
       'Grega',
       'Magam',
@@ -156,7 +156,7 @@ describe('Simulations', () => {
     ];
 
     const deckTwo = [
-      'Evu',
+      'Adis',
       'Tryn',
       'Yaki',
       'Bhatar',
@@ -211,7 +211,8 @@ describe('Simulations', () => {
     game.setup();
 
     // @ts-ignore
-    console.dir(game.twister);
+    // console.dir(game.twister);
+    game.enableDebug();
 
     let gameDataCallbackOne: Function = () => { };
     let actionCallbackOne: Function = () => { };
@@ -489,6 +490,7 @@ describe('Simulations', () => {
               debugger;
               expect(true).toEqual(false);
             }
+
             game.update(convertedCommand);
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
             if (activePlayer === 1) {
@@ -565,19 +567,19 @@ describe('Simulations', () => {
     const strategyConnectorTwo = new StrategyConnector(connectorTwo);
     strategyConnectorTwo.connect(new SimulationStrategy())
 
-    game.debug = false;
+    game.debug = true;
     game.setOnAction((action: AnyEffectType) => {
       // console.log(`Action from an engine`);
       // console.dir(action);
 
-      if (action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES && action.destinationZone === ZONE_TYPE_HAND) {
+      // if (action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES && action.destinationZone === ZONE_TYPE_HAND) {
         // @ts-ignore
         // if (typeof action.target == 'string') {
         //   console.log(`Drawing a card "${action.target}"`);
         // } else {
         //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
         // }
-      }
+      // }
       // try {
       const commandForBotOne = convertServerCommand(action, game, 1);
       actionCallbackOne(commandForBotOne);
