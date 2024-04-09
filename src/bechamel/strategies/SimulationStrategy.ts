@@ -42,14 +42,13 @@ type Leaf = {
   isPrompt: boolean
 }
 
-
 export class SimulationStrategy implements Strategy {
   // public static deckId = '62ed47ae99dd0db04e9f657b' // Online deck
   // public static deckId = '5f60e45e11283f7c98d9259b' // Local deck (Naroom)
   public static deckId = '5f60e45e11283f7c98d9259c' // Local deck (Arderial)
   // public static deckId = '6305ec3aa14ce19348dfd7f9' // Local deck (Underneath/Naroom)
 
-  public static failsafe = 4
+  public static failsafe = 500
 
   private waitingTarget?: {
     source: string

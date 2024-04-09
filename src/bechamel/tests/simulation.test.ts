@@ -163,7 +163,7 @@ describe('Strange attacks', () => {
 });
 
 describe('Simulations', () => {
-  it.only('Cald vs Naroom', (done) => {
+  it('Cald vs Naroom', (done) => {
     const deckOne = [
       'Grega',
       'Magam',
@@ -368,7 +368,7 @@ describe('Simulations', () => {
     strategyConnectorTwo.connect(new SimulationStrategy())
 
     game.debug = false;
-    let turnNumber = 0;
+    // let turnNumber = 0;
     game.setOnAction((action: AnyEffectType) => {
       // console.log(`Action from an engine`);
       // console.dir(action);
@@ -416,7 +416,7 @@ describe('Simulations', () => {
 
     gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
     gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
-  }, 1500000);
+  }, 20000);
 
   it('Cald vs GumGums', (done) => {
     const deckOne = [
@@ -664,6 +664,6 @@ describe('Simulations', () => {
 
     gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
     gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
-  });
+  }, 20000);
 })
 
