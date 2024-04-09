@@ -14,7 +14,7 @@ export class HashBuilder {
     for (const card of battlefieldCards) {
       const attacks = sim.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN)
       const attacked = card.data.attacked
-      const attackPart = card.card.type === TYPE_CREATURE ? `(${attacked}/${attacks})` : '*'
+      const attackPart = (card.card.type === TYPE_CREATURE && card.data.controller == sim.getActivePlayer()) ? `(${attacked}/${attacks})` : ''
       const energyPart = card.card.type === TYPE_CREATURE ? card.data.energy : '*'
       let powersPart = ''
       if (card.data.actionsUsed && card.data.actionsUsed.length) {

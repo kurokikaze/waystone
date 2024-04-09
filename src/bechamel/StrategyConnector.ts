@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { ACTION_PASS, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE } from "moonlands/dist/const"
+import { ACTION_PASS } from "moonlands/dist/const"
 import { Socket } from "socket.io-client"
-import { ClientAction, ClientPassAction, FromClientPassAction } from "../clientProtocol"
+import { ClientAction, FromClientPassAction } from "../clientProtocol"
 import { GameState } from "./GameState"
 import { Strategy } from './strategies/Strategy'
 import { SerializedClientState } from "./types"
@@ -74,13 +74,14 @@ export class StrategyConnector {
       (this.gameState.playerPriority(this.playerId) || inPromptState)
     ) {
       if (currentStep !== 5) {
-        // console.log(`[${this.playerId}] Step is ${STEP_NAMES[currentStep]}, ${inPromptState ? 'in prompt state ' : ''} requesting action`)
         const action = this.strategy.requestAction()
         if (action) {
           this.io.emit('clientAction', action)
         } else {
           console.log('No action returned from request')
         }
+      } else {
+        console.log(`We are here in step ${currentStep}, and cannot request action`)
       }
     }
   }

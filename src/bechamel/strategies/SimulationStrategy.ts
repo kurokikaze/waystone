@@ -9,7 +9,7 @@ import {
   ACTION_PLAY,
   ACTION_POWER,
   ACTION_RESOLVE_PROMPT,
-  TYPE_CREATURE, TYPE_RELIC, PROPERTY_CONTROLLER,
+  TYPE_CREATURE, TYPE_RELIC,
 } from "../const";
 import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
@@ -17,7 +17,7 @@ import { createState, getStateScore } from './simulationUtils'
 import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
-import { C2SAction, ClientAction, ClientAttackAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
+import { C2SAction, ClientAttackAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/const';
 
 const STEP_NAME = {
@@ -49,7 +49,7 @@ export class SimulationStrategy implements Strategy {
   public static deckId = '5f60e45e11283f7c98d9259c' // Local deck (Arderial)
   // public static deckId = '6305ec3aa14ce19348dfd7f9' // Local deck (Underneath/Naroom)
 
-  public static failsafe = 1000
+  public static failsafe = 4
 
   private waitingTarget?: {
     source: string
@@ -60,9 +60,9 @@ export class SimulationStrategy implements Strategy {
   private playerId?: number
   private gameState?: GameState
   private hashBuilder: HashBuilder
-  private graph: string = ''
+  protected graph: string = ''
 
-  private actionsOnHold: C2SActionOnHold[] = []
+  protected actionsOnHold: C2SActionOnHold[] = []
   private StoredTree: SimulationEntity[] = []
 
   constructor() {
@@ -255,10 +255,19 @@ export class SimulationStrategy implements Strategy {
         return `POWER ${action.source.card.name} ${action.power.name}`
       }
       case ACTION_RESOLVE_PROMPT: {
-        return `RESOLVE_PROMPT ${action.target.card.name || action.number}`
+        if ('target' in action && 'card' in action.target) {
+          return `RESOLVE_PROMPT ${action.target.card.name}`
+        }
+        if ('number' in action) {
+          return `RESOLVE_PROMPT ${action.number}`
+        }
+        if ('useEffect' in action) {
+          return `RESOLVE_PROMPT ${action.useEffect ? '' : 'don\'t '}use effect (player ${action.player})`
+        }
+        return `RESOLVE_PROMPT other (player ${action.player})`
       }
       case ACTION_ATTACK: {
-        return `ATTACK ${action.source.card.name} -> ${action.target.card.name}`
+        return `ATTACK ${action.source.card.name} -> ${action.target.card.name} (player ${action.player})`
       }
       case ACTION_PASS: {
         return 'PASS'
@@ -296,7 +305,10 @@ export class SimulationStrategy implements Strategy {
         const hash = this.hashBuilder.makeHash(workEntity.sim)
         try {
           this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)}"]\n`
-        } catch (_e) { }
+        } catch (_e) {
+          console.error('Error generating label perhaps')
+          console.dir(_e)
+         }
         if (hashes.has(hash)) {
           continue
         }
@@ -479,15 +491,16 @@ export class SimulationStrategy implements Strategy {
         const step = this.gameState.getStep()
         switch (step) {
           case STEP_NAME.ENERGIZE: {
-            if (this.gameState.isInMyPromptState()) {
-              if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
-                console.log(`Game makes us choose N cards from the zone on Energize step`)
-                console.dir(this.gameState.state.promptParams)
-              }
-            }
+          //   if (this.gameState.isInMyPromptState()) {
+          //     if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+          //       console.log(`Game makes us choose N cards from the zone on Energize step`)
+          //       console.dir(this.gameState.state.promptParams)
+          //     }
+          //   }
           }
           case STEP_NAME.PRS1:
           case STEP_NAME.PRS2: {
+
             if (this.gameState.isInMyPromptState()) {
               if (this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
                 return this.resolveChooseCardsPrompt()
@@ -504,6 +517,7 @@ export class SimulationStrategy implements Strategy {
                 if (!playableRelic.id) {
                   console.error(`Non-playable relic chosen somehow`);
                 }
+
                 return this.play(playableRelic?.id)
               }
             }
