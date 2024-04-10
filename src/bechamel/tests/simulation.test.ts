@@ -7,12 +7,11 @@ import { SimulationStrategy } from '../strategies/SimulationStrategy'
 import { GameState } from '../GameState';
 import { createZones } from '../strategies/simulationUtils';
 import { SerializedClientState } from '../types';
-import { ACTION_ATTACK, ACTION_EFFECT, ACTION_PASS, EFFECT_TYPE_DRAW, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_START_OF_TURN, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND } from 'moonlands';
+import { ACTION_ATTACK, ACTION_PASS, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands';
 import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
 import { AnyEffectType } from 'moonlands/dist/types';
 import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
-import { EFFECT_TYPE_START_STEP } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -160,6 +159,737 @@ describe('Strange attacks', () => {
       expect(actionsOnHold[1].action.target).toEqual(STRADUS_ID);
     }
   })
+
+  it('Attacks into Magi with creature', () => {
+    const cardHand = (id: string, owner: number) => ({
+      id,
+      data: null,
+      card: null,
+      owner
+    })
+    const cardDeck = (id: string, owner: number) => ({
+      id,
+      data: {},
+      card: null,
+      owner
+    })
+    const serializedState = {
+      "staticAbilities": [],
+      "energyPrompt": false,
+      "turnTimer": false,
+      "turnSecondsLeft": 0,
+      "promptAvailableCards": [],
+      "zones": {
+        "playerHand": [
+          {
+            "id": "waOsioWOGKjL1edBe7-wQ",
+            "owner": 2,
+            "card": "Vortex of Knowledge",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "hFbDKMYSpvmxw-92MLsps",
+            "owner": 2,
+            "card": "Leaf Hyren",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          }
+        ],
+        "opponentHand": [
+          cardHand("Y-jZQoAyBwtcCHoEkctoZ", 1),
+          cardHand("VabLk6P9qoqtx7y3jWIsK", 1),
+          cardHand("r5V5qSUGsgr0UWqJuxFeB", 1),
+          cardHand("fIu5nlwVQhzIeVatxdTOM", 1),
+          cardHand("DrlSai48ihWOA05RxP7dU", 1),
+          cardHand("4KuGbr1fzABErbcwVDP0D", 1),
+          cardHand("ovfY6wP1oFbECTZlRJ4q0", 1)
+        ],
+        "playerDeck": [
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "2P2XJ-y0dhaAsICvphfFJ"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "jpJG8jg6F0noVloqREU4L"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "r3jdwFZu55YAFp_6ZK1_F"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "0cY5ZGCFCiuN7Mqm5Xdtz"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "erwC-Ts2-EX5r1loAcHz-"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "UPVOgFWElgwRzxBcSxOD2"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "zlsVUkEiCGrCbzDuff4BN"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "LrcwTO6OUVxBVH0OQ06yH"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "eWMRZqmfNrmWrNx_lSTmf"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "WHoGt63z23B1jX_ZW29BA"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "4WkquVuCVdkXcTg8RV_iV"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "daZpM4m6fCgeu5xtKNcd4"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "vw5KQO3DLlvNHScDzdkDl"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "tktKdn4FENxNmW86wojmQ"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "fS_krZU0QT_0PDTtecgAB"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "rWt4frZfiWH4rofj5Cbkv"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "DU_95kerj3P3yM62qlk-3"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "aKxZwXq_FNzaqghaWXqMh"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "ycMQhBKzT_JUX1QsxVhX6"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "lEXuml2fmbtUHviELKhww"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "t48-dWqmC2W8kqVDhmGhe"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "ODZdgAo2n4E40giObFc7m"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "lcrMo8TSVbkU0ANyXcCe8"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "9hKs817YVx-9Thz2R6URp"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "lx0WowJU0yqMPD7BtET7f"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "7Gvo4ylXa7lN81HT3sSXm"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "V2Damm0mFh9C-Y0eyjI5K"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "mVYCvjxGOpAHi6G6fCoo-"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 2,
+            "id": "cnzg75__asHPpxrfgJD2T"
+          }
+        ],
+        "opponentDeck": [
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "h0bQYO4VhAuT6y0SnTB6J"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "whW68QNi5HLah6NH56VFY"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "5jI9yx1-tJ3VtgBxICFZ1"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "Sv0RdzlvepPcyj4zVKv-b"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "gYbV0hIAtbwCYjUHu0x0W"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "VQ-n-xg6tD7k6jfPts529"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "Y7PWwVpDcydHimZMcGSIl"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "PNQ2aszCysJrcCvfi-Weh"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "nARXR-gWI1UEZCfeoErDg"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "3AJX-3l3xg8GyK2asmijD"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "SZX7xlyk-qNzsdOLkeQNc"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "LBzjMHwif1gzjL6fg4xt8"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "obI2yxN8dB7sm7M4ynEts"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "Cx2R2a63YMQrRZ6aPUHkJ"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "oEL3sBa7yl5ALlCMIA2q6"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "3TAcZZ1nM9u8MRTWxNwiC"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "GK55YqLBQn_GJQ5AALbuI"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "91eG3RbM-WGeQ48bCeB3v"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "8pWLh5CN47dTPMQpMA1UR"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "Cx6wKS1DDrvedlwbY2WO3"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "JpL_eCwOKsGMj2Jf2jW4B"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "NwSIv-QKdrQh8zJO8mWVC"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "YNpHazbNzTRoH1N6rqdg5"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "Lv0_xDFdFxXpw2-bfCfN1"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "1XUHdszrSPk1zc_RyRvX7"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "dLNQTK6oFWWZHAGHMpbaY"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "bdFvOGviCqGeKGtnAe-BV"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "cuMjUsnp78QGiPmUsFv8G"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "oiPpeb7AWM-tzZU2P5362"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "lQR78lqgAL65PSkdHWWjx"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "m3n1hthKcpGlI8fngoD8l"
+          }
+        ],
+        "playerActiveMagi": [
+          {
+            "id": "xpVPPpkXp4tXk-5agBZCb",
+            "owner": 2,
+            "card": "Evu",
+            "data": {
+              "energy": 5,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          }
+        ],
+        "opponentActiveMagi": [
+          {
+            "id": "IDCV-qFviXmyzSlLn2b4Z",
+            "owner": 1,
+            "card": "Adis",
+            "data": {
+              "energy": 17,
+              "controller": 1,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          }
+        ],
+        "playerMagiPile": [
+          {
+            "card": "Tryn",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "owner": 2,
+            "id": "PSFRlCFzKOsR8ytctZ9H2"
+          },
+          {
+            "card": "Yaki",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "owner": 2,
+            "id": "4_L8cqq8X4srEAQQQbGl_"
+          }
+        ],
+        "opponentMagiPile": [
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "vxI8-1Tr7u8oe673vE_ud"
+          },
+          {
+            "card": null,
+            "data": {},
+            "owner": 1,
+            "id": "opzLfXFrjJkluISNgcZlk"
+          }
+        ],
+        "inPlay": [
+          {
+            "id": "hrojmW3hg1Brxt3gUTqPs",
+            "owner": 2,
+            "card": "Furok",
+            "data": {
+              "energy": 4,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "Rf5FmO-e_BdVapqfJz0Nm",
+            "owner": 2,
+            "card": "Plith",
+            "data": {
+              "energy": 3,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "IazPes0M8d2IIG5KOxrCY",
+            "owner": 1,
+            "card": "Orathan Flyer",
+            "data": {
+              "energy": 7,
+              "controller": 1,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "Z9h4EYznWkW9xV-jOuRXr",
+            "owner": 2,
+            "card": "Carillion",
+            "data": {
+              "energy": 4,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "9x6SCbVe2uawSRvYev97b",
+            "owner": 2,
+            "card": "Rudwot",
+            "data": {
+              "energy": 3,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "KpqUnhqLRk4R_W5NPHYNv",
+            "owner": 2,
+            "card": "Weebo",
+            "data": {
+              "energy": 2,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "1zPlxQ-JHrdYNV3offCjI",
+            "owner": 2,
+            "card": "Rudwot",
+            "data": {
+              "energy": 3,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "DtCN2XwTYzaDcT6mIsfU-",
+            "owner": 2,
+            "card": "Ancestral Flute",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          },
+          {
+            "id": "eY6CV4Q8SXCwTWYQdFNWI",
+            "owner": 2,
+            "card": "Robe of Vines",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          }
+        ],
+        "playerDefeatedMagi": [],
+        "opponentDefeatedMagi": [],
+        "playerDiscard": [
+          {
+            "id": "FYCgRS7CBuNcuKrnD1k7c",
+            "owner": 2,
+            "card": "Arboll",
+            "data": {
+              "energy": 0,
+              "controller": 2,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          }
+        ],
+        "opponentDiscard": [
+          {
+            "id": "d6cf3QI8NiydxB5VaewRR",
+            "owner": 1,
+            "card": "Fog Bank",
+            "data": {
+              "energy": 0,
+              "controller": 1,
+              "attacked": 0,
+              "actionsUsed": [],
+              "energyLostThisTurn": 0,
+              "defeatedCreature": false,
+              "hasAttacked": false,
+              "wasAttacked": false
+            }
+          }
+        ]
+      },
+      "continuousEffects": [
+        {
+          "generatedBy": "XmK1B5y5LIsSarBkRT_W-",
+          "expiration": {
+            "type": "expiration/opponents_turns",
+            "turns": 1
+          },
+          "staticAbilities": [
+            {
+              "name": "Fog Bank",
+              "text": "Creature cannot be attacked for next two opponents turns",
+              "selector": "selectors/id",
+              "selectorParameter": "IazPes0M8d2IIG5KOxrCY",
+              "property": "properties/can_be_attacked",
+              "modifier": {
+                "operandOne": false,
+                "operator": "calculations/set"
+              }
+            }
+          ],
+          "triggerEffects": [],
+          "player": 1,
+          "id": "XmK1B5y5LIsSarBkRT_W-"
+        }
+      ],
+      "step": 2,
+      "turn": 1,
+      "goesFirst": 2,
+      "activePlayer": 2,
+      "prompt": false,
+      "promptType": null,
+      "promptMessage": null,
+      "promptPlayer": null,
+      "promptGeneratedBy": null,
+      "promptParams": {},
+      "opponentId": 1,
+      "log": [],
+      "gameEnded": false,
+      "winner": null
+    }
+
+    const stateRepresentation = new GameState(serializedState as unknown as SerializedClientState);
+    stateRepresentation.setPlayerId(2)
+
+    const strategy = new PublicSimulationStrategy()
+    strategy.setup(stateRepresentation, 2)
+
+    const action = strategy.requestAction()
+
+    expect(action.type).toEqual(ACTION_PASS)
+  })
 });
 
 describe('Simulations', () => {
@@ -194,7 +924,7 @@ describe('Simulations', () => {
       'Diobor',
       'Drakan',
       'Drakan',
-      'Drakan',
+      'Dream Balm',
       'Thermal Blast',
       'Thermal Blast',
       'Thermal Blast',
@@ -410,6 +1140,18 @@ describe('Simulations', () => {
       }
 
       if (action.type === ACTION_PLAYER_WINS) {
+        
+          if (action.player === 1) {
+            console.log('Cald won')
+          } else {
+            console.log('Naroom won')
+          }
+          console.dir(action)
+          const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
+          const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
+          const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
+          console.log(`Winning player has ${magiLeft} Magi left with ${energyLeft} energy on active Magi and ${creaturesLeft} creatures`)
+        
         done();
       }
     });
@@ -557,14 +1299,14 @@ describe('Simulations', () => {
               // setTimeout(() => {
               actionCallbackOne({
                 type: 'display/priority',
-                player: 1,
+                player: activePlayer,
               })
               // }, 0);
             } else if (activePlayer === 2) {
               // setTimeout(() => {
               actionCallbackTwo({
                 type: 'display/priority',
-                player: 2,
+                player: activePlayer,
               })
               // }, 0);
             }
@@ -603,14 +1345,14 @@ describe('Simulations', () => {
             // setTimeout(() => {
             actionCallbackOne({
               type: 'display/priority',
-              player: 1,
+              player: activePlayer,
             })
             // }, 0);
           } else if (activePlayer === 2) {
             // setTimeout(() => {
             actionCallbackTwo({
               type: 'display/priority',
-              player: 2,
+              player: activePlayer,
             })
             // }, 0)
           }
@@ -658,6 +1400,16 @@ describe('Simulations', () => {
       }
 
       if (action.type === ACTION_PLAYER_WINS) {
+        if (action.player === 1) {
+          console.log('Cald won')
+        } else {
+          console.log('Gum-Gums won')
+        }
+        console.dir(action)
+        const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
+        const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
+        const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
+        console.log(`Winning player has ${magiLeft} Magi left with ${energyLeft} energy on active Magi and ${creaturesLeft} creatures`)
         done();
       }
     });

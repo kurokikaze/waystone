@@ -28,7 +28,7 @@ export const createGame = (): State => {
   });
 
   // @ts-ignore
-  game.initiatePRNG(3);
+  game.initiatePRNG(4);
 
   game.enableDebug();
 

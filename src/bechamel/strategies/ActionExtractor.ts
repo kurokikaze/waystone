@@ -987,20 +987,17 @@ export class ActionExtractor {
     const attackers = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === attacker && sim.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK) === true)
     const defenders = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== attacker && sim.modifyByStaticAbilities(card, PROPERTY_CAN_BE_ATTACKED) === true)
 
-    // console.log(`Opponent is ${opponent}`)
-    // console.dir(sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards);
-    const enemyMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards[0]
-    // console.log(`Enemy magi is ${enemyMagi.card}`)
-    const magiCanBeAttacked = sim.modifyByStaticAbilities(enemyMagi, PROPERTY_CAN_BE_ATTACKED)
+    const allOpponentCreatures = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== attacker)
 
-    // console.log(`Magi ${magiCanBeAttacked ? 'can' : 'cannot'} be attacked`);
+    const enemyMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards[0]
+    const magiCanBeAttacked = sim.modifyByStaticAbilities(enemyMagi, PROPERTY_CAN_BE_ATTACKED)
 
     const result: AttackPattern[] = []
     const packHunters = attackers.filter(card => card.card.data.canPackHunt)
     for (let attacker of attackers) {
       const numberOfAttacks = sim.modifyByStaticAbilities(attacker, PROPERTY_ATTACKS_PER_TURN)
       if (attacker.data.attacked < numberOfAttacks) {
-        if ((!defenders.length || attacker.card.data.canAttackMagiDirectly) && enemyMagi && enemyMagi.data.energy > 0 && magiCanBeAttacked) {
+        if ((!allOpponentCreatures.length || attacker.card.data.canAttackMagiDirectly) && enemyMagi && enemyMagi.data.energy > 0 && magiCanBeAttacked) {
           result.push({from: attacker.id, to: enemyMagi.id})
         }
         for (let defender of defenders) {
