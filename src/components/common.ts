@@ -271,7 +271,7 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): Selecto
 };
 
 type SelectorFunction = (card: EnrichedCard) => Boolean
-type PromptParamsFixed = PromptParams & { paymentAmount?: number, paymentType:  typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL; }
+type PromptParamsFixed = PromptParams & { paymentAmount?: number, paymentType: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL; }
 export const getPromptFilter = (promptType: PromptTypeType, promptParams: PromptParams): SelectorFunction => {
 	switch (promptType) {
 		case PROMPT_TYPE_RELIC:
@@ -400,9 +400,10 @@ const gameStaticAbilities: EnhancedStaticAbilityType[] = [
 	},
 ];
 
-type AffectedByType= {
+type AffectedByType = {
 	name: string
 	text: string
+	expiration?: { type: string, turns?: number }
 }
 
 type EnrichedCard = {
@@ -419,7 +420,7 @@ type CardsByZones = {
 	opponentActiveMagi: EnrichedCard[]
 }
 
-type EnhancedStaticAbilityType = StaticAbilityType & { player: number }
+type EnhancedStaticAbilityType = StaticAbilityType & { player: number, expiration?: { type: string, turns?: number } }
 
 export const getCardDetails = (state: State) => {
 	const baseCards = state.zones.inPlay;
@@ -430,7 +431,7 @@ export const getCardDetails = (state: State) => {
 		opponentActiveMagi: [...(state.zones.opponentActiveMagi || [])].map(card => ({ ...card, card: byName(card.card) as Card, originalCard: byName(card.card) as Card })),
 	};
 
-	const continuousStaticAbilities: EnhancedStaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities).flat();
+	const continuousStaticAbilities: EnhancedStaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities.map(ability => ({...ability, expiration: effect.expiration}))).flat();
 	const zoneAbilities: EnhancedStaticAbilityType[] = [...allZonesCards.inPlay, ...allZonesCards.playerActiveMagi, ...allZonesCards.opponentActiveMagi].reduce(
 		(acc: EnhancedStaticAbilityType[], cardInPlay) => (cardInPlay && 'card' in cardInPlay && cardInPlay.card.data.staticAbilities) ? [
 			...acc,
@@ -449,14 +450,15 @@ export const getCardDetails = (state: State) => {
 			selectorParameter,
 			property,
 			subProperty,
-			modifier
+			modifier,
+			expiration
 		} = staticAbility;
 
 		const { operator, operandOne } = modifier;
 
 		const newState = clone(oldState);
 
-		for (let cardId in newState.inPlay) { 
+		for (let cardId in newState.inPlay) {
 			const currentCard = newState.inPlay[cardId];
 
 			if (cardMatchesSelector(currentCard, selector, selectorParameter, staticAbility.player)) {
@@ -465,7 +467,7 @@ export const getCardDetails = (state: State) => {
 					newState.inPlay[cardId].data.affectedBy = [];
 				}
 
-				newState.inPlay[cardId].data.affectedBy = [...(newState.inPlay[cardId]?.data?.affectedBy || []), { name, text }];
+				newState.inPlay[cardId].data.affectedBy = [...(newState.inPlay[cardId]?.data?.affectedBy || []), { name, text, expiration }];
 
 				const initialValue = (property !== PROPERTY_POWER_COST) ? getByProperty(currentCard, property, subProperty) : null;
 				switch (property) {
