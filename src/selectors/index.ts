@@ -61,7 +61,7 @@ export function getMagiCard(state: State) {
 const isRelic = (card: ConvertedCard) => relicsHash[card.card];
 const isNotRelic = (card: ConvertedCard) => !relicsHash[card.card];
 
-type ZoneIdentifier = keyof State["zones"] | 'playerRelics' | 'opponentRelics' | 'playerInPlay' | 'opponentInPlay' 
+export type ZoneIdentifier = keyof State["zones"] | 'playerRelics' | 'opponentRelics' | 'playerInPlay' | 'opponentInPlay' 
 export function zoneContent(zoneId: ZoneIdentifier, state: State) {
 	switch (zoneId) {
 		case 'playerRelics': {

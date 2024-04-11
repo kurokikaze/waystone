@@ -4,7 +4,7 @@ import { Challenge, GameResponse } from "./types"
 
 export class DragonlandService {
   private cookie: string = ''
-  constructor(private readonly address: string) {}
+  constructor(private readonly address: string) { }
 
   public async login(login: string, password: string) {
     const params = new URLSearchParams({
@@ -26,9 +26,9 @@ export class DragonlandService {
         },
         redirect: 'manual',
       })
-      
+
       if (response.redirected && response.url.includes('loginError')) {
-        throw new Error(`Failed to login as ${params.toString()}`)  
+        throw new Error(`Failed to login as ${params.toString()}`)
       }
       const cookie = await response.headers.get('Set-Cookie')
       if (cookie) {
@@ -49,13 +49,13 @@ export class DragonlandService {
 
       const loggedBody = await loggedRes.text()
       console.log(loggedBody)
-    } catch(e) {
+    } catch (e) {
       console.dir(e)
       throw new Error(`Failed to login as ${login}`)
     }
-   }
+  }
 
-  public async getChallenges(): Promise<GameResponse|Challenge[]> {
+  public async getChallenges(): Promise<GameResponse | Challenge[]> {
     try {
       console.log(`Getting challenges with cookie ${this.cookie}`)
       const response = await fetch(`${this.address}/api/challenges`, {
@@ -76,14 +76,14 @@ export class DragonlandService {
       }
       const data = await response.json()
 
-      return data as GameResponse|Challenge[]
-    } catch(e) {
+      return data as GameResponse | Challenge[]
+    } catch (e) {
       console.dir(e)
       throw new Error('Failed to fetch challenges')
     }
   }
 
-  public async acceptChallenge(name: string, deckId: string): Promise<string|null> {
+  public async acceptChallenge(name: string, deckId: string): Promise<string | null> {
     try {
       const response = await fetch(`${this.address}/api/accept`, {
         method: 'POST',
@@ -99,7 +99,7 @@ export class DragonlandService {
       const data = await response.json()
 
       return data.hash || null
-    } catch(e) {
+    } catch (e) {
       console.dir(e)
       throw new Error('Failed to accept the challenge')
     }
@@ -119,7 +119,7 @@ export class DragonlandService {
       })
 
       return null
-    } catch(e) {
+    } catch (e) {
       console.dir(e)
       throw new Error('Failed to create the challenge')
     }

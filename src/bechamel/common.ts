@@ -377,12 +377,12 @@ export const getCardDetails = (state: StateRepresentation) => {
 
 	const allZonesCards = {
 		inPlay: [...baseCards].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
-		activePlayerMagi: [...(state.zones.playerActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
+		playerActiveMagi: [...(state.zones.playerActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
 		opponentActiveMagi: [...(state.zones.opponentActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
 	};
 
 	const continuousStaticAbilities: StaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities).flat();
-	const zoneAbilities: StaticAbilityExpanded[] = [...allZonesCards.inPlay, ...allZonesCards.activePlayerMagi, ...allZonesCards.opponentActiveMagi].reduce(
+	const zoneAbilities: StaticAbilityExpanded[] = [...allZonesCards.inPlay, ...allZonesCards.playerActiveMagi, ...allZonesCards.opponentActiveMagi].reduce(
 		(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
 			...acc,
 			...(cardInPlay.card.data.staticAbilities.map(a => ({ ...a, player: cardInPlay.data.controller })))

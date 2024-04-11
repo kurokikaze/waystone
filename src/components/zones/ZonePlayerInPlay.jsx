@@ -35,7 +35,7 @@ import {
 	FILTERED_CREATURE_PROMPTS,
 	getPromptFilter,
 	getCardDetails,
-} from '../common.js';
+} from '../common';
 import {withAbilities} from '../CardAbilities.jsx';
 import {withEnergyManipulation} from '../CardEnergyManipulation.jsx';
 import Velociraptor from '../icons/Velociraptor.tsx';

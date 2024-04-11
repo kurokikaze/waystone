@@ -48,25 +48,25 @@ export type NormalPlayType = EnrichedAction & {
   type: typeof ACTION_PLAY;
   player: number;
   payload: {
-      card: CardInGame;
-      player: number;
+    card: CardInGame;
+    player: number;
   }
   forcePriority?: false;
   generatedBy?: string;
 }
 
-type InGameData = { 
-	energy: number;
-	controller: number;
-	attacked: number;
-	actionsUsed: string[];
-	energyLostThisTurn: number;
-	defeatedCreature: boolean;
-	hasAttacked: boolean;
-	wasAttacked: boolean;
-	burrowed?: boolean;
-	ableToAttack?: boolean;
-	energyLossThreshold?: number;
+type InGameData = {
+  energy: number;
+  controller: number;
+  attacked: number;
+  actionsUsed: string[];
+  energyLostThisTurn: number;
+  defeatedCreature: boolean;
+  hasAttacked: boolean;
+  wasAttacked: boolean;
+  burrowed?: boolean;
+  ableToAttack?: boolean;
+  energyLossThreshold?: number;
 }
 
 type ClientCard = ConvertedCard /*{
@@ -90,7 +90,7 @@ export type HiddenCard = {
 type PromptParamsType = {
   cards?: ConvertedCard[];
   source?: CardInGame;
-  magi?: CardInGame; 
+  magi?: CardInGame;
   availableCards?: string[];
   numberOfCards?: number;
   restrictions?: RestrictionObjectType[] | null;

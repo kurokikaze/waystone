@@ -64,17 +64,24 @@ import {
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 
 	STATUS_BURROWED,
+	TYPE_SPELL,
 } from 'moonlands/dist/const';
 
-import { getZoneContent } from '../selectors';
+import { ZoneIdentifier, getZoneContent } from '../selectors';
+import { ExtendedCard, State } from '../types';
+import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType } from 'moonlands/dist/types';
+import { ConvertedCard, InGameData } from 'moonlands/dist/classes/CardInGame';
+import { HiddenConvertedCard } from '../clientProtocol';
+import Card from 'moonlands/dist/classes/Card';
+import { PropertyType } from 'moonlands/src/types';
 
-export const cardMatchesSelector = (card, selector, selectorParameter = null, source) => {
+export const cardMatchesSelector = (card: EnrichedCard, selector: SelectorTypeType, selectorParameter: any = null, sourceController: number) => {
 	switch (selector) {
 		case SELECTOR_OWN_CREATURES: {
-			return (card.card.type === TYPE_CREATURE && card.data.controller === source.data.controller);
+			return (card.card.type === TYPE_CREATURE && card.data.controller === sourceController);
 		}
 		case SELECTOR_OWN_MAGI: {
-			return (card.card.type === TYPE_MAGI && card.data.controller === source.data.controller);
+			return (card.card.type === TYPE_MAGI && card.data.controller === sourceController);
 		}
 		case SELECTOR_CREATURES_OF_PLAYER: {
 			return (card.card.type === TYPE_CREATURE && card.data.controller === selectorParameter);
@@ -85,7 +92,7 @@ export const cardMatchesSelector = (card, selector, selectorParameter = null, so
 		case SELECTOR_OWN_CREATURES_WITH_STATUS: {
 			switch (selectorParameter) {
 				case STATUS_BURROWED:
-					return card.data.burrowed && card.data.controller === source.data.controller;
+					return card.data.burrowed && card.data.controller === sourceController;
 			}
 			return false;
 		}
@@ -100,7 +107,7 @@ export const cardMatchesSelector = (card, selector, selectorParameter = null, so
 	return false;
 };
 
-export const performCalculation = (operator, operandOne, operandTwo) => {
+export const performCalculation = (operator: OperatorType, operandOne: any, operandTwo: any) => {
 	let result;
 	switch (operator) {
 		case CALCULATION_SET: {
@@ -144,20 +151,22 @@ export const performCalculation = (operator, operandOne, operandTwo) => {
 	return result;
 };
 
-export const transformCard = staticAbilityCards => cardData => {
+type EnrichedCardWithModifiedData = EnrichedCard & { modifiedData: CardData }
+export const transformCard = (staticAbilityCards: ExtendedCard[]) => (cardData: ConvertedCard) => {
 	const card = cardData.card ? byName(cardData.card) : null;
 
 	if (card) {
-		const result = {
+		const result: EnrichedCardWithModifiedData = {
 			...cardData,
 			card,
+			originalCard: card,
 			modifiedData: { ...card.data },
 		};
 
 		staticAbilityCards.forEach(staticAbilityCard => {
-			staticAbilityCard.card.data.staticAbilities.forEach(staticAbility => {
-				if (cardMatchesSelector(result, staticAbility.selector, staticAbility.selectorParameter, staticAbilityCard)) {
-					const modifierFunction = initialValue => {
+			staticAbilityCard.card.data.staticAbilities.forEach((staticAbility: StaticAbilityType) => {
+				if (cardMatchesSelector(result, staticAbility.selector, staticAbility.selectorParameter, staticAbilityCard.data.controller)) {
+					const modifierFunction = (initialValue: any) => {
 						const { operator, operandOne } = staticAbility.modifier;
 
 						// For specifying value to substract in modifiers as positive ("CALCULATION_SUBSTRACT, 1")
@@ -170,7 +179,7 @@ export const transformCard = staticAbilityCards => cardData => {
 
 					switch (staticAbility.property) {
 						case PROPERTY_POWER_COST: {
-							if ('powers' in result.modifiedData) {
+							if ('powers' in result.modifiedData && result.modifiedData.powers) {
 								result.modifiedData.powers = result.modifiedData.powers.map(power => ({ ...power, cost: modifierFunction(power.cost) }));
 							}
 							break;
@@ -196,14 +205,15 @@ export const transformCard = staticAbilityCards => cardData => {
 	};
 };
 
-export const useCardData = (content) => {
-	const staticAbilities = useSelector(state => state.staticAbilities) || [];
+export const useCardData = (content: ConvertedCard[]) => {
+	const staticAbilities = useSelector((state: State) => state.staticAbilities) || [];
 
-	return content.map(transformCard(staticAbilities));
+	const transformer = transformCard(staticAbilities)
+	return content.map(transformer);
 };
 
-export function mapCardDataFromProps(state, { id }) {
-	const filter = card => card.id === id;
+export function mapCardDataFromProps(state: State, { id }: ConvertedCard) {
+	const filter = (card: ConvertedCard | HiddenConvertedCard) => card.id === id;
 	const foundZone = Object.values(state.zones).find(zone => zone.find(filter));
 	return {
 		card: foundZone ? foundZone.find(filter) : null,
@@ -212,7 +222,7 @@ export function mapCardDataFromProps(state, { id }) {
 
 export const withSingleCardData = connect(mapCardDataFromProps);
 
-export const useZoneContent = zoneId => useSelector(getZoneContent(zoneId));
+export const useZoneContent = (zoneId: ZoneIdentifier) => useSelector(getZoneContent(zoneId));
 
 export const UNFILTERED_CREATURE_PROMPTS = [
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -231,7 +241,7 @@ export const UNFILTERED_RELIC_PROMPTS = [
 	PROMPT_TYPE_RELIC,
 ];
 
-const getRestrictionFilter = (restriction, value) => {
+const getRestrictionFilter = (restriction: RestrictionType, value: any): SelectorFunction => {
 	switch (restriction) {
 		case RESTRICTION_TYPE:
 			return card => card.card.type === value;
@@ -257,9 +267,12 @@ const getRestrictionFilter = (restriction, value) => {
 					return card => card.data.burrowed === true;
 			}
 	}
+	return () => true
 };
 
-export const getPromptFilter = (promptType, promptParams) => {
+type SelectorFunction = (card: EnrichedCard) => Boolean
+type PromptParamsFixed = PromptParams & { paymentAmount?: number, paymentType:  typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL; }
+export const getPromptFilter = (promptType: PromptTypeType, promptParams: PromptParams): SelectorFunction => {
 	switch (promptType) {
 		case PROMPT_TYPE_RELIC:
 			return card => card.card.type === TYPE_RELIC;
@@ -274,19 +287,20 @@ export const getPromptFilter = (promptType, promptParams) => {
 		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
 			if (promptParams) {
 				if (promptParams.restrictions && promptParams.restrictions.length) {
-					const checkers = promptParams.restrictions.map(({ type, value }) => getRestrictionFilter(type, value));
+					const checkers: SelectorFunction[] = promptParams.restrictions.map(({ type, value }: RestrictionObjectType): SelectorFunction => getRestrictionFilter(type, value));
 					return card =>
 						checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
 				} else {
-					return getRestrictionFilter(promptParams.restriction, promptParams.restrictionValue);
+					return getRestrictionFilter(promptParams.restriction!, promptParams.restrictionValue);
 				}
 			} else {
 				return () => true;
 			}
 		case PROMPT_TYPE_PAYMENT_SOURCE: {
 			return card => {
-				const canPayAtAll = card.card.data?.paymentSource && card.card.data?.paymentSource.includes(promptParams.paymentType);
-				const haveEnoughEnergy = card.data.energy >= promptParams.paymentAmount;
+				const promptParamsFixed = promptParams as PromptParamsFixed;
+				const canPayAtAll = card.card.data?.paymentSource && card.card.data?.paymentSource.includes(promptParamsFixed.paymentType);
+				const haveEnoughEnergy = card.data.energy >= (promptParamsFixed?.paymentAmount || 0);
 
 				return canPayAtAll && haveEnoughEnergy;
 			}
@@ -296,7 +310,7 @@ export const getPromptFilter = (promptType, promptParams) => {
 	}
 };
 
-const propertyLayers = {
+const propertyLayers: Partial<Record<PropertyType, number>> = {
 	[PROPERTY_CONTROLLER]: 0,
 	[PROPERTY_COST]: 1,
 	[PROPERTY_ENERGIZE]: 2,
@@ -307,7 +321,7 @@ const propertyLayers = {
 	[PROPERTY_ABLE_TO_ATTACK]: 7,
 };
 
-function getByProperty(target, property, subProperty = null) {
+function getByProperty(target: EnrichedCard, property: PropertyType, subProperty: any = null) {
 	switch (property) {
 		case PROPERTY_ID:
 			return target.id;
@@ -334,7 +348,7 @@ function getByProperty(target, property, subProperty = null) {
 		case PROPERTY_MAGI_STARTING_ENERGY:
 			return target.card.data.startingEnergy;
 		case PROPERTY_POWER_COST:
-			return target.card.data.powers.find(({ name }) => name === subProperty).cost;
+			return (target.card.data as CardData)?.powers?.find(({ name }) => name === subProperty)?.cost || 0;
 		case PROPERTY_STATUS_WAS_ATTACKED:
 			return target.data.wasAttacked || false;
 		case PROPERTY_CAN_BE_ATTACKED:
@@ -359,7 +373,7 @@ function getByProperty(target, property, subProperty = null) {
 	}
 }
 
-const gameStaticAbilities = [
+const gameStaticAbilities: EnhancedStaticAbilityType[] = [
 	{
 		name: 'Burrowed - Energy loss',
 		text: 'Your burrowed creatures cannot lose more than 2 energy each turn',
@@ -370,6 +384,7 @@ const gameStaticAbilities = [
 			operator: CALCULATION_SET,
 			operandOne: 2,
 		},
+		player: 0
 	},
 	{
 		name: 'Burrowed - Ability to attack',
@@ -381,30 +396,52 @@ const gameStaticAbilities = [
 			operator: CALCULATION_SET,
 			operandOne: false,
 		},
+		player: 0
 	},
 ];
 
-export const getCardDetails = state => {
+type AffectedByType= {
+	name: string
+	text: string
+}
+
+type EnrichedCard = {
+	id: string
+	owner: number
+	data: InGameData & { affectedBy?: AffectedByType[] } // List of ids of the static abilities the card is affected by
+	card: Card
+	originalCard: Card
+}
+
+type CardsByZones = {
+	inPlay: EnrichedCard[]
+	playerActiveMagi: EnrichedCard[]
+	opponentActiveMagi: EnrichedCard[]
+}
+
+type EnhancedStaticAbilityType = StaticAbilityType & { player: number }
+
+export const getCardDetails = (state: State) => {
 	const baseCards = state.zones.inPlay;
 
-	const allZonesCards = {
-		inPlay: [...baseCards].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
-		activePlayerMagi: [...(state.zones.activePlayerMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
-		opponentActiveMagi: [...(state.zones.opponentActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
+	const allZonesCards: CardsByZones = {
+		inPlay: [...baseCards].map((card: ConvertedCard): EnrichedCard => ({ ...card, card: byName(card.card) as Card, originalCard: byName(card.card) as Card })),
+		playerActiveMagi: [...(state.zones.playerActiveMagi || [])].map(card => ({ ...card, card: byName(card.card) as Card, originalCard: byName(card.card) as Card })),
+		opponentActiveMagi: [...(state.zones.opponentActiveMagi || [])].map(card => ({ ...card, card: byName(card.card) as Card, originalCard: byName(card.card) as Card })),
 	};
 
-	const continuousStaticAbilities = state.continuousEffects.map(effect => effect.staticAbilities).flat();
-	const zoneAbilities = [...allZonesCards.inPlay, ...allZonesCards.activePlayerMagi, ...allZonesCards.opponentActiveMagi].reduce(
-		(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
+	const continuousStaticAbilities: EnhancedStaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities).flat();
+	const zoneAbilities: EnhancedStaticAbilityType[] = [...allZonesCards.inPlay, ...allZonesCards.playerActiveMagi, ...allZonesCards.opponentActiveMagi].reduce(
+		(acc: EnhancedStaticAbilityType[], cardInPlay) => (cardInPlay && 'card' in cardInPlay && cardInPlay.card.data.staticAbilities) ? [
 			...acc,
-			...(cardInPlay.card.data.staticAbilities.map(a => ({ ...a, player: cardInPlay.data.controller })))
+			...(cardInPlay.card.data.staticAbilities.map((a: StaticAbilityType): EnhancedStaticAbilityType => ({ ...a, player: cardInPlay.data.controller })))
 		] : acc,
 		[],
 	);
 
-	const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
+	const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => (propertyLayers[a.property] || 0) - (propertyLayers[b.property] || 0));
 
-	const resultingZones = staticAbilities.reduce((oldState, staticAbility) => {
+	const resultingZones = staticAbilities.reduce((oldState: CardsByZones, staticAbility): CardsByZones => {
 		const {
 			name,
 			text,
@@ -419,23 +456,23 @@ export const getCardDetails = state => {
 
 		const newState = clone(oldState);
 
-		for (let cardId in newState.inPlay) {
+		for (let cardId in newState.inPlay) { 
 			const currentCard = newState.inPlay[cardId];
 
-			if (cardMatchesSelector(currentCard, selector, selectorParameter, { data: { controller: staticAbility.player || null } })) {
+			if (cardMatchesSelector(currentCard, selector, selectorParameter, staticAbility.player)) {
 
 				if (!newState.inPlay[cardId].data.affectedBy) {
 					newState.inPlay[cardId].data.affectedBy = [];
 				}
 
-				newState.inPlay[cardId].data.affectedBy = [...newState.inPlay[cardId].data.affectedBy, { name, text }];
+				newState.inPlay[cardId].data.affectedBy = [...(newState.inPlay[cardId]?.data?.affectedBy || []), { name, text }];
 
 				const initialValue = (property !== PROPERTY_POWER_COST) ? getByProperty(currentCard, property, subProperty) : null;
 				switch (property) {
 					case PROPERTY_ENERGIZE: {
 						const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
 							performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-							performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
+							performCalculation(operator as OperatorType, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
 
 						newState.inPlay[cardId].card.data.energize = resultValue;
 						break;

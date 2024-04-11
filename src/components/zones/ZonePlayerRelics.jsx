@@ -18,7 +18,7 @@ import {
 import {
 	getCardDetails,
 	UNFILTERED_RELIC_PROMPTS,
-} from '../common.js';
+} from '../common';
 import {withAbilities} from '../CardAbilities.jsx';
 import {withView} from '../CardView.jsx';
 

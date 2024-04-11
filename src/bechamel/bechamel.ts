@@ -1,4 +1,4 @@
-import {DragonlandService} from './DragonlandService'
+import { DragonlandService } from './DragonlandService'
 import { GameConnector } from './GameConnector'
 import { SimulationStrategy } from './strategies/SimulationStrategy';
 import { StrategyConnector } from './StrategyConnector';
@@ -20,23 +20,23 @@ async function play(username: string, deckId: string) {
       await dragonlandService.accessGame(gameHash)
 
       await timeout(300) // Just in case
-  
+
       const connector = new GameConnector('http://localhost:3000')
       const io = connector.connect(gameHash)
-  
+
       io.on('connect', () => {
         console.log('Connected, id is ', io.id)
       })
-  
+
       const strategyConnector = new StrategyConnector(io)
-  
+
       strategyConnector.connect(new SimulationStrategy())
     })
   } else {
     console.log(`Ready to accept challenge ${challenges[0].deckId}:${challenges[0].user}`)
     const gameHash = await dragonlandService.acceptChallenge(challenges[0].user, SimulationStrategy.deckId)
     console.log(`Started game ${gameHash}`)
-    
+
     if (!gameHash) {
       return false
     }
