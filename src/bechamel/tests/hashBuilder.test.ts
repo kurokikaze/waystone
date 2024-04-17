@@ -201,11 +201,11 @@ describe('hashBuilder', () => {
 
         const secondSim = gameState.clone();
 
-        const handOne = gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
-        const handTwo = secondSim.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
+        // const handOne = gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
+        // const handTwo = secondSim.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
 
-        console.dir(handOne)
-        console.dir(handTwo)
+        // console.dir(handOne)
+        // console.dir(handTwo)
 
         secondSim.setOnAction(action => {
             if (action.type === ACTION_EFFECT &&
@@ -216,7 +216,7 @@ describe('hashBuilder', () => {
                 builder.registerChildHash(action.sourceCard.id, action.destinationCard.id);
             }
         });
-        console.log(builder.makeHash(gameState));
+        // console.log(builder.makeHash(gameState));
         const card = gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards[0];
         // console.dir(card);
         const playAction = {
@@ -241,11 +241,11 @@ describe('hashBuilder', () => {
         secondSim.update(playAction2 as AnyEffectType);
         const hashTwo = builder.makeHash(secondSim);
 
-        const handOneAfter = gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
-        const handTwoAfter = secondSim.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
+        // const handOneAfter = gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
+        // const handTwoAfter = secondSim.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(({id}) => id)
 
-        console.dir(handOneAfter)
-        console.dir(handTwoAfter)
+        // console.dir(handOneAfter)
+        // console.dir(handTwoAfter)
         expect(hashOne).not.toEqual(hashTwo);
 
         // Okay, now to the final state
