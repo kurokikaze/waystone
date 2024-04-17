@@ -1,4 +1,4 @@
 export type IconProps = {
-	fillColor: string;
+	fillColor?: string;
 	size?: number;
 }

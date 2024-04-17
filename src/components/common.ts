@@ -214,9 +214,11 @@ export const useCardData = (content: ConvertedCard[]) => {
 
 export function mapCardDataFromProps(state: State, { id }: ConvertedCard) {
 	const filter = (card: ConvertedCard | HiddenConvertedCard) => card.id === id;
-	const foundZone = Object.values(state.zones).find(zone => zone.find(filter));
+	// @ts-ignore
+	const foundZone = Object.values(state.zones).find(zone => zone && zone.find(filter));
 	return {
-		card: foundZone ? foundZone.find(filter) : null,
+	// @ts-ignore
+	card: foundZone ? foundZone.find(filter) : null,
 	};
 }
 

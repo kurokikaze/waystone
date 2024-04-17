@@ -18,6 +18,8 @@ export const createGame = (): State => {
     zones: [],
     players: [],
     spellMetaData: {},
+    attachedTo: {},
+    cardsAttached: {}
   };
 
   const zones: any[] = []; //createZones(1, 2)

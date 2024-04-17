@@ -1,5 +1,7 @@
 /* globals window */
+// @ts-ignore
 import CreaturePowerIcon from './CreaturePowerIcon.jsx';
+// @ts-ignore
 import MagiPowerIcon from './MagiPowerIcon.jsx';
 import Ability from './icons/Ability.js';
 import Attack from './icons/Attack.js';
@@ -15,6 +17,7 @@ import { AnyEffectType, CardData } from 'moonlands/dist/types/index.js';
 import Card from 'moonlands/dist/classes/Card';
 import { InGameData } from 'moonlands/dist/classes/CardInGame';
 import { MouseEventHandler } from 'react';
+import React from 'react';
 
 type CardAbilityProps = {
 	name: string
@@ -71,15 +74,15 @@ type PowerType = {
     effects: AnyEffectType[];
 }
 // eslint-disable-next-line react/display-name
-export const withAbilities = (Component: React.Component) => (props: WithAbilitiesProps) => {
+export const withAbilities = (Component: typeof React.Component) => (props: WithAbilitiesProps) => {
 	const isOpponent = props.data.controller !== 1;
 	const hasAbilities = (props.card.data && props.card.data.powers);
 	const isRelic = props.card.type === TYPE_RELIC;
 	const hasUnusedAbilities = hasAbilities && (props.card.data.powers as PowerType[]).some(power => !(props.data.actionsUsed || []).includes(power.name));
 
-	const hasSeveralAttacks = props.modifiedData && props.modifiedData.attacksPerTurn > 1;
+	const hasSeveralAttacks = props.modifiedData && props?.modifiedData?.attacksPerTurn && props?.modifiedData?.attacksPerTurn > 1;
 	const canAttackDirectly = props.modifiedData && props.modifiedData.canAttackMagiDirectly;
-	const stillHasAttacks = props.data.attacked < (props.modifiedData ? props.modifiedData.attacksPerTurn : 0);
+	const stillHasAttacks = props.data.attacked < ((props.modifiedData && props.modifiedData.attacksPerTurn) ? props.modifiedData.attacksPerTurn : 0);
 
 	const PowerIcon = (props.card.type === TYPE_MAGI) ? MagiPowerIcon : CreaturePowerIcon;
 	const iconType = (props.card.type === TYPE_MAGI) ? 'cardIcons' : 'cardIcons';
@@ -115,9 +118,9 @@ export const withAbilities = (Component: React.Component) => (props: WithAbiliti
 						key={name}
 						name={name}
 						text={text}
-						cost={cost}
-						used={(props.data.actionsUsed && props.data.actionsUsed.includes(name)) || (props.data.energy < cost)}
-						costTooHigh={(props.data.energy < cost) && !isRelic}
+						cost={cost !== COST_X ? cost : 0}
+						used={(props.data.actionsUsed && props.data.actionsUsed.includes(name)) || (cost !== COST_X && props.data.energy < cost)}
+						costTooHigh={(cost !== COST_X && props.data.energy < cost) && !isRelic}
 						onClick={() => props.onAbilityUse(props.id, name)}
 					/>
 				)}
