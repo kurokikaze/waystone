@@ -48,6 +48,8 @@ const defaultState: StateShape = {
 	zones: [],
 	players: [],
 	spellMetaData: {},
+  attachedTo: {},
+  cardsAttached: {}
 }
 
 export const STEP_ATTACK = 2;

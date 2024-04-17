@@ -18,4 +18,8 @@ export const ANIMATION_CREATURE_DISCARDED = 'creatureDiscarded';
 export const ACTION_TIMER_TICK = 'actions/timer_tick';
 export const CLIENT_ACTION = 'clientAction';
 
+export const CARD_STYLE_NORMAL = 'card_style/normal';
+export const CARD_STYLE_LOCKET = 'card_style/locket';
+export const CARD_STYLE_DRAGGABLE = 'card_style/draggable';
+
 export const COMMAND_START = 'start';

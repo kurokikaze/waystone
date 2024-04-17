@@ -7,7 +7,7 @@ import {
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 } from 'moonlands/dist/const';
 import Card from '../Card.tsx';
-import {withAbilities} from '../CardAbilities.jsx';
+import {withAbilities} from '../CardAbilities.tsx';
 import {
   ANIMATION_MAGI_DEFEATED,
 	STEP_ATTACK,

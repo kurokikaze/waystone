@@ -38,6 +38,8 @@ describe('hashBuilder', () => {
             continuousEffects: [],
             spellMetaData: {},
             delayedTriggers: [],
+            attachedTo: {},
+            cardsAttached: {},
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
@@ -76,6 +78,8 @@ describe('hashBuilder', () => {
             continuousEffects: [],
             spellMetaData: {},
             delayedTriggers: [],
+            attachedTo: {},
+            cardsAttached: {},
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
@@ -174,6 +178,8 @@ describe('hashBuilder', () => {
             continuousEffects: [],
             spellMetaData: {},
             delayedTriggers: [],
+            attachedTo: {},
+            cardsAttached: {},
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 

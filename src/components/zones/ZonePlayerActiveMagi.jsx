@@ -12,7 +12,7 @@ import {
 import {byName} from 'moonlands/dist/cards';
 import Card from '../Card.tsx';
 import {isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy} from '../../selectors';
-import {withAbilities} from '../CardAbilities.jsx';
+import {withAbilities} from '../CardAbilities.tsx';
 import {useZoneContent, useCardData} from '../common';
 import {getMagiEnergy} from '../../selectors';
 import {ANIMATION_MAGI_DEFEATED} from '../../const';

@@ -12,7 +12,7 @@ import {
 } from 'moonlands/dist/const';
 import Card from '../Card.tsx';
 import {
-	ANIMATION_CREATURE_DISCARDED,
+	CARD_STYLE_DRAGGABLE,
 	STEP_ATTACK,
 } from '../../const';
 import {
@@ -36,7 +36,7 @@ import {
 	getPromptFilter,
 	getCardDetails,
 } from '../common';
-import {withAbilities} from '../CardAbilities.jsx';
+import {withAbilities} from '../CardAbilities.tsx';
 import {withEnergyManipulation} from '../CardEnergyManipulation.jsx';
 import Velociraptor from '../icons/Velociraptor.tsx';
 
@@ -132,6 +132,7 @@ function ZonePlayerInPlay({
 						onPackHunt={onAddToPack}
 						engineConnector={engineConnector} // Just make onAttack
 						className={cn({'attackTarget': animation && animation.target === cardData.id})}
+						cardStyle={CARD_STYLE_DRAGGABLE}
 					/>
 					{packs.some(({leader}) => leader === cardData.id) ? 
 						<div className='packHuntCounter' onClick={() => onRemovePack(cardData.id)}>+ <Velociraptor size={20} fillColor='#fff' /></div>

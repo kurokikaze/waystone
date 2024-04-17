@@ -2624,9 +2624,9 @@ minimatch@^3.0.4, minimatch@^3.1.1:
   dependencies:
     brace-expansion "^1.1.7"
 
-"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.21.5.tar.gz":
-  version "0.21.5"
-  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.21.5.tar.gz#14990b5c69e9e596c302d34f2a1b07ad9fa1d3d4"
+"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.21.7.tar.gz":
+  version "0.21.7"
+  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.21.7.tar.gz#cfb09777f2ca203c69bc3c5f429860edff0f2c2b"
   dependencies:
     nanoid "^3.0.0"
 

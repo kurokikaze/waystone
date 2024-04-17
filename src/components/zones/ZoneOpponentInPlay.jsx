@@ -7,7 +7,7 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 } from 'moonlands/dist/const';
 import Card from '../Card.tsx';
-import {withAbilities} from '../CardAbilities.jsx';
+import {withAbilities} from '../CardAbilities.tsx';
 import {
 	ANIMATION_CREATURE_DISCARDED,
 	STEP_ATTACK,

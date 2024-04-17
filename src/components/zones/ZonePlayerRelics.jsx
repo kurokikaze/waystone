@@ -1,5 +1,5 @@
 /* global window */
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import cn from 'classnames';
 import {
 	ACTION_POWER,
@@ -19,8 +19,9 @@ import {
 	getCardDetails,
 	UNFILTERED_RELIC_PROMPTS,
 } from '../common';
-import {withAbilities} from '../CardAbilities.jsx';
-import {withView} from '../CardView.jsx';
+import { CARD_STYLE_LOCKET } from '../../const.ts';
+import { withAbilities } from '../CardAbilities.tsx';
+import { withView } from '../CardView.jsx';
 
 const CardWithAbilities = withAbilities(Card);
 const CardWithView = withView(Card, true);
@@ -28,7 +29,7 @@ const CardWithView = withView(Card, true);
 function ZonePlayerRelics({
 	name,
 	zoneId,
-  engineConnector,
+	engineConnector,
 }) {
 	const rawContent = useSelector(getCardDetails);
 	const content = rawContent.inPlay.filter(card =>
@@ -47,7 +48,7 @@ function ZonePlayerRelics({
 			target: cardId,
 			generatedBy: promptGeneratedBy,
 		});
-	} : () => {};
+	} : () => { };
 
 	const abilityUseHandler = (id, powerName) => engineConnector.emit({
 		type: ACTION_POWER,
@@ -68,7 +69,7 @@ function ZonePlayerRelics({
 					isOnPrompt={isOnUnfilteredPrompt}
 					actionsAvailable={prsAvailable}
 					onAbilityUse={abilityUseHandler}
-					useLocket={true}
+					cardStyle={CARD_STYLE_LOCKET}
 				/>;
 			}) : null}
 		</div>

@@ -68,7 +68,7 @@ import {
 } from 'moonlands/dist/const';
 
 import { ZoneIdentifier, getZoneContent } from '../selectors';
-import { ExtendedCard, State } from '../types';
+import { EnrichedCard, ExtendedCard, State } from '../types';
 import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType } from 'moonlands/dist/types';
 import { ConvertedCard, InGameData } from 'moonlands/dist/classes/CardInGame';
 import { HiddenConvertedCard } from '../clientProtocol';
@@ -400,19 +400,7 @@ const gameStaticAbilities: EnhancedStaticAbilityType[] = [
 	},
 ];
 
-type AffectedByType = {
-	name: string
-	text: string
-	expiration?: { type: string, turns?: number }
-}
 
-type EnrichedCard = {
-	id: string
-	owner: number
-	data: InGameData & { affectedBy?: AffectedByType[] } // List of ids of the static abilities the card is affected by
-	card: Card
-	originalCard: Card
-}
 
 type CardsByZones = {
 	inPlay: EnrichedCard[]
