@@ -16,6 +16,8 @@ import rootReducer from '../../reducers';
 import GameApp from "../GameApp/GameApp"
 import { ReplayLogService } from "../../services/ReplayLogService";
 
+import './style.css';
+
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(
 	rootReducer,
@@ -75,6 +77,15 @@ export const ReplayAppWrapper = ({
 		}
 	}
 
+	const pause = () => {
+		setPlaying(false);
+		clearInterval(interval);
+	}
+
+	const play = () => {
+		startPlayback();
+	}
+
 	const [interval, saveInterval] = useState<ReturnType<typeof setInterval>>()
 	const breakRef = useRef<Function>(() => { });
 
@@ -128,7 +139,14 @@ export const ReplayAppWrapper = ({
 		loadReplay(replayName);
 	}, [replayName]);
 
-	return (<Provider store={store}>
-		{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} />}
-	</Provider>)
+	return (
+		<div className="replayWrapper">
+			<Provider store={store}>
+				{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} />}
+				<div className="controls">
+					{playing ? <button onClick={pause}>Pause</button>
+						: <button onClick={play}>Play</button>}
+				</div>
+			</Provider>
+		</div>)
 }

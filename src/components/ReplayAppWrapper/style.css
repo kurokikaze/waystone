@@ -1,0 +1,13 @@
+.replayWrapper {
+    position: relative;
+}
+
+.replayWrapper .game > button {
+    display: none;
+}
+
+.replayWrapper .controls {
+    position: absolute;
+    top: 600px;
+    left: 450px;
+}

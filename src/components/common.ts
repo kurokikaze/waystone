@@ -217,8 +217,8 @@ export function mapCardDataFromProps(state: State, { id }: ConvertedCard) {
 	// @ts-ignore
 	const foundZone = Object.values(state.zones).find(zone => zone && zone.find(filter));
 	return {
-	// @ts-ignore
-	card: foundZone ? foundZone.find(filter) : null,
+		// @ts-ignore
+		card: foundZone ? foundZone.find(filter) : null,
 	};
 }
 
@@ -421,7 +421,7 @@ export const getCardDetails = (state: State) => {
 		opponentActiveMagi: [...(state.zones.opponentActiveMagi || [])].map(card => ({ ...card, card: byName(card.card) as Card, originalCard: byName(card.card) as Card })),
 	};
 
-	const continuousStaticAbilities: EnhancedStaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities.map(ability => ({...ability, expiration: effect.expiration}))).flat();
+	const continuousStaticAbilities: EnhancedStaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities.map(ability => ({ ...ability, expiration: effect.expiration }))).flat();
 	const zoneAbilities: EnhancedStaticAbilityType[] = [...allZonesCards.inPlay, ...allZonesCards.playerActiveMagi, ...allZonesCards.opponentActiveMagi].reduce(
 		(acc: EnhancedStaticAbilityType[], cardInPlay) => (cardInPlay && 'card' in cardInPlay && cardInPlay.card.data.staticAbilities) ? [
 			...acc,

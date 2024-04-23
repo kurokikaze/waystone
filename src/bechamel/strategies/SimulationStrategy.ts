@@ -10,6 +10,7 @@ import {
   ACTION_POWER,
   ACTION_RESOLVE_PROMPT,
   TYPE_CREATURE, TYPE_RELIC,
+  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 } from "../const";
 import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
@@ -17,8 +18,8 @@ import { createState, getStateScore } from './simulationUtils'
 import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
-import { C2SAction, ClientAttackAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/const';
+import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/const';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -119,11 +120,15 @@ export class SimulationStrategy implements Strategy {
     }
   }
 
-  private resolveTargetPrompt(target: string, type?: string) {
+  private resolveTargetPrompt(target: string, targetName?: string) {
+    console.dir(target);
+    console.log('===============================================')
+    console.log('===============================================')
     return {
       type: ACTION_RESOLVE_PROMPT,
-      promptType: type || this.gameState?.getPromptType(),
+      promptType: this.gameState?.getPromptType(),
       target,
+      ...(targetName ? { targetName } : {}),
       player: this.playerId,
     } as C2SAction
   }
@@ -173,7 +178,8 @@ export class SimulationStrategy implements Strategy {
       }
       case ACTION_RESOLVE_PROMPT: {
         if ('target' in simAction && simAction.target && simAction.target instanceof CardInGame) {
-          return this.resolveTargetPrompt(simAction.target.id)
+          // console.log(`SimAction path`)
+          return this.resolveTargetPrompt(simAction.target.id, simAction.target.card.name)
         }
         if ('number' in simAction && typeof simAction.number == 'number') {
           return this.resolveNumberPrompt(simAction.number)
@@ -307,7 +313,7 @@ export class SimulationStrategy implements Strategy {
         } catch (_e) {
           console.error('Error generating label perhaps')
           console.dir(_e)
-         }
+        }
         if (hashes.has(hash)) {
           continue
         }
@@ -379,6 +385,7 @@ export class SimulationStrategy implements Strategy {
         !ids.has(action.source)
       ) {
         console.log(`Failed power activation, no card with id ${action.source} (power to be activated is ${action.power}). Dropping ${this.actionsOnHold.length} actions on hold.`)
+
         return true;
       }
     } else if (this.gameState.getStep() === STEP_NAME.ATTACK) {
@@ -397,8 +404,27 @@ export class SimulationStrategy implements Strategy {
   }
 
 
+  private fixTargetPromptResolution(action: C2SAction & { targetName: string }): C2SAction {
+    const promptAvailableCards = this.gameState?.state.promptParams.cards?.map(({ id }) => id);
+    console.log(`Searching for the ${action.targetName}`)
+    if ('target' in action && typeof action.target == 'string' && promptAvailableCards) {
+      const cards = this.gameState?.getMyCreaturesInPlay()
+      for (const cardId of promptAvailableCards) {
+        const card = cards?.find(card => card.id === cardId);
+        if (card && card.card.name === action.targetName) {
+          return {
+            ...action,
+            target: card.id,
+          } as C2SAction
+        }
+      }
+    }
+    console.log(`Fixing the target prompt failed`)
+    return action;
+  }
+
   private fixCardPromptResolution(action: C2SAction): C2SAction {
-    const promptAvailableCards = this.gameState?.state.promptParams.cards?.map(({id}) => id);
+    const promptAvailableCards = this.gameState?.state.promptParams.cards?.map(({ id }) => id);
 
     if ('cards' in action && action.cards && action.cards.some(card => !promptAvailableCards?.includes(card as unknown as string))) {
       const availableCardPairs: Record<string, string[]> = {}
@@ -413,6 +439,8 @@ export class SimulationStrategy implements Strategy {
       // @ts-ignore
       for (const cardName of action.cardNames) {
         if (!(cardName in availableCardPairs) || availableCardPairs[cardName].length == 0) {
+          console.dir(action)
+          console.dir(cardName)
           throw new Error(`Cannot find ${cardName} in the prompt zone`)
         }
         const newId = availableCardPairs[cardName].pop()!
@@ -457,8 +485,20 @@ export class SimulationStrategy implements Strategy {
       //   console.error(`Action hash: ${hash}, state hash: ${checkHash}`);
       // }
 
-      if (action.type == ACTION_RESOLVE_PROMPT && this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+      if (action.type == ACTION_RESOLVE_PROMPT && (
+        this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE
+      )) {
         return this.fixCardPromptResolution(action)
+      }
+
+      if (action.type == ACTION_RESOLVE_PROMPT &&
+        this.gameState.getPromptType() == PROMPT_TYPE_PAYMENT_SOURCE &&
+        !this.gameState.state.promptParams.cards?.some(({id}) => id == action.target)
+      ) {
+        console.log(`Target is ${action.target}`)
+        console.dir(this.gameState.state.promptParams.cards)
+        // const cardIsIn = this.gameState.state.promptParams.cards?.some(card => card.card == action.target)
+        return this.fixTargetPromptResolution(action as ClientResolvePromptAction & { targetName: string })
       }
       return action
     }
@@ -473,7 +513,27 @@ export class SimulationStrategy implements Strategy {
         }
       }
 
+      if (this.gameState.waitingForPaymentSourceSelection()) {
+        console.log(`We are waiting for payment source selection`)
+        console.log(`Available sources: ${this.gameState.getPaymentSourceCards().join(', ')}`)
+        return {
+          type: ACTION_RESOLVE_PROMPT,
+          // promptType: PROMPT_TYPE_CHOOSE_CARDS,
+          target: this.gameState.getPaymentSourceCards()[0],
+          player: this.playerId,
+        }
+      }
+
       if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_MAY_ABILITY) {
+        const myMagi = this.gameState.getMyMagi()
+        if (myMagi.card === 'Stradus' && this.gameState.state.promptGeneratedBy === myMagi.id) {
+          return {
+            type: ACTION_RESOLVE_PROMPT,
+            // promptType: PROMPT_TYPE_MAY_ABILITY,
+            useEffect: true,
+            player: this.playerId,
+          }
+        }
         return {
           type: ACTION_RESOLVE_PROMPT,
           // promptType: PROMPT_TYPE_MAY_ABILITY,
@@ -483,27 +543,33 @@ export class SimulationStrategy implements Strategy {
       }
 
       if (this.waitingTarget && this.gameState.waitingForTarget(this.waitingTarget.source, this.playerId)) {
-        return this.resolveTargetPrompt(this.waitingTarget.target)
+        console.log(`Waiting for target resolve path`)
+        console.dir(this.waitingTarget)
+        return this.resolveTargetPrompt(this.waitingTarget.target, 'waitingTarget')
       }
 
       if (this.gameState.playerPriority(this.playerId)) {
         const step = this.gameState.getStep()
         switch (step) {
           case STEP_NAME.ENERGIZE: {
-          //   if (this.gameState.isInMyPromptState()) {
-          //     if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
-          //       console.log(`Game makes us choose N cards from the zone on Energize step`)
-          //       console.dir(this.gameState.state.promptParams)
-          //     }
-          //   }
+            //   if (this.gameState.isInMyPromptState()) {
+            //     if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+            //       console.log(`Game makes us choose N cards from the zone on Energize step`)
+            //       console.dir(this.gameState.state.promptParams)
+            //     }
+            //   }
           }
           case STEP_NAME.PRS1:
           case STEP_NAME.PRS2: {
 
             if (this.gameState.isInMyPromptState()) {
-              if (this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
+              if (
+                this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE ||
+                this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE
+              ) {
                 return this.resolveChooseCardsPrompt()
               }
+              console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
             }
             const playable = this.gameState.getPlayableCards()
               .map(addCardData)
@@ -648,6 +714,16 @@ export class SimulationStrategy implements Strategy {
       throw new Error('Trying to resolve prompt without gameState present')
     }
     const availableCards = this.gameState.state.promptParams.cards || []
+    if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE) {
+      console.log('Resolving choose up to N cards prompt');
+      console.dir(this.resolveCardsPrompt(
+        availableCards.slice(0, this.gameState.state.promptParams.numberOfCards || 0)
+          .map(card => card as unknown as CardInGame),
+        this.gameState.state.promptType || '',
+        this.gameState.state.promptParams.zone || ZONE_TYPE_IN_PLAY,
+        this.gameState.state.promptParams.zoneOwner || 0,
+      ))
+    }
     // The conversion to CardInGame is OK because resolveCardPrompt only cares about card ids
     return this.resolveCardsPrompt(
       availableCards.slice(0, this.gameState.state.promptParams.numberOfCards || 0)

@@ -19,8 +19,6 @@ import {
   EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
   EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
   EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
-  EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-  EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
   EFFECT_TYPE_END_OF_TURN,
   EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
   EFFECT_TYPE_MOVE_ENERGY,
@@ -36,14 +34,27 @@ import {
   ZONE_TYPE_HAND,
   ZONE_TYPE_MAGI_PILE,
   PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+  EFFECT_TYPE_DRAW,
+  EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
 } from './const'
 import { byName } from 'moonlands/src/cards'
 import { HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation } from './types'
 import { ClientAction, HiddenConvertedCard } from '../clientProtocol'
 import { ConvertedCard } from 'moonlands/dist/classes/CardInGame'
-import { EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, REGION_UNIVERSAL, EFFECT_TYPE_DISCARD_RESHUFFLED, RESTRICTION_CREATURE_NAME, RESTRICTION_TYPE, RESTRICTION_ENERGY_EQUALS, RESTRICTION_OWN_CREATURE } from 'moonlands/dist/const'
+import {
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+  REGION_UNIVERSAL,
+  EFFECT_TYPE_DISCARD_RESHUFFLED,
+  RESTRICTION_CREATURE_NAME,
+  RESTRICTION_ENERGY_EQUALS,
+  RESTRICTION_OWN_CREATURE,
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI
+} from 'moonlands/src/const'
 import { getCardDetails } from './common'
 import { tickDownContinuousEffects } from '../reducers/utils'
+import { PROMPT_TYPE_PAYMENT_SOURCE } from 'moonlands/src/const'
 
 
 const nanoid = () => 'new_nanoid'
@@ -119,6 +130,7 @@ const clientZoneNames = {
 
 export class GameState {
   playerId: number = 0
+  turnNumber: number = 0
   state: StateRepresentation
   public constructor(serializedState: SerializedClientState) {
     this.state = {
@@ -142,6 +154,16 @@ export class GameState {
 
   public waitingForCardSelection(): boolean {
     return (this.state.prompt && this.state.promptType === PROMPT_TYPE_CHOOSE_CARDS)
+  }
+
+  public waitingForPaymentSourceSelection(): boolean {
+    return (this.state.prompt && this.state.promptType === PROMPT_TYPE_PAYMENT_SOURCE)
+  }
+
+  public getPaymentSourceCards(): string[] {
+    if (!this.waitingForPaymentSourceSelection()) { return [] }
+
+    return this.state.promptParams?.cards?.map(({id}) => id) || []
   }
 
   public isInPromptState(playerId: number): boolean {
@@ -172,6 +194,10 @@ export class GameState {
 
   public getStep() {
     return this.state.step
+  }
+
+  public getTurn() {
+    return this.turnNumber;
   }
 
   public getPlayableCards(): ClientCard[] {
@@ -420,6 +446,12 @@ export class GameState {
             };
             break;
           }
+          case PROMPT_TYPE_PAYMENT_SOURCE: {
+            promptParams = {
+              cards: action.cards,
+            };
+            break;
+          }
         }
 
         return {
@@ -474,7 +506,6 @@ export class GameState {
     }
   }
 
-  private turnNumber = 0;
   private applyEffect(state: StateRepresentation, action: ClientAction): StateRepresentation {
     if (!('effectType' in action)) {
       return state;
@@ -514,9 +545,6 @@ export class GameState {
       }
       case EFFECT_TYPE_START_OF_TURN: {
         this.turnNumber += 1;
-        // postMessage({
-        //   botState: JSON.stringify(state, null, 2),
-        // })
         if (action.player === this.playerId) {
           return {
             ...state,
@@ -591,9 +619,8 @@ export class GameState {
           },
         };
       }
-      case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
+      case EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
         const idsToFind = (action.target instanceof Array) ? action.target.map(({ id }) => id) : [action.target.id];
-
 
         const inPlay = [...state.zones.inPlay].map(card => idsToFind.includes(card.id) ? { ...card, data: { ...card.data, energy: Math.max(card.data.energy - action.amount, 0) } } : card);
 
@@ -605,9 +632,7 @@ export class GameState {
           },
         };
       }
-      case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-        // const magiFound = findInPlay(state, action.target.id);
-
+      case EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI: {
         const playerActiveMagi = [...state.zones.playerActiveMagi].map(card => card.id == action.target.id ? { ...card, data: { ...card.data, energy: Math.max(card.data.energy - action.amount, 0) } } : card);
         const opponentActiveMagi = [...state.zones.opponentActiveMagi].map(card => card.id == action.target.id ? { ...card, data: { ...card.data, energy: Math.max(card.data.energy - action.amount, 0) } } : card);
 
@@ -715,6 +740,17 @@ export class GameState {
         };
         return newState;
       }
+      // Unused effects
+      case EFFECT_TYPE_DRAW: {
+        break;
+      }
+      case EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY: {
+        break;
+      }
+      // default: {
+      //   const stopAction: never = action;
+      //   throw new Error(`Unused action effect: ${stopAction.effectType}`);
+      // }
     }
     return state;
   }

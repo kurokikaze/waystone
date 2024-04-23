@@ -1,11 +1,12 @@
 import CardInGame from 'moonlands/src/classes/CardInGame';
-import {State} from 'moonlands/src/index'
-import {ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNDERNEATH, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES} from '../const';
-import {ActionOnHold, SimulationEntity} from '../types';
+import { State } from 'moonlands/src/index'
+import { ACTION_ATTACK, PROPERTY_ATTACKS_PER_TURN, ACTION_PASS, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_OWN_SINGLE_CREATURE, ACTION_RESOLVE_PROMPT, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, ACTION_POWER, ZONE_TYPE_HAND, TYPE_SPELL, ACTION_PLAY, REGION_UNIVERSAL, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, ACTION_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, PROPERTY_CONTROLLER, PROPERTY_CAN_BE_ATTACKED, PROPERTY_ABLE_TO_ATTACK, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES } from '../const';
+import { ActionOnHold, SimulationEntity } from '../types';
 import { HashBuilder } from './HashBuilder';
-import { PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_RELIC, SELECTOR_CREATURES_OF_PLAYER, TYPE_RELIC } from 'moonlands/dist/const';
+import { PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_RELIC, SELECTOR_CREATURES_OF_PLAYER, TYPE_RELIC } from 'moonlands/src/const';
 import { C2SAction } from '../../clientProtocol';
 import { AnyEffectType } from 'moonlands/src/types';
+import { ResolvePaymentSourcePrompt } from 'moonlands/src/types/resolvePrompt';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -17,7 +18,7 @@ const STEP_NAME = {
 }
 
 type AttackPattern = {
-  from: string, 
+  from: string,
   add?: string,
   to: string,
 }
@@ -32,7 +33,7 @@ export class ActionExtractor {
       return ActionExtractor.extractPromptAction(sim, playerId, opponentId, actionLog, previousHash);
     }
     const step = sim.state.step
-    switch(step) {
+    switch (step) {
       case STEP_NAME.ENERGIZE: {
         return []
       }
@@ -154,13 +155,13 @@ export class ActionExtractor {
               additionalAttackers,
               target,
               player: playerId,
-            } : 
-            {
-              type: ACTION_ATTACK,
-              source,
-              target,
-              player: playerId,
-            }
+            } :
+              {
+                type: ACTION_ATTACK,
+                source,
+                target,
+                player: playerId,
+              }
             workEntities.push({
               sim: innerSim,
               action,
@@ -188,8 +189,8 @@ export class ActionExtractor {
                   action.effectType === EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES // &&
                   // action.sourceZone === ZONE_TYPE_HAND &&
                   // action.destinationZone === ZONE_TYPE_IN_PLAY
-                  ) {
-                    hashBuilder.registerChildHash(action.sourceCard.id, action.destinationCard.id);
+                ) {
+                  hashBuilder.registerChildHash(action.sourceCard.id, action.destinationCard.id);
                 }
               });
               const card = innerSim.getZone(ZONE_TYPE_HAND, playerId).byId(creature.id)
@@ -223,7 +224,7 @@ export class ActionExtractor {
       }
     }
 
-    return [] 
+    return []
   }
 
   public static getPassAction(sim: State, playerId: number, actionLog: ActionOnHold[], previousHash: string): SimulationEntity {
@@ -244,7 +245,7 @@ export class ActionExtractor {
   }
 
   public static extractPromptAction(sim: State, playerId: number, opponentId: number, actionLog: ActionOnHold[], previousHash: string): SimulationEntity[] {
-    switch(sim.state.promptType) {
+    switch (sim.state.promptType) {
       case PROMPT_TYPE_MAY_ABILITY: {
         const actionYes: AnyEffectType = {
           type: ACTION_RESOLVE_PROMPT,
@@ -473,7 +474,7 @@ export class ActionExtractor {
             }
           )
         })
-        
+
         return simulationQueue
       }
       case PROMPT_TYPE_SINGLE_MAGI: {
@@ -576,7 +577,7 @@ export class ActionExtractor {
         const action: AnyEffectType = {
           type: ACTION_RESOLVE_PROMPT,
           // promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-          cardsOrder: innerSim.state.promptParams?.cards?.map(({id}) => id) || [],
+          cardsOrder: innerSim.state.promptParams?.cards?.map(({ id }) => id) || [],
           generatedBy: innerSim.state.promptGeneratedBy,
           player: innerSim.state.promptPlayer as number,
         }
@@ -601,7 +602,7 @@ export class ActionExtractor {
           card => card.card.type === TYPE_CREATURE && sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === opponentId
         )
         const ids: [string, number][] = enemyCreatures.map(card => [card.id, card.data.energy])
-        ids.sort((a,b) => a[1] - b[1])
+        ids.sort((a, b) => a[1] - b[1])
 
         let damageLeft = sim.state.promptParams.amount;
         if (typeof damageLeft == 'number') {
@@ -652,7 +653,7 @@ export class ActionExtractor {
           card => card.card.type === TYPE_CREATURE && sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === playerId
         )
         const ids: [string, number][] = enemyCreatures.map(card => [card.id, card.data.energy])
-        ids.sort((a,b) => a[1] - b[1])
+        ids.sort((a, b) => a[1] - b[1])
 
         let energyLeft = sim.state.promptParams.amount;
         if (typeof energyLeft == 'number') {
@@ -773,7 +774,7 @@ export class ActionExtractor {
                 action,
                 actionLog: [...actionLog, {
                   action,
-                  hash:previousHash,
+                  hash: previousHash,
                 }],
                 previousHash,
               }
@@ -848,11 +849,11 @@ export class ActionExtractor {
                 action,
                 actionLog: [...actionLog, {
                   action,
-                  hash : previousHash,
+                  hash: previousHash,
                 }],
                 previousHash,
               }
-            )  
+            )
           }
         }
         const opponentMagi: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).card
@@ -975,6 +976,37 @@ export class ActionExtractor {
         }
         return simulationQueue
       }
+      case PROMPT_TYPE_PAYMENT_SOURCE: {
+        const simulationQueue: SimulationEntity[] = []
+        if (sim.state.promptParams.cards) {
+          for (const card of sim.state.promptParams.cards) {
+            const innerSim = sim.clone()
+
+            const foundCreatureCard = innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(card.id);
+            const foundMagiCard = innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, sim.state.promptPlayer).byId(card.id);
+            const foundCard = foundCreatureCard || foundMagiCard;
+            if (foundCard) {
+              const action: ResolvePaymentSourcePrompt = {
+                type: ACTION_RESOLVE_PROMPT,
+                // promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+                target: foundCard,
+                player: innerSim.state.promptPlayer as number,
+              }
+              simulationQueue.push({
+                sim: innerSim,
+                action,
+                actionLog: [...actionLog, {
+                  action,
+                  hash: previousHash,
+                }],
+                previousHash,
+              })
+            }
+
+          }
+        }
+        return simulationQueue;
+      }
       default: {
         console.log(`No handler for ${sim.state.promptType} prompt types`)
         return []
@@ -998,19 +1030,19 @@ export class ActionExtractor {
       const numberOfAttacks = sim.modifyByStaticAbilities(attacker, PROPERTY_ATTACKS_PER_TURN)
       if (attacker.data.attacked < numberOfAttacks) {
         if ((!allOpponentCreatures.length || attacker.card.data.canAttackMagiDirectly) && enemyMagi && enemyMagi.data.energy > 0 && magiCanBeAttacked) {
-          result.push({from: attacker.id, to: enemyMagi.id})
+          result.push({ from: attacker.id, to: enemyMagi.id })
         }
         for (let defender of defenders) {
-          result.push({from: attacker.id, to: defender.id})
+          result.push({ from: attacker.id, to: defender.id })
           for (let packHunter of packHunters) {
             if (packHunter.id !== attacker.id) {
-              result.push({from: attacker.id, add: packHunter.id, to: defender.id})
+              result.push({ from: attacker.id, add: packHunter.id, to: defender.id })
             }
           }
         }
       }
     }
-  
+
     return result
   }
 }

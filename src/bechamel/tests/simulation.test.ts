@@ -13,6 +13,8 @@ import { StrategyConnector } from '../StrategyConnector';
 import { AnyEffectType } from 'moonlands/dist/types';
 import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
 
+import fs from "node:fs";
+
 const STEP_NAME = {
   ENERGIZE: 0,
   PRS1: 1,
@@ -114,6 +116,1001 @@ describe('Simulations', () => {
       expect(action.target).toEqual(adis.id);
     }
   })
+
+  it('Failed power activation', () => {
+    const stateJson = {
+      "activePlayer": 2,
+      "cardsAttached": {
+      },
+      "continuousEffects": [
+      ],
+      "energyPrompt": false,
+      "gameEnded": false,
+      "goesFirst": 2,
+      "log": [
+      ],
+      "opponentId": 1,
+      "prompt": true,
+      "promptAvailableCards": [
+      ],
+      "promptMessage": null,
+      "promptParams": {
+        "cards": [
+          {
+            "card": "Balamant Pup",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "sUpPZ2aC_u3JJVjWGr8uK",
+            "owner": 2
+          },
+          {
+            "card": "Balamant Pup",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "En3JG424q9YC2fzP5VwAw",
+            "owner": 2
+          }
+        ],
+        "numberOfCards": 2,
+        "restrictions": [
+          {
+            "type": "restrictions/creature_name",
+            "value": "Balamant Pup"
+          }
+        ],
+        "zone": "zones/deck",
+        "zoneOwner": 2
+      },
+      "promptPlayer": 2,
+      "promptType": "prompt/choose_up_to_n_cards_from_zone",
+      "staticAbilities": [
+        {
+          "card": "Robes of the Ages",
+          "data": {
+            "actionsUsed": [
+            ],
+            "attacked": 0,
+            "controller": 1,
+            "defeatedCreature": false,
+            "energy": 0,
+            "energyLostThisTurn": 0,
+            "hasAttacked": false,
+            "wasAttacked": false
+          },
+          "id": "3gXsprabFfZU-BUSSRJO5",
+          "owner": 1
+        }
+      ],
+      "step": 1,
+      "turn": 1,
+      "turnSecondsLeft": 0,
+      "turnTimer": false,
+      "winner": null,
+      "zones": {
+        "inPlay": [
+          {
+            "card": "Orothean Belt",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "Cfr4JVDs3r1OOdayrqLSM",
+            "owner": 1
+          },
+          {
+            "card": "Giant Parathin",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 3,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "VXLl9cyD3fQwQdDaW2y8n",
+            "owner": 1
+          },
+          {
+            "card": "Robes of the Ages",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "3gXsprabFfZU-BUSSRJO5",
+            "owner": 1
+          },
+          {
+            "card": "Balamant Pup",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 6,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "mRhUstfZQmygpAHob2J_K",
+            "owner": 2
+          },
+          {
+            "card": "Deep Hyren",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 1,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 3,
+              "energyLostThisTurn": 0,
+              "hasAttacked": true,
+              "wasAttacked": false
+            },
+            "id": "eZSJhJdwzrGu21DVhNv8T",
+            "owner": 1
+          },
+          {
+            "card": "Hubdra's Spear",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "xeOeqRrrrBvMSkajSF14V",
+            "owner": 1
+          },
+          {
+            "card": "Corf",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 3,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "BPFX8uF6qYQZvQwjd5Htr",
+            "owner": 1
+          }
+        ],
+        "opponentActiveMagi": [
+          {
+            "card": "O'Qua",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 3,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "4ftxAz1qjEiExtbwRt4zH",
+            "owner": 1
+          }
+        ],
+        "opponentDeck": [
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "iI3sM77xywhjCWfEb_fHG",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "R-Xl_TZ3PQ055ZdqXjhjw",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "YqKFqszvjMaRzPdVECYNZ",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "TzZ-P-it2PsYP4i_s2sjo",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "61EGj32ubVMNCcucqbJ6j",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "z44lyesKH_o1k8WJKXt8Z",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "Xh_OXmLE9FC80-blsrSj4",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "ArHQlWVkrUxUOcYYQGZrT",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "FikK3ZzuhdaQDmztKnb6K",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "_TEHkiYKglRJNVt6zcPTu",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "2QrJhVjPVOYuifbHgRZCY",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "Jf6GyXBNDCKtz3v5c1Q8h",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "y0Owh17Vbuv0TC5OZ35GC",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "rPskoEq79LchZgjAwMZHi",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "FjsevVqqW9VXmqIvFpBrC",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "j0WS-Y_BOk57Fuz2mq89t",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "F0kXIrKTlGoarMzWrgP8g",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "d8MTVF3jVvwQFGma4v_Xe",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "L0He8Kdj3Ul_CjkTgQFF6",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "XjOD7LMTXORQ4stzWUPUb",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "yR78VJ9o6Zwubq4LrFu3H",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "0OaCCsNsgBdhR8MKwJHxU",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "vMvKj1yLJisld9RiEPxtE",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "zlHwTI1zkYYGV9yvE8ECL",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "lF4LCVf4rt-xyyaqoME9H",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "1XbRN2pr1-hqVlBzhFKek",
+            "owner": 1
+          }
+        ],
+        "opponentDefeatedMagi": [
+        ],
+        "opponentDiscard": [
+          {
+            "card": "Submerge",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "DB-wg8i8ftlT9bIuzkXam",
+            "owner": 1
+          },
+          {
+            "card": "Undertow",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "DWW7z7Sc8aEUPulDmukht",
+            "owner": 1
+          },
+          {
+            "card": "Abaquist",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "tJgMU-t_J4jQCpZ6bMU4C",
+            "owner": 1
+          },
+          {
+            "card": "Dream Balm",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "7tQ8RjPrmjKBpuTz9mek1",
+            "owner": 1
+          },
+          {
+            "card": "Abaquist",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 1,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "lJlPX-guGg9Sxdb1eMr3-",
+            "owner": 1
+          }
+        ],
+        "opponentHand": [
+          {
+            "card": null,
+            "data": null,
+            "id": "mRNHRBkpwuWZOkqzTivNZ",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": null,
+            "id": "gYMHZZsd1jA6fT3m0zn1R",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": null,
+            "id": "dTCD8Cfo3jXGfRqVeKc0H",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": null,
+            "id": "mWFEAkZdgdKEKQSKsSBI7",
+            "owner": 1
+          }
+        ],
+        "opponentMagiPile": [
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "-Z40K-ZHrzqJJEfMXyt2z",
+            "owner": 1
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "YCKgY2AXDNmwqJi8CwSNG",
+            "owner": 1
+          }
+        ],
+        "playerActiveMagi": [
+          {
+            "card": "Poad",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 7,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "8aRcDD0On7PWSNl_bRKuS",
+            "owner": 2
+          }
+        ],
+        "playerDeck": [
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "qjlRHP7TZtCd9ZDhj5ame",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "sj6p7aS2B38VFW5EgepQ1",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "ElCLOhI1hDxkM9UaHHzz_",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "qDKq8MFCnQNuEQ0xrBOJ7",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "tzJhRR8Nvp9g0I5J2FlgV",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "8Ue-W2eDVSNBwzvZsK_72",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "sUpPZ2aC_u3JJVjWGr8uK",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "CNClU2TLBfQkqA-EDStNY",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "zrRUQ2lSFix-A_H5DJtIa",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "frjywHuu0Scx0LnvJ3b2o",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "QUtJ1sgngeksYo0h0xSTy",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "WuYGkfoNPjj2exLkzgHM9",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "AKT3WPMyK0tfc55UxRNWi",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "L71QjUPkhOO1Es7TvKVZ7",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "807r4m4TPLHHxYJ_m8MHe",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "Yn-LSujm22El_BSY3j62E",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "pIsA-WpV0YnpZIHTDLwx2",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "uaffsffDaqYgcGa0lSrh-",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "En3JG424q9YC2fzP5VwAw",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "dzLlhrO5RlPWbS7FkZtTC",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "Y6YJATOVL7JpKC67ycR1e",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "CG17jdEJKjsQ6tpfIS9oy",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "uUjgsqA-Bqcj6VTO3Hsn7",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "qnzFue7uyi-u60YPa1hgy",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "1fTZiDBtj221aZOqflP9k",
+            "owner": 2
+          },
+          {
+            "card": null,
+            "data": {
+            },
+            "id": "Uy8TmIOekMV2VvRyWPP4Q",
+            "owner": 2
+          }
+        ],
+        "playerDefeatedMagi": [
+        ],
+        "playerDiscard": [
+          {
+            "card": "Carillion",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "fJh9-WIoLORewsL5QnZ1p",
+            "owner": 2
+          },
+          {
+            "card": "Grow",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "rjalNTab2h-Y1uHlnXiQ2",
+            "owner": 2
+          },
+          {
+            "card": "Weebo",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "FD31ggsGg6i-oP2HrOdOm",
+            "owner": 2
+          },
+          {
+            "card": "Leaf Hyren",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "cq1RbVz2d5u_7kBD0qdDy",
+            "owner": 2
+          },
+          {
+            "card": "Grow",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "EIqTTxom9YdZOkuzAB6nq",
+            "owner": 2
+          },
+          {
+            "card": "Arboll",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "YX2GSgALiJMI725qzxunb",
+            "owner": 2
+          },
+          {
+            "card": "Ancestral Flute",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "IgeN0P7K9Q3nq_illy8jt",
+            "owner": 2
+          }
+        ],
+        "playerHand": [
+          {
+            "card": "Vortex of Knowledge",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "2KdnFWgmfBTA2PHDYcjWv",
+            "owner": 2
+          },
+          {
+            "card": "Giant Carillion",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "9uhH0uSt65BH1PqHLr6kV",
+            "owner": 2
+          },
+          {
+            "card": "Giant Carillion",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "ZBobAWXOxmPERutciJGbp",
+            "owner": 2
+          },
+          {
+            "card": "Vortex of Knowledge",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "S9mir49Y1EGV0Vt_r2oi4",
+            "owner": 2
+          },
+          {
+            "card": "Carillion",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "SFjtOg3pbNdM-0KJliBg7",
+            "owner": 2
+          },
+          {
+            "card": "Grow",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "oVijOy1LO8kuCEAf4PuJr",
+            "owner": 2
+          }
+        ],
+        "playerMagiPile": [
+          {
+            "card": "Tryn",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "82NYqvhw0o3SBu6Wzp_cv",
+            "owner": 2
+          },
+          {
+            "card": "Yaki",
+            "data": {
+              "actionsUsed": [
+              ],
+              "attacked": 0,
+              "controller": 2,
+              "defeatedCreature": false,
+              "energy": 0,
+              "energyLostThisTurn": 0,
+              "hasAttacked": false,
+              "wasAttacked": false
+            },
+            "id": "2-byrmcxydfwsguFWGDZS",
+            "owner": 2
+          }
+        ]
+      }
+    }
+
+    const ACTIVE_PLAYER = 1;
+    const stateRepresentation = new GameState(stateJson as unknown as SerializedClientState);
+    stateRepresentation.setPlayerId(ACTIVE_PLAYER);
+
+    const strategy = new SimulationStrategy()
+
+    strategy.setup(stateRepresentation, ACTIVE_PLAYER)
+
+    const action = strategy.requestAction();
+    console.dir(action)
+  });
 })
 
 
@@ -999,6 +1996,8 @@ describe('Simulations', () => {
     // console.dir(game.twister);
     // game.enableDebug();
 
+    const gameLog: any[] = [];
+
     let gameDataCallbackOne: Function = () => { };
     let actionCallbackOne: Function = () => { };
 
@@ -1092,13 +2091,16 @@ describe('Simulations', () => {
       }
     }
 
+    console.log(`Connecting strategies to game`)
     const strategyConnectorOne = new StrategyConnector(connectorOne);
     strategyConnectorOne.connect(new SimulationStrategy())
     const strategyConnectorTwo = new StrategyConnector(connectorTwo);
     strategyConnectorTwo.connect(new SimulationStrategy())
 
+    console.log(`Turning off debug`)
     game.debug = false;
     // let turnNumber = 0;
+
     game.setOnAction((action: AnyEffectType) => {
       // console.log(`Action from an engine`);
       // console.dir(action);
@@ -1114,6 +2116,8 @@ describe('Simulations', () => {
       // try {
       const commandForBotOne = convertServerCommand(action, game, 1);
       actionCallbackOne(commandForBotOne);
+
+      gameLog.push({ for: 1, action: commandForBotOne });
       // } catch(e) {
       //   console.log(`Error converting command`)
       //   console.dir(action);
@@ -1140,25 +2144,340 @@ describe('Simulations', () => {
       }
 
       if (action.type === ACTION_PLAYER_WINS) {
-        
-          if (action.player === 1) {
-            console.log('Cald won')
-          } else {
-            console.log('Naroom won')
-          }
-          console.dir(action)
-          const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
-          const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
-          const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
-          console.log(`Winning player has ${magiLeft} Magi left with ${energyLeft} energy on active Magi and ${creaturesLeft} creatures`)
-        
+
+        if (action.player === 1) {
+          console.log('Cald won')
+        } else {
+          console.log('Naroom won')
+        }
+        // console.dir(action)
+        const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
+        const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
+        const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
+        console.log(`Winning player has ${magiLeft} Magi left with ${energyLeft} energy on active Magi and ${creaturesLeft} creatures`)
+
         done();
       }
     });
 
+    console.log(`Sending state data to log`)
+    gameLog.push({ for: 1, state: game.serializeData(1) });
+    console.log(`Sending state data to player 1`)
     gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
     gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
   }, 20000);
+
+  it.only('Arderial vs Naroom', (done) => {
+    const deckOne = [
+      'Stradus',
+      'Ora',
+      'Nimbulo',
+      'Water of Life',
+      'Water of Life',
+      'Water of Life',
+      'Dream Balm',
+      'Dream Balm',
+      'Dream Balm',
+      'Lovian',
+      'Lovian',
+      'Lovian',
+      'Alaban',
+      'Alaban',
+      'Alaban',
+      'Ayebaw',
+      'Ayebaw',
+      'Ayebaw',
+      'Fog Bank',
+      'Fog Bank',
+      'Fog Bank',
+      'Xyx',
+      'Xyx',
+      'Xyx',
+      'Xyx Elder',
+      'Xyx Elder',
+      'Xyx Elder',
+      'Pharan',
+      'Pharan',
+      'Pharan',
+      'Cloud Narth',
+      'Cloud Narth',
+      'Cloud Narth',
+      'Orathan Flyer',
+      'Orathan Flyer',
+      'Orathan Flyer',
+      'Shockwave',
+      'Shockwave',
+      'Shockwave',
+      'Storm Cloud',
+      'Storm Cloud',
+      'Storm Cloud',
+      'Updraft'
+    ];
+
+    const deckTwo = [
+      'Poad',
+      'Tryn',
+      'Yaki',
+      'Bhatar',
+      'Timber Hyren',
+      'Twee',
+      'Balamant Pup',
+      'Balamant Pup',
+      'Balamant Pup',
+      'Rudwot',
+      'Rudwot',
+      'Arboll',
+      'Arboll',
+      'Carillion',
+      'Carillion',
+      'Carillion',
+      'Furok',
+      'Furok',
+      'Leaf Hyren',
+      'Leaf Hyren',
+      'Plith',
+      'Plith',
+      'Weebo',
+      'Weebo',
+      'Ancestral Flute',
+      'Ancestral Flute',
+      'Ancestral Flute',
+      'Robe of Vines',
+      'Robe of Vines',
+      'Water of Life',
+      'Water of Life',
+      "Hyren's Call",
+      "Orwin's Gaze",
+      "Orwin's Gaze",
+      'Vortex of Knowledge',
+      'Vortex of Knowledge',
+      'Grow',
+      'Grow',
+      'Grow',
+      'Giant Carillion',
+      'Giant Carillion',
+      'Giant Carillion',
+      'Weebo'
+    ]
+
+    const game = createGame()
+    game.setPlayers(1, 2);
+    game.setDeck(1, deckOne);
+    game.setDeck(2, deckTwo);
+
+    // @ts-ignore
+    game.initiatePRNG(1002);
+    game.enableDebug();
+    game.setup();
+
+    // @ts-ignore
+    // console.dir(game.twister);
+    // game.enableDebug();
+
+    const gameLog: any[] = [];
+
+    let gameDataCallbackOne: Function = () => { };
+    let actionCallbackOne: Function = () => { };
+
+    let gameDataCallbackTwo: Function = () => { };
+    let actionCallbackTwo: Function = () => { };
+
+    const connectorOne = {
+      on: (type: string, callback: Function) => {
+        if (type == 'gameData') {
+          gameDataCallbackOne = callback;
+        } else if (type == 'action') {
+          actionCallbackOne = callback;
+        }
+      },
+      emit: (type: string, action: any) => {
+        // console.log(`Connector one emitting "${type}"`)
+        // console.dir(action);
+        if (type === 'clientAction') {
+          const convertedCommand = convertClientCommands({
+            ...action,
+            player: 1,
+          }, game);
+          if (convertedCommand) {
+            if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
+              console.log(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.name} [${action.payload.card.id}]`)
+              console.dir(action?.payload?.card);
+              debugger;
+              expect(true).toEqual(false);
+            }
+            try {
+              game.update(convertedCommand);
+            } catch (e: any) {
+              if (e && 'message' in e && e.message == 'Non-prompt action in the prompt state') {
+                actionCallbackOne({
+                  type: 'display/status',
+                })
+                actionCallbackTwo({
+                  type: 'display/status',
+                })
+              } else {
+                console.log(`Strange error: ${e?.message}`)
+              }
+              throw e;
+            }
+            const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+
+            //setTimeout(() => {
+            if (activePlayer == 1) {
+              actionCallbackOne({
+                type: 'display/priority',
+                player: activePlayer,
+              })
+            } else {
+              actionCallbackTwo({
+                type: 'display/priority',
+                player: activePlayer,
+              })
+            }
+            // }, 0)
+          }
+        }
+      },
+      close: () => {
+        // console.log(`Closing the connection`);
+      }
+    }
+
+    const connectorTwo = {
+      on: (type: string, callback: Function) => {
+        if (type == 'gameData') {
+          gameDataCallbackTwo = callback;
+        } else if (type == 'action') {
+          actionCallbackTwo = callback;
+        }
+      },
+      emit: (_type: string, action: any) => {
+        const convertedCommand = convertClientCommands({
+          ...action,
+          player: 2,
+        }, game);
+        if (convertedCommand) {
+          if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
+            console.error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.card} [${action.payload.card.id}]`)
+            console.log(game.getZone(ZONE_TYPE_HAND, 2).cards.map(card => `[${card.id}] ${card.card.name}`).join(', '))
+            console.dir(action?.payload?.card);
+            expect(true).toEqual(false);
+          }
+          try {
+            game.update(convertedCommand);
+          } catch (e: any) {
+            if (e && 'message' in e && e.message == 'Non-prompt action in the prompt state') {
+              actionCallbackOne({
+                type: 'display/status',
+              })
+              actionCallbackTwo({
+                type: 'display/status',
+              })
+            } else {
+              console.log(`Strange error: ${e?.message}`)
+            }
+            throw e;
+          }
+          const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+          // console.log(`Sending out priority display for player ${activePlayer}`);
+
+          //setTimeout(() => {
+          if (activePlayer == 1) {
+            actionCallbackOne({
+              type: 'display/priority',
+              player: activePlayer,
+            })
+          } else {
+            actionCallbackTwo({
+              type: 'display/priority',
+              player: activePlayer,
+            })
+          }
+          //}, 0)
+        }
+      },
+      close: () => {
+        // console.log(`Closing the connection`);
+      }
+    }
+
+    console.log(`Connecting strategies to game`)
+    const strategyConnectorOne = new StrategyConnector(connectorOne);
+    strategyConnectorOne.connect(new SimulationStrategy())
+    const strategyConnectorTwo = new StrategyConnector(connectorTwo);
+    strategyConnectorTwo.connect(new SimulationStrategy())
+
+    console.log(`Turning off debug`)
+    // game.debug = false;
+    // let turnNumber = 0;
+
+    game.setOnAction((action: AnyEffectType) => {
+      // console.log(`Action from an engine`);
+      // console.dir(action);
+
+      //if (action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES && action.destinationZone === ZONE_TYPE_HAND) {
+      // @ts-ignore
+      // if (typeof action.target == 'string') {
+      //   console.log(`Drawing a card "${action.target}"`);
+      // } else {
+      //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
+      // }
+      //}
+      // try {
+      const commandForBotOne = convertServerCommand(action, game, 1);
+      actionCallbackOne(commandForBotOne);
+
+      if (commandForBotOne) {
+        gameLog.push({ for: 1, action: commandForBotOne })
+      }
+      // } catch(e) {
+      //   console.log(`Error converting command`)
+      //   console.dir(action);
+      //   throw e;
+      // }
+      // if (action.type === ACTION_EFFECT) {
+      //   if (action.effectType === EFFECT_TYPE_START_OF_TURN) {
+      //     console.log(`Start of turn ${turnNumber}`)
+      //     turnNumber++;
+      //   }
+
+      //   if (action.effectType === EFFECT_TYPE_START_STEP) {
+      //     console.log(`Start of step ${STEP_NAMES[action.step]}`)
+      //   }
+      // }
+
+      try {
+        const commandForBotTwo = convertServerCommand(action, game, 2);
+        actionCallbackTwo(commandForBotTwo);
+      } catch (e) {
+        console.log(`Error converting command`)
+        console.dir(action);
+        throw e;
+      }
+
+      if (action.type === ACTION_PLAYER_WINS) {
+
+        if (action.player === 1) {
+          console.log('Arderial won')
+        } else {
+          console.log('Naroom won')
+        }
+        // console.dir(action)
+        const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
+        const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
+        const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
+        console.log(`Winning player has ${magiLeft} Magi left with ${energyLeft} energy on active Magi and ${creaturesLeft} creatures`)
+
+        done();
+      }
+    });
+
+    console.log(`Sending state data to log`)
+    gameLog.push({ for: 1, state: game.serializeData(1) });
+    console.log(`Sending state data to player 1`)
+    gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
+    gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
+  }, 2000000);
 
   it('Cald vs GumGums', (done) => {
     const deckOne = [

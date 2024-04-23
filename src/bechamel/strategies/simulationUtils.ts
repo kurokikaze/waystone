@@ -165,6 +165,8 @@ export function createState(
 
   sim.state.continuousEffects = gameState.getContinuousEffects();
   sim.state.step = gameState.getStep()
+  const seed = gameState.getTurn() * 100 + gameState.getStep() * 10 + gameState.playerId
+  sim.initiatePRNG(seed)
   return sim
 }
 

@@ -6,6 +6,8 @@ import { GameState } from "./GameState"
 import { Strategy } from './strategies/Strategy'
 import { SerializedClientState } from "./types"
 
+// import fs from 'node:fs'
+
 const STEP_NAMES: Record<number, string> = {
   0: 'Energize',
   1: 'Power/Relic/Spell (1)',
@@ -26,12 +28,15 @@ export class StrategyConnector {
 
     this.io.on('gameData', (data: { playerId: number, state: SerializedClientState }) => {
       this.playerId = data.playerId
+      console.log('Strategy receives game data')
       this.gameState = new GameState(data.state)
       this.gameState.setPlayerId(data.playerId)
 
+      console.log('Strategy setup')
       strategy.setup(this.gameState, this.playerId)
 
       if (this.gameState.playerPriority(this.playerId) || this.gameState.isInPromptState(this.playerId)) {
+        console.log('Requesting first action')
         this.requestAndSendAction()
       }
     })
@@ -40,6 +45,34 @@ export class StrategyConnector {
       if (this.gameState && this.playerId && action) {
         try {
           this.gameState.update(action)
+
+          /*
+          {
+              "type": "actions/enter_prompt",
+              "promptType": "prompt/payment_source",
+              "paymentType": "types/creature",
+              "cards": [
+                  {
+                      "id": "vxDvbFfzbUiysvsLBEtFB"
+                  },
+                  {
+                      "id": "hWMPXqay5rju-XAsUqL1T"
+                  }
+              ],
+              "amount": 5,
+              "generatedBy": "rxnIY6xUWtaYeimhvL2Mp",
+              "player": 1
+          }
+          */
+          if (
+            action.type == "actions/enter_prompt" && 
+            action.promptType == "prompt/payment_source" &&
+            action.player == 1 &&
+            !this.gameState.isInPromptState(action.player)
+          ) {
+            console.log(`Entered payment prompt unsuccesfully. Action:`)
+            console.dir(action)
+          }
         } catch (e: any) {
           console.log('Error applying the action')
           console.dir(action)
@@ -59,6 +92,16 @@ export class StrategyConnector {
             this.requestAndSendAction()
           }
         }
+
+        if (action.type === 'display/status') {
+          console.log(`Strategy connector for player ${this.playerId}`)
+          console.log(`Prompt state: ${this.gameState.isInPromptState(this.playerId) ? 'yes' : 'no'}`)
+          if (this.gameState.isInPromptState(this.playerId)) {
+            console.log(`Prompt type: ${this.gameState.getPromptType()}, player: ${this.gameState.state.promptPlayer}`)
+          }/* else {
+            fs.writeFileSync(`player_${this.playerId}_state.json`, JSON.stringify(this.gameState.state), { flag: 'w' })
+          }*/
+        }
       }
     })
   }
@@ -76,6 +119,9 @@ export class StrategyConnector {
       if (currentStep !== 5) {
         const action = this.strategy.requestAction()
         if (action) {
+          if (this.gameState.isInPromptState(this.playerId) && action.type == ACTION_PASS) {
+            console.log(`Here we go, returning pass for the prompt`)
+          }
           this.io.emit('clientAction', action)
         } else {
           console.log('No action returned from request')

@@ -2,6 +2,7 @@ import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@ta
 import { booleanGuard } from "../bechamel/strategies/simulationUtils";
 import { ClientMessage } from "../clientProtocol";
 import testReplay from './testReplay.json';
+import testReplay2 from './testReplay2.json';
 
 export class ReplayLogService {
     static REPLAYS_DIR = 'replays'
@@ -18,10 +19,10 @@ export class ReplayLogService {
     public async getReplaysList() {
         if (this.isTauri()) {
             const entries = await readDir(ReplayLogService.REPLAYS_DIR, { dir: BaseDirectory.AppData, recursive: false });
-            console.dir(entries);
+
             return entries.map(entry => entry.name).filter(booleanGuard);
         }
-        return ['testReplay'];
+        return ['testReplay', 'testReplay2'];
     }
 
     public async readReplay(replay: string):Promise<ClientMessage[]> {
@@ -30,7 +31,7 @@ export class ReplayLogService {
             const replayContent = JSON.parse(contentRaw) as ClientMessage[];
             return replayContent;
         }
-        return new Promise((resolve) => resolve(testReplay as ClientMessage[]));
+        return new Promise((resolve) => resolve((replay === 'testReplay' ? testReplay : testReplay2) as ClientMessage[]));
     }
 
     private async createReplayFileIfNotExists(replayName: string, replayContents: string[]) {
