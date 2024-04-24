@@ -2167,51 +2167,281 @@ describe('Simulations', () => {
     gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
   }, 20000);
 
-  it.only('Arderial vs Naroom', (done) => {
+  const naroomDefault = [
+    'Poad',
+    'Tryn',
+    'Yaki',
+    'Bhatar',
+    'Timber Hyren',
+    'Twee',
+    'Balamant Pup',
+    'Balamant Pup',
+    'Balamant Pup',
+    'Rudwot',
+    'Rudwot',
+    'Arboll',
+    'Arboll',
+    'Carillion',
+    'Carillion',
+    'Carillion',
+    'Furok',
+    'Furok',
+    'Leaf Hyren',
+    'Leaf Hyren',
+    'Plith',
+    'Plith',
+    'Weebo',
+    'Weebo',
+    'Ancestral Flute',
+    'Ancestral Flute',
+    'Ancestral Flute',
+    'Robe of Vines',
+    'Robe of Vines',
+    'Water of Life',
+    'Water of Life',
+    "Hyren's Call",
+    "Orwin's Gaze",
+    "Orwin's Gaze",
+    'Vortex of Knowledge',
+    'Vortex of Knowledge',
+    'Grow',
+    'Grow',
+    'Grow',
+    'Giant Carillion',
+    'Giant Carillion',
+    'Giant Carillion',
+    'Weebo'
+  ]
+
+  const underneathKorrits = [
+    'Motash',
+    'Strag',
+    'Ulk',
+    'Water of Life',
+    'Water of Life',
+    'Water of Life',
+    'Dream Balm',
+    'Dream Balm',
+    'Dream Balm',
+    'Korrit',
+    'Korrit',
+    'Korrit',
+    'Giant Korrit',
+    'Giant Korrit',
+    'Giant Korrit',
+    'Pack Korrit',
+    'Pack Korrit',
+    'Pack Korrit',
+    'Staff of Korrits',
+    'Staff of Korrits',
+    'Staff of Korrits',
+    'Crystal Arboll',
+    'Crystal Arboll',
+    'Crystal Arboll',
+    'Bottomless Pit',
+    'Bottomless Pit',
+    'Bottomless Pit',
+    'Pharan',
+    'Pharan',
+    'Pharan',
+    'Cloud Narth',
+    'Cloud Narth',
+    'Cloud Narth',
+    'Cave Rudwot',
+    'Cave Rudwot',
+    'Cave Rudwot',
+    'Agovo',
+    'Agovo',
+    'Agovo',
+    'Giant Parmalag',
+    'Giant Parmalag',
+    'Giant Parmalag',
+    'Motash\'s Staff'
+  ]
+
+  const caldCreatures = [
+    'Grega',
+    'Magam',
+    'Sinder',
+    'Fire Chogo',
+    'Fire Chogo',
+    'Fire Chogo',
+    'Fire Grag',
+    'Fire Grag',
+    'Fire Grag',
+    'Arbolit',
+    'Arbolit',
+    'Arbolit',
+    'Magma Hyren',
+    'Magma Hyren',
+    'Magma Hyren',
+    'Quor',
+    'Quor',
+    'Quor',
+    'Lava Aq',
+    'Lava Aq',
+    'Lava Aq',
+    'Lava Arboll',
+    'Lava Arboll',
+    'Lava Arboll',
+    'Diobor',
+    'Diobor',
+    'Diobor',
+    'Drakan',
+    'Drakan',
+    'Drakan',
+    'Thermal Blast',
+    'Thermal Blast',
+    'Thermal Blast',
+    'Flame Geyser',
+    'Flame Geyser',
+    'Flame Geyser',
+    'Water of Life',
+    'Dream Balm',
+    'Dream Balm',
+    'Magma Armor',
+    'Magma Armor',
+    'Water of Life',
+    'Water of Life'
+  ]
+
+  const arderialEnergy = [
+    'Stradus',
+    'Ora',
+    'Nimbulo',
+    'Water of Life',
+    'Water of Life',
+    'Water of Life',
+    'Dream Balm',
+    'Dream Balm',
+    'Dream Balm',
+    'Lovian',
+    'Lovian',
+    'Lovian',
+    'Alaban',
+    'Alaban',
+    'Alaban',
+    'Ayebaw',
+    'Ayebaw',
+    'Ayebaw',
+    'Fog Bank',
+    'Fog Bank',
+    'Fog Bank',
+    'Xyx',
+    'Xyx',
+    'Xyx',
+    'Xyx Elder',
+    'Xyx Elder',
+    'Xyx Elder',
+    'Pharan',
+    'Pharan',
+    'Pharan',
+    'Cloud Narth',
+    'Cloud Narth',
+    'Cloud Narth',
+    'Orathan Flyer',
+    'Orathan Flyer',
+    'Orathan Flyer',
+    'Shockwave',
+    'Shockwave',
+    'Shockwave',
+    'Storm Cloud',
+    'Storm Cloud',
+    'Storm Cloud',
+    'Updraft'
+  ]
+
+  const oQuaCombo = [
+    'O\'Qua',
+    'Whall',
+    'Ebylon',
+    'Water of Life',
+    'Water of Life',
+    'Water of Life',
+    'Dream Balm',
+    'Dream Balm',
+    'Dream Balm',
+    'Corf',
+    'Corf',
+    'Corf',
+    'Sphor',
+    'Sphor',
+    'Sphor',
+    'Abaquist',
+    'Abaquist',
+    'Abaquist',
+    'Orothean Belt',
+    'Platheus',
+    'Platheus',
+    'Platheus',
+    'Giant Parathin',
+    'Giant Parathin',
+    'Giant Parathin',
+    'Undertow',
+    'Undertow',
+    'Undertow',
+    'Deep Hyren',
+    'Deep Hyren',
+    'Deep Hyren',
+    'Megathan',
+    'Megathan',
+    'Megathan',
+    'Bwill',
+    'Bwill',
+    'Bwill',
+    'Robes of the Ages',
+    'Robes of the Ages',
+    'Submerge',
+    'Submerge',
+    'Submerge',
+    'Coral Hyren',
+    'Coral Hyren',
+  ]
+  it.only('Underneath vs Naroom', (done) => {
     const deckOne = [
-      'Stradus',
-      'Ora',
-      'Nimbulo',
+      'Motash',
+      'Strag',
+      'Ulk',
       'Water of Life',
       'Water of Life',
       'Water of Life',
       'Dream Balm',
       'Dream Balm',
       'Dream Balm',
-      'Lovian',
-      'Lovian',
-      'Lovian',
-      'Alaban',
-      'Alaban',
-      'Alaban',
-      'Ayebaw',
-      'Ayebaw',
-      'Ayebaw',
-      'Fog Bank',
-      'Fog Bank',
-      'Fog Bank',
-      'Xyx',
-      'Xyx',
-      'Xyx',
-      'Xyx Elder',
-      'Xyx Elder',
-      'Xyx Elder',
+      'Korrit',
+      'Korrit',
+      'Korrit',
+      'Giant Korrit',
+      'Giant Korrit',
+      'Giant Korrit',
+      'Pack Korrit',
+      'Pack Korrit',
+      'Pack Korrit',
+      'Staff of Korrits',
+      'Staff of Korrits',
+      'Staff of Korrits',
+      'Crystal Arboll',
+      'Crystal Arboll',
+      'Crystal Arboll',
+      'Bottomless Pit',
+      'Bottomless Pit',
+      'Bottomless Pit',
       'Pharan',
       'Pharan',
       'Pharan',
       'Cloud Narth',
       'Cloud Narth',
       'Cloud Narth',
-      'Orathan Flyer',
-      'Orathan Flyer',
-      'Orathan Flyer',
-      'Shockwave',
-      'Shockwave',
-      'Shockwave',
-      'Storm Cloud',
-      'Storm Cloud',
-      'Storm Cloud',
-      'Updraft'
+      'Cave Rudwot',
+      'Cave Rudwot',
+      'Cave Rudwot',
+      'Agovo',
+      'Agovo',
+      'Agovo',
+      'Giant Parmalag',
+      'Giant Parmalag',
+      'Giant Parmalag',
+      'Motash\'s Staff'
     ];
 
     const deckTwo = [
@@ -2262,17 +2492,15 @@ describe('Simulations', () => {
 
     const game = createGame()
     game.setPlayers(1, 2);
-    game.setDeck(1, deckOne);
-    game.setDeck(2, deckTwo);
+    game.setDeck(1, arderialEnergy);
+    game.setDeck(2, naroomDefault);
 
     // @ts-ignore
-    game.initiatePRNG(1002);
-    game.enableDebug();
-    game.setup();
-
-    // @ts-ignore
-    // console.dir(game.twister);
+    game.initiatePRNG(2020);
     // game.enableDebug();
+    game.setup();
+    
+    game.enableDebug();
 
     const gameLog: any[] = [];
 
@@ -2407,7 +2635,7 @@ describe('Simulations', () => {
     const strategyConnectorTwo = new StrategyConnector(connectorTwo);
     strategyConnectorTwo.connect(new SimulationStrategy())
 
-    console.log(`Turning off debug`)
+    // console.log(`Turning off debug`)
     // game.debug = false;
     // let turnNumber = 0;
 
@@ -2458,9 +2686,9 @@ describe('Simulations', () => {
       if (action.type === ACTION_PLAYER_WINS) {
 
         if (action.player === 1) {
-          console.log('Arderial won')
+          console.log('Arderial Energy won')
         } else {
-          console.log('Naroom won')
+          console.log('Naroom Default won')
         }
         // console.dir(action)
         const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi

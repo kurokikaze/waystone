@@ -121,9 +121,6 @@ export class SimulationStrategy implements Strategy {
   }
 
   private resolveTargetPrompt(target: string, targetName?: string) {
-    console.dir(target);
-    console.log('===============================================')
-    console.log('===============================================')
     return {
       type: ACTION_RESOLVE_PROMPT,
       promptType: this.gameState?.getPromptType(),
@@ -514,8 +511,6 @@ export class SimulationStrategy implements Strategy {
       }
 
       if (this.gameState.waitingForPaymentSourceSelection()) {
-        console.log(`We are waiting for payment source selection`)
-        console.log(`Available sources: ${this.gameState.getPaymentSourceCards().join(', ')}`)
         return {
           type: ACTION_RESOLVE_PROMPT,
           // promptType: PROMPT_TYPE_CHOOSE_CARDS,

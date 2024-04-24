@@ -82,8 +82,13 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>, on
 				action,
 			] : [action];
 		case ACTION_ATTACK: {
-			return (action.player === 2 || !onlyEnemy) ? [
-				startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, 2), 
+			if (action.player !== 1 || !onlyEnemy) {
+				if (action.player == 1) {
+					console.log(`Adding startAttackAnimation from ${action.source} to ${action.target}`)
+				}
+			}
+			return (action.player !== 1 || !onlyEnemy) ? [
+				startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, action.player), 
 				endAttackAnimation(action.source),
 				action,
 			] : [action];

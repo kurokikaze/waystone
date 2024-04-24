@@ -80,7 +80,7 @@ function ZoneOpponentInPlay({
 						droppable={active && cardData.card.type === TYPE_CREATURE}
 						target={active && cardData.card.type === TYPE_CREATURE}
 						engineConnector={engineConnector}
-						className={cn({'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
+						className={cn({'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
 						attacker={animation && animation.source === cardData.id}
 						attackNumber={cardData.data.attacked}
 					/>

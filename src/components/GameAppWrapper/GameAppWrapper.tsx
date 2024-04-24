@@ -7,7 +7,7 @@ import { createEpicMiddleware } from "redux-observable";
 import thunk from "redux-thunk";
 import { Observable } from "rxjs";
 import addAnimations from "../../addAnimations";
-import { C2SAction, ClientAction, ClientCommand } from "../../clientProtocol";
+import { C2SAction, ClientAction } from "../../clientProtocol";
 import { COMMAND_START } from "../../const";
 import { defaultState } from "../../reducers/reducer";
 import { EngineConnector } from "../../types";

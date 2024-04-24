@@ -37,6 +37,7 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
 	const isOnMagiPrompt = useSelector(getIsOnMagiPrompt);
 	const isOnFilteredPrompt = useSelector(isOnFilteredMagiPrompt);
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
+	
 	const animation = useSelector(getAnimation);
 	const defeatedId = animation && animation.type === ANIMATION_MAGI_DEFEATED ? animation.target : null;
 	const cardClickHandler = (isOnMagiPrompt || isOnFilteredPrompt) ? cardId => {

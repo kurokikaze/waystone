@@ -131,8 +131,10 @@ function ZonePlayerInPlay({
 						onAbilityUse={abilityUseHandler}
 						onPackHunt={onAddToPack}
 						engineConnector={engineConnector} // Just make onAttack
-						className={cn({'attackTarget': animation && animation.target === cardData.id})}
+						className={cn({'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
 						cardStyle={CARD_STYLE_DRAGGABLE}
+						attacker={animation && animation.source === cardData.id}
+						attackNumber={cardData.data.attacked}
 					/>
 					{packs.some(({leader}) => leader === cardData.id) ? 
 						<div className='packHuntCounter' onClick={() => onRemovePack(cardData.id)}>+ <Velociraptor size={20} fillColor='#fff' /></div>

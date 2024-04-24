@@ -65,27 +65,30 @@ export const endAttackAnimation = (source: string) => ({
   source,
   endAnimation: true,
 });
-export const startRelicAnimation = (card: string) => ({
+export const startRelicAnimation = (card: string, player: number) => ({
   type: START_RELIC_ANIMATION as typeof START_RELIC_ANIMATION,
   card,
+  player,
   endAnimation: true,
 });
 export const endRelicAnimation = () => ({
   type: END_RELIC_ANIMATION as typeof END_RELIC_ANIMATION,
   endAnimation: true,
 });
-export const startSpellAnimation = (card: string) => ({
+export const startSpellAnimation = (card: string, player: number) => ({
   type: START_SPELL_ANIMATION as typeof START_SPELL_ANIMATION,
   card,
+  player,
   endAnimation: true,
 });
 export const endSpellAnimation = () => ({
   type: END_SPELL_ANIMATION as typeof END_SPELL_ANIMATION,
   endAnimation: true,
 });
-export const startCreatureAnimation = (card: string) => ({
+export const startCreatureAnimation = (card: string, player: number) => ({
   type: START_CREATURE_ANIMATION as typeof START_CREATURE_ANIMATION,
   card,
+  player,
   endAnimation: true,
 });
 export const endCreatureAnimation = () => ({

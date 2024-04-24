@@ -13,7 +13,7 @@ import {
 	STEP_ATTACK,
 } from '../../const';
 import {useCardData, useZoneContent, getCardDetails} from '../common';
-import {isOurTurn, getCurrentStep, getPromptGeneratedBy, getIsOnMagiPrompt} from '../../selectors';
+import {isOurTurn, getCurrentStep, getPromptGeneratedBy, getIsOnMagiPrompt, getAnimation} from '../../selectors';
 
 const CardWithAbilities = withAbilities(Card);
 
@@ -28,6 +28,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 	const currentStep = useSelector(getCurrentStep);
 	const ourTurn = useSelector(isOurTurn);
 	const active = ourTurn && currentStep === STEP_ATTACK;
+	const animation = useSelector(getAnimation);
 	const inPlayContent = useSelector(getCardDetails);
 	const guarded = inPlayContent.inPlay.some(card => card.data.controller !== 1 && card.card.type === TYPE_CREATURE);
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
@@ -60,6 +61,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 					target={active}
 					guarded={guarded}
 					engineConnector={engineConnector}
+					className={cn({'attackTarget': animation && animation.type == 'attack' && animation.target === cardData.id})}
 				/>,
 			) : null}
 		</div>

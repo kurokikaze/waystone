@@ -249,6 +249,8 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case START_ATTACK_ANIMATION: {
+			console.log('Start attack animation')
+			console.dir(action)
 			return {
 				...state,
 				animation: {
@@ -271,6 +273,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: {
 					type: MESSAGE_TYPE_RELIC,
 					card: action.card,
+					player: action.player,
 				},
 			};
 		}
@@ -286,6 +289,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: {
 					type: MESSAGE_TYPE_SPELL,
 					card: action.card,
+					player: action.player,
 				},
 			};
 		}
@@ -301,6 +305,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: {
 					type: MESSAGE_TYPE_CREATURE,
 					card: action.card,
+					player: action.player,
 				},
 			};
 		}

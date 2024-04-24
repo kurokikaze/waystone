@@ -15,6 +15,7 @@ export type MessageType = {
   source?: string,
   card?: string,
   power?: string,
+  player?: number,
   chosenTarget?: string,
   chosenNumber?: number,
 }
