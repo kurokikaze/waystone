@@ -1,47 +1,53 @@
-import { Divider, List, Spin, Typography, Button, Space } from 'antd';
-import { useEffect, useState } from 'react';
-import { ReplayLogService } from '../../services/ReplayLogService';
+import { Divider, List, Spin, Typography, Button, Space } from "antd";
+import { useEffect, useState } from "react";
+import { ReplayLogService } from "../../services/ReplayLogService";
 
 type ReplayListProps = {
-	onReplayClick: (replay: string) => void,
-	onReturnToBase: () => void,
-}
+  onReplayClick: (replay: string) => void;
+  onReturnToBase: () => void;
+};
 
 const ReplayList: React.FC<ReplayListProps> = ({
-	onReplayClick,
-	onReturnToBase,
+  onReplayClick,
+  onReturnToBase,
 }) => {
-	const [loading, setLoading] = useState<boolean>(true);
-	const [data, setData] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<string[]>([]);
 
-	const loadReplays = async () => {
-		const replays = await (new ReplayLogService()).getReplaysList();
-		setData(replays);
-		setLoading(false);
-	}
+  const loadReplays = async () => {
+    const replays = await new ReplayLogService().getReplaysList();
+    setData(replays);
+    setLoading(false);
+  };
 
-	useEffect(() => {
-		loadReplays();
-	}, []);
+  useEffect(() => {
+    loadReplays();
+  }, []);
 
-	return (
-		<div className='appHolder'>
-			<Space direction='vertical' style={{ width: 800 }}>
-				<Divider orientation="left">Default Size</Divider>
-				{loading ? <Spin /> : <List
-					header={<div>Replays</div>}
-					bordered
-					dataSource={data}
-					renderItem={(item) => (
-						<List.Item>
-							<Typography.Text>{item}</Typography.Text>
-							<Button onClick={() => onReplayClick(item)}>Play</Button>
-						</List.Item>
-					)}
-				/>}
-				<Button onClick={onReturnToBase} disabled={loading}>Return</Button>
-			</Space>
-		</div>
-	);
-}
+  return (
+    <div className="appHolder">
+      <Space direction="vertical" style={{ width: 800 }}>
+        <Divider orientation="left">Default Size</Divider>
+        {loading ? (
+          <Spin />
+        ) : (
+          <List
+            header={<div>Replays</div>}
+            bordered
+            dataSource={data}
+            renderItem={(item) => (
+              <List.Item>
+                <Typography.Text>{item}</Typography.Text>
+                <Button onClick={() => onReplayClick(item)}>Play</Button>
+              </List.Item>
+            )}
+          />
+        )}
+        <Button onClick={onReturnToBase} disabled={loading}>
+          Return
+        </Button>
+      </Space>
+    </div>
+  );
+};
 export default ReplayList;

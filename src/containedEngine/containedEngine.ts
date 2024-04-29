@@ -1,4 +1,13 @@
-import {State, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE} from 'moonlands';
+import {
+  State,
+  ZONE_TYPE_ACTIVE_MAGI,
+  ZONE_TYPE_DECK,
+  ZONE_TYPE_DEFEATED_MAGI,
+  ZONE_TYPE_DISCARD,
+  ZONE_TYPE_HAND,
+  ZONE_TYPE_IN_PLAY,
+  ZONE_TYPE_MAGI_PILE,
+} from "moonlands";
 
 export const createGame = (): State => {
   const defaultState = {
@@ -19,7 +28,7 @@ export const createGame = (): State => {
     players: [],
     spellMetaData: {},
     attachedTo: {},
-    cardsAttached: {}
+    cardsAttached: {},
   };
 
   const zones: any[] = []; //createZones(1, 2)
@@ -34,5 +43,5 @@ export const createGame = (): State => {
 
   game.enableDebug();
 
-  return game
-}
+  return game;
+};

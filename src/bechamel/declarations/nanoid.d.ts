@@ -1,3 +1,3 @@
 declare module "nanoid" {
-  export const nanoid = (n?: number) => string,
+  export const nanoid = (n?: number) => string;
 }

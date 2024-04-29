@@ -1,47 +1,64 @@
 /* global window */
-import {useEffect, useRef} from 'react';
-import cn from 'classnames';
-import {useSelector} from 'react-redux';
-import { LogEntryType } from 'moonlands/src/types';
+import { useEffect, useRef } from "react";
+import cn from "classnames";
+import { useSelector } from "react-redux";
+import { LogEntryType } from "moonlands/src/types";
 
-import {mapEntryToText} from './utils';
-import './style.css';
+import { mapEntryToText } from "./utils";
+import "./style.css";
 
-const SHOW_CLASS = 'show';
+const SHOW_CLASS = "show";
 
 const getLogEntries = (state: AppState) => state.log;
 
 type LogEntryProps = {
-	entry: LogEntryType;
-}
+  entry: LogEntryType;
+};
 // @ts-ignore
-const LogEntry = ({entry}: LogEntryProps) => <div className={cn('logEntry', {'ours': ('player' in entry && entry.player === 1), 'theirs': ('player' in entry && entry.player !== 1)})}>{mapEntryToText(entry)}</div>;
+const LogEntry = ({ entry }: LogEntryProps) => (
+  <div
+    className={cn("logEntry", {
+      ours: "player" in entry && entry.player === 1,
+      theirs: "player" in entry && entry.player !== 1,
+    })}
+  >
+    {mapEntryToText(entry)}
+  </div>
+);
 
 const Log = () => {
-	const listRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
-	const entries = useSelector(getLogEntries);
-	useEffect(() => {
-		const listElement = listRef.current;
-		if (listElement && listElement.children.length) {
-			listElement.children[listElement.children.length - 1].scrollIntoView(false);
-		}
-		setTimeout(() => {
-			if (listElement) {
-				[].forEach.call(listElement.children, (child: HTMLElement) => {
-					if (!child.classList.contains(SHOW_CLASS)) { 
-						child.classList.add(SHOW_CLASS);
-					}
-				});
-			}
-		}, 10);
-	}, [entries]);
+  const entries = useSelector(getLogEntries);
+  useEffect(() => {
+    const listElement = listRef.current;
+    if (listElement && listElement.children.length) {
+      listElement.children[listElement.children.length - 1].scrollIntoView(
+        false,
+      );
+    }
+    setTimeout(() => {
+      if (listElement) {
+        [].forEach.call(listElement.children, (child: HTMLElement) => {
+          if (!child.classList.contains(SHOW_CLASS)) {
+            child.classList.add(SHOW_CLASS);
+          }
+        });
+      }
+    }, 10);
+  }, [entries]);
 
-	return <div className='actionLog' ref={listRef}>{entries.map((entry, i) => <LogEntry key={i} entry={entry} />)}</div>;
+  return (
+    <div className="actionLog" ref={listRef}>
+      {entries.map((entry, i) => (
+        <LogEntry key={i} entry={entry} />
+      ))}
+    </div>
+  );
 };
 
 type AppState = {
-	log: LogEntryType[];
-}
+  log: LogEntryType[];
+};
 
 export default Log;

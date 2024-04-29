@@ -56,6 +56,10 @@
     cursor: default;
 }
 
+.promptWindow.promptChooseCards .buttonHolder {
+    margin-top: 15px;
+}
+
 .promptWindow .cardHolder {
     height: 180px;
     width: 123px;

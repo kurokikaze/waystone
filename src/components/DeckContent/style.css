@@ -6,7 +6,8 @@
     width: 850px;
 }
 
-.deckGrid .ant-col-8, .deckGrid .ant-col-24 {
+.deckGrid .ant-col-8,
+.deckGrid .ant-col-24 {
     text-align: center;
 }
 
@@ -18,7 +19,7 @@
     margin: 0 25px;
 }
 
-.ant-col-24.cardList > div {
+.ant-col-24.cardList>div {
     display: flex;
     flex: 1 1 25%;
     text-align: center;

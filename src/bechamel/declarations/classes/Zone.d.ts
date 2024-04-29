@@ -1,6 +1,6 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
 import { ZoneType } from "../types";
-declare module 'moonlands/dist/classes/Zone' {
+declare module "moonlands/dist/classes/Zone" {
   export default class Zone {
     _name: string;
     _player: number | null;

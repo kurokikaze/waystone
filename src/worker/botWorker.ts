@@ -3,9 +3,9 @@
 /// <reference lib="webworker" />
 declare const self: DedicatedWorkerGlobalScope;
 
-import {WorkerStrategyConnector} from '../bechamel/WorkerStrategyConnector'
-import {SimulationStrategy} from '../bechamel/strategies/SimulationStrategy';
+import { WorkerStrategyConnector } from "../bechamel/WorkerStrategyConnector";
+import { SimulationStrategy } from "../bechamel/strategies/SimulationStrategy";
 
-const strategyConnector = new WorkerStrategyConnector()
+const strategyConnector = new WorkerStrategyConnector();
 
-strategyConnector.connect(new SimulationStrategy())
+strategyConnector.connect(new SimulationStrategy());

@@ -1,1 +1,1 @@
-export { default as DeckEditor } from './DeckEditor.jsx';
+export { default as DeckEditor } from "./DeckEditor.jsx";

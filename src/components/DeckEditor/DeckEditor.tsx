@@ -1,182 +1,309 @@
-import { useState, useCallback, useEffect } from 'react';
-import { appWindow, LogicalSize } from "@tauri-apps/api/window";
+import { useState, useCallback, useEffect } from "react";
+import { LogicalSize } from "@tauri-apps/api/window";
 
-import Row from 'antd/es/row';
-import Col from 'antd/es/col';
-import Input from 'antd/es/input';
-import Spin from 'antd/es/spin';
-import Button from 'antd/es/button';
+import Row from "antd/es/row";
+import Col from "antd/es/col";
+import Input from "antd/es/input";
+import Spin from "antd/es/spin";
+import Button from "antd/es/button";
 
-import { byName, cards } from 'moonlands/dist/cards';
-import cn from 'classnames';
-import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/dist/const';
+import { byName, cards } from "moonlands/dist/cards";
+import cn from "classnames";
+import {
+  REGION_ARDERIAL,
+  REGION_UNIVERSAL,
+  TYPE_MAGI,
+} from "moonlands/dist/const";
 
-import Add from '../icons/Add';
-import CardFilter, { CardFilterType, defaultFilter } from '../CardFilter/CardFilter.jsx';
-import DeckView from '../DeckView/DeckView';
-import { camelCase } from '../../utils';
+import Add from "../icons/Add";
+import CardFilter, {
+  CardFilterType,
+  defaultFilter,
+} from "../CardFilter/CardFilter.jsx";
+import DeckView from "../DeckView/DeckView";
+import { camelCase } from "../../utils";
+import { getCurrent } from "../tauriUtils";
 
-import './style.css';
-import Card from 'moonlands/dist/classes/Card';
-import { Region } from 'moonlands/dist/types';
-import { Tooltip } from 'antd';
-import { MAX_COPIES_IN_DECK } from '../../const';
+import "./style.css";
+import Card from "moonlands/dist/classes/Card";
+import { Region } from "moonlands/dist/types";
+import { Layout, Tooltip } from "antd";
+import { MAX_COPIES_IN_DECK } from "../../const";
+import Sider from "antd/es/layout/Sider";
+import { Content, Header } from "antd/es/layout/layout";
 
 export type DeckType = {
-  cards: string[]
-  name: string
-}
+  cards: string[];
+  name: string;
+};
 
 type DeckEditorProps = {
-  deckContents: DeckType
-  onSave: (deck: string[]) => void
-  onClose: () => void
-}
+  deckContents: DeckType;
+  onSave: (deck: string[]) => void;
+  onClose: () => void;
+};
 
-const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
-	const [loading, setLoading] = useState(false);
-	const [saving, setSaving] = useState(false);
-	const [savingNew, setSavingNew] = useState(false);
-	const [deck, setDeck] = useState<DeckType>(deckContents);
-	const [filter, setFilter] = useState<CardFilterType>(defaultFilter);
-	const [search, setSearch] = useState<string>('');
+const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savingNew, setSavingNew] = useState(false);
+  const [deck, setDeck] = useState<DeckType>(deckContents);
+  const [filter, setFilter] = useState<CardFilterType>(defaultFilter);
+  const [search, setSearch] = useState<string>("");
 
-	const [magiEditor, setMagiEditor] = useState<number|null>(null);
+  const [magiEditor, setMagiEditor] = useState<number | null>(null);
 
   useEffect(() => {
+    const appWindow = getCurrent();
     appWindow.setResizable(false);
     appWindow.setSize(new LogicalSize(1080, 816));
   }, []);
 
-	const handleSave = useCallback(() => {
-		setSaving(true);
-		onSave(deck.cards);
-		setSaving(false);
-	}, [deck]);
+  const handleSave = useCallback(() => {
+    setSaving(true);
+    onSave(deck.cards);
+    setSaving(false);
+  }, [deck]);
 
-	const removeFromDeck = useCallback((name: string) => {
-		const id = deck.cards.lastIndexOf(name);
-		if (id > -1) {
-			setDeck({
-				...deck,
-				cards: deck.cards.filter((card, i) => i !== id),
-			});
-		}
-	}, [deck]);
+  const removeFromDeck = useCallback(
+    (name: string) => {
+      const id = deck.cards.lastIndexOf(name);
+      if (id > -1) {
+        setDeck({
+          ...deck,
+          cards: deck.cards.filter((card, i) => i !== id),
+        });
+      }
+    },
+    [deck],
+  );
 
-	const addToDeck = useCallback((card: string)  => {
-		setDeck({
-			...deck,
-			cards: [...deck.cards, card],
-		});
-	}, [deck]);
+  const addToDeck = useCallback(
+    (card: string) => {
+      setDeck({
+        ...deck,
+        cards: [...deck.cards, card],
+      });
+    },
+    [deck],
+  );
 
-	const setMagi = useCallback((card: string) => {
-		const cards = [...deck.cards];
-		if (typeof magiEditor == 'number') {
-		cards[magiEditor] = card;
-			setDeck({
-				...deck,
-				cards,
-			});
-		}
-		setMagiEditor(null);
-	}, [deck, magiEditor]);
+  const setMagi = useCallback(
+    (card: string) => {
+      const cards = [...deck.cards];
+      if (typeof magiEditor == "number") {
+        cards[magiEditor] = card;
+        setDeck({
+          ...deck,
+          cards,
+        });
+      }
+      setMagiEditor(null);
+    },
+    [deck, magiEditor],
+  );
 
   const onClearRegions = useCallback(() => {
-    const fullCards = deck.cards.map(card => byName(card));
-    const magi = fullCards.filter(card => card?.type === TYPE_MAGI)
-    const magiRegions = new Set<Region>([...magi.map(card => card?.region || REGION_ARDERIAL), REGION_UNIVERSAL])
-    const newCards: string[] = []
-    magi.forEach(card => {
+    const fullCards = deck.cards.map((card) => byName(card));
+    const magi = fullCards.filter((card) => card?.type === TYPE_MAGI);
+    const magiRegions = new Set<Region>([
+      ...magi.map((card) => card?.region || REGION_ARDERIAL),
+      REGION_UNIVERSAL,
+    ]);
+    const newCards: string[] = [];
+    magi.forEach((card) => {
       if (card) {
-        newCards.push(card.name)
+        newCards.push(card.name);
       }
-    })
-    fullCards.forEach(card => {
+    });
+    fullCards.forEach((card) => {
       if (card?.type !== TYPE_MAGI) {
         if (card?.region && magiRegions.has(card?.region)) {
-          newCards.push(card.name)
+          newCards.push(card.name);
         }
       }
-    })
+    });
     setDeck({
-      ...deck, 
+      ...deck,
       cards: newCards,
-    })
-  }, [
-    deck,
-  ])
+    });
+  }, [deck]);
 
-	const filterFunction = useCallback(
-		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && filter.types.includes(card.type),
-		[filter, search]
-	);
-	
-	const magiFilterFunction = useCallback(
-		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && card.type === TYPE_MAGI,
-		[filter, search]
-	);
+  const filterFunction = useCallback(
+    (card: Card) =>
+      (search === "" ||
+        card.name.toLowerCase().includes(search.toLowerCase())) &&
+      filter.regions.includes(card.region) &&
+      filter.types.includes(card.type),
+    [filter, search],
+  );
 
-	const canAdd = useCallback((card: string) => {
-		return deck.cards.filter((c: string): boolean => c === card).length < MAX_COPIES_IN_DECK && deck.cards.length < 43;
-	}, [deck]);
+  const magiFilterFunction = useCallback(
+    (card: Card) =>
+      (search === "" ||
+        card.name.toLowerCase().includes(search.toLowerCase())) &&
+      filter.regions.includes(card.region) &&
+      card.type === TYPE_MAGI,
+    [filter, search],
+  );
 
-	const canSelectMagi = useCallback((card: string) => {
-    // @ts-ignore
-		return (deck.cards[0] !== card && deck.cards[1] !== card && deck.cards[2] !== card) || deck.cards[magiEditor] === card;
-	}, [deck, magiEditor]);
+  const canAdd = useCallback(
+    (card: string) => {
+      return (
+        deck.cards.filter((c: string): boolean => c === card).length <
+        MAX_COPIES_IN_DECK && deck.cards.length < 43
+      );
+    },
+    [deck],
+  );
 
-	const isDeckReadyForSaving = deck && (deck.name !== '' && deck.cards.length === 43);
+  const canSelectMagi = useCallback(
+    (card: string) => {
+      // @ts-ignore
+      return (
+        (deck.cards[0] !== card &&
+          deck.cards[1] !== card &&
+          deck.cards[2] !== card) ||
+        deck.cards[magiEditor!] === card
+      );
+    },
+    [deck, magiEditor],
+  );
 
-	return (<div>
-		{loading ? <Spin size='large' /> :
-			<>
-				<Row>
-					<Col span={24}><Input className='deckName' /*onChange={(e: React.FormEvent<HTMLInputElement>) => setName(e.currentTarget.value)}*/ disabled defaultValue={deck.name} /></Col>
-				</Row>
-				<Row>
-					<Col span={16}>
-						<div>
-							<section>
-								<CardFilter onFilterChange={setFilter} magiMode={!(magiEditor === null)} />
-								<div className='cardSearch'><Input placeholder='Card Search' onChange={e => setSearch(e.target.value)} /></div>
-							</section>
-							{magiEditor === null && <div className='allCardsContainer'>
-								<div className='allCards'>
-									{cards.filter(filterFunction).map((card) => <div key={card.name} className='cardSlot'>
-										<div className={cn('cardImage', {'canAdd': canAdd(card.name)})}>
-											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
-										</div>
-										{canAdd(card.name) && <div onClick={() => addToDeck(card.name)} className='addIcon'><Add size={50} fillColor={'#3f7d20'} /></div>}
-									</div>)}
-								</div>
-							</div>}
-							{!(magiEditor === null) && <div className='allCardsContainer'>
-								<div className='allCards'>
-									{cards.filter(magiFilterFunction).map((card) => <div key={card.name} className='cardSlot'>
-										<div className={cn('cardImage', {'canAdd': canSelectMagi(card.name)})}>
-											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
-										</div>
-										{canSelectMagi(card.name) && <div onClick={() => setMagi(card.name)} className='addIcon'><Add size={50} fillColor={'#3f7d20'} /></div>}
-									</div>)}
-								</div>
-							</div>}
-						</div>
-					</Col>
-					<Col span={8} className='deckHolderCol'>
-						<div className='deckHolder'>
-							<DeckView ourCards={deck.cards} addToDeck={addToDeck} onClearRegions={onClearRegions} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
-						</div>
-						<div className='commands'>
-							<Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
-							<Button onClick={onClose} type="default">Close</Button>
-						</div>
-					</Col>
-				</Row>
-			</>
-		}
-	</div>);
+  const isDeckReadyForSaving =
+    deck && deck.name !== "" && deck.cards.length === 43;
+
+  return (
+    <div>
+      {loading ? (
+        <Spin size="large" />
+      ) : (
+        <>
+          <Header>
+            <Col span={24}>
+              <Input
+                className="deckName"
+            /*onChange={(e: React.FormEvent<HTMLInputElement>) => setName(e.currentTarget.value)}*/ disabled
+                defaultValue={deck.name}
+              />
+            </Col>
+          </Header>
+          <Layout hasSider>
+            <Content style={{ marginRight: 500 }}>
+              {/* <Col span={16}> */}
+              <div>
+                <section>
+                  <CardFilter
+                    onFilterChange={setFilter}
+                    magiMode={!(magiEditor === null)}
+                  />
+                  <div className="cardSearch">
+                    <Input
+                      placeholder="Card Search"
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                </section>
+                {magiEditor === null && (
+                  <div className="allCardsContainer">
+                    <div className="allCards">
+                      {cards.filter(filterFunction).map((card) => (
+                        <div key={card.name} className="cardSlot">
+                          <div
+                            className={cn("cardImage", {
+                              canAdd: canAdd(card.name),
+                            })}
+                          >
+                            <img
+                              src={`/cards/${camelCase(card.name)}.jpg`}
+                              alt={card.name}
+                            />
+                          </div>
+                          {canAdd(card.name) && (
+                            <div
+                              onClick={() => addToDeck(card.name)}
+                              className="addIcon"
+                            >
+                              <Add size={50} fillColor={"#3f7d20"} />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {!(magiEditor === null) && (
+                  <div className="allCardsContainer">
+                    <div className="allCards">
+                      {cards.filter(magiFilterFunction).map((card) => (
+                        <div key={card.name} className="cardSlot">
+                          <div
+                            className={cn("cardImage", {
+                              canAdd: canSelectMagi(card.name),
+                            })}
+                          >
+                            <img
+                              src={`/cards/${camelCase(card.name)}.jpg`}
+                              alt={card.name}
+                            />
+                          </div>
+                          {canSelectMagi(card.name) && (
+                            <div
+                              onClick={() => setMagi(card.name)}
+                              className="addIcon"
+                            >
+                              <Add size={50} fillColor={"#3f7d20"} />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* </Col> */}
+            </Content>
+
+            <Sider theme="light" width={500} style={{ overflow: 'auto', height: '100vh', position: 'fixed', right: 0, top: 0, bottom: 0 }}>
+              {/* <Col span={8} className="deckHolderCol"> */}
+              <div className="deckHolder">
+                <DeckView
+                  ourCards={deck.cards}
+                  addToDeck={addToDeck}
+                  onClearRegions={onClearRegions}
+                  removeFromDeck={removeFromDeck}
+                  onMagiEditor={setMagiEditor}
+                  magiEditor={magiEditor}
+                />
+              </div>
+              <div className="commands">
+                <Tooltip
+                  title={
+                    isDeckReadyForSaving
+                      ? null
+                      : "Deck should have 43 cards in it"
+                  }
+                >
+                  <Button
+                    disabled={!isDeckReadyForSaving}
+                    loading={saving}
+                    type="primary"
+                    onClick={handleSave}
+                  >
+                    Save deck
+                  </Button>
+                </Tooltip>
+                <Button onClick={onClose} type="default">
+                  Close
+                </Button>
+              </div>
+              {/* </Col> */}
+            </Sider>
+          </Layout>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default DeckEditor;

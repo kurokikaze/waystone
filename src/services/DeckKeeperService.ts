@@ -1,113 +1,119 @@
-import { BaseDirectory, readTextFile, writeTextFile, createDir, exists } from '@tauri-apps/api/fs';
-import { byName } from 'moonlands/dist/cards';
-import { TYPE_MAGI } from 'moonlands/dist/const';
+import {
+  BaseDirectory,
+  readTextFile,
+  writeTextFile,
+  mkdir,
+  exists,
+} from "@tauri-apps/plugin-fs";
+import { byName } from "moonlands/dist/cards";
+import { TYPE_MAGI } from "moonlands/dist/const";
 
-type DecksResult = {player: string[], opponent: string[]}
+type DecksResult = { player: string[]; opponent: string[] };
 
 export class DeckKeeperService {
-  static DECKS_DIR = 'decks'
+  static DECKS_DIR = "decks";
 
   private isTauri() {
     return Boolean(
-      typeof window !== 'undefined' &&
-      window !== undefined &&
-      // @ts-ignore
-      window.__TAURI_IPC__ !== undefined
-    )
+      typeof window !== "undefined" &&
+        window !== undefined &&
+        // @ts-ignore
+        window.__TAURI_IPC__ !== undefined,
+    );
   }
 
   static defaultPlayerDeck = [
-    'O\'Qua',
-    'Whall',
-    'Ebylon',
-    'Water of Life',
-    'Water of Life',
-    'Water of Life',
-    'Dream Balm',
-    'Dream Balm',
-    'Dream Balm',
-    'Corf',
-    'Corf',
-    'Corf',
-    'Hubdra\'s Spear',
-    'Hubdra\'s Spear',
-    'Hubdra\'s Spear',
-    'Abaquist',
-    'Abaquist',
-    'Abaquist',
-    'Orothean Belt',
-    'Platheus',
-    'Platheus',
-    'Platheus',
-    'Giant Parathin',
-    'Giant Parathin',
-    'Giant Parathin',
-    'Undertow',
-    'Undertow',
-    'Undertow',
-    'Deep Hyren',
-    'Deep Hyren',
-    'Deep Hyren',
-    'Megathan',
-    'Megathan',
-    'Megathan',
-    'Bwill',
-    'Bwill',
-    'Bwill',
-    'Robes of the Ages',
-    'Robes of the Ages',
-    'Submerge',
-    'Submerge',
-    'Submerge',
-    'Coral Hyren',
-    'Coral Hyren',
-  ]
+    "O'Qua",
+    "Whall",
+    "Ebylon",
+    "Water of Life",
+    "Water of Life",
+    "Water of Life",
+    "Dream Balm",
+    "Dream Balm",
+    "Dream Balm",
+    "Corf",
+    "Corf",
+    "Corf",
+    "Hubdra's Spear",
+    "Hubdra's Spear",
+    "Hubdra's Spear",
+    "Abaquist",
+    "Abaquist",
+    "Abaquist",
+    "Orothean Belt",
+    "Platheus",
+    "Platheus",
+    "Platheus",
+    "Giant Parathin",
+    "Giant Parathin",
+    "Giant Parathin",
+    "Undertow",
+    "Undertow",
+    "Undertow",
+    "Deep Hyren",
+    "Deep Hyren",
+    "Deep Hyren",
+    "Megathan",
+    "Megathan",
+    "Megathan",
+    "Bwill",
+    "Bwill",
+    "Bwill",
+    "Robes of the Ages",
+    "Robes of the Ages",
+    "Submerge",
+    "Submerge",
+    "Submerge",
+    "Coral Hyren",
+    "Coral Hyren",
+  ];
 
   static defaultOpponentDeck = [
-    'O\'Qua',
-    'Whall',
-    'Ebylon',
-    'Water of Life',
-    'Water of Life',
-    'Water of Life',
-    'Dream Balm',
-    'Dream Balm',
-    'Dream Balm',
-    'Corf',
-    'Corf',
-    'Corf',
-    'Hubdra\'s Spear',
-    'Hubdra\'s Spear',
-    'Hubdra\'s Spear',
-    'Abaquist',
-    'Abaquist',
-    'Abaquist',
-    'Orothean Belt',
-    'Platheus',
-    'Platheus',
-    'Platheus',
-    'Giant Parathin',
-    'Giant Parathin',
-    'Giant Parathin',
-    'Undertow',
-    'Undertow',
-    'Undertow',
-    'Deep Hyren',
-    'Deep Hyren',
-    'Deep Hyren',
-    'Megathan',
-    'Megathan',
-    'Megathan',
-    'Bwill',
-    'Bwill',
-    'Bwill',
-    'Robes of the Ages',
-    'Robes of the Ages',
-    'Submerge',
-    'Submerge',
-    'Submerge',
-    'Coral Hyren',
-    'Coral Hyren',
+    "O'Qua",
+    "Whall",
+    "Ebylon",
+    "Water of Life",
+    "Water of Life",
+    "Water of Life",
+    "Dream Balm",
+    "Dream Balm",
+    "Dream Balm",
+    "Corf",
+    "Corf",
+    "Corf",
+    "Hubdra's Spear",
+    "Hubdra's Spear",
+    "Hubdra's Spear",
+    "Abaquist",
+    "Abaquist",
+    "Abaquist",
+    "Orothean Belt",
+    "Platheus",
+    "Platheus",
+    "Platheus",
+    "Giant Parathin",
+    "Giant Parathin",
+    "Giant Parathin",
+    "Undertow",
+    "Undertow",
+    "Undertow",
+    "Deep Hyren",
+    "Deep Hyren",
+    "Deep Hyren",
+    "Megathan",
+    "Megathan",
+    "Megathan",
+    "Bwill",
+    "Bwill",
+    "Bwill",
+    "Robes of the Ages",
+    "Robes of the Ages",
+    "Submerge",
+    "Submerge",
+    "Submerge",
+    "Coral Hyren",
+    "Coral Hyren",
     // 'Pruitt',
     // 'Poad',
     // 'Yaki',
@@ -151,27 +157,42 @@ export class DeckKeeperService {
     // 'Robe of Vines',
     // 'Robe of Vines',
     // 'Sea Barl',
-  ]
-  constructor() {
-
-  }
+  ];
+  constructor() {}
 
   public async createFiles() {
     if (!this.isTauri()) {
       return;
     }
-    const dirExists = await exists(DeckKeeperService.DECKS_DIR, { dir: BaseDirectory.AppConfig });
+    const dirExists = await exists(DeckKeeperService.DECKS_DIR, {
+      baseDir: BaseDirectory.AppConfig,
+    });
     if (!dirExists) {
-      await createDir(DeckKeeperService.DECKS_DIR, { dir: BaseDirectory.AppConfig, recursive: true });
+      await mkdir(DeckKeeperService.DECKS_DIR, {
+        baseDir: BaseDirectory.AppConfig,
+        recursive: true,
+      });
     }
-    await this.createDeckFileIfNotExists('playerDeck', DeckKeeperService.defaultPlayerDeck);
-    await this.createDeckFileIfNotExists('opponentDeck', DeckKeeperService.defaultOpponentDeck);
+    await this.createDeckFileIfNotExists(
+      "playerDeck",
+      DeckKeeperService.defaultPlayerDeck,
+    );
+    await this.createDeckFileIfNotExists(
+      "opponentDeck",
+      DeckKeeperService.defaultOpponentDeck,
+    );
   }
 
-  private async createDeckFileIfNotExists(deckFileName: string, deckContents: string[]) {
-    const deckFileExists =  await exists(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, { dir: BaseDirectory.AppConfig });
+  private async createDeckFileIfNotExists(
+    deckFileName: string,
+    deckContents: string[],
+  ) {
+    const deckFileExists = await exists(
+      `${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`,
+      { baseDir: BaseDirectory.AppConfig },
+    );
     if (!deckFileExists) {
-      await this.saveDeck(deckFileName, deckContents)
+      await this.saveDeck(deckFileName, deckContents);
     }
   }
 
@@ -182,8 +203,11 @@ export class DeckKeeperService {
         opponent: DeckKeeperService.defaultOpponentDeck,
       };
     }
-    const result: DecksResult = {player: [], opponent: []}
-    const playerDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`, { dir: BaseDirectory.AppConfig });
+    const result: DecksResult = { player: [], opponent: [] };
+    const playerDeckContents = await readTextFile(
+      `${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`,
+      { baseDir: BaseDirectory.AppConfig },
+    );
     const playerDeckCards: string[] = playerDeckContents.split("\n");
     if (
       playerDeckCards.length === 43 &&
@@ -194,7 +218,10 @@ export class DeckKeeperService {
       result.player = playerDeckCards;
     }
 
-    const opponentDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\opponentDeck.txt`, { dir: BaseDirectory.AppConfig });
+    const opponentDeckContents = await readTextFile(
+      `${DeckKeeperService.DECKS_DIR}\\opponentDeck.txt`,
+      { baseDir: BaseDirectory.AppConfig },
+    );
     const opponentDeckCards: string[] = opponentDeckContents.split("\n");
     if (
       opponentDeckCards.length === 43 &&
@@ -209,7 +236,11 @@ export class DeckKeeperService {
 
   public async saveDeck(deckFileName: string, deckContents: string[]) {
     if (this.isTauri()) {
-      await writeTextFile(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, deckContents.join("\n"), { dir: BaseDirectory.AppConfig })
+      await writeTextFile(
+        `${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`,
+        deckContents.join("\n"),
+        { baseDir: BaseDirectory.AppConfig },
+      );
     }
   }
 }

@@ -1,16 +1,21 @@
 import { ACTION_EFFECT, State } from "moonlands/src";
-import {EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY} from "moonlands/src/const";
+import {
+  EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+  ZONE_TYPE_HAND,
+  ZONE_TYPE_IN_PLAY,
+} from "moonlands/src/const";
 export class IdentityKeeper {
-  private creaturePlays: Record<string, string>
+  private creaturePlays: Record<string, string>;
   constructor(sim: State) {
     this.creaturePlays = {};
-    sim.setOnAction(action => {
-      if (action.type === ACTION_EFFECT &&
+    sim.setOnAction((action) => {
+      if (
+        action.type === ACTION_EFFECT &&
         action.effectType === EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES &&
         action.sourceZone === ZONE_TYPE_HAND &&
         action.destinationZone === ZONE_TYPE_IN_PLAY
-        ) {
-          this.creaturePlays[action.sourceCard.id] = action.destinationCard.id;
+      ) {
+        this.creaturePlays[action.sourceCard.id] = action.destinationCard.id;
       }
     });
   }

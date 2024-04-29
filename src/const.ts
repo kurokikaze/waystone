@@ -7,19 +7,19 @@ export const STEP_DRAW = 5;
 
 export const MAX_COPIES_IN_DECK = 3;
 
-export const MESSAGE_TYPE_POWER = 'messages/power';
-export const MESSAGE_TYPE_RELIC = 'messages/relic';
-export const MESSAGE_TYPE_SPELL = 'messages/spell';
-export const MESSAGE_TYPE_CREATURE = 'messages/creature';
-export const MESSAGE_TYPE_PROMPT_RESOLUTION = 'messages/prompt_resolution';
+export const MESSAGE_TYPE_POWER = "messages/power";
+export const MESSAGE_TYPE_RELIC = "messages/relic";
+export const MESSAGE_TYPE_SPELL = "messages/spell";
+export const MESSAGE_TYPE_CREATURE = "messages/creature";
+export const MESSAGE_TYPE_PROMPT_RESOLUTION = "messages/prompt_resolution";
 
-export const ANIMATION_MAGI_DEFEATED = 'magiDefeated';
-export const ANIMATION_CREATURE_DISCARDED = 'creatureDiscarded';
-export const ACTION_TIMER_TICK = 'actions/timer_tick';
-export const CLIENT_ACTION = 'clientAction';
+export const ANIMATION_MAGI_DEFEATED = "magiDefeated";
+export const ANIMATION_CREATURE_DISCARDED = "creatureDiscarded";
+export const ACTION_TIMER_TICK = "actions/timer_tick";
+export const CLIENT_ACTION = "clientAction";
 
-export const CARD_STYLE_NORMAL = 'card_style/normal';
-export const CARD_STYLE_LOCKET = 'card_style/locket';
-export const CARD_STYLE_DRAGGABLE = 'card_style/draggable';
+export const CARD_STYLE_NORMAL = "card_style/normal";
+export const CARD_STYLE_LOCKET = "card_style/locket";
+export const CARD_STYLE_DRAGGABLE = "card_style/draggable";
 
-export const COMMAND_START = 'start';
+export const COMMAND_START = "start";

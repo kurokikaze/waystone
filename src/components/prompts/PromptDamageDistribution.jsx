@@ -1,37 +1,37 @@
 /* global window */
-import {useSelector} from 'react-redux';
-import {
-	ACTION_RESOLVE_PROMPT,
-} from 'moonlands/src/const.ts';
-import {getPromptGeneratedBy, getPromptType} from '../../selectors';
+import { useSelector } from "react-redux";
+import { ACTION_RESOLVE_PROMPT } from "moonlands/src/const.ts";
+import { getPromptGeneratedBy, getPromptType } from "../../selectors";
 
-function PromptDistributeDamage({engineConnector}) {
-	const generatedBy = useSelector(getPromptGeneratedBy);
+function PromptDistributeDamage({ engineConnector }) {
+  const generatedBy = useSelector(getPromptGeneratedBy);
 
-	const freeDamage = useSelector(state => state.energyPrompt.freeEnergy);
-	const cards = useSelector(state => state.energyPrompt.cards);
-	const promptType = useSelector(getPromptType);
+  const freeDamage = useSelector((state) => state.energyPrompt.freeEnergy);
+  const cards = useSelector((state) => state.energyPrompt.cards);
+  const promptType = useSelector(getPromptType);
 
-	const handleSend = () => {
-		if (freeDamage === 0) {
-			engineConnector.emit({
-				type: ACTION_RESOLVE_PROMPT,
-				promptType,
-				damageOnCreatures: cards,
-				generatedBy,
-				player: 1,
-			});
-		}
-	};
+  const handleSend = () => {
+    if (freeDamage === 0) {
+      engineConnector.emit({
+        type: ACTION_RESOLVE_PROMPT,
+        promptType,
+        damageOnCreatures: cards,
+        generatedBy,
+        player: 1,
+      });
+    }
+  };
 
-	return (
-		<div className="promptWindow promptEnergyManipulation">
-			{(freeDamage > 0) && <div>Damage left to distribute: {freeDamage}</div>}
-			<div className="buttonHolder">
-				<button onClick={handleSend} disabled={freeDamage > 0}>OK</button>
-			</div>
-		</div>
-	);
+  return (
+    <div className="promptWindow promptEnergyManipulation">
+      {freeDamage > 0 && <div>Damage left to distribute: {freeDamage}</div>}
+      <div className="buttonHolder">
+        <button onClick={handleSend} disabled={freeDamage > 0}>
+          OK
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default PromptDistributeDamage;

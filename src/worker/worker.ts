@@ -3,11 +3,13 @@
 /// <reference lib="webworker" />
 declare const self: DedicatedWorkerGlobalScope;
 
-import { ACTION_PLAYER_WINS, State } from 'moonlands';
-import { AnyEffectType } from 'moonlands/dist/types';
-import { COMMAND_START } from '../const';
-import { createGame } from '../containedEngine/containedEngine';
-import convertClientCommands, { convertServerCommand } from '../containedEngine/utils';
+import { ACTION_PLAYER_WINS, State } from "moonlands";
+import { AnyEffectType } from "moonlands/dist/types";
+import { COMMAND_START } from "../const";
+import { createGame } from "../containedEngine/containedEngine";
+import convertClientCommands, {
+  convertServerCommand,
+} from "../containedEngine/utils";
 // const caldDeck = [
 // 	'Grega',
 // 	'Magam',
@@ -104,7 +106,7 @@ var game: State | null = null;
 onmessage = (event) => {
   if (event.data && event.data.type === COMMAND_START) {
     game = createGame();
-    game.setPlayers(1,2);
+    game.setPlayers(1, 2);
     game.setDeck(1, event.data.playerDeck);
     game.setDeck(2, event.data.opponentDeck);
     game.setup();
@@ -121,10 +123,10 @@ onmessage = (event) => {
               for: 1,
               action: commandPlayerOne,
             });
-          } catch(err) {
-            console.error('Error converting the server command')
-            console.dir(err)
-            console.dir(commandPlayerOne)
+          } catch (err) {
+            console.error("Error converting the server command");
+            console.dir(err);
+            console.dir(commandPlayerOne);
           }
         }
         const commandPlayerTwo = convertServerCommand(action, game, 2);
@@ -136,8 +138,8 @@ onmessage = (event) => {
               action: commandPlayerTwo,
             });
           } catch (e) {
-            console.error('Error converting the server command')
-            console.dir(commandPlayerTwo)
+            console.error("Error converting the server command");
+            console.dir(commandPlayerTwo);
           }
         }
 
@@ -147,9 +149,9 @@ onmessage = (event) => {
           closing = true;
         }
       }
-    }
+    };
     game.setOnAction(actionCallback);
-  
+
     const serializedState = game.serializeData(1);
     postMessage({
       for: 1,
@@ -160,35 +162,40 @@ onmessage = (event) => {
       for: 2,
       state: serializedStateTwo,
     });
-  } else if (event.data && event.data.special === 'refresh') {
+  } else if (event.data && event.data.special === "refresh") {
     if (game) {
-    const serializedState = game.serializeData(1);
+      const serializedState = game.serializeData(1);
       postMessage({
         for: 1,
         state: serializedState,
       });
     }
-  } else if (event.data && 'type' in event.data) {
+  } else if (event.data && "type" in event.data) {
     if (game) {
-      const convertedCommand = convertClientCommands({
-        ...event.data,
-        player: event.data.player,
-      }, game);
+      const convertedCommand = convertClientCommands(
+        {
+          ...event.data,
+          player: event.data.player,
+        },
+        game,
+      );
       if (convertedCommand) {
         game?.update(convertedCommand);
-        const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+        const activePlayer = game.state.prompt
+          ? game.state.promptPlayer
+          : game.state.activePlayer;
         if (activePlayer === 2) {
           // Support bechamel with the priority events
           postMessage({
             for: 2,
             action: {
-              type: 'display/priority',
+              type: "display/priority",
               player: 2,
             },
-          })
+          });
         }
       }
     }
   }
   return true;
-}
+};

@@ -1,3 +1,3 @@
-import simpleReducer from './reducer';
+import simpleReducer from "./reducer";
 
 export default simpleReducer;

@@ -1,7 +1,7 @@
-import { appWindow, LogicalSize } from "@tauri-apps/api/window";
+import { LogicalSize } from "@tauri-apps/api/window";
 import { ACTION_PLAYER_WINS } from "moonlands";
 import { useRef, useEffect, useState } from "react";
-import { Provider } from "react-redux"
+import { Provider } from "react-redux";
 import { createStore, compose, applyMiddleware } from "redux";
 import { createEpicMiddleware } from "redux-observable";
 import thunk from "redux-thunk";
@@ -12,141 +12,160 @@ import { C2SAction, ClientAction, ClientMessage } from "../../clientProtocol";
 import { defaultState } from "../../reducers/reducer";
 import { EngineConnector } from "../../types";
 import { enrichState } from "../../utils";
-import rootReducer from '../../reducers';
-import GameApp from "../GameApp/GameApp"
+import rootReducer from "../../reducers";
+import GameApp from "../GameApp/GameApp";
 import { ReplayLogService } from "../../services/ReplayLogService";
+import { getCurrent } from "../tauriUtils";
 
-import './style.css';
+import "./style.css";
 
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(
-	rootReducer,
-	defaultState,
-	compose(
-		applyMiddleware(thunk),
-		applyMiddleware(epicMiddleware),
-	),
+  rootReducer,
+  defaultState,
+  compose(applyMiddleware(thunk), applyMiddleware(epicMiddleware)),
 );
 
-
 var emptyEngineConnector: EngineConnector = {
-	emit: (_action: C2SAction) => { },
+  emit: (_action: C2SAction) => {},
 };
 
 type ReplayAppWrapperProps = {
-	replayName: string
-	onReturnToBase: () => void
-}
+  replayName: string;
+  onReturnToBase: () => void;
+};
 
 export const ReplayAppWrapper = ({
-	replayName,
-	onReturnToBase,
+  replayName,
+  onReturnToBase,
 }: ReplayAppWrapperProps) => {
-	const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
+  const [engineConnector, setEngineConnector] =
+    useState<EngineConnector>(emptyEngineConnector);
 
-	const [loading, setLoading] = useState(true);
-	const [playing, setPlaying] = useState(true);
-	const replayDataSaved = useRef<ClientMessage[]>()
-	const actionSubscriber = useRef<Subscriber<ClientAction>>()
+  const [loading, setLoading] = useState(true);
+  const [playing, setPlaying] = useState(true);
+  const replayDataSaved = useRef<ClientMessage[]>();
+  const actionSubscriber = useRef<Subscriber<ClientAction>>();
 
-	const startPlayback = (speed = 100) => {
-		if (replayDataSaved.current && actionSubscriber.current) {
-			saveInterval(setInterval(() => {
-				if (!replayDataSaved.current) {
-					throw new Error('Replay stopped prematurely');
-				}
-				const messageData = replayDataSaved.current.shift();
-				if (messageData && 'state' in messageData) {
-					const data = messageData;
-					if (data.for === 1) {
-						console.log('Setting the initial state');
-						console.dir(messageData.state);
-						// @ts-ignore
-						store.dispatch({ type: 'setInitialState', state: enrichState(messageData.state, 1) });
-					}
-				} else if (messageData && 'action' in messageData) {
-					if (messageData.for === 1) {
-						actionSubscriber.current?.next(messageData.action);
-						if (messageData.action.type === ACTION_PLAYER_WINS) {
-							actionSubscriber.current?.complete();
-						}
-					}
-				}
-			}, speed));
-			setPlaying(true);
-		}
-	}
+  const startPlayback = (speed = 100) => {
+    if (replayDataSaved.current && actionSubscriber.current) {
+      saveInterval(
+        setInterval(() => {
+          if (!replayDataSaved.current) {
+            throw new Error("Replay stopped prematurely");
+          }
+          const messageData = replayDataSaved.current.shift();
+          if (messageData && "state" in messageData) {
+            const data = messageData;
+            if (data.for === 1) {
+              console.log("Setting the initial state");
+              console.dir(messageData.state);
 
-	const pause = () => {
-		setPlaying(false);
-		clearInterval(interval);
-	}
+              store.dispatch({
+                type: "setInitialState",
+                state: enrichState(messageData.state, 1),
+              });
+            }
+          } else if (messageData && "action" in messageData) {
+            if (messageData.for === 1) {
+              actionSubscriber.current?.next(messageData.action);
+              if (messageData.action.type === ACTION_PLAYER_WINS) {
+                actionSubscriber.current?.complete();
+              }
+            }
+          }
+        }, speed),
+      );
+      setPlaying(true);
+    }
+  };
 
-	const play = () => {
-		startPlayback();
-	}
+  const pause = () => {
+    setPlaying(false);
+    clearInterval(interval);
+  };
 
-	const [interval, saveInterval] = useState<ReturnType<typeof setInterval>>()
-	const breakRef = useRef<Function>(() => { });
+  const play = () => {
+    startPlayback();
+  };
 
-	const loadReplay = async (replayName: string) => {
-		const replayData = await (new ReplayLogService()).readReplay(replayName);
-		replayDataSaved.current = replayData;
+  const [interval, saveInterval] = useState<ReturnType<typeof setInterval>>();
+  const breakRef = useRef<Function>(() => {});
 
-		const actionsObservable = new Observable<ClientAction>(subscriber => {
-			actionSubscriber.current = subscriber;
+  const loadReplay = async (replayName: string) => {
+    const replayData = await new ReplayLogService().readReplay(replayName);
+    replayDataSaved.current = replayData;
 
-			startPlayback();
-		});
+    const actionsObservable = new Observable<ClientAction>((subscriber) => {
+      actionSubscriber.current = subscriber;
 
-		const breakObservable = new Observable<{}>(observer => {
-			breakRef.current = () => {
-				observer.next({});
-			}
-		});
-		const animatedActions = addAnimations(actionsObservable, breakObservable, store, false);
-		animatedActions.subscribe({
-			next: (transformedAction) => {
-				store.dispatch(transformedAction);
-			},
-		});
-		setLoading(false);
-	}
+      startPlayback();
+    });
 
-	useEffect(() => {
-		try {
-			appWindow.setResizable(false);
-			appWindow.setSize(new LogicalSize(1111, 660));
-		} catch (e) {
+    const breakObservable = new Observable<{}>((observer) => {
+      breakRef.current = () => {
+        observer.next({});
+      };
+    });
+    const animatedActions = addAnimations(
+      actionsObservable,
+      breakObservable,
+      store,
+      false,
+    );
+    animatedActions.subscribe({
+      next: (transformedAction) => {
+        store.dispatch(transformedAction);
+      },
+    });
+    setLoading(false);
+  };
 
-		}
-		const realEngineConnector = {
-			emit: (action: any) => () => {
-				switch (action.type) {
-					case 'actions/pause': {
-						clearInterval(interval);
-						setPlaying(false);
-						break;
-					}
-					case 'actions/play': {
-						startPlayback();
-						break;
-					}
-				}
-			}
-		};
-		setEngineConnector(realEngineConnector);
-		loadReplay(replayName);
-	}, [replayName]);
+  useEffect(() => {
+    try {
+      const appWindow = getCurrent();
+      appWindow.setResizable(false);
+      appWindow.setSize(new LogicalSize(1111, 660));
+    } catch (e) {}
+    const realEngineConnector = {
+      emit: (action: any) => () => {
+        switch (action.type) {
+          case "actions/pause": {
+            clearInterval(interval);
+            setPlaying(false);
+            break;
+          }
+          case "actions/play": {
+            startPlayback();
+            break;
+          }
+        }
+      },
+    };
+    setEngineConnector(realEngineConnector);
+    loadReplay(replayName);
+  }, [replayName]);
 
-	return (
-		<div className="replayWrapper">
-			<Provider store={store}>
-				{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} />}
-				<div className="controls">
-					{playing ? <button onClick={pause}>Pause</button>
-						: <button onClick={play}>Play</button>}
-				</div>
-			</Provider>
-		</div>)
-}
+  return (
+    <div className="replayWrapper">
+      <Provider store={store}>
+        {loading ? (
+          <Spin />
+        ) : (
+          <GameApp
+            engineConnector={engineConnector}
+            onBreak={breakRef.current}
+            onReturnToBase={onReturnToBase}
+          />
+        )}
+        <div className="controls">
+          {playing ? (
+            <button onClick={pause}>Pause</button>
+          ) : (
+            <button onClick={play}>Play</button>
+          )}
+        </div>
+      </Provider>
+    </div>
+  );
+};

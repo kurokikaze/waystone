@@ -1,25 +1,27 @@
-import Card from '../Card.tsx';
-import {useCardData, useZoneContent} from '../common';
-import {withView} from '../CardView.jsx';
+import Card from "../Card.tsx";
+import { useCardData, useZoneContent } from "../common";
+import { withView } from "../CardView.jsx";
 
 const CardWithView = withView(Card);
 
 function ZoneDiscard({ name, zoneId }) {
-	const rawContent = useZoneContent(zoneId);
-	const content = useCardData(rawContent);
+  const rawContent = useZoneContent(zoneId);
+  const content = useCardData(rawContent);
 
-	return (
-		<div className='zone zone-discard' data-zone-name={name}>
-			{content.length ? content.map(cardData =>
-				<CardWithView
-					key={cardData.id}
-					id={cardData.id}
-					card={cardData.card}
-					data={cardData.data}
-				/>,
-			) : null}
-		</div>
-	);
+  return (
+    <div className="zone zone-discard" data-zone-name={name}>
+      {content.length
+        ? content.map((cardData) => (
+            <CardWithView
+              key={cardData.id}
+              id={cardData.id}
+              card={cardData.card}
+              data={cardData.data}
+            />
+          ))
+        : null}
+    </div>
+  );
 }
 
 export default ZoneDiscard;

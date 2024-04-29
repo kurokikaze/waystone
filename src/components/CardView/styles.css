@@ -25,9 +25,9 @@
     display: block;
     width: 270px;
     height: 395px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .playerRelics .cardView {
-  margin-bottom: 57px;
+    margin-bottom: 57px;
 }
