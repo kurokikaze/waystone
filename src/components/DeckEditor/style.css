@@ -61,6 +61,7 @@
 
 .cardImage img {
   filter: grayscale(100%);
+  transition: filter .2s linear;
 }
 
 .cardImage.canAdd img {
@@ -107,4 +108,14 @@
   transition: height .2s;
   transition: left .2s;
   transition: top .2s;
+}
+
+.cardViewSide {
+  width: 270px;
+  height: 397px;
+  overflow: hidden;
+  border-radius: 13px;
+  position: fixed;
+  top: 200px;
+  right: 500px;
 }

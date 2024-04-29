@@ -2,8 +2,6 @@ import { byName, cards } from "moonlands/dist/cards";
 import cn from "classnames";
 import { camelCase } from "../../utils";
 // @ts-ignore
-import CardView from "../CardView/CardView.jsx";
-// @ts-ignore
 import Remove from "../icons/Remove.jsx";
 import Add from "../icons/Add.jsx";
 import { Tooltip } from "antd";
@@ -28,6 +26,7 @@ type MagiViewProps = {
   id: number;
   chosenMagi: boolean;
   onMagiEditor: (place: number | null) => void;
+  onHover: (card: string) => void;
 };
 
 type Props = {
@@ -36,22 +35,24 @@ type Props = {
   removeFromDeck: (card: string) => void;
   onClearRegions: () => void;
   onMagiEditor: (place: number | null) => void;
+  onCardHover: (cardName: string) => void;
   magiEditor: number | null;
 };
 
 const types: Record<string, CardType> = {};
 cards.forEach((card) => (types[card.name] = card.type));
 
-function MagiView({ name, id, chosenMagi, onMagiEditor }: MagiViewProps) {
+function MagiView({ name, id, chosenMagi, onMagiEditor, onHover }: MagiViewProps) {
   const magi = cards.find((card) => card.name === name);
   return (
-    <div className="magiCard">
+    <div className="magiCard" onMouseEnter={() => onHover(name)} onMouseLeave={() => onHover('')}>
       <div
         onClick={() => onMagiEditor(!chosenMagi ? id : null)}
         className={cn("magiVignette", { chosenMagi: chosenMagi })}
         style={{ backgroundImage: `url("/cards/${camelCase(name)}.jpg")` }}
       ></div>
-      <CardView name={name} className="deckView" top={false} />
+      {/* <CardView name={name} className="deckView" top={false} /> */}
+      <div className="magiName">{name}</div>
       {magi && (
         <Tooltip title="Starting energy" placement="bottom">
           <div className="startingEnergy">{magi.data.startingEnergy}</div>
@@ -71,6 +72,7 @@ type SimpleCardViewProps = {
   className: string;
   startingCard: boolean;
   invalidCard: boolean;
+  onHover: (card: string) => void
 };
 
 function CardTypeIcon({
@@ -139,9 +141,10 @@ function SimpleCardView({
   className,
   startingCard,
   invalidCard,
+  onHover,
 }: SimpleCardViewProps) {
   return (
-    <div className="simpleCard">
+    <div className="simpleCard"  onMouseEnter={() => onHover(card)} onMouseLeave={() => onHover('')}>
       <div className="typeIcon">
         <CardTypeIcon
           card={card}
@@ -149,8 +152,8 @@ function SimpleCardView({
           invalid={invalidCard}
         />
       </div>
-      <div className={className}>
-        <CardView name={card} top={false} />
+      <div className={className} >
+        {card}
       </div>
     </div>
   );
@@ -162,6 +165,7 @@ export default function DeckView({
   onClearRegions,
   removeFromDeck,
   onMagiEditor,
+  onCardHover,
   magiEditor,
 }: Props) {
   const magiOne = ourCards[0];
@@ -195,18 +199,21 @@ export default function DeckView({
           name={magiOne}
           id={0}
           onMagiEditor={onMagiEditor}
+          onHover={onCardHover}
           chosenMagi={magiEditor === 0}
         />
         <MagiView
           name={magiTwo}
           id={1}
           onMagiEditor={onMagiEditor}
+          onHover={onCardHover}
           chosenMagi={magiEditor === 1}
         />
         <MagiView
           name={magiThree}
           id={2}
           onMagiEditor={onMagiEditor}
+          onHover={onCardHover}
           chosenMagi={magiEditor === 2}
         />
       </div>
@@ -241,6 +248,7 @@ export default function DeckView({
                   })}
                   startingCard={startingCards.has(card)}
                   invalidCard={Boolean(invalidCard)}
+                  onHover={onCardHover}
                 />
                 <div className="cardActions">
                   <div className="cardCount">

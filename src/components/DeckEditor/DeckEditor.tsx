@@ -47,6 +47,7 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingNew, setSavingNew] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState('');
   const [deck, setDeck] = useState<DeckType>(deckContents);
   const [filter, setFilter] = useState<CardFilterType>(defaultFilter);
   const [search, setSearch] = useState<string>("");
@@ -262,6 +263,9 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
                 )}
               </div>
               {/* </Col> */}
+              {hoveredCard ? <div className="cardViewSide">
+                <img src={`/cards/${camelCase(hoveredCard)}.jpg`} alt={hoveredCard} />
+              </div> : null}
             </Content>
 
             <Sider theme="light" width={500} style={{ overflow: 'auto', height: '100vh', position: 'fixed', right: 0, top: 0, bottom: 0 }}>
@@ -274,6 +278,7 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
                   removeFromDeck={removeFromDeck}
                   onMagiEditor={setMagiEditor}
                   magiEditor={magiEditor}
+                  onCardHover={setHoveredCard}
                 />
               </div>
               <div className="commands">

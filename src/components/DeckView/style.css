@@ -1,3 +1,8 @@
+:root {
+  --magi-vignette-size: 100px;
+  --magi-stat-holder-size: 30px;
+}
+
 .deckView {
   display: inline-block;
   font-size: 1em;
@@ -54,29 +59,29 @@
   position: relative;
 }
 
-.magiCard .startingEnergy {
+.magiCard .startingEnergy, .magiCard .energizeRate {
   position: absolute;
-  border-radius: 50px;
+  border-radius: var(--magi-stat-holder-size);
   background-color: orange;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
+  width: var(--magi-stat-holder-size);
+  height: var(--magi-stat-holder-size);
+  line-height: var(--magi-stat-holder-size);
   text-align: center;
-  top: 112px;
+  top: calc(var(--magi-vignette-size) - var(--magi-stat-holder-size));
   user-select: none;
 }
 
 .magiCard .energizeRate {
-  position: absolute;
-  border-radius: 50px;
+  /* position: absolute;
+  border-radius: var(--magi-stat-holder-size);
   background-color: orange;
   width: 30px;
   height: 30px;
   line-height: 30px;
   text-align: center;
-  top: 112px;
+  top: 70px; */
   right: 1px;
-  user-select: none;
+  /* user-select: none; */
 }
 
 .magiCard .cardViewHolder {
@@ -87,12 +92,12 @@
 }
 
 .magiVignette {
-  width: 100px;
-  height: 100px;
-  background-position: top -25px left -20px;
-  border-radius: 50px;
+  width: var(--magi-vignette-size);
+  height: var(--magi-vignette-size);
+  background-position: top -25px left -18px;
+  border-radius: calc(var(--magi-vignette-size) / 2);
   overflow: hidden;
-  background-size: 130%;
+  background-size: 140%;
 }
 
 .magiVignette.chosenMagi {
