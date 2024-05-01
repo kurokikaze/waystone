@@ -23,14 +23,16 @@ import {
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_PAYMENT_SOURCE,
+  PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+  PROMPT_TYPE_POWER_ON_MAGI,
 
 	LOG_ENTRY_POWER_ACTIVATION,
 	LOG_ENTRY_TARGETING,
 	LOG_ENTRY_NUMBER_CHOICE,
 	LOG_ENTRY_PLAY,
-	PROMPT_TYPE_CHOOSE_CARDS,
-	PROMPT_TYPE_ALTERNATIVE,
-	PROMPT_TYPE_PAYMENT_SOURCE,
 } from 'moonlands/dist/const';
 import {byName} from 'moonlands/dist/cards';
 
@@ -91,7 +93,6 @@ import {findInPlay} from './utils';
 import { ClientAction } from '../clientProtocol';
 import { LogEntryType } from 'moonlands/dist/types';
 import { ExpandedPromptParams, MessageType, State } from '../types';
-import { PROMPT_TYPE_POWER_ON_MAGI } from 'moonlands/src/const';
 
 const INITIAL_STATE = 'setInitialState';
 
@@ -249,8 +250,6 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case START_ATTACK_ANIMATION: {
-			console.log('Start attack animation')
-			console.dir(action)
 			return {
 				...state,
 				animation: {
@@ -414,7 +413,6 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						zoneOwner: action.zoneOwner,
 						numberOfCards: realNumberOfCards,
 					};
-					console.dir(promptParams)
 					break;
 				}
 				case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
@@ -455,7 +453,13 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					};
 					break;
 				}
-				case PROMPT_TYPE_POWER_ON_MAGI: {
+				case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+					energyPrompt = {
+						freeEnergy: action.amount,
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+					};
+					break;
+				}				case PROMPT_TYPE_POWER_ON_MAGI: {
 					promptParams = {
 						magi: action?.magi,
 					}
@@ -595,7 +599,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					freeEnergy: state.energyPrompt.freeEnergy - 1,
 					cards: { 
 						...state.energyPrompt.cards,
-						[action.cardId]: state.energyPrompt.cards[action.cardId] + 1, 
+						[action.cardId]: (state.energyPrompt.cards[action.cardId] || 0) + 1, 
 					},
 				},
 			};
@@ -607,7 +611,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					freeEnergy: state.energyPrompt.freeEnergy + 1,
 					cards: {
 						...state.energyPrompt.cards,
-						[action.cardId]: state.energyPrompt.cards[action.cardId] - 1, 
+						[action.cardId]: (state.energyPrompt.cards[action.cardId] || 0) - 1, 
 					},
 				},
 			};

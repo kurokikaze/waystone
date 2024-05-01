@@ -48,7 +48,8 @@ import {
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, 
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
   EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
-  EFFECT_TYPE_ATTACH_CARD_TO_CARD
+  EFFECT_TYPE_ATTACH_CARD_TO_CARD,
+  PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
 } from "moonlands/dist/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
@@ -106,6 +107,11 @@ export type ClientEnterPromptNumber = ClientEnterPromptInterface & {
 
 export type ClientEnterPromptDistributeEnergyOnCreatures = ClientEnterPromptInterface & {
   promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+  amount: number,
+}
+
+export type ClientEnterPromptDistributeDamageOnCreatures = ClientEnterPromptInterface & {
+  promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
   amount: number,
 }
 
@@ -174,6 +180,7 @@ export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptChooseCards |
   ClientEnterPromptAlternatives |
   ClientEnterPromptPaymentSource |
+  ClientEnterPromptDistributeDamageOnCreatures |
   ClientEnterPromptPowerOnMagi;
 
 export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |

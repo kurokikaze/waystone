@@ -212,6 +212,11 @@ function Card({
 	// useEffect(() => {
 	// 	preview(document.querySelector('.attackSource .cutAround'), { captureDraggingState: true })
 	// }, [])
+  const unableToAttack = data && (
+    data.ableToAttack === false
+    || (modifiedData && modifiedData.ableToAttack === false) 
+    || data.attacked === Infinity
+  );
 
 	const [_, drop] = useDrop(() => ({
 		// The type (or types) to accept - strings or symbols
@@ -247,7 +252,7 @@ function Card({
 	if (droppable) {
 		drop(ref);
 	}
-	if (draggable) {
+	if (draggable && !unableToAttack) {
 		drag(ref);
 	}
 

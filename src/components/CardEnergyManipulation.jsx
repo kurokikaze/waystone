@@ -11,7 +11,7 @@ export const SimpleButton = ({name, disabled, style, onClick}) =>
 	);
 
 // eslint-disable-next-line react/display-name
-export const withEnergyManipulation = Component => ({ id, data, ...props }) => {
+export const withEnergyManipulation = Component => ({ id, data, card, ...props }) => {
 	const dispatch = useDispatch();
 	const freeEnergy = useSelector(state => state.energyPrompt.freeEnergy);
 	const currentEnergy = useSelector(state => state.energyPrompt.cards[id]) || 0;
@@ -31,12 +31,12 @@ export const withEnergyManipulation = Component => ({ id, data, ...props }) => {
 	};
 	
 	const thisIsNotTheSource = restriction !== RESTRICTION_EXCEPT_SOURCE || id !== generatedBy;
-	const card = byName(data.card.name);
-	const ableToParticipate = !card || !card.data.energyStasis;
+	const ableToParticipate = !data.energyStasis;
 	return <div>
 		<Component
 			id={id}
 			data={data}
+      card={card}
 			{...props}
 		/>
 		{(thisIsNotTheSource && ableToParticipate) && <div className="energyManipulation">
