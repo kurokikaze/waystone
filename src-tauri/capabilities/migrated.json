@@ -2,7 +2,9 @@
   "identifier": "migrated",
   "description": "permissions that were migrated from v1",
   "local": true,
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "path:default",
     "event:default",
@@ -22,7 +24,11 @@
     "fs:allow-exists",
     {
       "identifier": "fs:scope",
-      "allow": ["$APPDATA/*", "$APPDATA/decks/*", "$APPDATA/replays/*"]
+      "allow": [
+        "$APPDATA/*",
+        "$APPDATA/decks/*",
+        "$APPDATA/replays/*"
+      ]
     },
     "window:allow-set-resizable",
     "window:allow-set-size",

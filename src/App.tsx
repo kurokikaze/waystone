@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import WebSocket from '@tauri-apps/plugin-websocket';
 import "./App.css";
 
 import { GameAppWrapper } from "./components/GameAppWrapper/GameAppWrapper";
@@ -39,9 +40,9 @@ function App() {
   const handleIsTauri = () => {
     return Boolean(
       typeof window !== "undefined" &&
-        window !== undefined &&
-        // @ts-ignore
-        window.__TAURI_IPC__ !== undefined,
+      window !== undefined &&
+      // @ts-ignore
+      window.__TAURI_IPC__ !== undefined,
     );
   };
 
@@ -69,6 +70,18 @@ function App() {
     setLoading(false);
   };
 
+  async function testWebsocket() {
+    const ws = await WebSocket.connect('wss://ws.postman-echo.com/raw');
+
+    ws.addListener((msg) => {
+      console.log('Received Message:', msg);
+    });
+
+    await ws.send('Hello World!');
+
+    await ws.disconnect();
+  }
+
   useEffect(() => {
     try {
       if (handleIsTauri()) {
@@ -79,6 +92,8 @@ function App() {
         setLoading(false);
         setError("Not a Tauri environment");
       }
+
+      testWebsocket()
     } catch (e) {
       setError(JSON.stringify(e));
     }
