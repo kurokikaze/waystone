@@ -5,7 +5,6 @@ import { ClientAction, FromClientPassAction } from "../clientProtocol"
 import { GameState } from "./GameState"
 import { Strategy } from './strategies/Strategy'
 import { SerializedClientState } from "./types"
-import { BaseDirectory, writeTextFile } from '@tauri-apps/api/fs'
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Energize',
@@ -95,12 +94,10 @@ export class StrategyConnector {
         }
 
         if (action.type == 'display/status') {
-          console.log(`Caught status inside the strategy`)
-          if (this.isTauri()) {
-            writeTextFile(`player_${this.playerId}_state.json`, JSON.stringify(this.gameState.state), { dir: BaseDirectory.AppConfig })
-          } else {
-            console.dir(this.gameState.state)
-          }
+          this.io.emit('clientAction', {
+            type: 'display/dump',
+            state: this.gameState.state,
+          })
         }
       }
     })

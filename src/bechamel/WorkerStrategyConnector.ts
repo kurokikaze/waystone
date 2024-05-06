@@ -52,6 +52,10 @@ export class WorkerStrategyConnector {
             return true;
           }
 
+          if (action.type === 'display/status') {
+            console.log(`State dump`)
+            console.dir(this.gameState.state);
+          }
           if (action.type === 'display/priority') {
             if (action.player === this.playerId) {
               this.requestAndSendAction()

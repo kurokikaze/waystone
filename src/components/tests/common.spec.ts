@@ -1,9 +1,11 @@
 /* global expect, describe, it */
 import {byName} from 'moonlands/dist/cards';
-import {mapCardDataFromProps, transformCard, getCardDetails} from '../common.js';
+import {mapCardDataFromProps, transformCard, getCardDetails} from '../common';
 import debugState from '../../spec/abilityState.json'
-import { State } from '../../types';
-/*
+import { ExtendedCard, State } from '../../types';
+import { ConvertedCard, InGameData } from 'moonlands/dist/classes/CardInGame';
+import { StaticAbilityType } from 'moonlands/dist/types';
+
 describe('Common code from components', () => {
 	it('Fetches card by id from zones', () => {
 		const defaultState = {
@@ -58,7 +60,7 @@ describe('Common code from components', () => {
 			winner: null,
 		};
 
-		const transformedState = mapCardDataFromProps(defaultState, {id: 7});
+		const transformedState = mapCardDataFromProps(defaultState as unknown as State, {id: 7} as unknown as ConvertedCard);
 
 		expect(transformedState).toEqual({
 			card: {
@@ -92,9 +94,12 @@ describe('cardDataTransformer', () => {
 			},
 		};
 
+		// @ts-ignore
 		const resultingCard = transformCard(testStaticAbilities)(testCard);
-		expect(resultingCard.card.data.attacksPerTurn).toEqual(1, 'Arbolls original data shows 1 attack per turn');
-		expect(resultingCard.modifiedData.attacksPerTurn).toEqual(2, 'Arboll now has 2 attacks per turn, modified by Yaki static ability');
+		// @ts-ignore
+		expect(resultingCard.card.data.attacksPerTurn).toEqual(1);
+		// @ts-ignore
+		expect(resultingCard.modifiedData.attacksPerTurn).toEqual(2);
 	});
 
 	it('Static abilities - Invigorate', () => {
@@ -119,49 +124,63 @@ describe('cardDataTransformer', () => {
 			},
 		};
 
+		// @ts-ignore
 		const resultingCard = transformCard(testStaticAbilities)(testCard);
 
+		// @ts-ignore
 		expect(resultingCard.modifiedData.energize).toEqual(6, 'Grega energize rate modified by Water of Life is 6');
+		// @ts-ignore
 		expect(resultingCard.card.data.energize).toEqual(5, 'Grega original energize rate is still 5');
 	});
 
 	it('Static abilities - none', () => {
 		const TEST_PLAYER_ONE = 12;
 
-		const testStaticAbilities = [];
+		const testStaticAbilities: ExtendedCard[] = [];
 
-		const testCard = {
+		const testCard: ConvertedCard = {
 			id: 'card1',
 			card: 'Arboll',
+			owner: 1,
 			data: {
 				controller: TEST_PLAYER_ONE,
-			},
+			} as InGameData,
 		};
 
 		const resultingCard = transformCard(testStaticAbilities)(testCard);
-		expect(resultingCard.modifiedData.attacksPerTurn).toEqual(1, 'Arboll has 1 attack per turn,  not modified by anything');
+		expect(resultingCard).toHaveProperty('modifiedData')
+		if ('modifiedData' in resultingCard) {
+			expect(resultingCard.modifiedData.attacksPerTurn).toEqual(1);
+		}
 	});
 
 	it('Static abilities - none (Stagadan)', () => {
 		const TEST_PLAYER_ONE = 12;
 
-		const testStaticAbilities = [];
+		const testStaticAbilities: ExtendedCard[] = [];
 
-		const testCard = {
+		const testCard: ConvertedCard = {
 			id: 'card1',
 			card: 'Stagadan',
+			owner: 1,
 			data: {
 				controller: TEST_PLAYER_ONE,
-			},
+			} as InGameData,
 		};
 
 		const transformedCard = transformCard(testStaticAbilities)(testCard);
-		expect(transformedCard.modifiedData.attacksPerTurn).toEqual(1, 'Stagadan has 1 attack per turn,  not modified by anything');
+		expect(transformedCard).toHaveProperty('modifiedData')
+		if ('modifiedData' in transformedCard) {
+			expect(transformedCard.modifiedData.attacksPerTurn).toEqual(1);
+		}
 	});
-});*/
+});
 
-describe.only('getCardDetails', () => {
+describe('getCardDetails', () => {
   it('Ability cost for the controlled creature', () => {
-    console.dir(getCardDetails(debugState as unknown as State));
+	const enrichedState = getCardDetails(debugState as unknown as State)
+    const hyren = enrichedState.inPlay.find(({id}) => id == 'P427nmFyh0KGGYepf0cTh')
+	expect(hyren?.data.controller).toEqual(1);
+	expect(hyren?.card.data.powers[0].cost).toEqual(5);
   })
 })

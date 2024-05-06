@@ -315,6 +315,7 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 const propertyLayers: Partial<Record<PropertyType, number>> = {
 	[PROPERTY_CONTROLLER]: 0,
 	[PROPERTY_COST]: 1,
+  [PROPERTY_POWER_COST]: 1,
 	[PROPERTY_ENERGIZE]: 2,
 	[PROPERTY_STATUS]: 3,
 	[PROPERTY_ATTACKS_PER_TURN]: 4,

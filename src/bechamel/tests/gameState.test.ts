@@ -22,7 +22,7 @@ describe('GameState tests', () => {
     })
 
 
-    it.only('Strange prompt entering', () => {
+    it('Strange prompt entering', () => {
         const stateObj = {
             "zones": {
                 "playerHand": [],
