@@ -1,4 +1,4 @@
-import {State, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE} from 'moonlands';
+import {State} from 'moonlands';
 
 export const createGame = (): State => {
   const defaultState = {
@@ -30,7 +30,7 @@ export const createGame = (): State => {
   });
 
   // @ts-ignore
-  game.initiatePRNG(4);
+  game.initiatePRNG(Math.floor(Math.random() * 100));
 
   game.enableDebug();
 

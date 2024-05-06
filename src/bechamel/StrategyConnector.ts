@@ -5,8 +5,7 @@ import { ClientAction, FromClientPassAction } from "../clientProtocol"
 import { GameState } from "./GameState"
 import { Strategy } from './strategies/Strategy'
 import { SerializedClientState } from "./types"
-
-// import fs from 'node:fs'
+import { BaseDirectory, writeTextFile } from '@tauri-apps/api/fs'
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Energize',
@@ -43,6 +42,8 @@ export class StrategyConnector {
 
     this.io.on('action', (action: ClientAction | { type: 'display/priority', player: number }) => {
       if (this.gameState && this.playerId && action) {
+        console.log(`Got action in bot`)
+        console.dir(action)
         try {
           this.gameState.update(action)
 
@@ -65,7 +66,7 @@ export class StrategyConnector {
           }
           */
           if (
-            action.type == "actions/enter_prompt" && 
+            action.type == "actions/enter_prompt" &&
             action.promptType == "prompt/payment_source" &&
             action.player == 1 &&
             !this.gameState.isInPromptState(action.player)
@@ -93,19 +94,26 @@ export class StrategyConnector {
           }
         }
 
-        if (action.type === 'display/status') {
-          console.log(`Strategy connector for player ${this.playerId}`)
-          console.log(`Prompt state: ${this.gameState.isInPromptState(this.playerId) ? 'yes' : 'no'}`)
-          if (this.gameState.isInPromptState(this.playerId)) {
-            console.log(`Prompt type: ${this.gameState.getPromptType()}, player: ${this.gameState.state.promptPlayer}`)
-          }/* else {
-            fs.writeFileSync(`player_${this.playerId}_state.json`, JSON.stringify(this.gameState.state), { flag: 'w' })
-          }*/
+        if (action.type == 'display/status') {
+          console.log(`Caught status inside the strategy`)
+          if (this.isTauri()) {
+            writeTextFile(`player_${this.playerId}_state.json`, JSON.stringify(this.gameState.state), { dir: BaseDirectory.AppConfig })
+          } else {
+            console.dir(this.gameState.state)
+          }
         }
       }
     })
   }
 
+  private isTauri() {
+    return Boolean(
+      typeof window !== 'undefined' &&
+      window !== undefined &&
+      // @ts-ignore
+      window.__TAURI_IPC__ !== undefined
+    )
+  }
   private requestAndSendAction() {
     if (!this.gameState) {
       this.io.emit('clientAction', { type: ACTION_PASS, player: this.playerId } as FromClientPassAction)

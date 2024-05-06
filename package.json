@@ -19,7 +19,7 @@
     "comlink": "^4.4.1",
     "gsap": "^3.11.4",
     "jest": "^29",
-    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.21.8.tar.gz",
+    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.23.1.tar.gz",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

@@ -8,97 +8,6 @@ import { AnyEffectType } from 'moonlands/dist/types';
 import { COMMAND_START } from '../const';
 import { createGame } from '../containedEngine/containedEngine';
 import convertClientCommands, { convertServerCommand } from '../containedEngine/utils';
-// const caldDeck = [
-// 	'Grega',
-// 	'Magam',
-// 	'Sinder',
-// 	'Fire Chogo',
-// 	'Fire Chogo',
-// 	'Fire Chogo',
-// 	'Fire Grag',
-// 	'Fire Grag',
-// 	'Fire Grag',
-// 	'Arbolit',
-// 	'Arbolit',
-// 	'Arbolit',
-// 	'Magma Hyren',
-// 	'Magma Hyren',
-// 	'Magma Hyren',
-// 	'Quor',
-// 	'Quor',
-// 	'Quor',
-// 	'Lava Aq',
-// 	'Lava Aq',
-// 	'Lava Aq',
-// 	'Lava Arboll',
-// 	'Lava Arboll',
-// 	'Lava Arboll',
-// 	'Diobor',
-// 	'Diobor',
-// 	'Diobor',
-// 	'Drakan',
-// 	'Drakan',
-// 	'Drakan',
-// 	'Thermal Blast',
-// 	'Thermal Blast',
-// 	'Thermal Blast',
-// 	'Flame Geyser',
-// 	'Flame Geyser',
-// 	'Flame Geyser',
-// 	'Cave Hyren',
-// 	'Cave Hyren',
-// 	'Cave Hyren',
-// 	'Magma Armor',
-// 	'Magma Armor',
-// 	'Fire Flow',
-// 	'Fire Flow',
-// ];
-
-// const naroomDeck =[
-// 	'Pruitt',
-// 	'Poad',
-// 	'Yaki',
-// 	'Leaf Hyren',
-// 	'Leaf Hyren',
-// 	'Leaf Hyren',
-// 	'Weebo',
-// 	'Weebo',
-// 	'Weebo',
-// 	'Arboll',
-// 	'Arboll',
-// 	'Arboll',
-// 	'Giant Carillion',
-// 	'Giant Carillion',
-// 	'Giant Carillion',
-// 	'Giant Parathin',
-// 	'Giant Parathin',
-// 	'Giant Parathin',
-// 	'Balamant',
-// 	'Balamant',
-// 	'Balamant',
-// 	'Grow',
-// 	'Grow',
-// 	'Grow',
-// 	'Giant Parathin',
-// 	'Giant Parathin',
-// 	'Giant Parathin',
-// 	'Syphon Stone',
-// 	'Syphon Stone',
-// 	'Syphon Stone',
-// 	'Carillion',
-// 	'Carillion',
-// 	'Carillion',
-// 	'Rudwot',
-// 	'Rudwot',
-// 	'Rudwot',
-// 	'Stagadan',
-// 	'Stagadan',
-// 	'Stagadan',
-// 	'Robe of Vines',
-// 	'Robe of Vines',
-// 	'Robe of Vines',
-// 	'Sea Barl',
-// ];
 
 var game: State | null = null;
 onmessage = (event) => {
@@ -168,6 +77,18 @@ onmessage = (event) => {
         state: serializedState,
       });
     }
+  } else if (event.data && event.data.special === 'status') {
+    console.log(`Caught status in the worker, re-sending for the bot`)
+    console.dir({
+      type: 'display/status'
+    })
+    postMessage({
+      for: 2,
+      action: {
+        type: 'display/status',
+        player: 2,
+      },
+    });
   } else if (event.data && 'type' in event.data) {
     if (game) {
       const convertedCommand = convertClientCommands({

@@ -1,14 +1,14 @@
 // Will have to convert them all to TS someday
 // @ts-nocheck
 import { useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 import {
 	ACTION_PASS,
 	ACTION_PLAY,
 } from 'moonlands/dist/const';
-
+import { FloatButton } from 'antd';
 // @ts-ignore-next
 import Log from '../Log/Log.tsx';
 import Zone from '../zones/Zone.jsx';
@@ -27,6 +27,7 @@ import CreatureMessage from '../messages/CreatureMessage.jsx';
 import PromptResolutionMessage from '../messages/PromptResolutionMessage.jsx';
 import ActionCardView from '../ActionCardView.jsx';
 
+import debugState from '../../spec/abilityState.json'
 // @ts-ignore
 import StepBoard from '../StepBoard/StepBoard.jsx';
 import EndgameOverlay from '../EndgameOverlay/EndgameOverlay.tsx';
@@ -135,8 +136,17 @@ function App({ engineConnector, onBreak, onReturnToBase }: AppProps) {
 		});
 	}, [engineConnector]);
 
+  const dispatch = useDispatch()
+  const onDebug = useCallback(() => {
+    dispatch({
+      type: 'SetInitialState',
+      state: debugState, 
+    })
+  })
+
 	return (
 		<div className='gameContainer'>
+       <FloatButton type="primary" onClick={onDebug} style={{ right: 24 }} />
 			{/*timer && <div className="turnTimer">00:{timerSeconds.toString().padStart(2, '0')}</div>*/}
 			<div className="game">
 				<DndProvider backend={HTML5Backend}>
