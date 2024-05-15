@@ -30,19 +30,15 @@ export class StrategyConnector {
       this.gameState = new GameState(data.state)
       this.gameState.setPlayerId(data.playerId)
 
-      console.log('Strategy setup')
       strategy.setup(this.gameState, this.playerId)
 
       if (this.gameState.playerPriority(this.playerId) || this.gameState.isInPromptState(this.playerId)) {
-        console.log('Requesting first action')
         this.requestAndSendAction()
       }
     })
 
     this.io.on('action', (action: ClientAction | { type: 'display/priority', player: number }) => {
       if (this.gameState && this.playerId && action) {
-        console.log(`Got action in bot`)
-        console.dir(action)
         try {
           this.gameState.update(action)
 

@@ -20,6 +20,7 @@ import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard,
 import { ActionExtractor } from './ActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/const';
+import { SimulationQueue } from './SimulationQueue';
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -201,7 +202,7 @@ export class SimulationStrategy implements Strategy {
     return this.pass()
   }
 
-  private simulateAttacksQueue(simulationQueue: SimulationEntity[], initialScore: number, opponentId: number): AnyEffectType {
+  private simulateAttacksQueue(simulationQueue: SimulationQueue, initialScore: number, opponentId: number): AnyEffectType {
     const hashes = new Set<string>()
     let bestAction: { score: number, action: AnyEffectType[] } = {
       score: initialScore,
@@ -213,10 +214,10 @@ export class SimulationStrategy implements Strategy {
     // Simulation itself
     let failsafe = SimulationStrategy.failsafe
     let counter = 0
-    while (simulationQueue.length && failsafe > 0) {
+    while (simulationQueue.hasItems() && failsafe > 0) {
       failsafe -= 1
       counter += 1
-      const workEntity = simulationQueue.pop()
+      const workEntity = simulationQueue.shift()
       if (workEntity) {
         try {
           workEntity.sim.update(workEntity.action)
@@ -278,7 +279,7 @@ export class SimulationStrategy implements Strategy {
     return `Unknown action: ${action.type}`
   }
 
-  private simulateActionsQueue(simulationQueue: SimulationEntity[], initialScore: number, opponentId: number): ActionOnHold[] {
+  private simulateActionsQueue(simulationQueue: SimulationQueue, initialScore: number, opponentId: number): ActionOnHold[] {
     const hashes = new Set<string>()
     if (!this.playerId) {
       return [{
@@ -291,7 +292,7 @@ export class SimulationStrategy implements Strategy {
 
     this.leaves.clear()
 
-    while (simulationQueue.length && counter <= SimulationStrategy.failsafe) {
+    while (simulationQueue.hasItems() && counter <= SimulationStrategy.failsafe) {
       counter += 1
       const workEntity = simulationQueue.shift()
       if (workEntity && workEntity.action) {
@@ -425,6 +426,7 @@ export class SimulationStrategy implements Strategy {
 
     if ('cards' in action && action.cards && action.cards.some(card => !promptAvailableCards?.includes(card as unknown as string))) {
       const availableCardPairs: Record<string, string[]> = {}
+      console.dir(this.gameState?.state.promptParams.cards)
       for (let card of this.gameState?.state.promptParams.cards!) {
         if (!(card.card in availableCardPairs)) {
           availableCardPairs[card.card] = []
@@ -435,12 +437,12 @@ export class SimulationStrategy implements Strategy {
       const newCards: string[] = []
       // @ts-ignore
       for (const cardName of action.cardNames) {
-        if (!(cardName in availableCardPairs) || availableCardPairs[cardName].length == 0) {
-          console.dir(action)
-          console.dir(cardName)
-          throw new Error(`Cannot find ${cardName} in the prompt zone`)
+        if (!(cardName.name in availableCardPairs) || availableCardPairs[cardName.name].length == 0) {
+          // console.dir(action)
+          // console.dir(cardName)
+          throw new Error(`Cannot find ${cardName.name} in the prompt zone`)
         }
-        const newId = availableCardPairs[cardName].pop()!
+        const newId = availableCardPairs[cardName.name].pop()!
         newCards.push(newId)
       }
 
@@ -492,8 +494,8 @@ export class SimulationStrategy implements Strategy {
         this.gameState.getPromptType() == PROMPT_TYPE_PAYMENT_SOURCE &&
         !this.gameState.state.promptParams.cards?.some(({id}) => id == action.target)
       ) {
-        console.log(`Target is ${action.target}`)
-        console.dir(this.gameState.state.promptParams.cards)
+        // console.log(`Target is ${action.target}`)
+        // console.dir(this.gameState.state.promptParams.cards)
         // const cardIsIn = this.gameState.state.promptParams.cards?.some(card => card.card == action.target)
         return this.fixTargetPromptResolution(action as ClientResolvePromptAction & { targetName: string })
       }
@@ -538,8 +540,8 @@ export class SimulationStrategy implements Strategy {
       }
 
       if (this.waitingTarget && this.gameState.waitingForTarget(this.waitingTarget.source, this.playerId)) {
-        console.log(`Waiting for target resolve path`)
-        console.dir(this.waitingTarget)
+        // console.log(`Waiting for target resolve path`)
+        // console.dir(this.waitingTarget)
         return this.resolveTargetPrompt(this.waitingTarget.target, 'waitingTarget')
       }
 
@@ -564,7 +566,7 @@ export class SimulationStrategy implements Strategy {
               ) {
                 return this.resolveChooseCardsPrompt()
               }
-              console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
+              // console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
             }
             const playable = this.gameState.getPlayableCards()
               .map(addCardData)
@@ -596,7 +598,9 @@ export class SimulationStrategy implements Strategy {
             const hash = this.hashBuilder.makeHash(outerSim)
             const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
 
-            const simulationQueue: SimulationEntity[] = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
+            const simulationQueue = new SimulationQueue();
+            simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
+            //const simulationQueue: SimulationEntity[] = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
             const bestActions = this.simulateActionsQueue(simulationQueue, initialScore, TEMPORARY_OPPONENT_ID)
             const finalHash = this.hashBuilder.makeHash(outerSim)
             if (finalHash !== hash) {
@@ -673,7 +677,9 @@ export class SimulationStrategy implements Strategy {
               )
 
               const hash = this.hashBuilder.makeHash(outerSim)
-              const simulationQueue = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
+              const simulationQueue = new SimulationQueue();
+              simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
+              // const simulationQueue = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
 
               const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
 
@@ -710,14 +716,14 @@ export class SimulationStrategy implements Strategy {
     }
     const availableCards = this.gameState.state.promptParams.cards || []
     if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE) {
-      console.log('Resolving choose up to N cards prompt');
-      console.dir(this.resolveCardsPrompt(
-        availableCards.slice(0, this.gameState.state.promptParams.numberOfCards || 0)
-          .map(card => card as unknown as CardInGame),
-        this.gameState.state.promptType || '',
-        this.gameState.state.promptParams.zone || ZONE_TYPE_IN_PLAY,
-        this.gameState.state.promptParams.zoneOwner || 0,
-      ))
+      // console.log('Resolving choose up to N cards prompt');
+      // console.dir(this.resolveCardsPrompt(
+      //   availableCards.slice(0, this.gameState.state.promptParams.numberOfCards || 0)
+      //     .map(card => card as unknown as CardInGame),
+      //   this.gameState.state.promptType || '',
+      //   this.gameState.state.promptParams.zone || ZONE_TYPE_IN_PLAY,
+      //   this.gameState.state.promptParams.zoneOwner || 0,
+      // ))
     }
     // The conversion to CardInGame is OK because resolveCardPrompt only cares about card ids
     return this.resolveCardsPrompt(

@@ -3,18 +3,36 @@ import { ActionOnHold, SimulationEntity } from "../types";
 import { HashBuilder } from "./HashBuilder";
 import { ActionExtractor } from "./ActionExtractor";
 
+type QueueEntry = {
+    next: QueueEntry | null
+    entry: SimulationEntity
+}
+
 // This is for easier moving to the heap later
 export class SimulationQueue {
-    private queue: Array<SimulationEntity> = [];
+    private queueStart: QueueEntry | null = null;
     public addFromSim(sim: State, playerId: number, opponentId: number, actionLog: ActionOnHold[], previousHash: string, hashBuilder: HashBuilder) {
-        this.queue.push(...ActionExtractor.extractActions(sim, playerId, opponentId, actionLog, previousHash, hashBuilder))
+        this.push(...ActionExtractor.extractActions(sim, playerId, opponentId, actionLog, previousHash, hashBuilder))
     }
 
+    public push(...args: SimulationEntity[]): void {
+        for (let arg of args) {
+            const newEntry = {
+                entry: arg,
+                next: this.queueStart
+            }
+            this.queueStart = newEntry
+        }
+    }
     public hasItems(): boolean {
-        return this.queue.length > 0;
+        return this.queueStart !== null;
     }
 
-    public get(): SimulationEntity | null {
-        return this.queue.shift() || null;
+    public shift(): SimulationEntity | null {
+        if (this.queueStart == null) return null;
+        const {entry, next} = this.queueStart;
+        this.queueStart = next;
+
+        return entry;
     }
 }
