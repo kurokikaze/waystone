@@ -1,7 +1,5 @@
-# Tauri + React + Typescript
+# Waystone
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+This app lets you play Magi-Nation Duel locally, against the bot. You can edit both your and opponents' decks, and all effects are automated.
 
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+The cards currently included in the app are almost all cards of the Base set.
