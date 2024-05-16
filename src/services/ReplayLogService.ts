@@ -1,4 +1,4 @@
-import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/api/fs"
+import { BaseDirectory, createDir, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/api/fs"
 import { booleanGuard } from "../bechamel/strategies/simulationUtils";
 import { ClientMessage } from "../clientProtocol";
 import testReplay from './testReplay.json';
@@ -18,6 +18,10 @@ export class ReplayLogService {
 
     public async getReplaysList() {
         if (this.isTauri()) {
+            const dirExists = await exists(ReplayLogService.REPLAYS_DIR, { dir: BaseDirectory.AppConfig })
+            if (!dirExists) {
+                await createDir(ReplayLogService.REPLAYS_DIR, { dir: BaseDirectory.AppConfig })
+            }
             const entries = await readDir(ReplayLogService.REPLAYS_DIR, { dir: BaseDirectory.AppData, recursive: false });
 
             return entries.map(entry => entry.name).filter(booleanGuard);

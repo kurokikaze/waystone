@@ -3229,7 +3229,7 @@ checksum = "af190c94f2773fdb3729c55b007a722abb5384da03bc0986df4c289bf5567e96"
 
 [[package]]
 name = "waystone"
-version = "0.0.40"
+version = "0.0.42"
 dependencies = [
  "serde",
  "serde_json",
