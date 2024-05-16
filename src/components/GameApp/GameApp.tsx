@@ -7,7 +7,7 @@ import { DndProvider } from 'react-dnd';
 import {
 	ACTION_PASS,
 	ACTION_PLAY,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 import { FloatButton } from 'antd';
 // @ts-ignore-next
 import Log from '../Log/Log.tsx';
@@ -27,7 +27,7 @@ import CreatureMessage from '../messages/CreatureMessage.jsx';
 import PromptResolutionMessage from '../messages/PromptResolutionMessage.jsx';
 import ActionCardView from '../ActionCardView.jsx';
 
-import debugState from '../../spec/abilityState.json'
+import debugState from '../../spec/abilityState.js/index.js'
 // @ts-ignore
 import StepBoard from '../StepBoard/StepBoard.jsx';
 import EndgameOverlay from '../EndgameOverlay/EndgameOverlay.tsx';

@@ -1,8 +1,8 @@
-import Card from "moonlands/dist/classes/Card"
-import { ConvertedCard, InGameData } from "moonlands/dist/classes/CardInGame"
-import { LogEntryType, PromptParams, PromptTypeType } from "moonlands/dist/types"
+import Card from "moonlands/src/classes/Card"
+import { ConvertedCard, InGameData } from "moonlands/src/classes/CardInGame"
+import { LogEntryType, PromptParams, PromptTypeType } from "moonlands/src/types"
 import { C2SAction, HiddenConvertedCard } from "./clientProtocol"
-import { AlternativeType } from "moonlands/dist/types/prompt"
+import { AlternativeType } from "moonlands/src/types/prompt"
 import { TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from "moonlands"
 import { CARD_STYLE_DRAGGABLE, CARD_STYLE_LOCKET, CARD_STYLE_NORMAL } from "./const"
 

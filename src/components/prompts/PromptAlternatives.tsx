@@ -1,8 +1,8 @@
 /* global window */
-import { byName } from 'moonlands/dist/cards';
+import { byName } from 'moonlands/src/cards';
 import {
 	ACTION_RESOLVE_PROMPT,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 import { useSelector } from 'react-redux';
 import { getPromptMagi, getAlternatives } from '../../selectors';
 import { EngineConnector } from '../../types';

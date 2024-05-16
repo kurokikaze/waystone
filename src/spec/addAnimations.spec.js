@@ -5,7 +5,7 @@ import {
 	ACTION_POWER, 
 	ACTION_RESOLVE_PROMPT,
 	ACTION_PASS,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 
 import { 
 	START_POWER_ANIMATION,

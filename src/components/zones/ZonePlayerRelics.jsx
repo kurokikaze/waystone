@@ -6,7 +6,7 @@ import {
 	ACTION_RESOLVE_PROMPT,
 
 	TYPE_RELIC,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 import Card from '../Card.tsx';
 
 import {

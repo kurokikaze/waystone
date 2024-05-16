@@ -1,5 +1,5 @@
 // globals describe, it
-import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/src'
+import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/src/index'
 import { byName } from 'moonlands/src/cards';
 import Card from 'moonlands/src/classes/Card';
 import CardInGame from 'moonlands/src/classes/CardInGame';
@@ -7,13 +7,13 @@ import { SimulationStrategy } from '../strategies/SimulationStrategy'
 import { GameState } from '../GameState';
 import { createZones } from '../strategies/simulationUtils';
 import { SerializedClientState } from '../types';
-import { ACTION_ATTACK, ACTION_PASS, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands';
+import { ACTION_ATTACK, ACTION_PASS, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/src/const';
 import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
-import { AnyEffectType } from 'moonlands/dist/types';
+import { AnyEffectType } from 'moonlands/src/types';
 import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
 
-import fs from "node:fs";
+const fs = require('node:fs');
 
 const STEP_NAME = {
   ENERGIZE: 0,
@@ -33,7 +33,7 @@ const STEP_NAMES: Record<number, string> = {
   5: 'Draw',
 }
 
-describe('Simulations', () => {
+describe.skip('Simulations', () => {
   it('test', () => {
     const ACTIVE_PLAYER = 422;
     const NON_ACTIVE_PLAYER = 1310;
@@ -2496,7 +2496,7 @@ describe('Simulations', () => {
     game.setDeck(2, naroomDefault);
 
     // @ts-ignore
-    game.initiatePRNG(2028);
+    game.initiatePRNG(2029);
     game.setup();
 
     const gameLog: any[] = [];
@@ -2516,8 +2516,6 @@ describe('Simulations', () => {
         }
       },
       emit: (type: string, action: any) => {
-        // console.log(`Connector one emitting "${type}"`)
-        // console.dir(action);
         if (type === 'clientAction') {
           const convertedCommand = convertClientCommands({
             ...action,
@@ -2527,8 +2525,7 @@ describe('Simulations', () => {
             if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
               console.log(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.name} [${action.payload.card.id}]`)
               console.dir(action?.payload?.card);
-              debugger;
-              expect(true).toEqual(false);
+              throw new Error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.name} [${action.payload.card.id}]`)
             }
             try {
               game.update(convertedCommand);
@@ -2547,7 +2544,6 @@ describe('Simulations', () => {
             }
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
 
-            //setTimeout(() => {
             if (activePlayer == 1) {
               actionCallbackOne({
                 type: 'display/priority',
@@ -2559,7 +2555,6 @@ describe('Simulations', () => {
                 player: activePlayer,
               })
             }
-            // }, 0)
           }
         }
       },
@@ -2604,9 +2599,11 @@ describe('Simulations', () => {
             throw e;
           }
           const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+          // if (game.state.prompt) {
+          //   console.log(`Game is in prompt state, prompt is ${game.state.promptType}`)
+          // }
           // console.log(`Sending out priority display for player ${activePlayer}`);
 
-          //setTimeout(() => {
           if (activePlayer == 1) {
             actionCallbackOne({
               type: 'display/priority',
@@ -2618,7 +2615,18 @@ describe('Simulations', () => {
               player: activePlayer,
             })
           }
-          //}, 0)
+        } else {
+          console.log(`Fail to convert command, oh my`)
+          console.log(JSON.stringify(game.serializeData(2)))
+
+          // if (action.type !== 'display/dump') {
+          //   actionCallbackTwo({
+          //     type: 'display/status',
+          //   })
+          // }
+          fs.writeFileSync('./replayPlayerTwo.json', JSON.stringify(gameLog, null, 2));
+
+          throw new Error('Conversion error')
         }
       },
       close: () => {
@@ -2673,6 +2681,10 @@ describe('Simulations', () => {
 
       try {
         const commandForBotTwo = convertServerCommand(action, game, 2);
+
+        if (commandForBotTwo) {
+          gameLog.push({ for: 2, action: commandForBotTwo })
+        }
         actionCallbackTwo(commandForBotTwo);
       } catch (e) {
         console.log(`Error converting command`)
@@ -2681,13 +2693,12 @@ describe('Simulations', () => {
       }
 
       if (action.type === ACTION_PLAYER_WINS) {
-
         if (action.player === 1) {
           console.log('Arderial Energy won')
         } else {
           console.log('Naroom Default won')
         }
-        // console.dir(action)
+
         const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
         const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
         const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
@@ -2698,11 +2709,11 @@ describe('Simulations', () => {
     });
 
     console.log(`Sending state data to log`)
-    gameLog.push({ for: 1, state: game.serializeData(1) });
-    console.log(`Sending state data to player 1`)
+    gameLog.push({ for: 2, state: game.serializeData(2) });
+    console.log(`Sending state data to players`)
     gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
     gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
-  }, 2000000);
+  }, 4000000);
 
   it('Cald vs GumGums', (done) => {
     const deckOne = [

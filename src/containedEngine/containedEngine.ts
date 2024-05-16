@@ -1,4 +1,4 @@
-import {State} from 'moonlands';
+import {State} from 'moonlands/src/index';
 
 export const createGame = (): State => {
   const defaultState = {

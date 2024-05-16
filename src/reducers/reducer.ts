@@ -33,8 +33,8 @@ import {
 	LOG_ENTRY_TARGETING,
 	LOG_ENTRY_NUMBER_CHOICE,
 	LOG_ENTRY_PLAY,
-} from 'moonlands/dist/const';
-import {byName} from 'moonlands/dist/cards';
+} from 'moonlands/src/const';
+import {byName} from 'moonlands/src/cards';
 
 import {
 	START_POWER_ANIMATION,
@@ -91,7 +91,7 @@ import {
 import {applyEffect} from './applyEffect';
 import {findInPlay} from './utils';
 import { ClientAction } from '../clientProtocol';
-import { LogEntryType } from 'moonlands/dist/types';
+import { LogEntryType } from 'moonlands/src/types';
 import { ExpandedPromptParams, MessageType, State } from '../types';
 
 const INITIAL_STATE = 'setInitialState';

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ACTION_PASS } from "moonlands/dist/const"
+import { ACTION_PASS } from "moonlands/src/const"
 import { Socket } from "socket.io-client"
 import { ClientAction, FromClientPassAction } from "../clientProtocol"
 import { GameState } from "./GameState"
@@ -92,7 +92,7 @@ export class StrategyConnector {
         if (action.type == 'display/status') {
           this.io.emit('clientAction', {
             type: 'display/dump',
-            state: this.gameState.state,
+            state: JSON.stringify(this.gameState.state),
           })
         }
       }

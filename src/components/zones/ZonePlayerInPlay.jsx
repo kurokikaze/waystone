@@ -9,7 +9,7 @@ import {
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 import Card from '../Card.tsx';
 import {
 	CARD_STYLE_DRAGGABLE,

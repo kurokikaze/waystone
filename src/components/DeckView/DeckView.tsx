@@ -1,4 +1,4 @@
-import { byName, cards } from 'moonlands/dist/cards';
+import { byName, cards } from 'moonlands/src/cards';
 import cn from 'classnames';
 import { camelCase } from '../../utils';
 // @ts-ignore
@@ -10,12 +10,12 @@ import { Tooltip } from 'antd';
 
 import './style.css';
 import Cards from '../icons/Cards';
-import { CardType, Region } from 'moonlands/dist/types';
-import { REGION_UNIVERSAL, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from 'moonlands';
+import { CardType, Region } from 'moonlands/src/types';
+import { REGION_UNIVERSAL, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from 'moonlands/src/index';
 import Creature from '../icons/Creature';
 import Relic from '../icons/Relic';
 import Spell from '../icons/Spell';
-import { REGION_ARDERIAL } from 'moonlands/dist/const';
+import { REGION_ARDERIAL } from 'moonlands/src/const';
 import { MAX_COPIES_IN_DECK } from '../../const';
 
 type MagiViewProps = {

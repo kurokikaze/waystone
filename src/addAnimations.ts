@@ -14,7 +14,7 @@ import {
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_MAGI_IS_DEFEATED,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 
 import { 
 	startPowerAnimation,

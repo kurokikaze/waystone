@@ -10,8 +10,8 @@ import {
 	TYPE_RELIC,
 	TYPE_SPELL,
 	TYPE_CREATURE
-} from 'moonlands/dist/const';
-import { CardType, Region } from 'moonlands/dist/types';
+} from 'moonlands/src/const';
+import { CardType, Region } from 'moonlands/src/types';
 
 export type CardFilterType = {
   regions: Region[]

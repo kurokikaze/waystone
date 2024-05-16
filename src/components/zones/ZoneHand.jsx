@@ -1,5 +1,5 @@
 import {useSelector} from 'react-redux';
-import {byName} from 'moonlands/dist/cards';
+import {byName} from 'moonlands/src/cards';
 import {
 	REGION_UNIVERSAL,
 	TYPE_CREATURE,

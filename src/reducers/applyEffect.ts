@@ -37,15 +37,15 @@ import {
 	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 
-import { byName } from 'moonlands/dist/cards';
+import { byName } from 'moonlands/src/cards';
 
 import { affectAddEnergy, affectRemoveEnergy, cleanupContinuousEffects, findInPlay, getZoneName, tickDownContinuousEffects } from './utils.js';
 import { ClientEffectAction, HiddenConvertedCard } from '../clientProtocol.js';
 import { State } from '../types.js';
-import { LogEntryType } from 'moonlands/dist/types/log.js';
-import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
+import { LogEntryType } from 'moonlands/src/types/log.js';
+import { ConvertedCard } from 'moonlands/src/classes/CardInGame';
 
 const zonesToConsiderForStaticAbilities = new Set<string>(['inPlay', 'opponentInPlay', 'playerActiveMagi', 'opponentActiveMagi']);
 

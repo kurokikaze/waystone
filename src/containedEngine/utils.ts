@@ -1,5 +1,5 @@
-import { MetaDataRecord, State } from 'moonlands';
-import CardInGame from 'moonlands/dist/classes/CardInGame.js';
+import { MetaDataRecord, State } from 'moonlands/src/index';
+import CardInGame, { ConvertedCard } from 'moonlands/src/classes/CardInGame';
 import {
   ACTION_PASS,
   ACTION_PLAY,
@@ -83,13 +83,12 @@ import {
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
   EFFECT_TYPE_ATTACH_CARD_TO_CARD,
   PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
-} from 'moonlands/dist/const.js';
-import { ZoneType } from 'moonlands/dist/types/common.js';
-import { AnyEffectType, NormalPlayType } from 'moonlands/dist/types/index.js';
+} from 'moonlands/src/const';
+import { ZoneType } from 'moonlands/src/types/common';
+import { AnyEffectType, NormalPlayType } from 'moonlands/src/types/index';
 
-import clone from 'moonlands/dist/clone';
-import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
-import { RestrictionType } from 'moonlands/dist/types';
+import clone from 'moonlands/src/clone';
+import { RestrictionType } from 'moonlands/src/types';
 import {
   ClientAction,
   ClientAttachCardToCard,

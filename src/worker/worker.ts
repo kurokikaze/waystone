@@ -3,8 +3,8 @@
 /// <reference lib="webworker" />
 declare const self: DedicatedWorkerGlobalScope;
 
-import { ACTION_PLAYER_WINS, State } from 'moonlands';
-import { AnyEffectType } from 'moonlands/dist/types';
+import { ACTION_PLAYER_WINS, State } from 'moonlands/src/index';
+import { AnyEffectType } from 'moonlands/src/types';
 import { COMMAND_START } from '../const';
 import { createGame } from '../containedEngine/containedEngine';
 import convertClientCommands, { convertServerCommand } from '../containedEngine/utils';

@@ -19,7 +19,7 @@ import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/const';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/src/const';
 import { SimulationQueue } from './SimulationQueue';
 
 const STEP_NAME = {
@@ -391,6 +391,11 @@ export class SimulationStrategy implements Strategy {
         console.log('Non-attack action in the attack step')
         return true
       }
+
+      if (action.type === ACTION_ATTACK && !this.gameState.getMyCreaturesInPlay().some(pcc => pcc.id == action.source)) {
+        console.log(`Unknown attacker, probably killed by a unforeseen effect?`)
+        return true;
+      }
     }
 
     if (this.gameState.isInMyPromptState() && action.type !== ACTION_RESOLVE_PROMPT) {
@@ -426,7 +431,7 @@ export class SimulationStrategy implements Strategy {
 
     if ('cards' in action && action.cards && action.cards.some(card => !promptAvailableCards?.includes(card as unknown as string))) {
       const availableCardPairs: Record<string, string[]> = {}
-      console.dir(this.gameState?.state.promptParams.cards)
+      // console.dir(this.gameState?.state.promptParams.cards)
       for (let card of this.gameState?.state.promptParams.cards!) {
         if (!(card.card in availableCardPairs)) {
           availableCardPairs[card.card] = []

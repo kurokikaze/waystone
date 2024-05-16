@@ -40,7 +40,7 @@ import {
 import { byName } from 'moonlands/src/cards'
 import { HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation } from './types'
 import { ClientAction, HiddenConvertedCard } from '../clientProtocol'
-import { ConvertedCard } from 'moonlands/dist/classes/CardInGame'
+import { ConvertedCard } from 'moonlands/src/classes/CardInGame'
 import {
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
@@ -50,11 +50,11 @@ import {
   RESTRICTION_ENERGY_EQUALS,
   RESTRICTION_OWN_CREATURE,
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
-  EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+  PROMPT_TYPE_PAYMENT_SOURCE
 } from 'moonlands/src/const'
 import { getCardDetails } from './common'
 import { tickDownContinuousEffects } from '../reducers/utils'
-import { PROMPT_TYPE_PAYMENT_SOURCE } from 'moonlands/src/const'
 
 
 const nanoid = () => 'new_nanoid'

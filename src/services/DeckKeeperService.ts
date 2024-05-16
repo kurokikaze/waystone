@@ -1,8 +1,9 @@
 import { BaseDirectory, readTextFile, writeTextFile, createDir, exists } from '@tauri-apps/api/fs';
-import { byName } from 'moonlands/dist/cards';
-import { TYPE_MAGI } from 'moonlands/dist/const';
+import { byName } from 'moonlands/src/cards';
+import { TYPE_MAGI } from 'moonlands/src/const';
+import DeckEditor from '../components/DeckEditor/DeckEditor';
 
-type DecksResult = {player: string[], opponent: string[]}
+type DecksResult = { player: string[], opponent: string[] }
 
 export class DeckKeeperService {
   static DECKS_DIR = 'decks'
@@ -17,7 +18,6 @@ export class DeckKeeperService {
   }
 
   static defaultPlayerDeck = [
-
     /*'O\'Qua',
     'Whall',
     'Ebylon',
@@ -63,48 +63,48 @@ export class DeckKeeperService {
     'Coral Hyren',
     'Coral Hyren',*/
     'Blu',
-'O\'Qua',
-'Ebylon',
-'Ancestral Flute',
-'Ancestral Flute',
-'Water of Life',
-'Water of Life',
-'Water of Life',
-'Dream Balm',
-'Dream Balm',
-'Dream Balm',
-'Mirror Pendant',
-'Mirror Pendant',
-'Robes of the Ages',
-'Robes of the Ages',
-'Ring of Secrets',
-'Orothean Belt',
-'Orothean Belt',
-'Orothean Belt',
-'Orothean Gloves',
-'Orothean Gloves',
-'Orothean Gloves',
-'Hubdra\'s Spear',
-'Ancestral Flute',
-'Relic Mirror',
-'Relic Mirror',
-'Corf',
-'Corf',
-'Corf',
-'Giant Parathin',
-'Giant Parathin',
-'Giant Parathin',
-'Sphor',
-'Sphor',
-'Sphor',
-'Megathan',
-'Megathan',
-'Megathan',
-'Sea Barl',
-'Sea Barl',
-'Sea Barl',
-'Bwill',
-'Bwill',
+    'O\'Qua',
+    'Ebylon',
+    'Ancestral Flute',
+    'Ancestral Flute',
+    'Water of Life',
+    'Water of Life',
+    'Water of Life',
+    'Dream Balm',
+    'Dream Balm',
+    'Dream Balm',
+    'Mirror Pendant',
+    'Mirror Pendant',
+    'Robes of the Ages',
+    'Robes of the Ages',
+    'Ring of Secrets',
+    'Orothean Belt',
+    'Orothean Belt',
+    'Orothean Belt',
+    'Orothean Gloves',
+    'Orothean Gloves',
+    'Orothean Gloves',
+    'Hubdra\'s Spear',
+    'Ancestral Flute',
+    'Relic Mirror',
+    'Relic Mirror',
+    'Corf',
+    'Corf',
+    'Corf',
+    'Giant Parathin',
+    'Giant Parathin',
+    'Giant Parathin',
+    'Sphor',
+    'Sphor',
+    'Sphor',
+    'Megathan',
+    'Megathan',
+    'Megathan',
+    'Sea Barl',
+    'Sea Barl',
+    'Sea Barl',
+    'Bwill',
+    'Bwill',
   ]
 
   static defaultOpponentDeck = [
@@ -213,7 +213,7 @@ export class DeckKeeperService {
   }
 
   private async createDeckFileIfNotExists(deckFileName: string, deckContents: string[]) {
-    const deckFileExists =  await exists(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, { dir: BaseDirectory.AppConfig });
+    const deckFileExists = await exists(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, { dir: BaseDirectory.AppConfig });
     if (!deckFileExists) {
       await this.saveDeck(deckFileName, deckContents)
     }
@@ -226,7 +226,7 @@ export class DeckKeeperService {
         opponent: DeckKeeperService.defaultOpponentDeck,
       };
     }
-    const result: DecksResult = {player: [], opponent: []}
+    const result: DecksResult = { player: [], opponent: [] }
     const playerDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`, { dir: BaseDirectory.AppConfig });
     const playerDeckCards: string[] = playerDeckContents.split("\n");
     if (
@@ -236,6 +236,8 @@ export class DeckKeeperService {
       byName(playerDeckCards[2])?.type === TYPE_MAGI
     ) {
       result.player = playerDeckCards;
+    } else {
+      result.player = DeckKeeperService.defaultPlayerDeck
     }
 
     const opponentDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\opponentDeck.txt`, { dir: BaseDirectory.AppConfig });
@@ -247,6 +249,8 @@ export class DeckKeeperService {
       byName(opponentDeckCards[2])?.type === TYPE_MAGI
     ) {
       result.opponent = opponentDeckCards;
+    } else {
+      result.opponent = DeckKeeperService.defaultOpponentDeck
     }
     return result;
   }

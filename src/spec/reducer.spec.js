@@ -12,7 +12,7 @@ import {
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 
 const defaultState = () => ({
 	zones: {

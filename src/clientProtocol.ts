@@ -1,5 +1,4 @@
-import { TYPE_CREATURE } from "@moonlands_old/dist"
-import { ConvertedCard } from "moonlands/dist/classes/CardInGame"
+import { ConvertedCard } from "moonlands/src/classes/CardInGame"
 import {
   ACTION_ATTACK,
   ACTION_ENTER_PROMPT,
@@ -44,16 +43,17 @@ import {
   PROMPT_TYPE_ALTERNATIVE,
   PROMPT_TYPE_PAYMENT_SOURCE,
   TYPE_RELIC,
+  TYPE_CREATURE,
   TYPE_SPELL,
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, 
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
   EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
   EFFECT_TYPE_ATTACH_CARD_TO_CARD,
   PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
-} from "moonlands/dist/const"
-import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/types"
-import { ExpirationObjectType, RestrictionType } from "moonlands/dist/types/common"
-import { AlternativeType } from "moonlands/dist/types/prompt"
+} from "moonlands/src/const"
+import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/src/types"
+import { ExpirationObjectType, RestrictionType } from "moonlands/src/types/common"
+import { AlternativeType } from "moonlands/src/types/prompt"
 
 export type HiddenConvertedCard = {
 	id: string,

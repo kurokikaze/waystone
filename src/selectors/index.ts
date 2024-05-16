@@ -1,12 +1,12 @@
 /* global window */
-import { cards } from 'moonlands/dist/cards';
+import { cards } from 'moonlands/src/cards';
 
 import {
 	TYPE_RELIC,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_SINGLE_MAGI,
 	TYPE_CREATURE,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 
 import {
 	ANIMATION_CREATURE_DISCARDED,
@@ -14,8 +14,8 @@ import {
 	STEP_PRS_SECOND,
 } from '../const';
 import { State } from '../types';
-import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
-import { byName } from 'moonlands/dist/cards';
+import { ConvertedCard } from 'moonlands/src/classes/CardInGame';
+import { byName } from 'moonlands/src/cards';
 
 const relicsHash: Record<string, boolean> = {};
 

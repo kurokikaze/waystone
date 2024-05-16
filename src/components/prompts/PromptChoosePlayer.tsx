@@ -2,7 +2,7 @@
 // import {useSelector} from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 // import {getPromptGeneratedBy} from '../../selectors';
 import { EngineConnector } from '../../types';
 

@@ -5,7 +5,7 @@ import {
 	TYPE_CREATURE,
 	ACTION_RESOLVE_PROMPT,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 import Card from '../Card.tsx';
 import {withAbilities} from '../CardAbilities.tsx';
 import {

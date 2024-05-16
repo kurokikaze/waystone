@@ -1,6 +1,6 @@
 /* globals */
 import { useSelector, useDispatch } from 'react-redux';
-import { RESTRICTION_EXCEPT_SOURCE } from 'moonlands/dist/const';
+import { RESTRICTION_EXCEPT_SOURCE } from 'moonlands/src/const';
 import cn from 'classnames';
 import { plusEnergyOnCreature, minusEnergyOnCreature } from '../actions';
 import { getPromptGeneratedBy } from '../selectors';

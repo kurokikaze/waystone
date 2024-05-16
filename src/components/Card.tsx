@@ -18,13 +18,13 @@ import {
 	REGION_OROTHE,
 	REGION_BOGRATH,
 	REGION_UNIVERSAL,
-} from 'moonlands/dist/const.js';
+} from 'moonlands/src/const';
 import { canFirstAttackSecond, canPackHuntWith } from './helpers.js';
 import { camelCase } from '../utils';
 import { CardStyleType, DraggedItem, EnergyLossRecord, EngineConnector, State } from '../types.js';
-import { CardData, CardType, Region } from 'moonlands/dist/types/index.js';
-import MoonlandsCard from 'moonlands/dist/classes/Card';
-import { InGameData } from 'moonlands/dist/classes/CardInGame';
+import { CardData, CardType, Region } from 'moonlands/src/types/index';
+import MoonlandsCard from 'moonlands/src/classes/Card';
+import { InGameData } from 'moonlands/src/classes/CardInGame';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearEntryAnimation } from '../actions/index.js';
 import { CREATURE_DISCARD_TIMEOUT } from '../addAnimations.js';

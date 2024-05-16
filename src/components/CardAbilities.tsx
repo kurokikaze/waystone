@@ -12,10 +12,10 @@ import Energize from './icons/Energize.js';
 import Velociraptor from './icons/Velociraptor.js';
 
 import cn from 'classnames';
-import { COST_X, TYPE_MAGI, TYPE_RELIC } from 'moonlands/dist/const';
-import { AnyEffectType, CardData } from 'moonlands/dist/types/index.js';
-import Card from 'moonlands/dist/classes/Card';
-import { InGameData } from 'moonlands/dist/classes/CardInGame';
+import { COST_X, TYPE_MAGI, TYPE_RELIC } from 'moonlands/src/const';
+import { AnyEffectType, CardData } from 'moonlands/src/types/index.js';
+import Card from 'moonlands/src/classes/Card';
+import { InGameData } from 'moonlands/src/classes/CardInGame';
 import { MouseEventHandler } from 'react';
 import React from 'react';
 
@@ -98,7 +98,7 @@ export const withAbilities = (Component: typeof React.Component) => (props: With
 	const energizeProperty = props.modifiedData ? props.modifiedData.energize : props.card.data.energize;
 	const hasEffects = allEffects.length > 0;
 	const canPackHunt = props.card.data.canPackHunt;
-	const hasEnergize = energizeProperty > 0;
+	const hasEnergize = energizeProperty && energizeProperty > 0;
 	const hasAdditionalIcons = hasSeveralAttacks || canAttackDirectly || canPackHunt || hasEnergize;
 
 	const unableToAttack = props.data.ableToAttack === false || (props.modifiedData && props.modifiedData.ableToAttack === false) || props.data.attacked === Infinity;
@@ -113,7 +113,7 @@ export const withAbilities = (Component: typeof React.Component) => (props: With
 	return <>
 		{(showAbilities || showEffects || hasAdditionalIcons) && <div className='cardAbilityHolder cardViewHolder'>
 			{hasAbilities && (props.actionsAvailable || isOpponent) && <div className='cardAbilities'>
-				{powers.map(({ name, text, cost }: PowerType) =>
+				{powers?.map(({ name, text, cost }: PowerType) =>
 					<AbilityComponent
 						key={name}
 						name={name}
@@ -126,7 +126,8 @@ export const withAbilities = (Component: typeof React.Component) => (props: With
 				)}
 			</div>}
 			{hasEffects && <div className='cardAbilities'>
-				{allEffects.map(({ name, text }, i) =>
+				{/* @ts-ignore */}
+				{allEffects.map(({ name = 'Unknown Effect', text = 'Unknown Text' }, i) =>
 					<p key={name}><b>Effect &mdash; {name}</b>: {text}</p>
 				)}
 			</div>}

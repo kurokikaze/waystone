@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { byName } from 'moonlands/dist/cards.js';
+import { byName } from 'moonlands/src/cards';
 import cn from 'classnames'; 
 import { MESSAGE_TYPE_POWER, MESSAGE_TYPE_RELIC, MESSAGE_TYPE_SPELL } from '../const';
 import { getPowerSource } from '../selectors';

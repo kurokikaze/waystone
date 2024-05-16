@@ -1,10 +1,10 @@
 /* global expect, describe, it */
-import {byName} from 'moonlands/dist/cards';
+import {byName} from 'moonlands/src/cards';
 import {mapCardDataFromProps, transformCard, getCardDetails} from '../common';
-import debugState from '../../spec/abilityState.json'
+import { state } from '../../spec/abilityState'
 import { ExtendedCard, State } from '../../types';
-import { ConvertedCard, InGameData } from 'moonlands/dist/classes/CardInGame';
-import { StaticAbilityType } from 'moonlands/dist/types';
+import { ConvertedCard, InGameData } from 'moonlands/src/classes/CardInGame';
+// import { StaticAbilityType } from 'moonlands/src/types';
 
 describe('Common code from components', () => {
 	it('Fetches card by id from zones', () => {
@@ -178,9 +178,10 @@ describe('cardDataTransformer', () => {
 
 describe('getCardDetails', () => {
   it('Ability cost for the controlled creature', () => {
-	const enrichedState = getCardDetails(debugState as unknown as State)
+	const enrichedState = getCardDetails(state as unknown as State)
     const hyren = enrichedState.inPlay.find(({id}) => id == 'P427nmFyh0KGGYepf0cTh')
 	expect(hyren?.data.controller).toEqual(1);
-	expect(hyren?.card.data.powers[0].cost).toEqual(5);
+	expect(hyren?.card.data.powers).toHaveLength(1);
+	expect(hyren?.card.data.powers![0].cost).toEqual(5);
   })
 })

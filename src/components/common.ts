@@ -1,7 +1,7 @@
 /* global window */
 import { connect, useSelector } from 'react-redux';
-import { byName } from 'moonlands/dist/cards';
-import clone from 'moonlands/dist/clone';
+import { byName } from 'moonlands/src/cards';
+import clone from 'moonlands/src/clone';
 import {
 	TYPE_CREATURE,
 	TYPE_RELIC,
@@ -65,14 +65,14 @@ import {
 
 	STATUS_BURROWED,
 	TYPE_SPELL,
-} from 'moonlands/dist/const';
+} from 'moonlands/src/const';
 
 import { ZoneIdentifier, getZoneContent } from '../selectors';
 import { EnrichedCard, ExtendedCard, State } from '../types';
-import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType } from 'moonlands/dist/types';
-import { ConvertedCard, InGameData } from 'moonlands/dist/classes/CardInGame';
+import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType } from 'moonlands/src/types';
+import { ConvertedCard, InGameData } from 'moonlands/src/classes/CardInGame';
 import { HiddenConvertedCard } from '../clientProtocol';
-import Card from 'moonlands/dist/classes/Card';
+import Card from 'moonlands/src/classes/Card';
 import { PropertyType } from 'moonlands/src/types';
 
 export const cardMatchesSelector = (card: EnrichedCard, selector: SelectorTypeType, selectorParameter: any = null, sourceController: number) => {
@@ -164,7 +164,7 @@ export const transformCard = (staticAbilityCards: ExtendedCard[]) => (cardData: 
 		};
 
 		staticAbilityCards.forEach(staticAbilityCard => {
-			staticAbilityCard.card.data.staticAbilities.forEach((staticAbility: StaticAbilityType) => {
+			staticAbilityCard.card.data.staticAbilities?.forEach((staticAbility: StaticAbilityType) => {
 				if (cardMatchesSelector(result, staticAbility.selector, staticAbility.selectorParameter, staticAbilityCard.data.controller)) {
 					const modifierFunction = (initialValue: any) => {
 						const { operator, operandOne } = staticAbility.modifier;
@@ -256,7 +256,7 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): Selecto
 		case RESTRICTION_ENERGY_LESS_THAN:
 			return card => (card.card.type === TYPE_CREATURE && card.data.energy < value);
 		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-			return card => (card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
+			return card => (card.card.type === TYPE_CREATURE && card.data.energy < ((typeof card.card.cost == 'number') ? card.card.cost : 0));
 		case RESTRICTION_OWN_CREATURE:
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === 1);
 		case RESTRICTION_OPPONENT_CREATURE:
@@ -304,7 +304,7 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 				const canPayAtAll = card.card.data?.paymentSource && card.card.data?.paymentSource.includes(promptParamsFixed.paymentType);
 				const haveEnoughEnergy = card.data.energy >= (promptParamsFixed?.paymentAmount || 0);
 
-				return canPayAtAll && haveEnoughEnergy;
+				return Boolean(canPayAtAll && haveEnoughEnergy);
 			}
 		}
 		default:
@@ -495,14 +495,14 @@ export const getCardDetails = (state: State) => {
 						const initialValue = getByProperty(currentCard, PROPERTY_ABLE_TO_ATTACK);
 						const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-						newState.inPlay[cardId].card.data.ableToAttack = resultValue;
+						newState.inPlay[cardId].card.data.ableToAttack = resultValue as boolean;
 						break;
 					}
 					case PROPERTY_CAN_BE_ATTACKED: {
 						const initialValue = getByProperty(currentCard, PROPERTY_CAN_BE_ATTACKED);
 						const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-						newState.inPlay[cardId].card.data.canBeAttacked = resultValue;
+						newState.inPlay[cardId].card.data.canBeAttacked = resultValue as boolean;
 						break;
 					}
 					case PROPERTY_CONTROLLER: {
@@ -510,7 +510,7 @@ export const getCardDetails = (state: State) => {
 
 						const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-						newState.inPlay[cardId].data.controller = resultValue;
+						newState.inPlay[cardId].data.controller = resultValue as number;
 						break;
 					}
 					case PROPERTY_STATUS: {
@@ -520,7 +520,7 @@ export const getCardDetails = (state: State) => {
 
 						switch (staticAbility.subProperty) {
 							case STATUS_BURROWED: {
-								newState.inPlay[cardId].data.burrowed = resultValue;
+								newState.inPlay[cardId].data.burrowed = resultValue as boolean;
 							}
 						}
 						break;
@@ -534,7 +534,9 @@ export const getCardDetails = (state: State) => {
 								const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
 									performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
 									performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-								newState.inPlay[cardId].card.data.powers[powerId].cost = resultValue;
+								if (newState.inPlay[cardId].card.data?.powers && powerId in newState.inPlay[cardId].card.data?.powers!) {
+									newState.inPlay[cardId].card.data.powers![powerId].cost = resultValue;
+								}
 							}
 						}
 						break;
