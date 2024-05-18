@@ -27,7 +27,7 @@ import CreatureMessage from '../messages/CreatureMessage.jsx';
 import PromptResolutionMessage from '../messages/PromptResolutionMessage.jsx';
 import ActionCardView from '../ActionCardView.jsx';
 
-import debugState from '../../spec/abilityState.js/index.js'
+import debugState from '../../spec/abilityState.ts/index.js'
 // @ts-ignore
 import StepBoard from '../StepBoard/StepBoard.jsx';
 import EndgameOverlay from '../EndgameOverlay/EndgameOverlay.tsx';

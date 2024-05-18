@@ -1,4 +1,4 @@
-import { ConvertedCard } from "moonlands/src/classes/CardInGame"
+import { ConvertedCard, HiddenConvertedCard } from "moonlands/src/classes/CardInGame"
 import {
   ACTION_ATTACK,
   ACTION_ENTER_PROMPT,
@@ -54,13 +54,6 @@ import {
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/src/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/src/types/common"
 import { AlternativeType } from "moonlands/src/types/prompt"
-
-export type HiddenConvertedCard = {
-	id: string,
-	owner: number,
-	card: null,
-	data: null,
-}
 
 export type ConvertedCardMinimal = {
   id: string,

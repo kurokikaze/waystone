@@ -1,5 +1,5 @@
 /* global window */
-import { ConvertedCard } from 'moonlands/src/classes/CardInGame';
+import { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
 import {
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -13,7 +13,7 @@ import {
   EXPIRATION_OPPONENT_TURNS,
 } from 'moonlands/src/const';
 import { ZoneType } from 'moonlands/src/types';
-import { ClientEffectAddEnergyToCreature, ClientEffectRemoveEnergyFromCreature, HiddenConvertedCard } from '../clientProtocol';
+import { ClientEffectAddEnergyToCreature, ClientEffectRemoveEnergyFromCreature } from '../clientProtocol';
 import { State, ContinuousEffectType } from '../types';
 import { byName } from 'moonlands/src/cards';
 

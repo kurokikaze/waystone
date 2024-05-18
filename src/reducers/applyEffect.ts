@@ -42,10 +42,10 @@ import {
 import { byName } from 'moonlands/src/cards';
 
 import { affectAddEnergy, affectRemoveEnergy, cleanupContinuousEffects, findInPlay, getZoneName, tickDownContinuousEffects } from './utils.js';
-import { ClientEffectAction, HiddenConvertedCard } from '../clientProtocol.js';
+import { ClientEffectAction } from '../clientProtocol.js';
 import { State } from '../types.js';
 import { LogEntryType } from 'moonlands/src/types/log.js';
-import { ConvertedCard } from 'moonlands/src/classes/CardInGame';
+import { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
 
 const zonesToConsiderForStaticAbilities = new Set<string>(['inPlay', 'opponentInPlay', 'playerActiveMagi', 'opponentActiveMagi']);
 
@@ -151,7 +151,12 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					}
 				}
 			}
-			if (sourceZone === 'inPlay' && action.sourceCard.data && action.sourceCard.data.controller === 1) {
+			if (
+				sourceZone === 'inPlay' &&
+				action.sourceCard.data &&
+				'controller' in action.sourceCard.data && // This should always be true for the inPlay zone, but Typescript doesnt know that 
+				action.sourceCard.data.controller === 1
+			) {
 				packs = packs.filter(({ leader }) => leader !== action.sourceCard.id);
 			}
 
@@ -547,14 +552,14 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				zones: {
 					...state.zones,
 					playerDiscard: [],
-					playerDeck: action.cards.map(cardId => ({ id: cardId, owner: action.player, card: null, data: null })),
+					playerDeck: action.cards.map(cardId => ({ id: cardId, owner: action.player, card: null, data: {} })),
 				},
 			} : {
 				...state,
 				zones: {
 					...state.zones,
 					opponentDiscard: [],
-					opponentDeck: action.cards.map(cardId => ({ id: cardId, owner: action.player, card: null, data: null })),
+					opponentDeck: action.cards.map(cardId => ({ id: cardId, owner: action.player, card: null, data: {} })),
 				},
 			};
 			return newState;

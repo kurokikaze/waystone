@@ -1,5 +1,5 @@
 import { MetaDataRecord, State } from 'moonlands/src/index';
-import CardInGame, { ConvertedCard } from 'moonlands/src/classes/CardInGame';
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
 import {
   ACTION_PASS,
   ACTION_PLAY,
@@ -130,8 +130,7 @@ import {
   ClientPlayAction,
   ClientPowerAction,
   ClientResolvePromptAction,
-  ConvertedCardMinimal,
-  HiddenConvertedCard
+  ConvertedCardMinimal
 } from '../clientProtocol';
 
 const hiddenZonesHash: Record<ZoneType, boolean> = {
@@ -164,10 +163,11 @@ const templateMessage = (message: string, metadata: MetaDataRecord) => {
   return message.replace(/\$\{(.+?)\}/g, (_match, p1) => index(metadata, p1));
 };
 
-type HiddenCardInGame = CardInGame & { card: null, data: null }
+type HiddenCardInGame = CardInGame & { card: null, data: {} }
 
-const convertCard = (cardInGame: CardInGame): ConvertedCard | HiddenConvertedCard => {
-  if (!cardInGame.card) {
+const convertCard = (cardInGame: CardInGame, hidden = false): ConvertedCard | HiddenConvertedCard => {
+  return cardInGame.serialize(hidden);
+  /*if (!cardInGame.card) {
     return {
       id: cardInGame.id,
       owner: cardInGame.owner,
@@ -180,19 +180,23 @@ const convertCard = (cardInGame: CardInGame): ConvertedCard | HiddenConvertedCar
     owner: cardInGame.owner,
     card: cardInGame.card.name,
     data: cardInGame.data,
-  }
+  }*/
 };
 
 const convertCardMinimal = (cardInGame: CardInGame): ConvertedCardMinimal => ({
   id: cardInGame.id,
 });
 
+const hidingNecessary = (targetZone: ZoneType, isOpponent: boolean) => {
+  return hiddenZonesHash[targetZone] && isOpponent
+}
+
 export const hideIfNecessary = (card: CardInGame, targetZone: ZoneType, isOpponent: boolean): CardInGame | HiddenCardInGame => {
   if (hiddenZonesHash[targetZone] && isOpponent) {
     return {
       ...card,
       card: null,
-      data: null,
+      data: {},
     } as HiddenCardInGame;
   } else {
     return card;
@@ -316,7 +320,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             player: promptPlayer,
             zone,
             restrictions,
-            cards: cards.map(convertCard),
+            cards: cards.map(card => convertCard(card)),
             zoneOwner,
             ...(action.message ? { message: action.message } : {}),
             numberOfCards,
@@ -345,7 +349,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             zone,
             restrictions,
             ...(action.message ? { message: action.message } : {}),
-            cards: cards.map(convertCard),
+            cards: cards.map(card => convertCard(card)),
             zoneOwner,
             numberOfCards,
           } as ClientEnterPromptChooseNCardsFromZone;
@@ -355,7 +359,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           const zoneOwner = game.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
           const numberOfCards = game.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
           const zoneContent = game.getZone(zone, zoneOwner).cards;
-          const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
+        const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
 
           return {
             type: ACTION_ENTER_PROMPT,
@@ -363,7 +367,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             player: action.player,
             zone,
             ...(action.message ? { message: action.message } : {}),
-            cards: cards.map(convertCard),
+            cards: cards.map(card => convertCard(card)),
             zoneOwner,
             numberOfCards,
           } as ClientEnterPromptRearrangeCardsOfZone;
@@ -503,17 +507,29 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           return {
             type: action.type,
             effectType: action.effectType,
-            sourceCard: convertCard(hideIfNecessary(
-              action.sourceCard,
-              action.sourceZone,
-              overrideHiding ? false : sourceCardOwner !== playerId
-            )),
+            sourceCard: convertCard(action.sourceCard,
+              hidingNecessary(
+                action.sourceZone,
+                overrideHiding ? false : sourceCardOwner !== playerId
+              )
+            ),
+            // sourceCard: convertCard(hideIfNecessary(
+            //   action.sourceCard,
+            //   action.sourceZone,
+            //   overrideHiding ? false : sourceCardOwner !== playerId
+            // )),
             sourceZone: action.sourceZone,
-            destinationCard: convertCard(hideIfNecessary(
-              action.destinationCard,
-              action.destinationZone,
-              overrideHiding ? false : destinationCardOwner !== playerId
-            )),
+            destinationCard: convertCard(action.destinationCard,
+              hidingNecessary(
+                action.destinationZone,
+                overrideHiding ? false : destinationCardOwner !== playerId
+              )
+            ),
+            // destinationCard: convertCard(hideIfNecessary(
+            //   action.destinationCard,
+            //   action.destinationZone,
+            //   overrideHiding ? false : destinationCardOwner !== playerId
+            // )),
             destinationZone: action.destinationZone,
             convertedFor: playerId,
             destOwner: destinationCardOwner,
@@ -837,7 +853,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           const sourceCard: CardInGame | null = (typeof action?.source == 'string') ?
             // @ts-ignore will be fixed in a future moonlands update
             game.getMetaValue(action?.source, action.generatedBy) :
-            action.target;
+            action.source;
 
           return {
             type: action.type,

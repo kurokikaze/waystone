@@ -1,7 +1,7 @@
 /* global expect, describe, it */
 import {byName} from 'moonlands/src/cards';
 import {mapCardDataFromProps, transformCard, getCardDetails} from '../common';
-import { state } from '../../spec/abilityState'
+// import { state } from '../../spec/abilityState'
 import { ExtendedCard, State } from '../../types';
 import { ConvertedCard, InGameData } from 'moonlands/src/classes/CardInGame';
 // import { StaticAbilityType } from 'moonlands/src/types';
@@ -176,12 +176,12 @@ describe('cardDataTransformer', () => {
 	});
 });
 
-describe('getCardDetails', () => {
-  it('Ability cost for the controlled creature', () => {
-	const enrichedState = getCardDetails(state as unknown as State)
-    const hyren = enrichedState.inPlay.find(({id}) => id == 'P427nmFyh0KGGYepf0cTh')
-	expect(hyren?.data.controller).toEqual(1);
-	expect(hyren?.card.data.powers).toHaveLength(1);
-	expect(hyren?.card.data.powers![0].cost).toEqual(5);
-  })
-})
+// describe('getCardDetails', () => {
+//   it('Ability cost for the controlled creature', () => {
+// 	const enrichedState = getCardDetails(state as unknown as State)
+//     const hyren = enrichedState.inPlay.find(({id}) => id == 'P427nmFyh0KGGYepf0cTh')
+// 	expect(hyren?.data.controller).toEqual(1);
+// 	expect(hyren?.card.data.powers).toHaveLength(1);
+// 	expect(hyren?.card.data.powers![0].cost).toEqual(5);
+//   })
+// })

@@ -1160,7 +1160,7 @@ describe('Strange attacks', () => {
   it('Attacks into Magi with creature', () => {
     const cardHand = (id: string, owner: number) => ({
       id,
-      data: null,
+      data: {},
       card: null,
       owner
     })

@@ -1,10 +1,9 @@
-import { log } from 'console'
 import { ACTION_PASS, ACTION_PLAY, ACTION_POWER, State } from 'moonlands/src'
 import Card from 'moonlands/src/classes/Card'
 import CardInGame, { ConvertedCard } from 'moonlands/src/classes/CardInGame'
 import { AnyEffectType, ContinuousEffectType, LogEntryType, PromptTypeType, RestrictionObjectType, RestrictionType, ZoneType } from 'moonlands/src/types'
 import { ResolvePromptType } from 'moonlands/src/types/resolvePrompt'
-import { ACTION_ATTACK, ACTION_CONCEDE, ACTION_NONE, COST_X } from './const'
+import { ACTION_ATTACK, ACTION_CONCEDE, COST_X } from './const'
 import { C2SAction } from '../clientProtocol'
 
 export type Challenge = {

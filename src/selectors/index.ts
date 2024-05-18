@@ -34,34 +34,34 @@ export function isPromptActive(state: State) {
 }
 
 export function getMagiEnergy(state: State) {
-  const activeMagi = zoneContent('playerActiveMagi', state)
-	return activeMagi.length ? activeMagi[0].data?.energy : 0;
+	const activeMagi = zoneContent('playerActiveMagi', state)
+	return activeMagi.length && 'energy' in activeMagi[0].data ? activeMagi[0].data.energy : 0;
 }
 
 export function getMaxPaymentSourceEnergy(state: State) {
 	const activeMagi = zoneContent('playerActiveMagi', state)
 	const paymentCardEnergies = state.zones.inPlay.filter(card => {
-		
+
 		if (card.data.controller !== 1) return false;
 		const cardData = byName(card.card);
 
 		return cardData && cardData.data.paymentSource?.includes(TYPE_CREATURE);
 	}).map(card => card.data.energy);
-	const fullArray: number[] = activeMagi.length && activeMagi[0].data?.energy ? [activeMagi[0].data?.energy, ...paymentCardEnergies] : paymentCardEnergies;
+	const fullArray: number[] = activeMagi.length && 'energy' in activeMagi[0].data ? [activeMagi[0].data?.energy, ...paymentCardEnergies] : paymentCardEnergies;
 	return Math.max(...fullArray) || 0;
 }
 
 export function getMagiCard(state: State) {
-  if (!zoneContent('playerActiveMagi', state).length) {
-    return null
-  }
-  return zoneContent('playerActiveMagi', state)[0].card;
+	if (!zoneContent('playerActiveMagi', state).length) {
+		return null
+	}
+	return zoneContent('playerActiveMagi', state)[0].card;
 }
 
 const isRelic = (card: ConvertedCard) => relicsHash[card.card];
 const isNotRelic = (card: ConvertedCard) => !relicsHash[card.card];
 
-export type ZoneIdentifier = keyof State["zones"] | 'playerRelics' | 'opponentRelics' | 'playerInPlay' | 'opponentInPlay' 
+export type ZoneIdentifier = keyof State["zones"] | 'playerRelics' | 'opponentRelics' | 'playerInPlay' | 'opponentInPlay'
 export function zoneContent(zoneId: ZoneIdentifier, state: State) {
 	switch (zoneId) {
 		case 'playerRelics': {
@@ -113,7 +113,7 @@ export const isPRSAvailable = (state: State) => state.activePlayer == 1 && typeo
 
 export const getActivePlayerMagi = (state: State) => state.zones.playerActiveMagi[0];
 export const getPromptCards = (state: State) => {
-  return state.promptParams?.cards;
+	return state.promptParams?.cards;
 }
 export const getStartingCards = (state: State) => state.promptParams?.startingCards;
 export const getAvailableCards = (state: State) => state.promptParams?.availableCards;
@@ -121,7 +121,7 @@ export const getPromptGeneratedBy = (state: State) => state.promptGeneratedBy;
 export const getPromptNumberOfCards = (state: State) => state.promptParams?.numberOfCards;
 export const getPromptMagi = (state: State) => state.promptParams?.magi;
 export const getPromptMin = (state: State) => {
-  return typeof state.promptParams?.min == 'number' ? state.promptParams?.min : 1; 
+	return typeof state.promptParams?.min == 'number' ? state.promptParams?.min : 1;
 };
 export const getPromptMax = (state: State) => state.promptParams?.max;
 export const getCards = (state: State) => state.promptParams?.cards;
@@ -148,12 +148,12 @@ export const getIsOnMagiPrompt = (state: State) => state.prompt &&
 export const getPowerSource = (id: string) => (state: State) => {
 	if (!id) return null;
 
-  if (state.zones.opponentActiveMagi.length) {
-    const opponentMagi = state.zones.opponentActiveMagi[0];
-    if (opponentMagi && opponentMagi.id === id) {
-      return opponentMagi;
-    }
-  }
+	if (state.zones.opponentActiveMagi.length) {
+		const opponentMagi = state.zones.opponentActiveMagi[0];
+		if (opponentMagi && opponentMagi.id === id) {
+			return opponentMagi;
+		}
+	}
 	const myCards = state.zones.inPlay;
 	const myCard = myCards ? myCards.find(card => card.id === id) : null;
 

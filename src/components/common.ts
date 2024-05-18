@@ -70,8 +70,7 @@ import {
 import { ZoneIdentifier, getZoneContent } from '../selectors';
 import { EnrichedCard, ExtendedCard, State } from '../types';
 import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType } from 'moonlands/src/types';
-import { ConvertedCard, InGameData } from 'moonlands/src/classes/CardInGame';
-import { HiddenConvertedCard } from '../clientProtocol';
+import { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
 import Card from 'moonlands/src/classes/Card';
 import { PropertyType } from 'moonlands/src/types';
 
