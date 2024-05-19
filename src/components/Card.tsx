@@ -86,6 +86,7 @@ type CardProps = {
 	engineConnector: EngineConnector;
 }
 
+const getEnergyChange = (id: string) => (state: State) => state.energyLosses.filter(loss => loss.card === id)
 function Card({
 	id,
 	card,
@@ -137,7 +138,7 @@ function Card({
 		}
 	}, [attacker, attackNumber]);
 
-	const energyChange = useSelector((state: State) => state.energyLosses.filter(loss => loss.card === id));
+	const energyChange = useSelector(getEnergyChange(id));
 	const energyEffectsShown = useSelector((state: State) => state.energyAnimationsShown);
 
 	const damage: EnergyLossRecord[] = []

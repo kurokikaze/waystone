@@ -1,88 +1,87 @@
 import { MetaDataRecord, State } from 'moonlands/src/index';
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
 import {
+  ACTION_ATTACK,
+  ACTION_EFFECT,
+  ACTION_ENTER_PROMPT,
   ACTION_PASS,
   ACTION_PLAY,
-  ACTION_ENTER_PROMPT,
-  ACTION_EFFECT,
-  ACTION_POWER,
-  ACTION_ATTACK,
   ACTION_PLAYER_WINS,
+  ACTION_POWER,
+  ACTION_RESOLVE_PROMPT,
 
-  PROMPT_TYPE_NUMBER,
-  PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-  PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-  PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
-  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  PROMPT_TYPE_CHOOSE_CARDS,
-
-  EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
-  EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-  EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-  EFFECT_TYPE_MOVE_ENERGY,
-  EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-  EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+  EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+  EFFECT_TYPE_ATTACH_CARD_TO_CARD,
   EFFECT_TYPE_ATTACK,
+  EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
+  EFFECT_TYPE_BEFORE_DAMAGE,
+  EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+  EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
   EFFECT_TYPE_CREATURE_ATTACKS,
-  EFFECT_TYPE_MAGI_IS_DEFEATED,
-  EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
-  EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
-  EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-  EFFECT_TYPE_PLAY_CREATURE,
-  EFFECT_TYPE_DISCARD_RESHUFFLED,
-  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-  EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+  EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+  EFFECT_TYPE_CREATURE_IS_DEFEATED,
   EFFECT_TYPE_DAMAGE_STEP,
   EFFECT_TYPE_DEAL_DAMAGE,
   EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
   EFFECT_TYPE_DIE_ROLLED,
   EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
-
-  ZONE_TYPE_DECK,
-  ZONE_TYPE_MAGI_PILE,
-  ZONE_TYPE_HAND,
-  EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
+  EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
   EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
-  EFFECT_TYPE_BEFORE_DAMAGE,
-  EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
-  EFFECT_TYPE_CREATURE_IS_DEFEATED,
-  EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
+  EFFECT_TYPE_DISCARD_RESHUFFLED,
+  EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+  EFFECT_TYPE_DRAW,
+  EFFECT_TYPE_END_OF_TURN,
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+  EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+  EFFECT_TYPE_MAGI_IS_DEFEATED,
+  EFFECT_TYPE_MOVE_ENERGY,
+  EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+  EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+  EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
+  EFFECT_TYPE_PLAY_CREATURE,
+  EFFECT_TYPE_PLAY_SPELL,
+  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-  EFFECT_TYPE_END_OF_TURN,
+  EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
   EFFECT_TYPE_START_OF_TURN,
-  ZONE_TYPE_ACTIVE_MAGI,
-  ZONE_TYPE_DEFEATED_MAGI,
-  ZONE_TYPE_DISCARD,
-  ZONE_TYPE_IN_PLAY,
-  EFFECT_TYPE_DRAW,
-  ACTION_RESOLVE_PROMPT,
-  PROMPT_TYPE_OWN_SINGLE_CREATURE,
+  EFFECT_TYPE_START_STEP,
+
+  PROMPT_TYPE_ALTERNATIVE,
   PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+  PROMPT_TYPE_CHOOSE_CARDS,
+  PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+  PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+  PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
   PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+  PROMPT_TYPE_MAY_ABILITY,
+  PROMPT_TYPE_NUMBER,
+  PROMPT_TYPE_OWN_SINGLE_CREATURE,
+  PROMPT_TYPE_PAYMENT_SOURCE,
+  PROMPT_TYPE_PLAYER,
+  PROMPT_TYPE_POWER_ON_MAGI,
+  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
   PROMPT_TYPE_RELIC,
-  PROMPT_TYPE_SINGLE_CREATURE,
   PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
   PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+  PROMPT_TYPE_SINGLE_CREATURE,
   PROMPT_TYPE_SINGLE_MAGI,
+  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+
   PROPERTY_CONTROLLER,
-  PROMPT_TYPE_MAY_ABILITY,
-  EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
-  EFFECT_TYPE_START_STEP,
-  PROMPT_TYPE_PLAYER,
-  EFFECT_TYPE_PLAY_SPELL,
-  PROMPT_TYPE_POWER_ON_MAGI,
-  PROMPT_TYPE_PAYMENT_SOURCE,
-  EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
-  EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
-  EFFECT_TYPE_ATTACH_CARD_TO_CARD,
-  PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
+
+  ZONE_TYPE_ACTIVE_MAGI,
+  ZONE_TYPE_DECK,
+  ZONE_TYPE_DEFEATED_MAGI,
+  ZONE_TYPE_DISCARD,
+  ZONE_TYPE_HAND,
+  ZONE_TYPE_IN_PLAY,
+  ZONE_TYPE_MAGI_PILE,
 } from 'moonlands/src/const';
 import { ZoneType } from 'moonlands/src/types/common';
 import { AnyEffectType, NormalPlayType } from 'moonlands/src/types/index';
@@ -125,6 +124,7 @@ import {
   ClientEnterPromptPaymentSource,
   ClientEnterPromptRearrangeCardsOfZone,
   ClientEnterPromptRearrangeEnergyOnCreatures,
+  ClientEnterPromptDistributeCardsInZones,
   ClientEnterPromptSingleCreatureFiltered,
   ClientPassAction,
   ClientPlayAction,
@@ -359,7 +359,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           const zoneOwner = game.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
           const numberOfCards = game.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
           const zoneContent = game.getZone(zone, zoneOwner).cards;
-        const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
+          const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
 
           return {
             type: ACTION_ENTER_PROMPT,
@@ -371,6 +371,28 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             zoneOwner,
             numberOfCards,
           } as ClientEnterPromptRearrangeCardsOfZone;
+        }
+        case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+          const sourceZone = game.getMetaValue(action.sourceZone, action.generatedBy);
+          const zoneOwner = game.getMetaValue(action.sourceZoneOwner, action.generatedBy);
+          const numberOfCards = game.getMetaValue(action.numberOfCards, action.generatedBy);
+          // targetZones cannot be metadata values because you cannot store set of zones in a value for now
+          const zoneContent = game.getZone(sourceZone, zoneOwner).cards;
+          const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
+          const player: number = game.getMetaValue<number>(action.player || 1, action.generatedBy);
+
+          const result: ClientEnterPromptDistributeCardsInZones = {
+            type: ACTION_ENTER_PROMPT,
+            promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+            player,
+            sourceZone,
+            ...(action.message ? { message: action.message } : {}),
+            cards: cards.map(card => convertCard(card) as ConvertedCard), // These are never hidden
+            zoneOwner,
+            targetZones: action.targetZones as ZoneType[],
+            numberOfCards,
+          };
+          return result;
         }
         case PROMPT_TYPE_CHOOSE_CARDS: {
           return {
@@ -864,25 +886,6 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             player: action.player,
           };
         }
-        // case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
-        // 	const targetCard = (typeof action.target == 'string') ?
-        // 		game.getMetaValue(action.target, action.generatedBy) :
-        // 		action.target;
-
-        // 	const amount = (typeof action.amount == 'string') ?
-        // 		parseInt(game.getMetaValue(action.amount, action.generatedBy), 10) :
-        // 		action.amount;
-
-        // 	const target = (targetCard instanceof Array) ? targetCard.map(convertCardMinimal) : convertCardMinimal(targetCard);
-
-        // 	return {
-        // 		...action,
-        // 		target,
-        // 		source: action.source ? convertCardMinimal(action.source) : action.source,
-        // 		triggerSource: action.triggerSource ? convertCardMinimal(action.triggerSource) : action.triggerSource,
-        // 		amount,
-        // 	} as ClientEffectDiscardEnergyFromCreature;
-        // }
         case EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
           const targetCard = (typeof action.target == 'string') ?
             game.getMetaValue(action.target, action.generatedBy) :
@@ -1326,7 +1329,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
             const zoneContent = zone.cards;
             const actionCards = action.cards;
             if (actionCards) {
-              const cards = zoneContent.filter(card => actionCards.includes(card.id));
+              const cards = zoneContent.filter(card => (actionCards instanceof Array && actionCards.includes(card.id)));
               return {
                 type: action.type,
                 cards,
@@ -1341,7 +1344,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
           const zoneContent = zone.cards;
           const actionCards = action.cards;
           if (actionCards) {
-            const cards = zoneContent.filter(card => actionCards.includes(card.id));
+            const cards = zoneContent.filter(card => (actionCards instanceof Array && actionCards.includes(card.id)));
 
             return {
               type: action.type,
@@ -1397,6 +1400,26 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
             ...action,
             target,
           } as AnyEffectType;
+        }
+        case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+          if (
+            'sourceZone' in game.state.promptParams &&
+            game.state.promptParams.sourceZone &&
+            typeof action.cards == 'object'
+          ) {
+            const sourceZone = game.getZone(game.state.promptParams.sourceZone, game.state.promptParams.sourceZoneOwner);
+            const cards: Partial<Record<ZoneType, CardInGame[]>> = {}
+            const booleanGuard = Boolean as any as <T>(x: T | false | undefined | null | "" | 0) => x is T;
+
+            for (const [targetZone, zoneCards] of Object.entries(action.cards)) {
+              cards[targetZone as ZoneType] = (zoneCards as string[]).map(zoneCardId => sourceZone.byId(zoneCardId)).filter(booleanGuard)
+            }
+
+            return {
+              ...action,
+              cards,
+            } as AnyEffectType;
+          }
         }
       }
       // change target string to CardInGame

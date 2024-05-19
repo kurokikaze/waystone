@@ -56,22 +56,42 @@ function ZonePlayerRelics({
 		power: powerName,
 	});
 
+	const firstShelf = content.slice(0, 6);
+	const secondShelf = content.slice(6);
 	return (
-		<div className={cn('zone', 'zone-relics', zoneId)} data-zone-name={name}>
-			{content.length ? content.map(cardData => {
-				const SelectedCard = (prsAvailable && cardData.card.data.powers) ? CardWithAbilities : CardWithView;
-				return <SelectedCard
-					key={cardData.id}
-					id={cardData.id}
-					card={cardData.card}
-					data={cardData.data}
-					onClick={cardClickHandler}
-					isOnPrompt={isOnUnfilteredPrompt}
-					actionsAvailable={prsAvailable}
-					onAbilityUse={abilityUseHandler}
-					cardStyle={CARD_STYLE_LOCKET}
-				/>;
-			}) : null}
+		<div className={cn('zone', 'zone-relics', zoneId, { 'only-one-shelf': secondShelf.length == 0 })} data-zone-name={name}>
+			{firstShelf.length ? <div className="first-shelf">
+				{firstShelf.map(cardData => {
+					const SelectedCard = (prsAvailable && cardData.card.data.powers) ? CardWithAbilities : CardWithView;
+					return <SelectedCard
+						key={cardData.id}
+						id={cardData.id}
+						card={cardData.card}
+						data={cardData.data}
+						onClick={cardClickHandler}
+						isOnPrompt={isOnUnfilteredPrompt}
+						actionsAvailable={prsAvailable}
+						onAbilityUse={abilityUseHandler}
+						cardStyle={CARD_STYLE_LOCKET}
+					/>;
+				})}
+			</div> : null}
+			{secondShelf.length ? <div className="second-shelf">
+				{secondShelf.map(cardData => {
+					const SelectedCard = (prsAvailable && cardData.card.data.powers) ? CardWithAbilities : CardWithView;
+					return <SelectedCard
+						key={cardData.id}
+						id={cardData.id}
+						card={cardData.card}
+						data={cardData.data}
+						onClick={cardClickHandler}
+						isOnPrompt={isOnUnfilteredPrompt}
+						actionsAvailable={prsAvailable}
+						onAbilityUse={abilityUseHandler}
+						cardStyle={CARD_STYLE_LOCKET}
+					/>;
+				})}
+			</div> : null}
 		</div>
 	);
 }

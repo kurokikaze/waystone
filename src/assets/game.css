@@ -52,11 +52,42 @@ body {
     background-position: -8px -22px;
 }
 
-.zone-relics .cardViewHolder {
-    margin: 0 -6px;
+.zone-relics.opponentRelics .first-shelf {
+    flex-direction: row;
+    margin-left: 10px;
 }
-.zone-relics .cardViewHolder:nth-child(even) {
-    margin-top: -52px;
+
+.zone-relics .first-shelf {
+    display: flex;
+    margin-top: 45px;
+    flex-direction: row-reverse;
+}
+
+.zone-relics .first-shelf .cardViewHolder {
+    margin: -52px -6px
+}
+
+.zone-relics .first-shelf .cardViewHolder:nth-child(even) {
+    margin-top: -24px;
+}
+
+.zone-relics.playerRelics.only-one-shelf {
+    margin-right: 10px;
+}
+
+.zone-relics .second-shelf {
+    height: 90px;
+    max-height: 90px;
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    gap: 52px;
+    box-sizing: border-box;
+    margin-top: 6px;
+}
+
+.zone-relics .second-shelf .cardViewHolder {
+    margin: 0 -6px;
 }
 
 .cardHolder .energyDamage {
@@ -70,6 +101,7 @@ body {
     text-align: center;
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
+
 /* .cardHolder .energyDamage::before {
     content: '-';
     display: inline-block;
@@ -95,6 +127,7 @@ body {
     text-align: center;
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
+
 .cardHolder .energyGain::before {
     content: '+';
     display: inline-block;
@@ -156,6 +189,7 @@ body {
     top: -22px;
     left: -9px;
 }
+
 .zone-creatures .cardHolder.relic img {
     width: auto;
     height: 100px;
@@ -179,6 +213,7 @@ body {
     border-radius: 47px;
     /* overflow: hidden; */
 }
+
 .zone-magi .cutAround {
     width: 94px;
     height: 94px;
@@ -223,10 +258,10 @@ body {
 }
 
 .BaseMessage__close {
-  width: 50px;
-  line-height: 50px;
-  text-align: center;
-  cursor: pointer;
+    width: 50px;
+    line-height: 50px;
+    text-align: center;
+    cursor: pointer;
 }
 
 .zone-magi .cardHolder img {
@@ -293,9 +328,8 @@ body {
     max-width: 380px;
     min-width: 380px;
     min-height: 90px;
-    margin-top: 20px;
-    justify-content: center;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 
 .zone-relics .cardHolder {
@@ -450,7 +484,7 @@ body {
     justify-content: space-between;
 }
 
-.abilityIconHolder .magiCardIcons > div {
+.abilityIconHolder .magiCardIcons>div {
     margin-left: 4px;
 }
 
@@ -467,16 +501,16 @@ body {
     font-size: 3em;
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
     box-shadow:
-    /* The top layer shadow */
-    0 -1px 1px rgba(0,0,0,0.8),
-    /* The second layer */
-    0 -8px 0 -5px #eee,
-    /* The second layer shadow */
-    0 -8px 1px -4px rgba(0,0,0,0.8),
-     /* The third layer */
-    0 -16px 0 -10px #eee,
-    /* The third layer shadow */
-    0 -16px 1px -9px rgba(0,0,0,0.8);
+        /* The top layer shadow */
+        0 -1px 1px rgba(0, 0, 0, 0.8),
+        /* The second layer */
+        0 -8px 0 -5px #eee,
+        /* The second layer shadow */
+        0 -8px 1px -4px rgba(0, 0, 0, 0.8),
+        /* The third layer */
+        0 -16px 0 -10px #eee,
+        /* The third layer shadow */
+        0 -16px 1px -9px rgba(0, 0, 0, 0.8);
 }
 
 .discardCounter {
@@ -507,11 +541,11 @@ body {
 }
 
 .zone.animated .cardHolder.additionalAttacker {
-  box-shadow: 0 0 6px 6px rgb(131, 49, 131);
-  --targetOffsetX: 100px;
-  --targetOffsetY: -120px;
-  animation-duration: 0.6s;
-  animation-name: attack;
+    box-shadow: 0 0 6px 6px rgb(131, 49, 131);
+    --targetOffsetX: 100px;
+    --targetOffsetY: -120px;
+    animation-duration: 0.6s;
+    animation-name: attack;
 }
 
 @keyframes attack {
@@ -529,12 +563,12 @@ body {
 }
 
 .magiDefeated {
-  -webkit-filter: grayscale(100%);
-  -moz-filter: grayscale(100%);
-  -ms-filter: grayscale(100%);
-  -o-filter: grayscale(100%);
-  opacity: 0;
-  transition: all 1s ease-out;
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+    opacity: 0;
+    transition: all 1s ease-out;
 }
 
 .zone-creatures .magiDefeated {
@@ -557,31 +591,31 @@ body {
 }
 
 .region-orothe {
-  background: rgb(166,208,222);
-  background: linear-gradient(145deg, rgba(166,208,222,1) 0%, rgba(35,53,55,1) 100%);
+    background: rgb(166, 208, 222);
+    background: linear-gradient(145deg, rgba(166, 208, 222, 1) 0%, rgba(35, 53, 55, 1) 100%);
 }
 
 .region-arderial {
-  background: rgb(79,78,83);
-  background: linear-gradient(145deg, rgba(79,78,83,1) 0%, rgba(20,13,67,1) 100%);
+    background: rgb(79, 78, 83);
+    background: linear-gradient(145deg, rgba(79, 78, 83, 1) 0%, rgba(20, 13, 67, 1) 100%);
 }
 
 .region-naroom {
-  background: rgb(96,153,60);
-  background: linear-gradient(145deg, rgba(96,153,60,1) 0%, rgba(55,50,28,1) 100%); 
+    background: rgb(96, 153, 60);
+    background: linear-gradient(145deg, rgba(96, 153, 60, 1) 0%, rgba(55, 50, 28, 1) 100%);
 }
 
 .region-cald {
-  background: rgb(197,142,23);
-  background: linear-gradient(145deg, rgba(197,142,23,1) 0%, rgba(87,15,6,1) 100%);
+    background: rgb(197, 142, 23);
+    background: linear-gradient(145deg, rgba(197, 142, 23, 1) 0%, rgba(87, 15, 6, 1) 100%);
 }
 
 .region-underneath {
-  background: rgb(165,158,119);
-  background: linear-gradient(145deg, rgba(165,158,119,1) 0%, rgba(79,79,47,1) 100%);
+    background: rgb(165, 158, 119);
+    background: linear-gradient(145deg, rgba(165, 158, 119, 1) 0%, rgba(79, 79, 47, 1) 100%);
 }
 
 .region-universal {
-  background: rgb(246,243,90);
-  background: linear-gradient(145deg, rgba(246,243,90,1) 0%, rgba(104,72,21,1) 100%);
+    background: rgb(246, 243, 90);
+    background: linear-gradient(145deg, rgba(246, 243, 90, 1) 0%, rgba(104, 72, 21, 1) 100%);
 }

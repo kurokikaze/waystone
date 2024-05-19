@@ -112,11 +112,16 @@ export function getAvailableStartingCards(cards: string[] = [], state: State) {
 export const isPRSAvailable = (state: State) => state.activePlayer == 1 && typeof state.step == 'number' && [STEP_PRS_FIRST, STEP_PRS_SECOND].includes(state.step);
 
 export const getActivePlayerMagi = (state: State) => state.zones.playerActiveMagi[0];
-export const getPromptCards = (state: State) => {
-	return state.promptParams?.cards;
-}
 export const getStartingCards = (state: State) => state.promptParams?.startingCards;
 export const getAvailableCards = (state: State) => state.promptParams?.availableCards;
+export const getCards = (state: State) => state.promptParams?.cards;
+
+export const getPromptParams = (state: State) => state.promptParams;
+export const getPromptZone = (state: State) => state.promptParams?.zone;
+export const getPromptZoneOwner = (state: State) => state.promptParams?.zoneOwner;
+export const getPromptTargetZones = (state: State) => state.promptParams?.targetZones;
+export const getPromptMessage = (state: State) => state.promptMessage;
+export const getPromptType = (state: State) => state.prompt ? state.promptType : null;
 export const getPromptGeneratedBy = (state: State) => state.promptGeneratedBy;
 export const getPromptNumberOfCards = (state: State) => state.promptParams?.numberOfCards;
 export const getPromptMagi = (state: State) => state.promptParams?.magi;
@@ -124,12 +129,10 @@ export const getPromptMin = (state: State) => {
 	return typeof state.promptParams?.min == 'number' ? state.promptParams?.min : 1;
 };
 export const getPromptMax = (state: State) => state.promptParams?.max;
-export const getCards = (state: State) => state.promptParams?.cards;
-export const getPromptParams = (state: State) => state.promptParams;
-export const getPromptZone = (state: State) => state.promptParams?.zone;
-export const getPromptZoneOwner = (state: State) => state.promptParams?.zoneOwner;
-export const getPromptMessage = (state: State) => state.promptMessage;
-export const getPromptType = (state: State) => state.prompt ? state.promptType : null;
+export const getPromptCards = (state: State) => {
+	return state.promptParams?.cards;
+}
+
 export const getMessage = (state: State) => state.message;
 export const getTimer = (state: State) => state.turnTimer;
 export const getTimerSeconds = (state: State) => state.turnSecondsLeft;

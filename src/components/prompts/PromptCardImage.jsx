@@ -2,19 +2,19 @@ import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import {camelCase} from '../../utils';
 
-const CARD_IMAGE = 'card_image';
+export const CARD_IMAGE = 'card_image';
 
 const getCardUrl = (card, useLocket) => {
 	if (!card) {
-		return '/images/cards/cardBack.jpg';
+		return '/cards/cardBack.jpg';
 	} else if (useLocket) {
-		return `/images/masked/${camelCase(card)}.png`;
+		return `/masked/${camelCase(card)}.png`;
 	} else {
-		return `/images/cards/${camelCase(card)}.jpg`;
+		return `/cards/${camelCase(card)}.jpg`;
 	}
 };
 
-const PromptCardImage = ({ card, id, index, onMove }) => {
+const PromptCardImage = ({ card, id, zoneId, index, onMove }) => {
 	const ref = useRef(null);
 	const [{ handlerId }, drop] = useDrop({
 		accept: CARD_IMAGE,
@@ -65,7 +65,7 @@ const PromptCardImage = ({ card, id, index, onMove }) => {
 	const [, drag] = useDrag({
 		type: CARD_IMAGE,
 		item: () => {
-			return { id, index };
+			return { id, index, zoneId };
 		},
 		collect: (monitor) => ({
 			isDragging: monitor.isDragging(),

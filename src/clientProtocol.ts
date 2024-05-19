@@ -1,55 +1,59 @@
 import { ConvertedCard, HiddenConvertedCard } from "moonlands/src/classes/CardInGame"
 import {
   ACTION_ATTACK,
-  ACTION_ENTER_PROMPT,
-  PROMPT_TYPE_NUMBER,
   ACTION_EFFECT,
-  EFFECT_TYPE_START_OF_TURN,
-  EFFECT_TYPE_END_OF_TURN,
-  EFFECT_TYPE_DRAW,
-  EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-  EFFECT_TYPE_MAGI_IS_DEFEATED,
+  ACTION_ENTER_PROMPT,
   ACTION_PASS,
   ACTION_PLAY,
+  ACTION_PLAYER_WINS,
   ACTION_POWER,
   ACTION_RESOLVE_PROMPT,
-  PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-  PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-  PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
-  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
-  EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
+
+  EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+  EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+  EFFECT_TYPE_ATTACH_CARD_TO_CARD,
   EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+  EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+  EFFECT_TYPE_CREATURE_ATTACKS,
+  EFFECT_TYPE_DIE_ROLLED,
+  EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
   EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
   EFFECT_TYPE_DISCARD_RESHUFFLED,
-  EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-  EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-  EFFECT_TYPE_CREATURE_ATTACKS,
-  EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
-  EFFECT_TYPE_MOVE_ENERGY,
-  EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
-  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
-  ACTION_PLAYER_WINS,
-  PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
-  PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-  PROMPT_TYPE_CHOOSE_CARDS,
-  EFFECT_TYPE_PLAY_SPELL,
-  EFFECT_TYPE_DIE_ROLLED,
   EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-  PROMPT_TYPE_POWER_ON_MAGI,
-  PROMPT_TYPE_ALTERNATIVE,
-  PROMPT_TYPE_PAYMENT_SOURCE,
-  TYPE_RELIC,
-  TYPE_CREATURE,
-  TYPE_SPELL,
-  EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, 
+  EFFECT_TYPE_DRAW,
+  EFFECT_TYPE_END_OF_TURN,
+  EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
-  EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
-  EFFECT_TYPE_ATTACH_CARD_TO_CARD,
-  PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES
+  EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+  EFFECT_TYPE_MAGI_IS_DEFEATED,
+  EFFECT_TYPE_MOVE_ENERGY,
+  EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+  EFFECT_TYPE_PLAY_SPELL,
+  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+  EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
+  EFFECT_TYPE_START_OF_TURN,
+
+  PROMPT_TYPE_ALTERNATIVE,
+  PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+  PROMPT_TYPE_CHOOSE_CARDS,
+  PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+  PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+  PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+  PROMPT_TYPE_NUMBER,
+  PROMPT_TYPE_PAYMENT_SOURCE,
+  PROMPT_TYPE_POWER_ON_MAGI,
+  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+  PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+
+  TYPE_CREATURE,
+  TYPE_RELIC,
+  TYPE_SPELL,
 } from "moonlands/src/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/src/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/src/types/common"
@@ -120,19 +124,28 @@ export type ClientEnterPromptRearrangeCardsOfZone = ClientEnterPromptInterface &
   numberOfCards: number,
 }
 
+export type ClientEnterPromptDistributeCardsInZones = ClientEnterPromptInterface & {
+  promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+  sourceZone: ZoneType,
+  targetZones: ZoneType[],
+  cards: ConvertedCard[],
+  zoneOwner: number,
+  numberOfCards: number,
+}
+
 export type ClientEnterPromptAnyCreatureExceptSource = ClientEnterPromptInterface & {
   promptType: typeof PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
   source: ConvertedCard,
 }
 
 export type ClientEnterPromptChooseCards = ClientEnterPromptInterface & {
-    promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
-    promptParams: {
-      availableCards: string[],
-      startingCards: string[],
-    },
-    generatedBy: string,
-    player: number,
+  promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
+  promptParams: {
+    availableCards: string[],
+    startingCards: string[],
+  },
+  generatedBy: string,
+  player: number,
 }
 
 export type ClientEnterPromptSingleCreatureFiltered = ClientEnterPromptInterface & {
@@ -174,6 +187,7 @@ export type ClientEnterPromptAction = ClientEnterPromptChooseNCardsFromZone |
   ClientEnterPromptAlternatives |
   ClientEnterPromptPaymentSource |
   ClientEnterPromptDistributeDamageOnCreatures |
+  ClientEnterPromptDistributeCardsInZones |
   ClientEnterPromptPowerOnMagi;
 
 export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
@@ -203,7 +217,7 @@ export type ClientEffectAction = ClientEffectRearrangeEnergyOnCreatures |
   ClientEffectCreatureAttacks |
   ClientAttachCardToCard;
 
-  export type ClientEffectPlaySpell = {
+export type ClientEffectPlaySpell = {
   type: typeof ACTION_EFFECT
   effectType: typeof EFFECT_TYPE_PLAY_SPELL
   card: ConvertedCard
@@ -242,7 +256,7 @@ export type ClientEffectCreatureAttacks = {
 export type ClientEffectRearrangeEnergyOnCreatures = {
   type: typeof ACTION_EFFECT,
   effectType: typeof EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
-	energyOnCreatures: Record<string, number>;
+  energyOnCreatures: Record<string, number>;
 }
 
 export type ClientEffectReturnCreatureReturningEnergy = {
@@ -308,26 +322,6 @@ export type ClientAttachCardToCard = {
   player: number
   generatedBy: string
 }
-
-// export type ClientEffectMoveCardsBetweenZones = {
-//   type: typeof ACTION_EFFECT,
-//   effectType: typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
-//   sourceZone: ZoneType,
-//   destinationZone: ZoneType,
-//   target: (ConvertedCardMinimal | HiddenConvertedCard)[],
-//   generatedBy: string,
-//   player: number,
-// }
-
-// export type ClientEffectMoveCardBetweenZones = {
-//   type: typeof ACTION_EFFECT,
-//   effectType: typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-//   sourceZone: ZoneType,
-//   destinationZone: ZoneType,
-//   target: ConvertedCardMinimal | HiddenConvertedCard,
-//   generatedBy: string,
-//   player: number,
-// }
 
 export type ClientEffectCardMovedBetweenZones = {
   type: typeof ACTION_EFFECT,
@@ -532,8 +526,9 @@ export type ClientResolvePromptAction = {
   alternative?: string,
   zoneOwner?: number,
   useEffect?: boolean,
-  cards?: string[],
+  cards?: string[] | Partial<Record<string, string[]>>, // Second one is for DistributeCardsInZones
   power?: string,
+  generatedBy?: string
 }
 
 type CommonAction = ClientAttackAction | ClientEnterPromptAction | ClientEffectAction
