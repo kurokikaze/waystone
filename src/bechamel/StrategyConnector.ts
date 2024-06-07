@@ -92,7 +92,7 @@ export class StrategyConnector {
         if (action.type == 'display/status') {
           this.io.emit('clientAction', {
             type: 'display/dump',
-            state: JSON.stringify(this.gameState.state),
+            state: JSON.stringify(this.strategy.getHistory()),
           })
         }
       }

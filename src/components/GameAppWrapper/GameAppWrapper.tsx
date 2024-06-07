@@ -28,9 +28,8 @@ const store = createStore(
   ),
 );
 
-
 var emptyEngineConnector: EngineConnector = {
-  emit: (_action: C2SAction) => {},
+  emit: (_action: C2SAction) => { },
 };
 
 type GameAppWrapperProps = {
@@ -50,13 +49,13 @@ export const GameAppWrapper = ({
 
   const engineRef = useRef<Worker>();
   const botRef = useRef<Worker>();
-  const breakRef = useRef<Function>(() => {});
+  const breakRef = useRef<Function>(() => { });
 
   useEffect(() => {
     try {
       appWindow.setResizable(false);
       appWindow.setSize(new LogicalSize(1111, 660));
-    } catch(e) {
+    } catch (e) {
 
     }
     if (!botRef.current) {
@@ -76,7 +75,7 @@ export const GameAppWrapper = ({
             if (data.for === 1) {
               console.log('Setting the initial state');
               console.dir(message.data.state);
-              store.dispatch({type: 'setInitialState', state: enrichState(message.data.state, 1)});
+              store.dispatch({ type: 'setInitialState', state: enrichState(message.data.state, 1) });
               fullLog.push(JSON.stringify(message.data));
             } else if (botRef.current) {
               console.log('Sending initial state to the bot')
@@ -105,7 +104,7 @@ export const GameAppWrapper = ({
         }
 
         engine.onmessage = onmessage;
-      });      
+      });
 
       actionsObservableRef.current = actionsObservable;
       // console.log('Creating the break observable');
@@ -118,7 +117,7 @@ export const GameAppWrapper = ({
       });
       const delayedActions = addAnimations(actionsObservable, breakObservable, store, true);
 
-	    delayedActions.subscribe({
+      delayedActions.subscribe({
         next: (transformedAction) => {
           store.dispatch(transformedAction);
         },
@@ -133,10 +132,12 @@ export const GameAppWrapper = ({
       // window.engine = engine;
       engineRef.current = engine;
       const realEngineConnector = {
-        emit: (action: any) => engine.postMessage({
-          ...action,
-          player: 1,
-        }),
+        emit: (action: any) => {
+          engine.postMessage({
+            ...action,
+            player: 1,
+          })
+        },
       };
       setEngineConnector(realEngineConnector);
 
@@ -151,6 +152,8 @@ export const GameAppWrapper = ({
           } else if (action.data && 'botState' in action.data) {
             // @ts-ignore
             window.lastBotState = JSON.parse(action.data.botState);
+          } else if (action.data && action.data.type == 'display/dump') {
+            console.dir(action.data.state)
           }
         }
         console.log('Bechamel connected to the engine');

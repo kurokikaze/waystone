@@ -250,11 +250,13 @@ export class GameState {
               if (card.data.controller !== this.playerId || card.card.type !== TYPE_CREATURE) {
                 return false;
               }
+              break;
             }
             case RESTRICTION_ENERGY_EQUALS: {
               if (card.data.energy !== restriction.value) {
                 return false;
               }
+              break;
             }
           }
         }

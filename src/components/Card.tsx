@@ -1,5 +1,5 @@
 /* global window, document */
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useMemo } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { gsap } from 'gsap';
 import cn from 'classnames';
@@ -138,7 +138,8 @@ function Card({
 		}
 	}, [attacker, attackNumber]);
 
-	const energyChange = useSelector(getEnergyChange(id));
+	const energyChangeSelector = useMemo(() => getEnergyChange(id), [id])
+	const energyChange = useSelector(energyChangeSelector);
 	const energyEffectsShown = useSelector((state: State) => state.energyAnimationsShown);
 
 	const damage: EnergyLossRecord[] = []

@@ -16,7 +16,7 @@ import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
 import { createState, getStateScore } from './simulationUtils'
 import { HashBuilder } from './HashBuilder';
-import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
+import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SerializedClientState, SimulationEntity, StateRepresentation } from '../types';
 import { ActionExtractor } from './ActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/src/const';
@@ -44,6 +44,12 @@ type Leaf = {
   isPrompt: boolean
 }
 
+type HistoryEntry = {
+  state: string
+  action: C2SAction
+  fromHold: boolean
+}
+
 export class SimulationStrategy implements Strategy {
   // public static deckId = '62ed47ae99dd0db04e9f657b' // Online deck
   // public static deckId = '5f60e45e11283f7c98d9259b' // Local deck (Naroom)
@@ -61,6 +67,11 @@ export class SimulationStrategy implements Strategy {
   private playerId?: number
   private gameState?: GameState
   private hashBuilder: HashBuilder
+
+  private history: HistoryEntry[] = []
+  private historyLength = 15
+  private actionCameFromHold = false
+
   protected graph: string = ''
 
   protected actionsOnHold: C2SActionOnHold[] = []
@@ -429,7 +440,8 @@ export class SimulationStrategy implements Strategy {
   private fixCardPromptResolution(action: C2SAction): C2SAction {
     const promptAvailableCards = this.gameState?.state.promptParams.cards?.map(({ id }) => id);
 
-    if ('cards' in action && action.cards && action.cards.some(card => !promptAvailableCards?.includes(card as unknown as string))) {
+    // @ts-ignore
+    if ('cards' in action && action.cards && action.cards instanceof Array && action.cards.some((card: string) => !promptAvailableCards?.includes(card as unknown as string))) {
       const availableCardPairs: Record<string, string[]> = {}
       // console.dir(this.gameState?.state.promptParams.cards)
       for (let card of this.gameState?.state.promptParams.cards!) {
@@ -461,6 +473,28 @@ export class SimulationStrategy implements Strategy {
   }
 
   public requestAction(): C2SAction {
+    const action = this.generateAction();
+    if (this.gameState) {
+      const historyEntry: HistoryEntry = {
+        state: JSON.stringify(this.gameState.state),
+        action,
+        fromHold: this.actionCameFromHold,
+      }
+      this.history.push(historyEntry)
+      if (this.history.length > this.historyLength) {
+        this.history = this.history.slice(0, this.historyLength)
+      }
+    }
+    return action;
+  }
+
+  public requestHistory(): HistoryEntry[] {
+    return this.history;
+  }
+
+  private generateAction(): C2SAction {
+    this.actionCameFromHold = false
+
     if (this.shouldClearHeldActions()) {
       this.actionsOnHold = []
     }
@@ -470,6 +504,7 @@ export class SimulationStrategy implements Strategy {
     }
 
     if (this.actionsOnHold.length) {
+      this.actionCameFromHold = true
       const { action, hash } = this.actionsOnHold.shift()!
 
       // const testSim = createState(
@@ -497,7 +532,7 @@ export class SimulationStrategy implements Strategy {
 
       if (action.type == ACTION_RESOLVE_PROMPT &&
         this.gameState.getPromptType() == PROMPT_TYPE_PAYMENT_SOURCE &&
-        !this.gameState.state.promptParams.cards?.some(({id}) => id == action.target)
+        !this.gameState.state.promptParams.cards?.some(({ id }) => id == action.target)
       ) {
         // console.log(`Target is ${action.target}`)
         // console.dir(this.gameState.state.promptParams.cards)
