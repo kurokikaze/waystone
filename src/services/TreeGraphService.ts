@@ -1,4 +1,4 @@
-import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/api/fs"
+import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { booleanGuard } from "../bechamel/strategies/simulationUtils";
 import { ClientMessage } from "../clientProtocol";
 import testReplay from './testReplay.json';

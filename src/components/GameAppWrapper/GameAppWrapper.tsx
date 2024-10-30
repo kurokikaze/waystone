@@ -1,4 +1,5 @@
-import { appWindow, LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { LogicalSize } from "@tauri-apps/api/dpi";
 import { ACTION_PLAYER_WINS } from "moonlands";
 import { useRef, useEffect, useState } from "react";
 import { Provider } from "react-redux"
@@ -17,6 +18,16 @@ import GameApp from "../GameApp/GameApp"
 import Worker from "../../worker/worker?worker"
 import BotWorker from "../../worker/botWorker?worker"
 import { ReplayLogService } from "../../services/ReplayLogService";
+
+function isTauri() {
+  return Boolean(
+    typeof window !== 'undefined' &&
+    window !== undefined &&
+    // @ts-ignore
+    window.__TAURI_IPC__ !== undefined
+  )
+}
+const appWindow = isTauri() ? getCurrentWebviewWindow() : {}
 
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(
@@ -53,8 +64,12 @@ export const GameAppWrapper = ({
 
   useEffect(() => {
     try {
-      appWindow.setResizable(false);
-      appWindow.setSize(new LogicalSize(1111, 660));
+      if (isTauri()) {
+        // @ts-ignore
+        appWindow.setResizable(false);
+        // @ts-ignore
+        appWindow.setSize(new LogicalSize(1111, 660));
+      }
     } catch (e) {
 
     }

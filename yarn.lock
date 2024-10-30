@@ -838,76 +838,45 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
-"@tauri-apps/api@^1.2.0":
-  version "1.5.5"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/api/-/api-1.5.5.tgz"
-  integrity sha512-Jgwj8BK/9YXZNzcqVDk1Al7+u5V9sWrZ8MhV41A1AKgJaicHuqlkc/qdx06sNDXvc+qprTPpBAaqnt891qOUIQ==
+"@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.0.3":
+  version "2.0.3"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/api/-/api-2.0.3.tgz"
+  integrity sha512-840qk6n8rbXBXMA5/aAgTYsg5JAubKO0nXw5wf7IzGnUuYKGbB4oFBIZtXOIWy+E0kNTDI3qhq5iqsoMJfwp8g==
 
-"@tauri-apps/cli-darwin-arm64@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-1.5.14.tgz"
-  integrity sha512-lxoSOp3KKSqzHJa7iT32dukPGMlfsTuja1xXSgwR8o/fqzpYJY7FY/3ZxesP8HR66FcK+vtqa//HNqeOQ0mHkA==
+"@tauri-apps/cli-win32-x64-msvc@2.0.4":
+  version "2.0.4"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.0.4.tgz"
+  integrity sha512-GVaiI3KWRFLomjJmApHqihhYlkJ+7FqhumhVfBO6Z2tWzZjQyVQgTdNp0kYEuW2WoAYEj0dKY6qd4YM33xYcUA==
 
-"@tauri-apps/cli-darwin-x64@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-1.5.14.tgz"
-  integrity sha512-EXSwN1n5spfG8FoXuyc90ACtmDJXzaZ1gxyENaq9xEpQoo7j/Q1vb6qXxmr6azKr8zmqY4h08ZFbv3exh93xJg==
-
-"@tauri-apps/cli-linux-arm-gnueabihf@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-1.5.14.tgz"
-  integrity sha512-Yb8BH/KYR7Tl+de40sZPfrqbhcU3Jlu+UPIrnXt05sjn48xqIps74Xjz8zzVp0TuHxUp8FmIGtCVhQgsbrsvvg==
-
-"@tauri-apps/cli-linux-arm64-gnu@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-1.5.14.tgz"
-  integrity sha512-QrKHP4gRaHiup478rPBZ+BmNd88yze9jMmheoNy9mN1K/aECRmTHO+tWhsxv5moFHZzRhO0QDWxxvTtiaPXaGg==
-
-"@tauri-apps/cli-linux-arm64-musl@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-1.5.14.tgz"
-  integrity sha512-Hb1C1VMxmUcyGjW/K/INKF87zzzgLEVRmWZZnQd7M1P4uue4xPyIwUELSdX12Z2jREPgmLW4AXPD0m6wsNu7iw==
-
-"@tauri-apps/cli-linux-x64-gnu@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-linux-x64-gnu/-/cli-linux-x64-gnu-1.5.14.tgz"
-  integrity sha512-kD9v/UwPDuhIgq2TJj/s2/7rqk+vmExVV6xHPKI8vVbIvlNAOZqmx3fpxjej1241vhJ/piGd/m6q6YMWGsL0oQ==
-
-"@tauri-apps/cli-linux-x64-musl@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-1.5.14.tgz"
-  integrity sha512-204Drgg9Zx0+THKndqASz4+iPCwqA3gQVF9C0CDIArNXrjPyJjVvW8VP5CHiZYaTNWxlz/ltyxluM6UFWbXNFw==
-
-"@tauri-apps/cli-win32-arm64-msvc@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-1.5.14.tgz"
-  integrity sha512-sqPSni2MnWNCm+8YZnLdWCclxfSHaYqKuPFSz8q7Tn1G1m/cA9gyPoC1G0esHftY7bu/ZM5lB4kM3I4U0KlLiA==
-
-"@tauri-apps/cli-win32-ia32-msvc@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-1.5.14.tgz"
-  integrity sha512-8xN8W0zTs8oFsQmvYLxHFeqhzVI7oTaPK1xQMc5gbpFP45jN41c21aCXfjnvzT+h90EfCHUF9EWj2HTEJSb7Iw==
-
-"@tauri-apps/cli-win32-x64-msvc@1.5.14":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-1.5.14.tgz"
-  integrity sha512-U0slee5tNM2PYECBpPHavLSwkT3szGMZ+qhcikQQbDan84bQdLn/kHWjyXOgLJs4KSve4+KxcrN+AVqj0VyHnw==
-
-"@tauri-apps/cli@^1.2.2":
-  version "1.5.14"
-  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli/-/cli-1.5.14.tgz"
-  integrity sha512-JOSMKymlg116UdEXSj69eg5p1OtZnQkUE0qIGbtNDO1sk3X/KgBN6+oHBW0BzPStp/W0AjBgrMWCqjHPwEpOug==
+"@tauri-apps/cli@^2.0.4":
+  version "2.0.4"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/cli/-/cli-2.0.4.tgz"
+  integrity sha512-Hl9eFXz+O366+6su9PfaSzu2EJdFe1p8K8ghkWmi40dz8VmSE7vsMTaOStD0I71ckSOkh2ICDX7FQTBgjlpjWw==
   optionalDependencies:
-    "@tauri-apps/cli-darwin-arm64" "1.5.14"
-    "@tauri-apps/cli-darwin-x64" "1.5.14"
-    "@tauri-apps/cli-linux-arm-gnueabihf" "1.5.14"
-    "@tauri-apps/cli-linux-arm64-gnu" "1.5.14"
-    "@tauri-apps/cli-linux-arm64-musl" "1.5.14"
-    "@tauri-apps/cli-linux-x64-gnu" "1.5.14"
-    "@tauri-apps/cli-linux-x64-musl" "1.5.14"
-    "@tauri-apps/cli-win32-arm64-msvc" "1.5.14"
-    "@tauri-apps/cli-win32-ia32-msvc" "1.5.14"
-    "@tauri-apps/cli-win32-x64-msvc" "1.5.14"
+    "@tauri-apps/cli-darwin-arm64" "2.0.4"
+    "@tauri-apps/cli-darwin-x64" "2.0.4"
+    "@tauri-apps/cli-linux-arm-gnueabihf" "2.0.4"
+    "@tauri-apps/cli-linux-arm64-gnu" "2.0.4"
+    "@tauri-apps/cli-linux-arm64-musl" "2.0.4"
+    "@tauri-apps/cli-linux-x64-gnu" "2.0.4"
+    "@tauri-apps/cli-linux-x64-musl" "2.0.4"
+    "@tauri-apps/cli-win32-arm64-msvc" "2.0.4"
+    "@tauri-apps/cli-win32-ia32-msvc" "2.0.4"
+    "@tauri-apps/cli-win32-x64-msvc" "2.0.4"
+
+"@tauri-apps/plugin-fs@^2.0.1":
+  version "2.0.1"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/plugin-fs/-/plugin-fs-2.0.1.tgz"
+  integrity sha512-PkeZG2WAob9Xpmr66aPvj+McDVgFjV2a7YBzYVZjiCvbGeMs6Yk09tlXhCe3EyZdT/pwWMSi8lXUace+hlsjsw==
+  dependencies:
+    "@tauri-apps/api" "^2.0.0"
+
+"@tauri-apps/plugin-shell@^2.0.1":
+  version "2.0.1"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/plugin-shell/-/plugin-shell-2.0.1.tgz"
+  integrity sha512-akU1b77sw3qHiynrK0s930y8zKmcdrSD60htjH+mFZqv5WaakZA/XxHR3/sF1nNv9Mgmt/Shls37HwnOr00aSw==
+  dependencies:
+    "@tauri-apps/api" "^2.0.0"
 
 "@types/babel__core@^7.1.14":
   version "7.20.5"

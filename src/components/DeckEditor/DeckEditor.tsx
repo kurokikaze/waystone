@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { appWindow, LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { LogicalSize } from "@tauri-apps/api/dpi"
 
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
@@ -22,18 +23,27 @@ import { Region } from 'moonlands/src/types';
 import { Tooltip } from 'antd';
 import { MAX_COPIES_IN_DECK } from '../../const';
 
+function isTauri() {
+	return Boolean(
+		typeof window !== 'undefined' &&
+		window !== undefined &&
+		// @ts-ignore
+		window.__TAURI_IPC__ !== undefined
+	)
+}
+
 export type DeckType = {
-  cards: string[]
-  name: string
+	cards: string[]
+	name: string
 }
 
 type DeckEditorProps = {
-  deckContents: DeckType
-  onSave: (deck: string[]) => void
-  onClose: () => void
+	deckContents: DeckType
+	onSave: (deck: string[]) => void
+	onClose: () => void
 }
 
-const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
+const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [savingNew, setSavingNew] = useState(false);
@@ -41,12 +51,15 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 	const [filter, setFilter] = useState<CardFilterType>(defaultFilter);
 	const [search, setSearch] = useState<string>('');
 
-	const [magiEditor, setMagiEditor] = useState<number|null>(null);
+	const [magiEditor, setMagiEditor] = useState<number | null>(null);
 
-  useEffect(() => {
-    appWindow.setResizable(false);
-    appWindow.setSize(new LogicalSize(1080, 816));
-  }, []);
+	useEffect(() => {
+		if (isTauri()) {
+			const appWindow = getCurrentWebviewWindow()
+			appWindow.setResizable(false);
+			appWindow.setSize(new LogicalSize(1080, 816));
+		}
+	}, []);
 
 	const handleSave = useCallback(() => {
 		setSaving(true);
@@ -64,7 +77,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 		}
 	}, [deck]);
 
-	const addToDeck = useCallback((card: string)  => {
+	const addToDeck = useCallback((card: string) => {
 		setDeck({
 			...deck,
 			cards: [...deck.cards, card],
@@ -74,7 +87,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 	const setMagi = useCallback((card: string) => {
 		const cards = [...deck.cards];
 		if (typeof magiEditor == 'number') {
-		cards[magiEditor] = card;
+			cards[magiEditor] = card;
 			setDeck({
 				...deck,
 				cards,
@@ -83,36 +96,36 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 		setMagiEditor(null);
 	}, [deck, magiEditor]);
 
-  const onClearRegions = useCallback(() => {
-    const fullCards = deck.cards.map(card => byName(card));
-    const magi = fullCards.filter(card => card?.type === TYPE_MAGI)
-    const magiRegions = new Set<Region>([...magi.map(card => card?.region || REGION_ARDERIAL), REGION_UNIVERSAL])
-    const newCards: string[] = []
-    magi.forEach(card => {
-      if (card) {
-        newCards.push(card.name)
-      }
-    })
-    fullCards.forEach(card => {
-      if (card?.type !== TYPE_MAGI) {
-        if (card?.region && magiRegions.has(card?.region)) {
-          newCards.push(card.name)
-        }
-      }
-    })
-    setDeck({
-      ...deck, 
-      cards: newCards,
-    })
-  }, [
-    deck,
-  ])
+	const onClearRegions = useCallback(() => {
+		const fullCards = deck.cards.map(card => byName(card));
+		const magi = fullCards.filter(card => card?.type === TYPE_MAGI)
+		const magiRegions = new Set<Region>([...magi.map(card => card?.region || REGION_ARDERIAL), REGION_UNIVERSAL])
+		const newCards: string[] = []
+		magi.forEach(card => {
+			if (card) {
+				newCards.push(card.name)
+			}
+		})
+		fullCards.forEach(card => {
+			if (card?.type !== TYPE_MAGI) {
+				if (card?.region && magiRegions.has(card?.region)) {
+					newCards.push(card.name)
+				}
+			}
+		})
+		setDeck({
+			...deck,
+			cards: newCards,
+		})
+	}, [
+		deck,
+	])
 
 	const filterFunction = useCallback(
 		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && filter.types.includes(card.type),
 		[filter, search]
 	);
-	
+
 	const magiFilterFunction = useCallback(
 		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && card.type === TYPE_MAGI,
 		[filter, search]
@@ -123,7 +136,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 	}, [deck]);
 
 	const canSelectMagi = useCallback((card: string) => {
-    // @ts-ignore
+		// @ts-ignore
 		return (deck.cards[0] !== card && deck.cards[1] !== card && deck.cards[2] !== card) || deck.cards[magiEditor] === card;
 	}, [deck, magiEditor]);
 
@@ -145,7 +158,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 							{magiEditor === null && <div className='allCardsContainer'>
 								<div className='allCards'>
 									{cards.filter(filterFunction).map((card) => <div key={card.name} className='cardSlot'>
-										<div className={cn('cardImage', {'canAdd': canAdd(card.name)})}>
+										<div className={cn('cardImage', { 'canAdd': canAdd(card.name) })}>
 											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
 										</div>
 										{canAdd(card.name) && <div onClick={() => addToDeck(card.name)} className='addIcon'><Add size={50} fillColor={'#3f7d20'} /></div>}
@@ -155,7 +168,7 @@ const DeckEditor = ({deckContents, onSave, onClose}: DeckEditorProps) => {
 							{!(magiEditor === null) && <div className='allCardsContainer'>
 								<div className='allCards'>
 									{cards.filter(magiFilterFunction).map((card) => <div key={card.name} className='cardSlot'>
-										<div className={cn('cardImage', {'canAdd': canSelectMagi(card.name)})}>
+										<div className={cn('cardImage', { 'canAdd': canSelectMagi(card.name) })}>
 											<img src={`/cards/${camelCase(card.name)}.jpg`} alt={card.name} />
 										</div>
 										{canSelectMagi(card.name) && <div onClick={() => setMagi(card.name)} className='addIcon'><Add size={50} fillColor={'#3f7d20'} /></div>}

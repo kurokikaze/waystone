@@ -21,6 +21,7 @@ type AppMode = typeof MODE_BASE | typeof MODE_EDITOR | typeof MODE_GAME | typeof
 
 function App() {
   const [mode, setMode] = useState<AppMode>(MODE_BASE);
+  const [networkMode, setNetworkMode] = useState<Boolean>(false);
 
   const [loading, setLoading] = useState(true)
   const [editedDeck, setEditedDeck] = useState<DeckType>({name: '', cards: []})
@@ -95,6 +96,11 @@ function App() {
     setMode(MODE_GAME);
   }, [])
 
+  const handleConnectToGame = useCallback(() => {
+    setNetworkMode(true);
+    setMode(MODE_GAME);
+  }, [])
+
   const handleOpenReplays = useCallback(() => {
     setMode(MODE_REPLAY_LIST);
   }, [])
@@ -125,6 +131,7 @@ function App() {
         <p><Button disabled={loading} onClick={handleEditPlayerDeck}>Edit player deck</Button></p>
         <p><Button disabled={loading} onClick={handleEditOpponentDeck}>Edit opponent deck</Button></p>
         <p><Button disabled={loading} onClick={handleStartGame} type="primary">Start game</Button></p>
+        <p><Button disabled={loading} onClick={handleConnectToGame} type="primary">Start network game</Button></p>
         <p><Button disabled={loading} onClick={handleOpenReplays}>Replays</Button></p>
       </div> : null}
       {mode === MODE_EDITOR ? <DeckEditor deckContents={editedDeck} onSave={handleSave} onClose={handleReturnToBase} /> : null}

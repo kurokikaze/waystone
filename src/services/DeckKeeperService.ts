@@ -1,4 +1,4 @@
-import { BaseDirectory, readTextFile, writeTextFile, createDir, exists } from '@tauri-apps/api/fs';
+import { BaseDirectory, readTextFile, writeTextFile, create, exists } from '@tauri-apps/plugin-fs';
 import { byName } from 'moonlands/src/cards';
 import { TYPE_MAGI } from 'moonlands/src/const';
 import DeckEditor from '../components/DeckEditor/DeckEditor';
@@ -204,16 +204,16 @@ export class DeckKeeperService {
     if (!this.isTauri()) {
       return;
     }
-    const dirExists = await exists(DeckKeeperService.DECKS_DIR, { dir: BaseDirectory.AppConfig });
+    const dirExists = await exists(DeckKeeperService.DECKS_DIR, { baseDir: BaseDirectory.AppConfig });
     if (!dirExists) {
-      await createDir(DeckKeeperService.DECKS_DIR, { dir: BaseDirectory.AppConfig, recursive: true });
+      await create(DeckKeeperService.DECKS_DIR, { baseDir: BaseDirectory.AppConfig });
     }
     await this.createDeckFileIfNotExists('playerDeck', DeckKeeperService.defaultPlayerDeck);
     await this.createDeckFileIfNotExists('opponentDeck', DeckKeeperService.defaultOpponentDeck);
   }
 
   private async createDeckFileIfNotExists(deckFileName: string, deckContents: string[]) {
-    const deckFileExists = await exists(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, { dir: BaseDirectory.AppConfig });
+    const deckFileExists = await exists(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, { baseDir: BaseDirectory.AppConfig });
     if (!deckFileExists) {
       await this.saveDeck(deckFileName, deckContents)
     }
@@ -227,7 +227,7 @@ export class DeckKeeperService {
       };
     }
     const result: DecksResult = { player: [], opponent: [] }
-    const playerDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`, { dir: BaseDirectory.AppConfig });
+    const playerDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`, { baseDir: BaseDirectory.AppConfig });
     const playerDeckCards: string[] = playerDeckContents.split("\n");
     if (
       playerDeckCards.length === 43 &&
@@ -240,7 +240,7 @@ export class DeckKeeperService {
       result.player = DeckKeeperService.defaultPlayerDeck
     }
 
-    const opponentDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\opponentDeck.txt`, { dir: BaseDirectory.AppConfig });
+    const opponentDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\opponentDeck.txt`, { baseDir: BaseDirectory.AppConfig });
     const opponentDeckCards: string[] = opponentDeckContents.split("\n");
     if (
       opponentDeckCards.length === 43 &&
@@ -257,7 +257,7 @@ export class DeckKeeperService {
 
   public async saveDeck(deckFileName: string, deckContents: string[]) {
     if (this.isTauri()) {
-      await writeTextFile(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, deckContents.join("\n"), { dir: BaseDirectory.AppConfig })
+      await writeTextFile(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, deckContents.join("\n"), { baseDir: BaseDirectory.AppConfig })
     }
   }
 }
