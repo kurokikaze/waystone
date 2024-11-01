@@ -12,20 +12,12 @@ import addAnimations from "../../addAnimations";
 import { C2SAction, ClientAction, ClientMessage } from "../../clientProtocol";
 import { defaultState } from "../../reducers/reducer";
 import { EngineConnector } from "../../types";
-import { enrichState } from "../../utils";
+import { enrichState, isTauri } from "../../utils";
 import rootReducer from '../../reducers';
 import GameApp from "../GameApp/GameApp"
 import { ReplayLogService } from "../../services/ReplayLogService";
 
 import './style.css';
-function isTauri() {
-	return Boolean(
-		typeof window !== 'undefined' &&
-		window !== undefined &&
-		// @ts-ignore
-		window.__TAURI_IPC__ !== undefined
-	)
-}
 
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(

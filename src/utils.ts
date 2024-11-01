@@ -54,3 +54,12 @@ export function enrichState(state: State, playerId: number): State {
 	}
 	return result;
 }
+
+export function isTauri() {
+    return Boolean(
+      typeof window !== 'undefined' &&
+      window !== undefined &&
+      // @ts-ignore
+      window.__TAURI_IPC__ !== undefined
+    )
+  }

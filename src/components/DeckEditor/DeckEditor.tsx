@@ -15,27 +15,14 @@ import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/src/cons
 import Add from '../icons/Add';
 import CardFilter, { CardFilterType, defaultFilter } from '../CardFilter/CardFilter.jsx';
 import DeckView from '../DeckView/DeckView';
-import { camelCase } from '../../utils';
+import { camelCase, isTauri } from '../../utils';
 
 import './style.css';
 import Card from 'moonlands/src/classes/Card';
 import { Region } from 'moonlands/src/types';
 import { Tooltip } from 'antd';
 import { MAX_COPIES_IN_DECK } from '../../const';
-
-function isTauri() {
-	return Boolean(
-		typeof window !== 'undefined' &&
-		window !== undefined &&
-		// @ts-ignore
-		window.__TAURI_IPC__ !== undefined
-	)
-}
-
-export type DeckType = {
-	cards: string[]
-	name: string
-}
+import { DeckType } from '../../types';
 
 type DeckEditorProps = {
 	deckContents: DeckType

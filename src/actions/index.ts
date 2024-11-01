@@ -27,6 +27,10 @@ export const MARK_ENERGY_ANIMATION_AS_DONE = 'actions/mark_energy_animation_as_d
 export const MINUS_ENERGY_ON_CREATURE = 'actions/minus_energy_on_creature';
 export const PLUS_ENERGY_ON_CREATURE = 'actions/plus_energy_on_creature';
 
+export const ACCEPT_CHALLENGE = 'actions/challenges/accept'
+export const CREATE_CHALLENGE = 'actions/challenges/create'
+export const CANCEL_CHALLENGE = 'actions/challenge/cancel'
+
 export const showPowerName = (id: string, powerName: string) => ({
   type: SHOW_POWER_NAME as typeof SHOW_POWER_NAME,
   id,
@@ -142,6 +146,21 @@ export const startCreatureDiscardAnimation = (id: string) => ({
 export const markEnergyAnimationDone = (id: number) => ({
   type: MARK_ENERGY_ANIMATION_AS_DONE as typeof MARK_ENERGY_ANIMATION_AS_DONE,
   id,
+})
+
+export const acceptChallenge = (challengeId: string) => ({
+  type: ACCEPT_CHALLENGE as typeof ACCEPT_CHALLENGE,
+  challengeId,
+})
+
+export const createChallenge = (challengeName: string, deck: string[]) => ({
+  type: CREATE_CHALLENGE as typeof CREATE_CHALLENGE,
+  challengeName,
+  deck,
+})
+
+export const cancelChallenge = () => ({
+  type: CANCEL_CHALLENGE as typeof CANCEL_CHALLENGE
 })
 
 export type StartPowerAnimationAction = ReturnType<typeof startPowerAnimation>

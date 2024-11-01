@@ -67,6 +67,13 @@ export type EnergyLossRecord = {
   id: number;
 }
 
+export type ChallengeType = {
+  id: string
+  name: string
+  created: Date
+  own: boolean
+}
+
 export type State = {
   zones: {
     playerHand: ConvertedCard[],
@@ -110,6 +117,9 @@ export type State = {
   promptAvailableCards: string[] | null,
   lastPositions: LastPositionsMap,
   energyAnimationsShown: Set<number>,
+  challenges: {
+    challenges: ChallengeType[],
+  }
 }
 
 export type DraggedItem = {
@@ -141,4 +151,9 @@ export type EnrichedCard = {
   data: InGameData & { affectedBy?: AffectedByType[] } // List of ids of the static abilities the card is affected by
   card: Card
   originalCard: Card
+}
+
+export type DeckType = {
+	cards: string[]
+	name: string
 }

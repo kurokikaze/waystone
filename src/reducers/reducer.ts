@@ -77,6 +77,9 @@ import {
 	MarkEnergyAnimationAction,
 	START_CREATURE_DISCARD_ANIMATION,
 	StartCreatureDiscardAnimationAction,
+	ACCEPT_CHALLENGE,
+	CREATE_CHALLENGE,
+	CANCEL_CHALLENGE,
 } from '../actions';
 
 import {
@@ -144,6 +147,9 @@ export const defaultState: State = {
 	activePlayer: 0,
 	lastPositions: {},
 	energyAnimationsShown: new Set<number>(),
+	challenges: {
+		challenges: []
+	}
 };
 
 

@@ -1,4 +1,5 @@
 import { BaseDirectory, create, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
+import { isTauri } from "@tauri-apps/api/core";
 import { booleanGuard } from "../bechamel/strategies/simulationUtils";
 import { ClientMessage } from "../clientProtocol";
 import testReplay from './testReplay.json';
@@ -8,12 +9,7 @@ export class ReplayLogService {
     static REPLAYS_DIR = 'replays'
 
     private isTauri() {
-        return Boolean(
-            typeof window !== 'undefined' &&
-            window !== undefined &&
-            // @ts-ignore
-            window.__TAURI_IPC__ !== undefined
-        )
+        return isTauri()
     }
 
     public async getReplaysList() {
