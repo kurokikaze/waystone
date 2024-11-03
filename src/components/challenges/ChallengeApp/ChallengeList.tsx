@@ -1,5 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { fetch } from '@tauri-apps/plugin-http';
+import { useDispatch } from 'react-redux';
 import { acceptChallenge, createChallenge, cancelChallenge } from '../../../actions/index.js';
 import { ChallengeType, DeckType } from '../../../types.js';
 import { useEffect, useState } from 'react';
@@ -16,29 +15,15 @@ export default function ChallengeList({ currentDeck }: ChallengeListProps) {
 
 	const dispatch = useDispatch()
 
-	const loadChallenges = async () => {
-		const challengeService = new ChallengesService()
-		const challenges = await challengeService.getChallenges()
-
-		setChallenges(challenges)
-	}
-	useEffect(() => {
-		loadChallenges()
-	}, [])
 	const handleAcceptChallenge = (challenge: string) => dispatch(acceptChallenge(challenge))
 	const handleCancelChallenge = () => dispatch(cancelChallenge())
 	const handleCreateChallenge = () => dispatch(createChallenge('challenge', currentDeck.cards))
 
 	useEffect(() => {
-		fetch(`http://${serverAddress}/challenges/list`)
-			.then(challenges => {
-				console.dir(challenges)
-			})
-			.catch((error) => {
-				console.log(`Request error`)
-				console.dir(error)
-			})
+        const challengesService = new ChallengesService()
+        challengesService.connectToChallenges(setChallenges)
 	}, [])
+
 	return <div className='challenges'>
 		{challenges.map(challenge => (<div className='challenge' key={challenge.id || 'test'}>
 			<div>{challenge.name}</div>

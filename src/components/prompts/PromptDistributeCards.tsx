@@ -47,7 +47,7 @@ function PromptDistributeCards({ engineConnector }: PromptDistributeCardsProps) 
 	const targetZones = useSelector(getPromptTargetZones) || [];
 	const generatedBy = useSelector(getPromptGeneratedBy) || '';
 	const cardIndices = cards.map((_, i) => i)
-	const initialValue: CardsInZones = Object.fromEntries(targetZones.map(index => [index as ZoneType, []]))
+	const initialValue: CardsInZones = Object.fromEntries(targetZones.map((index: ZoneType) => [index as ZoneType, []]))
 	initialValue[targetZones[0] as ZoneType]!.push(...cardIndices)
 
 	const [order, setOrder] = useState<CardsInZones>(initialValue);

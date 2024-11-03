@@ -1,6 +1,6 @@
 import Card from "moonlands/src/classes/Card"
 import { ConvertedCard, HiddenConvertedCard, InGameData } from "moonlands/src/classes/CardInGame"
-import { LogEntryType, PromptParams, PromptTypeType } from "moonlands/src/types"
+import { LogEntryType, PromptParams, PromptTypeType, ZoneType } from "moonlands/src/types"
 import { C2SAction } from "./clientProtocol"
 import { AlternativeType } from "moonlands/src/types/prompt"
 import { TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from "moonlands"
@@ -49,6 +49,7 @@ export type ExpandedPromptParams = Omit<Omit<Omit<PromptParams, "promptType">, "
   paymentAmount?: number;
   restrictionValue?: string | string[] | number | boolean
   zoneOwner?: number
+  targetZones?: ZoneType[]
 }
 
 type AnimationStateType = {

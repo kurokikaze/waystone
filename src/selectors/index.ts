@@ -119,7 +119,7 @@ export const getCards = (state: State) => state.promptParams?.cards;
 export const getPromptParams = (state: State) => state.promptParams;
 export const getPromptZone = (state: State) => state.promptParams?.zone;
 export const getPromptZoneOwner = (state: State) => state.promptParams?.zoneOwner;
-export const getPromptTargetZones = (state: State) => state.promptParams?.targetZones;
+export const getPromptTargetZones = (state: State) => state.promptParams?.targetZones || [];
 export const getPromptMessage = (state: State) => state.promptMessage;
 export const getPromptType = (state: State) => state.prompt ? state.promptType : null;
 export const getPromptGeneratedBy = (state: State) => state.promptGeneratedBy;
