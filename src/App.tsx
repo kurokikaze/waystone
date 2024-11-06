@@ -133,6 +133,9 @@ function App() {
       {mode === MODE_CHALLENGES ? <div className="appHolder">
         <ChallengeAppWrapper playerDeck={{ name: 'current deck', cards: playerDeck }} onChallengeAccepted={handleChallengeAccept} />
       </div> : null}
+      {mode === MODE_NETWORK_PLAY ? <div className="appHolder">
+        Secret: <p>{secret}</p>
+      </div> : null}
       {mode === MODE_BASE ? <div className="appHolder"><div className="row">
         <MoonlandsLogo />
       </div>
