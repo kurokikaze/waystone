@@ -18,7 +18,7 @@ export class ChallengesService {
         return json;
     }
 
-    public async connectToChallenges(setter: (challenges: ChallengeType[]) => void): Promise<void> {
+    public async connectToChallenges(setter: (challenges: ChallengeType[]) => void, onAccept: (secret: string) => void): Promise<void> {
         const socket = io('ws://localhost:3000');
 
         socket.on('connect', () => {
@@ -26,12 +26,14 @@ export class ChallengesService {
         })
 
         socket.on('message', (msg) => {
-            console.log('Received Message:', msg);
+            console.log('Received Message:', msg.event, JSON.stringify(msg.data));
             if (msg.event == 'response') {
                 setter(msg.data)
             }
+            if (msg.event == 'challenge_accepted') {
+                onAccept(msg.data.secret)
+            }
         });
-
 
         socket.on('disconnect', () => {
             console.log(`Disconnected from the server`)

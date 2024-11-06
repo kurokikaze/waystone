@@ -26,19 +26,19 @@ var emptyEngineConnector: EngineConnector = {
 
 type GameAppWrapperProps = {
   playerDeck: DeckType
+  onChallengeAccepted: (secret: string) => void
 }
 
 export const ChallengeAppWrapper = ({
   playerDeck,
+  onChallengeAccepted,
 }: GameAppWrapperProps) => {
-  let breakCallback = () => {}
-
   const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
   useEffect(() => {
   }, []);
 
   return (<Provider store={store}>
-    <ChallengeApp playerDeck={playerDeck} />
+    <ChallengeApp playerDeck={playerDeck} onChallengeAccepted={onChallengeAccepted} />
   </Provider>)
 }

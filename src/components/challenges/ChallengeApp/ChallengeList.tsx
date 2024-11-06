@@ -8,8 +8,10 @@ const serverAddress = 'localhost:3000'
 
 type ChallengeListProps = {
 	currentDeck: DeckType
+	onChallengeAccepted: (secret: string) => void
 }
-export default function ChallengeList({ currentDeck }: ChallengeListProps) {
+
+export default function ChallengeList({ currentDeck, onChallengeAccepted }: ChallengeListProps) {
 	const [challenges, setChallenges] = useState<ChallengeType[]>([])
 	const hasChallenged = challenges.some(challenge => challenge.own);
 
@@ -21,7 +23,7 @@ export default function ChallengeList({ currentDeck }: ChallengeListProps) {
 
 	useEffect(() => {
         const challengesService = new ChallengesService()
-        challengesService.connectToChallenges(setChallenges)
+        challengesService.connectToChallenges(setChallenges, onChallengeAccepted)
 	}, [])
 
 	return <div className='challenges'>
@@ -37,25 +39,3 @@ export default function ChallengeList({ currentDeck }: ChallengeListProps) {
 		</div>}
 	</div>;
 }
-
-// function mapStateToProps(state) {
-// 	return {
-// 		challenges: state.challenges,
-// 		currentDeck: state.currentDeck,
-// 		username: state.username,
-// 	};
-// }
-
-// function mapDispatchToProps(dispatch) {
-// 	return {
-// 		cancelChallenge: () => dispatch(cancelChallenge()),
-// 		acceptChallenge: (name, deck) => dispatch(acceptChallenge(name, deck)),
-// 		createChallenge: (deckId) => dispatch(createChallenge(deckId)),
-// 	};
-// }
-
-// const enhance = connect(mapStateToProps, mapDispatchToProps);
-
-// export {ChallengeList as Base};
-
-// export default enhance(ChallengeList);

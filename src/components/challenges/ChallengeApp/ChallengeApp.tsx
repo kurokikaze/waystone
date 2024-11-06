@@ -5,12 +5,13 @@ import ChallengeList from './ChallengeList';
 
 type ChallengeAppProps = {
 	playerDeck: DeckType
+	onChallengeAccepted: (secret: string) => void
 }
 
-function ChallengeApp({ playerDeck }: ChallengeAppProps) {
+function ChallengeApp({ playerDeck, onChallengeAccepted }: ChallengeAppProps) {
 	return <div>
 		<h2>Challenges</h2>
-		<ChallengeList currentDeck={playerDeck} />
+		<ChallengeList currentDeck={playerDeck} onChallengeAccepted={onChallengeAccepted} />
 		{/* No deck selector for now */}
 		{/*<DeckSelector />-*/}
 	</div>;

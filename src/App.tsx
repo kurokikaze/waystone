@@ -19,13 +19,15 @@ const MODE_REPLAY = 'modes/replay';
 const MODE_REPLAY_LIST = 'modes/replay_list';
 const MODE_GAME = 'modes/game';
 const MODE_CHALLENGES = 'modes/challenges';
+const MODE_NETWORK_PLAY = 'modes/network_play';
 
-type AppMode = typeof MODE_BASE | typeof MODE_EDITOR | typeof MODE_GAME | typeof MODE_REPLAY_LIST | typeof MODE_REPLAY | typeof MODE_CHALLENGES;
+type AppMode = typeof MODE_BASE | typeof MODE_EDITOR | typeof MODE_GAME | typeof MODE_REPLAY_LIST | typeof MODE_REPLAY | typeof MODE_CHALLENGES | typeof MODE_NETWORK_PLAY;
 
 function App() {
   const [mode, setMode] = useState<AppMode>(MODE_BASE);
 
   const [loading, setLoading] = useState(true)
+  const [secret, setSecret] = useState<string>()
   const [editedDeck, setEditedDeck] = useState<DeckType>({ name: '', cards: [] })
   const [playerDeckEdited, setPlayerDeckEdited] = useState(true)
   const [error, setError] = useState('')
@@ -99,34 +101,8 @@ function App() {
     setMode(MODE_GAME);
   }, [])
 
-  const handleConnectToGame = useCallback(() => {
+  const handleConnectToServer = useCallback(() => {
     setMode(MODE_CHALLENGES)
-    /*
-    console.log(`Starting the connection`)
-    const socket = io("http://localhost:3000", {
-      reconnectionDelayMax: 10000
-    })
-
-    socket.onAny((event) => {
-      console.log(`Socket event: ${event}`)
-    })
-
-    socket.io.on('error', () => {
-      console.log(`Connection error`)
-    })
-
-    socket.io.on('ping', () => {
-      console.log(`Ping`)
-    })
-    
-    socket.on('connect', () => {
-      console.log(`Connection established`);
-    })
-
-    socket.on('data', () => {
-      console.log('Data received')
-    })
-      */
   }, [])
 
   const handleOpenReplays = useCallback(() => {
@@ -136,6 +112,11 @@ function App() {
   const handleReplaySelect = useCallback((replay: string) => {
     setChosenReplay(replay)
     setMode(MODE_REPLAY);
+  }, [])
+
+  const handleChallengeAccept = useCallback((secret: string) => {
+    setSecret(secret)
+    setMode(MODE_NETWORK_PLAY)
   }, [])
 
   return (
@@ -150,7 +131,7 @@ function App() {
         <ReplayAppWrapper replayName={chosenReplay} onReturnToBase={handleReturnToBase} />
       </div> : null}
       {mode === MODE_CHALLENGES ? <div className="appHolder">
-        <ChallengeAppWrapper playerDeck={{ name: 'current deck', cards: playerDeck }} />
+        <ChallengeAppWrapper playerDeck={{ name: 'current deck', cards: playerDeck }} onChallengeAccepted={handleChallengeAccept} />
       </div> : null}
       {mode === MODE_BASE ? <div className="appHolder"><div className="row">
         <MoonlandsLogo />
@@ -162,7 +143,7 @@ function App() {
         <p><Button disabled={loading} onClick={handleEditPlayerDeck}>Edit player deck</Button></p>
         <p><Button disabled={loading} onClick={handleEditOpponentDeck}>Edit opponent deck</Button></p>
         <p><Button disabled={loading} onClick={handleStartGame} type="primary">Start game</Button></p>
-        <p><Button disabled={loading} onClick={handleConnectToGame} type="primary">Network play</Button></p>
+        <p><Button disabled={loading} onClick={handleConnectToServer} type="primary">Network play</Button></p>
         <p><Button disabled={loading} onClick={handleOpenReplays}>Replays</Button></p>
       </div> : null}
       {mode === MODE_EDITOR ? <DeckEditor deckContents={editedDeck} onSave={handleSave} onClose={handleReturnToBase} /> : null}
