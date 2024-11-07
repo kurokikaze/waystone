@@ -242,7 +242,7 @@ export const UNFILTERED_RELIC_PROMPTS = [
 	PROMPT_TYPE_RELIC,
 ];
 
-const getRestrictionFilter = (restriction: RestrictionType, value: any): SelectorFunction => {
+const getRestrictionFilter = (restriction: RestrictionType, value: any, playerNumber: number): SelectorFunction => {
 	switch (restriction) {
 		case RESTRICTION_TYPE:
 			return card => card.card.type === value;
@@ -257,9 +257,9 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): Selecto
 		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
 			return card => (card.card.type === TYPE_CREATURE && card.data.energy < ((typeof card.card.cost == 'number') ? card.card.cost : 0));
 		case RESTRICTION_OWN_CREATURE:
-			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === 1);
+			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === playerNumber);
 		case RESTRICTION_OPPONENT_CREATURE:
-			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) !== 1);
+			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) !== playerNumber);
 		case RESTRICTION_CREATURE_WAS_ATTACKED:
 			return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
 		case RESTRICTION_STATUS:
@@ -273,7 +273,7 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): Selecto
 
 type SelectorFunction = (card: EnrichedCard) => Boolean
 type PromptParamsFixed = PromptParams & { paymentAmount?: number, paymentType: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL; }
-export const getPromptFilter = (promptType: PromptTypeType, promptParams: PromptParams): SelectorFunction => {
+export const getPromptFilter = (promptType: PromptTypeType, promptParams: PromptParams, playerNumber: number): SelectorFunction => {
 	switch (promptType) {
 		case PROMPT_TYPE_RELIC:
 			return card => card.card.type === TYPE_RELIC;
@@ -282,7 +282,7 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 		case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
 			return card => (card.card.type === TYPE_MAGI || card.card.type === TYPE_CREATURE);
 		case PROMPT_TYPE_OWN_SINGLE_CREATURE:
-			return card => (card.data.controller || card.owner) === 1 && card.card.type === TYPE_CREATURE;
+			return card => (card.data.controller || card.owner) === playerNumber && card.card.type === TYPE_CREATURE;
 		case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
 			return card => card.id !== promptParams.source;
 		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
@@ -292,7 +292,7 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 					return card =>
 						checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
 				} else {
-					return getRestrictionFilter(promptParams.restriction!, promptParams.restrictionValue);
+					return getRestrictionFilter(promptParams.restriction!, promptParams.restrictionValue, playerNumber);
 				}
 			} else {
 				return () => true;
@@ -314,7 +314,7 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 const propertyLayers: Partial<Record<PropertyType, number>> = {
 	[PROPERTY_CONTROLLER]: 0,
 	[PROPERTY_COST]: 1,
-  [PROPERTY_POWER_COST]: 1,
+	[PROPERTY_POWER_COST]: 1,
 	[PROPERTY_ENERGIZE]: 2,
 	[PROPERTY_STATUS]: 3,
 	[PROPERTY_ATTACKS_PER_TURN]: 4,

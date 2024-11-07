@@ -6,7 +6,7 @@ import {
 	ACTION_RESOLVE_PROMPT,
 	PROMPT_TYPE_NUMBER
 } from 'moonlands/src/const.ts';
-import {getPromptMin, getPromptMax, getPromptGeneratedBy} from '../../selectors';
+import {getPromptMin, getPromptMax, getPromptGeneratedBy, getPlayerNumber} from '../../selectors';
 
 const makeArray = (min, max) => Array.apply(null, {length: max + 1}).map(Number.call, Number).slice(min);
 
@@ -16,6 +16,7 @@ function PromptChooseCards({engineConnector}) {
 	const generatedBy = useSelector(getPromptGeneratedBy);
 	const [value, setValue] = useState(min);
 	const options = makeArray(min, max);
+	const playerNumber = useSelector(getPlayerNumber)
 
 	const onSend = () => {
 		engineConnector.emit({
@@ -23,7 +24,7 @@ function PromptChooseCards({engineConnector}) {
 			promptType: PROMPT_TYPE_NUMBER,
 			number: value,
 			generatedBy: generatedBy,
-			player: 1,
+			player: playerNumber,
 		});
 	};
 

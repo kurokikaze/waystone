@@ -12,6 +12,7 @@ const getPromptEffect = state => state.promptParams.effect || { name: 'none', te
 function PromptMayEffect({engineConnector}) {
 	const generatedBy = useSelector(getPromptGeneratedBy);
 	const effect = useSelector(getPromptEffect);
+	const playerNumber = useSelector(getPlayerNumber);
 
 	const handleSend = value => {
 		engineConnector.emit({
@@ -19,7 +20,7 @@ function PromptMayEffect({engineConnector}) {
 			promptType: PROMPT_TYPE_MAY_ABILITY,
 			useEffect: value,
 			generatedBy: generatedBy,
-			player: 1,
+			player: playerNumber,
 		});
 	};
 	return (

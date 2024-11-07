@@ -4,7 +4,7 @@ import {
 	ACTION_RESOLVE_PROMPT,
 } from 'moonlands/src/const';
 import { useSelector } from 'react-redux';
-import { getPromptMagi } from '../../selectors';
+import { getPlayerNumber, getPromptMagi } from '../../selectors';
 import { EngineConnector } from '../../types';
 
 type Props = {
@@ -15,6 +15,7 @@ function PromptChoosePowerOnMagi({engineConnector}: Props) {
   const magi = useSelector(getPromptMagi);
   const magiCard = byName(magi?.card || 'Grega');
   const magiPowers = magiCard?.data.powers || []
+  const playerNumber = useSelector(getPlayerNumber)
 
 	const handleSend = (powerName: string) => {
     engineConnector.emit({
@@ -22,7 +23,7 @@ function PromptChoosePowerOnMagi({engineConnector}: Props) {
       // promptType: PROMPT_TYPE_PLAYER,
       power: powerName,
       // generatedBy,
-      player: 1,
+      player: playerNumber,
     });
 	};
 

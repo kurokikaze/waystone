@@ -29,6 +29,7 @@ import {
 	getPromptParams,
 	getPromptGeneratedBy,
 	getDefeatedCreatureId,
+	getPlayerNumber,
 } from '../../selectors';
 import {
 	UNFILTERED_CREATURE_PROMPTS,
@@ -55,7 +56,8 @@ function ZonePlayerInPlay({
 }) {
 	const packs = useSelector(getPacks);
 	const rawContent = useSelector(getCardDetails);
-	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === 1);
+	const playerNumber = useSelector(getPlayerNumber);
+	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === playerNumber);
 
 	const prsAvailable = useSelector(isPRSAvailable);
 	const animation = useSelector(getAnimation);
@@ -84,7 +86,7 @@ function ZonePlayerInPlay({
 
 	const isOnUnfilteredPrompt = isOnPrompt && UNFILTERED_CREATURE_PROMPTS.includes(promptType);
 	const isOnFilteredPrompt = isOnPrompt && FILTERED_CREATURE_PROMPTS.includes(promptType);
-	const promptFilter = useCallback(getPromptFilter(promptType, promptParams), [promptType, promptParams]);
+	const promptFilter = useCallback(getPromptFilter(promptType, promptParams, playerNumber), [promptType, promptParams, playerNumber]);
 
 	const onAddToPack = (leader, hunter) => {
 		dispatch(addToPack(leader, hunter));
@@ -135,6 +137,7 @@ function ZonePlayerInPlay({
 						cardStyle={CARD_STYLE_DRAGGABLE}
 						attacker={animation && animation.source === cardData.id}
 						attackNumber={cardData.data.attacked}
+						playerNumber={playerNumber}
 					/>
 					{packs.some(({leader}) => leader === cardData.id) ? 
 						<div className='packHuntCounter' onClick={() => onRemovePack(cardData.id)}>+ <Velociraptor size={20} fillColor='#fff' /></div>

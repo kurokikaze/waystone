@@ -1,22 +1,23 @@
 /* global window */
-import {useState} from 'react';
-import {useSelector} from 'react-redux';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
 } from 'moonlands/src/const.ts';
-import {DndProvider} from 'react-dnd';
+import { DndProvider } from 'react-dnd';
 import PromptCardImage from './PromptCardImage.jsx';
-import {HTML5Backend} from 'react-dnd-html5-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import {
 	getPromptCards,
 	getPromptGeneratedBy,
 } from '../../selectors';
 
-function PromptRearrangeCards({engineConnector}) {
+function PromptRearrangeCards({ engineConnector }) {
 	const cards = useSelector(getPromptCards);
 	const generatedBy = useSelector(getPromptGeneratedBy);
+	const playerNumber = useSelector(getPlayerNumber);
 	const [order, setOrder] = useState(cards.map((_, i) => i));
 
 	const moveCard = (from, to) => {
@@ -37,7 +38,7 @@ function PromptRearrangeCards({engineConnector}) {
 			promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
 			cards: order.map(index => cards[index].id),
 			generatedBy,
-			player: 1,
+			player: playerNumber,
 		});
 	};
 
@@ -45,7 +46,7 @@ function PromptRearrangeCards({engineConnector}) {
 		<div className="promptWindow promptRearrangeCards">
 			<h1>Rearrange the cards</h1>
 			<DndProvider backend={HTML5Backend}>
-				<div className="cardsRow" style={{display: 'flex', flexDirection: 'row'}}>
+				<div className="cardsRow" style={{ display: 'flex', flexDirection: 'row' }}>
 					{order.map((position, i) => (
 						<PromptCardImage card={cards[position].card} onMove={moveCard} key={cards[position].id} id={cards[position].id} index={i} />
 					))}

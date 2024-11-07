@@ -19,7 +19,7 @@ import {ANIMATION_MAGI_DEFEATED} from '../../const';
 
 const CardWithAbilities = withAbilities(Card);
 
-const playerHasCreatures = state => state.zones.inPlay.some(card => byName(card.card).type === TYPE_CREATURE && card.data.controller === 1);
+const playerHasCreatures = state => state.zones.inPlay.some(card => byName(card.card).type === TYPE_CREATURE && card.data.controller === state.playerNumber);
 
 const isOnFilteredMagiPrompt = (state) => {
 	if (!state.prompt) return false;

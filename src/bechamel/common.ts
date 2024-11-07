@@ -253,6 +253,7 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): CardFil
 	}
 };
 
+// @deprecated Probably not used inside the Bechamel, user ids are hardcoded inside `getRestrictionFilter`
 export const getPromptFilter = (promptType: PromptType, promptParams: PromptParams) => {
 	switch (promptType) {
 		case PROMPT_TYPE_RELIC:

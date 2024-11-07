@@ -17,6 +17,7 @@ import {
 	getPromptNumberOfCards,
 	getPromptZoneOwner,
 	getPromptGeneratedBy,
+	getPlayerNumber,
 } from '../../selectors';
 
 function PromptChooseCards({ engineConnector }) {
@@ -27,6 +28,7 @@ function PromptChooseCards({ engineConnector }) {
 	const zoneOwner = useSelector(getPromptZoneOwner);
 	const numberOfCards = useSelector(getPromptNumberOfCards);
 	const generatedBy = useSelector(getPromptGeneratedBy);
+	const playerNumber = useSelector(getPlayerNumber);
 
 	const [selected, setSelected] = useState([]);
 
@@ -40,7 +42,7 @@ function PromptChooseCards({ engineConnector }) {
 			zoneOwner,
 			cards: selected,
 			generatedBy,
-			player: 1,
+			player: playerNumber,
 		});
 	};
 

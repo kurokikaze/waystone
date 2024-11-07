@@ -26,11 +26,11 @@ cards.forEach(card => {
 });
 
 export function isOurTurn(state: State) {
-	return state.activePlayer === 1;
+	return state.activePlayer === state.playerNumber;
 }
 
 export function isPromptActive(state: State) {
-	return state.prompt && state.promptPlayer === 1;
+	return state.prompt && state.promptPlayer === state.playerNumber;
 }
 
 export function getMagiEnergy(state: State) {
@@ -42,7 +42,7 @@ export function getMaxPaymentSourceEnergy(state: State) {
 	const activeMagi = zoneContent('playerActiveMagi', state)
 	const paymentCardEnergies = state.zones.inPlay.filter(card => {
 
-		if (card.data.controller !== 1) return false;
+		if (card.data.controller !== state.playerNumber) return false;
 		const cardData = byName(card.card);
 
 		return cardData && cardData.data.paymentSource?.includes(TYPE_CREATURE);
@@ -109,7 +109,7 @@ export function getAvailableStartingCards(cards: string[] = [], state: State) {
 	return cards.filter(card => searchableCards.includes(card));
 }
 
-export const isPRSAvailable = (state: State) => state.activePlayer == 1 && typeof state.step == 'number' && [STEP_PRS_FIRST, STEP_PRS_SECOND].includes(state.step);
+export const isPRSAvailable = (state: State) => state.activePlayer == state.playerNumber && typeof state.step == 'number' && [STEP_PRS_FIRST, STEP_PRS_SECOND].includes(state.step);
 
 export const getActivePlayerMagi = (state: State) => state.zones.playerActiveMagi[0];
 export const getStartingCards = (state: State) => state.promptParams?.startingCards;
@@ -139,7 +139,7 @@ export const getTimerSeconds = (state: State) => state.turnSecondsLeft;
 export const getCurrentStep = (state: State) => state.step;
 export const getGameEnded = (state: State) => state.gameEnded;
 export const getAlternatives = (state: State) => state.promptParams?.alternatives || [];
-export const getMyRelicNames = (state: State) => state.zones.inPlay.filter(cardData => cardData.data.controller === 1 && relicsHash[cardData.card]).map(cardData => cardData.card);
+export const getMyRelicNames = (state: State) => state.zones.inPlay.filter(cardData => cardData.data.controller === state.playerNumber && relicsHash[cardData.card]).map(cardData => cardData.card);
 export const getDefeatedCreatureId = (state: State) => state.animation && state.animation.type === ANIMATION_CREATURE_DISCARDED ? state.animation.target : null
 export const getCardsCountInOurDiscard = (state: State) => state.zones.playerDiscard.length;
 export const getCardsCountInOpponentDiscard = (state: State) => state.zones.opponentDiscard.length;
@@ -163,3 +163,4 @@ export const getPowerSource = (id: string) => (state: State) => {
 	return myCard;
 };
 export const getWinner = (state: State) => state.winner;
+export const getPlayerNumber = (state: State) => state.playerNumber;

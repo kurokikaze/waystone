@@ -26,6 +26,7 @@ import {
 	getPromptType,
 	getPromptParams,
 	getAnimation,
+	getPlayerNumber,
 } from '../../selectors';
 import {withEnergyManipulation} from '../CardEnergyManipulation.jsx';
 import { useCallback } from 'react';
@@ -38,7 +39,8 @@ function ZoneOpponentInPlay({
 	engineConnector,
 }) {
 	const rawContent = useSelector(getCardDetails);
-	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller !== 1);
+	const playerNumber = useSelector(getPlayerNumber)
+	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller !== playerNumber);
 	
 	const currentStep = useSelector(getCurrentStep);
 	const ourTurn = useSelector(isOurTurn);
@@ -47,7 +49,7 @@ function ZoneOpponentInPlay({
 	const isOnCreaturePrompt = useSelector(isPromptActive);
 	const promptType = useSelector(getPromptType);
 	const promptParams = useSelector(getPromptParams);
-	const promptFilter = useCallback(getPromptFilter(promptType, promptParams), [promptType, promptParams]);
+	const promptFilter = useCallback(getPromptFilter(promptType, promptParams, playerNumber), [promptType, promptParams, playerNumber]);
 	const isOnUnfilteredPrompt = isOnCreaturePrompt && UNFILTERED_CREATURE_PROMPTS.includes(promptType);
 	const isOnFilteredPrompt = isOnCreaturePrompt && FILTERED_CREATURE_PROMPTS.includes(promptType);
 	const animation = useSelector(getAnimation);

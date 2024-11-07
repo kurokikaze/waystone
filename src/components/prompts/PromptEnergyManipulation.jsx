@@ -12,6 +12,7 @@ function PromptChooseCards({engineConnector}) {
 	const cards = useSelector(state => state.energyPrompt.cards);
 	const message = useSelector(getPromptMessage);
 	const promptType = useSelector(getPromptType);
+	const playerNumber = useSelector(getPlayerNumber);
 
 	const handleSend = () => {
 		if (freeEnergy === 0) {
@@ -20,7 +21,7 @@ function PromptChooseCards({engineConnector}) {
 				promptType,
 				energyOnCreatures: cards,
 				generatedBy,
-				player: 1,
+				player: playerNumber,
 			});
 		}
 	};

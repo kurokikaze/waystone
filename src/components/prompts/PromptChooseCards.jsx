@@ -7,13 +7,14 @@ import {
 } from 'moonlands/src/const.ts';
 import cn from 'classnames';
 import Card from '../Card.tsx';
-import {getStartingCards, getPromptGeneratedBy, getActivePlayerMagi, getAvailableCards} from '../../selectors';
+import {getStartingCards, getPromptGeneratedBy, getActivePlayerMagi, getAvailableCards, getPlayerNumber} from '../../selectors';
 
 function PromptChooseCards({engineConnector}) {
 	const cards = useSelector(getStartingCards);
 	const generatedBy = useSelector(getPromptGeneratedBy);
 	const magi = useSelector(getActivePlayerMagi);
 	const availableCards = useSelector(getAvailableCards);
+	const playerNumber = useSelector(getPlayerNumber);
 
 	const [selected, setSelected] = useState([]);
 
@@ -26,7 +27,7 @@ function PromptChooseCards({engineConnector}) {
 			promptType: PROMPT_TYPE_CHOOSE_CARDS,
 			cards: selected,
 			generatedBy,
-			player: 1,
+			player: playerNumber,
 		});
 	};
 

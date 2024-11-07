@@ -13,13 +13,13 @@ import {
 	STEP_ATTACK,
 } from '../../const';
 import {useCardData, useZoneContent, getCardDetails} from '../common';
-import {isOurTurn, getCurrentStep, getPromptGeneratedBy, getIsOnMagiPrompt, getAnimation} from '../../selectors';
+import {isOurTurn, getCurrentStep, getPromptGeneratedBy, getIsOnMagiPrompt, getAnimation, getPlayerNumber} from '../../selectors';
 
 const CardWithAbilities = withAbilities(Card);
 
 const isOnFilteredMagiPrompt = (state) => {
 	const isOnMWCPrompt = state.prompt && state.promptType === PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
-	return isOnMWCPrompt && !getCardDetails(state).inPlay.some(card => card.data.controller !== 1 && card.card.type === TYPE_CREATURE);
+	return isOnMWCPrompt && !getCardDetails(state).inPlay.some(card => card.data.controller !== state.playerNumber && card.card.type === TYPE_CREATURE);
 };
 
 function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
@@ -30,7 +30,8 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 	const active = ourTurn && currentStep === STEP_ATTACK;
 	const animation = useSelector(getAnimation);
 	const inPlayContent = useSelector(getCardDetails);
-	const guarded = inPlayContent.inPlay.some(card => card.data.controller !== 1 && card.card.type === TYPE_CREATURE);
+	const playerNumber = useSelector(getPlayerNumber);
+	const guarded = inPlayContent.inPlay.some(card => card.data.controller !== playerNumber && card.card.type === TYPE_CREATURE);
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
 	const isOnMagiPrompt = useSelector(getIsOnMagiPrompt);
 	const onMWCPrompt = useSelector(isOnFilteredMagiPrompt);

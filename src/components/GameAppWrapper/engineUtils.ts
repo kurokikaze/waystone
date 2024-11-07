@@ -14,7 +14,7 @@ export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck
     const bechamel = new BotWorker();
     // botRef.current = bechamel
     console.log('Bechamel worker created');
-    let breakCallback = () => {};
+    let breakCallback = () => { };
 
     // if (!engineRef.current && !actionsObservableRef.current) {
     const engine = new Worker();
@@ -27,7 +27,7 @@ export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck
                 if (data.for === 1) {
                     console.log('Setting the initial state');
                     console.dir(message.data.state);
-                    store.dispatch({ type: 'setInitialState', state: enrichState(message.data.state, 1) });
+                    store.dispatch({ type: 'setInitialState', state: enrichState({ ...message.data.state, playerNumber: 1 }) });
                     fullLog.push(JSON.stringify(message.data));
                 } else if (bechamel) {
                     console.log('Sending initial state to the bot')

@@ -11,6 +11,7 @@ function PromptDistributeDamage({engineConnector}) {
 	const freeDamage = useSelector(state => state.energyPrompt.freeEnergy);
 	const cards = useSelector(state => state.energyPrompt.cards);
 	const promptType = useSelector(getPromptType);
+	const playerNumber = useSelector(getPlayerNumber);
 
 	const handleSend = () => {
 		if (freeDamage === 0) {
@@ -19,7 +20,7 @@ function PromptDistributeDamage({engineConnector}) {
 				promptType,
 				damageOnCreatures: cards,
 				generatedBy,
-				player: 1,
+				player: playerNumber,
 			});
 		}
 	};

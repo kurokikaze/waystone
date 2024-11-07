@@ -65,6 +65,7 @@ type WithAbilitiesProps = {
 
 	onAbilityUse: Function
 	engineConnector: { emit: Function }
+	playerNumber: number
 }
 
 type PowerType = {
@@ -75,7 +76,7 @@ type PowerType = {
 }
 // eslint-disable-next-line react/display-name
 export const withAbilities = (Component: typeof React.Component) => (props: WithAbilitiesProps) => {
-	const isOpponent = props.data.controller !== 1;
+	const isOpponent = props.data.controller !== props.playerNumber;
 	const hasAbilities = (props.card.data && props.card.data.powers);
 	const isRelic = props.card.type === TYPE_RELIC;
 	const hasUnusedAbilities = hasAbilities && (props.card.data.powers as PowerType[]).some(power => !(props.data.actionsUsed || []).includes(power.name));

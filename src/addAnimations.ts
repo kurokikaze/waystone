@@ -70,24 +70,24 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>, on
 			if (!card) {
 				return [action]
 			}
-			return (action.player !== 1 || !onlyEnemy) ? [
+			return (action.player !== state.playerNumber || !onlyEnemy) ? [
 				startPromptResolutionAnimation(action.target ? (getPowerSource(action.target)(state)?.card || '') : (action.number || 0).toString()),
 				endPromptResolutionAnimation(),
 				action,
 			] : [action];
 		case ACTION_POWER:
-			return (action.source.owner !== 1) ? [
+			return (action.source.owner !== state.playerNumber) ? [
 				startPowerAnimation(action.source.id, action.power, action.player), 
 				endPowerAnimation(action.power),
 				action,
 			] : [action];
 		case ACTION_ATTACK: {
-			if (action.player !== 1 || !onlyEnemy) {
-				if (action.player == 1) {
+			if (action.player !== state.playerNumber || !onlyEnemy) {
+				if (action.player == state.playerNumber) {
 					console.log(`Adding startAttackAnimation from ${action.source} to ${action.target}`)
 				}
 			}
-			return (action.player !== 1 || !onlyEnemy) ? [
+			return (action.player !== state.playerNumber || !onlyEnemy) ? [
 				startAttackAnimation(action.source, action.target, (action.additionalAttackers && action.additionalAttackers.length) ? action.additionalAttackers[0] : null, action.player), 
 				endAttackAnimation(action.source),
 				action,
@@ -96,19 +96,19 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>, on
 		case ACTION_EFFECT: {
 			switch(action.effectType) {
 				case EFFECT_TYPE_PLAY_RELIC:
-					return (action.player !== 1 || !onlyEnemy) ? [
+					return (action.player !== state.playerNumber || !onlyEnemy) ? [
 						startRelicAnimation(action.card, action.player), 
 						endRelicAnimation(),
 						action,
 					] : [action];
 				case EFFECT_TYPE_PLAY_CREATURE:
-					return (action.player !== 1 || !onlyEnemy) ? [
+					return (action.player !== state.playerNumber || !onlyEnemy) ? [
 						startCreatureAnimation(action.card, action.player), 
 						endCreatureAnimation(),
 						action,
 					] : [action];
 				case EFFECT_TYPE_PLAY_SPELL:
-					return (action.player !== 1 || !onlyEnemy) ? [
+					return (action.player !== state.playerNumber || !onlyEnemy) ? [
 						startSpellAnimation(action.card, action.player), 
 						endSpellAnimation(),
 						action,
