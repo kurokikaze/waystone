@@ -371,12 +371,6 @@ export class GameState {
         };
       }
       case ACTION_PASS: {
-        // postMessage({
-        //   botState: JSON.stringify({
-        //     ...state,
-        //     step: action.newStep,
-        //   }, null, 2),
-        // })
         return {
           ...state,
           step: action.newStep,
