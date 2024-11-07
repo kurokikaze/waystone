@@ -68,9 +68,10 @@ type AppProps = {
 	engineConnector: EngineConnector,
 	onBreak: Function,
 	onReturnToBase: () => void,
+    playerId: number
 }
 
-function App({ engineConnector, onBreak, onReturnToBase }: AppProps) {
+function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 	const [discardShown, setDiscardShown] = useState(false);
 	const [opponentDiscardShown, setOpponentDiscardShown] = useState(false);
 
@@ -116,7 +117,7 @@ function App({ engineConnector, onBreak, onReturnToBase }: AppProps) {
 	const onPass = useCallback(() => {
 		engineConnector.emit({
 			type: ACTION_PASS,
-			player: 1,
+			player: playerId,
 		});
 	}, [engineConnector]);
 
@@ -128,7 +129,7 @@ function App({ engineConnector, onBreak, onReturnToBase }: AppProps) {
 					id: cardId,
 				},
 			},
-			player: 1,
+			player: playerId,
 		});
 	}, [engineConnector]);
 

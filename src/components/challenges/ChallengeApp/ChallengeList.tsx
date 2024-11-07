@@ -12,6 +12,32 @@ type ChallengeListProps = {
     onChallengeAccepted: (secret: string) => void
 }
 
+const formatter = new Intl.RelativeTimeFormat(undefined, {
+    numeric: "auto",
+})
+
+const DIVISIONS = [
+    { amount: 60, name: "seconds" },
+    { amount: 60, name: "minutes" },
+    { amount: 24, name: "hours" },
+    { amount: 7, name: "days" },
+    { amount: 4.34524, name: "weeks" },
+    { amount: 12, name: "months" },
+    { amount: Number.POSITIVE_INFINITY, name: "years" },
+]
+
+function formatTimeAgo(date: string) {
+    let duration = (+(new Date(date)) - +(new Date())) / 1000
+
+    for (let i = 0; i < DIVISIONS.length; i++) {
+        const division = DIVISIONS[i]
+        if (Math.abs(duration) < division.amount) {
+            return formatter.format(Math.round(duration), division.name as Intl.RelativeTimeFormatUnit)
+        }
+        duration /= division.amount
+    }
+}
+
 export default function ChallengeList({ currentDeck, onChallengeAccepted }: ChallengeListProps) {
     const [challenges, setChallenges] = useState<ChallengeType[]>([])
     const [challengeComment, setChallengeComment] = useState<string>('')
@@ -65,6 +91,7 @@ export default function ChallengeList({ currentDeck, onChallengeAccepted }: Chal
                     <List.Item.Meta
                         avatar={<Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />}
                         title={<b>{challenge.name}</b>}
+                        description={formatTimeAgo(challenge.created)}
                         key={challenge.id}
                     />
                 </List.Item>

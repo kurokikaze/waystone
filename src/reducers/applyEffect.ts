@@ -154,7 +154,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 			if (
 				sourceZone === 'inPlay' &&
 				action.sourceCard.data &&
-				'controller' in action.sourceCard.data && // This should always be true for the inPlay zone, but Typescript doesnt know that 
+				'controller' in action.sourceCard.data && // This should always be true for the inPlay zone, but Typescript doesn't know that 
 				action.sourceCard.data.controller === 1
 			) {
 				packs = packs.filter(({ leader }) => leader !== action.sourceCard.id);

@@ -10,12 +10,9 @@ const CLIENT_CHALLENGE_EVENT_DELETE = 'remove_challenge'
 const CLIENT_CHALLENGE_EVENT_ACCEPT = 'challenge_accepted'
 
 export class ChallengesService {
-    private isTauri() {
-        return isTauri()
-    }
-
+    // @deprecated
     public async getChallenges(): Promise<ChallengeType[]> {
-        const fetchFunction = this.isTauri() ? tauriFetch : tauriFetch;
+        const fetchFunction = isTauri() ? tauriFetch : fetch;
 
         const result = await fetchFunction('http://localhost:3000/challenge/list', { mode: 'no-cors' })
         const json = await result.json() as ChallengeType[]

@@ -2,27 +2,30 @@ import { useState, useCallback, useEffect } from 'react';
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { LogicalSize } from "@tauri-apps/api/dpi"
 
+import Card from 'moonlands/src/classes/Card';
+import { Region } from 'moonlands/src/types';
+import { Tooltip } from 'antd';
+import { isTauri } from '@tauri-apps/api/core';
+
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
 import Input from 'antd/es/input';
 import Spin from 'antd/es/spin';
 import Button from 'antd/es/button';
 
+import Add from '../icons/Add';
+
 import { byName, cards } from 'moonlands/src/cards';
 import cn from 'classnames';
 import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/src/const';
 
-import Add from '../icons/Add';
 import CardFilter, { CardFilterType, defaultFilter } from '../CardFilter/CardFilter.jsx';
-import DeckView from '../DeckView/DeckView';
-import { camelCase, isTauri } from '../../utils';
-
-import './style.css';
-import Card from 'moonlands/src/classes/Card';
-import { Region } from 'moonlands/src/types';
-import { Tooltip } from 'antd';
 import { MAX_COPIES_IN_DECK } from '../../const';
 import { DeckType } from '../../types';
+import DeckView from '../DeckView/DeckView';
+import { camelCase } from '../../utils';
+
+import './style.css';
 
 type DeckEditorProps = {
 	deckContents: DeckType

@@ -71,7 +71,7 @@ export type EnergyLossRecord = {
 export type ChallengeType = {
   id: string
   name: string
-  created: Date
+  created: string
   own: boolean
 }
 

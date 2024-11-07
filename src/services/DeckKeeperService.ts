@@ -2,7 +2,6 @@ import { BaseDirectory, readTextFile, writeTextFile, create, exists } from '@tau
 import { byName } from 'moonlands/src/cards';
 import { TYPE_MAGI } from 'moonlands/src/const';
 import { isTauri } from "@tauri-apps/api/core";
-import DeckEditor from '../components/DeckEditor/DeckEditor';
 
 type DecksResult = { player: string[], opponent: string[] }
 

@@ -1,4 +1,5 @@
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { isTauri } from "@tauri-apps/api/core";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import { ACTION_PLAYER_WINS } from "moonlands";
 import { useRef, useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import addAnimations from "../../addAnimations";
 import { C2SAction, ClientAction, ClientMessage } from "../../clientProtocol";
 import { defaultState } from "../../reducers/reducer";
 import { EngineConnector } from "../../types";
-import { enrichState, isTauri } from "../../utils";
+import { enrichState } from "../../utils";
 import rootReducer from '../../reducers';
 import GameApp from "../GameApp/GameApp"
 import { ReplayLogService } from "../../services/ReplayLogService";
@@ -147,7 +148,7 @@ export const ReplayAppWrapper = ({
 	return (
 		<div className="replayWrapper">
 			<Provider store={store}>
-				{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} />}
+				{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} playerId={1} />}
 				<div className="controls">
 					{playing ? <button onClick={pause}>Pause</button>
 						: <button onClick={play}>Play</button>}

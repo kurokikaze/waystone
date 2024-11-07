@@ -55,6 +55,7 @@ export function enrichState(state: State, playerId: number): State {
 	return result;
 }
 
+// @deprecated
 export function isTauri() {
     return Boolean(
       typeof window !== 'undefined' &&
