@@ -120,7 +120,8 @@ export type State = {
   energyAnimationsShown: Set<number>,
   challenges: {
     challenges: ChallengeType[],
-  }
+  },
+  playerNumber: number
 }
 
 export type DraggedItem = {

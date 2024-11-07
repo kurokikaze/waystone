@@ -77,9 +77,6 @@ import {
 	MarkEnergyAnimationAction,
 	START_CREATURE_DISCARD_ANIMATION,
 	StartCreatureDiscardAnimationAction,
-	ACCEPT_CHALLENGE,
-	CREATE_CHALLENGE,
-	CANCEL_CHALLENGE,
 } from '../actions';
 
 import {
@@ -149,7 +146,8 @@ export const defaultState: State = {
 	energyAnimationsShown: new Set<number>(),
 	challenges: {
 		challenges: []
-	}
+	},
+	playerNumber: 1
 };
 
 
@@ -458,7 +456,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: 0,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
 					};
 					promptParams = promptParams || {};
 					break;
@@ -466,14 +464,14 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: action.amount,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 					};
 					break;
 				}
 				case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: action.amount,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 					};
 					break;
 				} case PROMPT_TYPE_POWER_ON_MAGI: {

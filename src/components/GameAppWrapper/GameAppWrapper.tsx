@@ -48,6 +48,6 @@ export const GameAppWrapper = ({
   }, []);
 
   return (<Provider store={store}>
-    <GameApp engineConnector={engineConnector} onBreak={breakCallback} onReturnToBase={onReturnToBase} />
+    <GameApp engineConnector={engineConnector} onBreak={breakCallback} onReturnToBase={onReturnToBase} playerId={1} />
   </Provider>)
 }

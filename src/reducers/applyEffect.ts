@@ -129,8 +129,8 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 			};
 		}
 		case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
-			const sourceZone: keyof State["zones"] = getZoneName(action.sourceZone, action.sourceCard);
-			const destinationZone: keyof State["zones"] = getZoneName(action.destinationZone, action.destinationCard);
+			const sourceZone: keyof State["zones"] = getZoneName(action.sourceZone, action.sourceCard, state.playerNumber);
+			const destinationZone: keyof State["zones"] = getZoneName(action.destinationZone, action.destinationCard, state.playerNumber);
 
 			var packs = [...state.packs];
 			var staticAbilities = state.staticAbilities || [];
@@ -155,7 +155,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				sourceZone === 'inPlay' &&
 				action.sourceCard.data &&
 				'controller' in action.sourceCard.data && // This should always be true for the inPlay zone, but Typescript doesn't know that 
-				action.sourceCard.data.controller === 1
+				action.sourceCard.data.controller === state.playerNumber
 			) {
 				packs = packs.filter(({ leader }) => leader !== action.sourceCard.id);
 			}
@@ -186,12 +186,12 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 			};
 		}
 		case EFFECT_TYPE_START_OF_TURN: {
-			if (action.player === 1) {
+			if (action.player === state.playerNumber) {
 				return {
 					...state,
 					zones: {
 						...state.zones,
-						inPlay: state.zones.inPlay.map(card => card.data.controller === 1 ? ({ ...card, data: { ...card.data, attacked: 0, hasAttacked: false, wasAttacked: false, actionsUsed: [] } }) : card),
+						inPlay: state.zones.inPlay.map(card => card.data.controller === state.playerNumber ? ({ ...card, data: { ...card.data, attacked: 0, hasAttacked: false, wasAttacked: false, actionsUsed: [] } }) : card),
 						playerActiveMagi: state.zones.playerActiveMagi.map(card => ({ ...card, data: { ...card.data, wasAttacked: false, actionsUsed: [] } })),
 					},
 					activePlayer: action.player,
@@ -202,7 +202,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					...state,
 					zones: {
 						...state.zones,
-						inPlay: state.zones.inPlay.map(card => card.data.controller !== 1 ? ({ ...card, data: { ...card.data, attacked: 0, hasAttacked: false, wasAttacked: false, actionsUsed: [] } }) : card),
+						inPlay: state.zones.inPlay.map(card => card.data.controller !== state.playerNumber ? ({ ...card, data: { ...card.data, attacked: 0, hasAttacked: false, wasAttacked: false, actionsUsed: [] } }) : card),
 						opponentActiveMagi: state.zones.opponentActiveMagi.map(card => ({ ...card, data: { ...card.data, wasAttacked: false, actionsUsed: [] } })),
 					},
 					activePlayer: action.player,
@@ -214,7 +214,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 			return {
 				...state,
 				turnTimer: false,
-				continuousEffects: cleanupContinuousEffects(state.continuousEffects, action.player === 2),
+				continuousEffects: cleanupContinuousEffects(state.continuousEffects, action.player !== state.playerNumber),
 			};
 		}
 		case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
@@ -547,7 +547,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 			};
 		}
 		case EFFECT_TYPE_DISCARD_RESHUFFLED: {
-			const newState = action.player === 1 ? {
+			const newState = action.player === state.playerNumber ? {
 				...state,
 				zones: {
 					...state.zones,
