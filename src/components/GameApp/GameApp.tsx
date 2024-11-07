@@ -47,6 +47,7 @@ import {
 	getGameEnded,
 	getCardsCountInOurDeck,
 	getCardsCountInOpponentDeck,
+    getPlayerNumber,
 } from '../../selectors';
 
 import {
@@ -113,13 +114,14 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 	const cardsInOurDiscard: number = useSelector(getCardsCountInOurDiscard);
 	const cardsInOurDeck: number = useSelector(getCardsCountInOurDeck);
 	const cardsInOpponentDeck: number = useSelector(getCardsCountInOpponentDeck);
+    const playerNumber = useSelector(getPlayerNumber)
 
 	const onPass = useCallback(() => {
 		engineConnector.emit({
 			type: ACTION_PASS,
-			player: playerId,
+			player: playerNumber,
 		});
-	}, [engineConnector]);
+	}, [engineConnector, playerNumber]);
 
 	const onPlay = useCallback((cardId: string) => {
 		engineConnector.emit({
@@ -129,9 +131,9 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 					id: cardId,
 				},
 			},
-			player: playerId,
+			player: playerNumber,
 		});
-	}, [engineConnector]);
+	}, [engineConnector, playerNumber]);
 
 	const onDebug = useCallback(() => {
 		console.log(`Sending debug command`)

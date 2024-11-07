@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
 } from 'moonlands/src/const.ts';
-import {getPromptGeneratedBy, getPromptMessage, getPromptType} from '../../selectors';
+import {getPromptGeneratedBy, getPromptMessage, getPromptType, getPlayerNumber} from '../../selectors';
 
 function PromptChooseCards({engineConnector}) {
 	const generatedBy = useSelector(getPromptGeneratedBy);
