@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import { UserOutlined } from '@ant-design/icons';
-import { Alert, Avatar, Button, Input, List } from 'antd';
+import { Alert, Avatar, Breadcrumb, Button, Input, List } from 'antd';
 import { acceptChallenge, createChallenge, cancelChallenge } from '../../../actions/index.js';
 import { ChallengeType, DeckType } from '../../../types.js';
 import { useEffect, useRef, useState } from 'react';
@@ -75,6 +75,10 @@ export default function ChallengeList({ currentDeck, onChallengeAccepted }: Chal
     useEffect(() => {
         const challengesService = new ChallengesService()
         connection.current = challengesService.connectToChallenges(setChallenges, onChallengeAccepted)
+
+        return () => {
+            connection.current?.disconnect()
+        }
     }, [])
 
     return <div className='challenges'>

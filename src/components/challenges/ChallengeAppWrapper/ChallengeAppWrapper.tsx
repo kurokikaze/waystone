@@ -27,11 +27,13 @@ var emptyEngineConnector: EngineConnector = {
 type GameAppWrapperProps = {
   playerDeck: DeckType
   onChallengeAccepted: (secret: string) => void
+  onReturnToMenu: () => void
 }
 
 export const ChallengeAppWrapper = ({
   playerDeck,
   onChallengeAccepted,
+  onReturnToMenu,
 }: GameAppWrapperProps) => {
   const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
@@ -39,6 +41,6 @@ export const ChallengeAppWrapper = ({
   }, []);
 
   return (<Provider store={store}>
-    <ChallengeApp playerDeck={playerDeck} onChallengeAccepted={onChallengeAccepted} />
+    <ChallengeApp playerDeck={playerDeck} onChallengeAccepted={onChallengeAccepted} onReturnToMenu={onReturnToMenu} />
   </Provider>)
 }

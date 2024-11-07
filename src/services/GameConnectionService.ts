@@ -7,7 +7,7 @@ import { EngineConnector } from "../types";
 
 export class GameConnectionService {
     public connectToGame(store: Store, secret: string): [EngineConnector, () => void] {
-        const socket = io(`ws://localhost:3000/game/${secret}`);
+        const socket = io(`ws://13.53.133.189:80/game/${secret}`);
         let breakCallback = () => {}
     
         socket.on('connect', () => {

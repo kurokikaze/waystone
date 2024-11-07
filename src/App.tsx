@@ -132,7 +132,11 @@ function App() {
                 <ReplayAppWrapper replayName={chosenReplay} onReturnToBase={handleReturnToBase} />
             </div> : null}
             {mode === MODE_CHALLENGES ? <div className="appHolder">
-                <ChallengeAppWrapper playerDeck={{ name: 'current deck', cards: playerDeck }} onChallengeAccepted={handleChallengeAccept} />
+                <ChallengeAppWrapper
+                    playerDeck={{ name: 'current deck', cards: playerDeck }}
+                    onChallengeAccepted={handleChallengeAccept}
+                    onReturnToMenu={handleReturnToBase}
+                />
             </div> : null}
             {mode === MODE_NETWORK_PLAY ? <div>
                 {typeof secret == 'string' ? <NetworkGameAppWrapper secret={secret} onReturnToBase={handleReturnToBase} /> : <b>Bad secret received from server</b>}

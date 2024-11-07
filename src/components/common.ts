@@ -288,7 +288,7 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
 			if (promptParams) {
 				if (promptParams.restrictions && promptParams.restrictions.length) {
-					const checkers: SelectorFunction[] = promptParams.restrictions.map(({ type, value }: RestrictionObjectType): SelectorFunction => getRestrictionFilter(type, value));
+					const checkers: SelectorFunction[] = promptParams.restrictions.map(({ type, value }: RestrictionObjectType): SelectorFunction => getRestrictionFilter(type, value, playerNumber));
 					return card =>
 						checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
 				} else {
