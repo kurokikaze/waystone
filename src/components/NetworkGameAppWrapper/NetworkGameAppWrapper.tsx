@@ -37,11 +37,18 @@ export const NetworkGameAppWrapper = ({
     const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
     useEffect(() => {
+        console.log(`Connecting with the secret ${secret}`)
         const [realEngineConnector, callback] = connectToEngine(store, secret)
 
         setEngineConnector(realEngineConnector)
         breakCallback = callback
-    }, []);
+
+        return () => {
+            console.log('Disconnecting from the game')
+            // @ts-ignore
+            realEngineConnector.disconnect()
+        }
+    }, [secret]);
 
     return (<Provider store={store}>
         <GameApp engineConnector={engineConnector} onBreak={breakCallback} onReturnToBase={onReturnToBase} playerId={1} />

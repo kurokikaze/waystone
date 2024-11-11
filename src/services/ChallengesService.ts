@@ -23,7 +23,14 @@ export class ChallengesService {
     public connectToChallenges(setter: (
         challenges: ChallengeType[] | ((oldChallenges: ChallengeType[]) => ChallengeType[])
     ) => void, onAccept: (secret: string) => void): Socket {
-        const socket = io('ws://13.53.133.189:80/challenge');
+        const socket = io('ws://13.53.133.189:80/challenge', {
+            autoConnect: true,
+        });
+
+        socket.on('error', err => {
+            console.error('Socket connection error')
+            console.dir(err)
+        })
 
         socket.on('connect', () => {
             console.log(`Connected to the server!`)
@@ -42,6 +49,7 @@ export class ChallengesService {
                     break;
                 }
                 case CLIENT_CHALLENGE_EVENT_DELETE: {
+                    console.log(`Removing the challenge ${msg.data}`)
                     setter(data => data.filter(challenge => challenge.id !== msg.data))
                     break;
                 }

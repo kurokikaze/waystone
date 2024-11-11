@@ -179,7 +179,7 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 						{ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <>
 							<button onClick={onPass}>{currentStep === null ? 'Start the game' : 'Pass'}</button>
 						</>}
-						{!ourTurn && <div>Opponent&apos;s turn ({currentPlayer})</div>}
+						{!ourTurn && <div>Opponent&apos;s turn ({currentPlayer}/{playerNumber})</div>}
 						{/*<button onClick={onRefresh}>Refresh</button>*/}
 						{discardShown && <div className='discardOverlay'>
 							<h2>Discard</h2>

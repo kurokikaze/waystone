@@ -7,9 +7,22 @@ import { EngineConnector } from "../types";
 
 export class GameConnectionService {
     public connectToGame(store: Store, secret: string): [EngineConnector, () => void] {
-        const socket = io(`ws://13.53.133.189:80/game/${secret}`);
+        console.log(`Secret is ${secret}`)
+        const socket = io(`ws://13.53.133.189/game/${secret}`);
         let breakCallback = () => {}
-    
+        socket.on("connect_error", (err) => {
+            // the reason of the error, for example "xhr poll error"
+            console.log(err.message);
+          
+            // some additional description, for example the status code of the initial HTTP response
+            // @ts-ignore
+            console.log(err?.description);
+          
+            // some additional context, for example the XMLHttpRequest object
+            // @ts-ignore
+            console.log(err?.context);
+          });
+                    
         socket.on('connect', () => {
             console.log(`Connected to the game`)
         })
@@ -38,12 +51,15 @@ export class GameConnectionService {
             console.log(`Disconnected from the game server`)
         })
 
-        const networkEngineConnector: EngineConnector = {
+        const networkEngineConnector: EngineConnector & { disconnect: () => void } = {
             emit: (action: any) => {
                 console.log(`Outgoing action`)
                 console.dir(action)
                 socket.send(action)
             },
+            disconnect: () => {
+                socket.close()
+            }
         };
 
         return [networkEngineConnector, breakCallback]
