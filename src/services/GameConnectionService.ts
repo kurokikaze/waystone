@@ -8,7 +8,7 @@ import { EngineConnector } from "../types";
 export class GameConnectionService {
     public connectToGame(store: Store, secret: string): [EngineConnector, () => void] {
         console.log(`Secret is ${secret}`)
-        const socket = io(`ws://13.53.133.189/game/${secret}`);
+        const socket = io(`ws://ec2-13-60-188-142.eu-north-1.compute.amazonaws.com/game`);
         let breakCallback = () => {}
         socket.on("connect_error", (err) => {
             // the reason of the error, for example "xhr poll error"
@@ -25,6 +25,9 @@ export class GameConnectionService {
                     
         socket.on('connect', () => {
             console.log(`Connected to the game`)
+            socket.emit('secret', JSON.stringify({
+                secret,
+            }))
         })
 
         const actionsObservable = new Observable<ClientCommand>(subscriber => {

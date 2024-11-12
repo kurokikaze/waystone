@@ -1,6 +1,6 @@
 // Will have to convert them all to TS someday
 // @ts-nocheck
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -9,26 +9,41 @@ import {
 	ACTION_PLAY,
 } from 'moonlands/src/const';
 import { FloatButton } from 'antd';
-// @ts-ignore-next
 import Log from '../Log/Log.tsx';
+// @ts-ignore-next
 import Zone from '../zones/Zone.jsx';
+// @ts-ignore-next
 import ZoneHand from '../zones/ZoneHand.jsx';
+// @ts-ignore-next
 import ZoneDiscard from '../zones/ZoneDiscard.jsx';
+// @ts-ignore-next
 import ZonePlayerInPlay from '../zones/ZonePlayerInPlay.jsx';
+// @ts-ignore-next
 import ZonePlayerRelics from '../zones/ZonePlayerRelics.jsx';
+// @ts-ignore-next
 import ZoneOpponentInPlay from '../zones/ZoneOpponentInPlay.jsx';
+// @ts-ignore-next
 import ZoneOpponentActiveMagi from '../zones/ZoneOpponentActiveMagi.jsx';
+// @ts-ignore-next
 import ZonePlayerActiveMagi from '../zones/ZonePlayerActiveMagi.jsx';
+// @ts-ignore-next
 import PromptOverlay from '../prompts/PromptOverlay.jsx';
+// @ts-ignore-next
 import PowerMessage from '../messages/PowerMessage.jsx';
+// @ts-ignore-next
 import RelicMessage from '../messages/RelicMessage.jsx';
+// @ts-ignore-next
 import SpellMessage from '../messages/SpellMessage.jsx';
+// @ts-ignore-next
 import CreatureMessage from '../messages/CreatureMessage.jsx';
+// @ts-ignore-next
 import PromptResolutionMessage from '../messages/PromptResolutionMessage.jsx';
+// @ts-ignore-next
 import ActionCardView from '../ActionCardView.jsx';
 
 // @ts-ignore
 import StepBoard from '../StepBoard/StepBoard.jsx';
+// @ts-ignore-next
 import EndgameOverlay from '../EndgameOverlay/EndgameOverlay.tsx';
 
 import "./style.css";
@@ -62,6 +77,9 @@ import {
 	STEP_DRAW,
 } from '../../const.js';
 import { EngineConnector, MessageType } from '../../types';
+import { isTauri } from '@tauri-apps/api/core';
+import { LogicalSize } from '@tauri-apps/api/dpi';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 const EnhancedPowerMessage = withSingleCardData(PowerMessage);
 
@@ -75,6 +93,14 @@ type AppProps = {
 function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 	const [discardShown, setDiscardShown] = useState(false);
 	const [opponentDiscardShown, setOpponentDiscardShown] = useState(false);
+
+    useEffect(() => {
+		if (isTauri()) {
+			const appWindow = getCurrentWebviewWindow()
+			appWindow.setResizable(true);
+			appWindow.setSize(new LogicalSize(1108, 659));
+		}
+	}, []);
 
 	const handleOurDiscardClick = useCallback(
 		() => {
@@ -138,9 +164,10 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 	const onDebug = useCallback(() => {
 		console.log(`Sending debug command`)
 		engineConnector.emit({
+            // @ts-ignore
 			special: 'status',
 		})
-	})
+	}, [engineConnector])
 
 	return (
 		<div className='gameContainer'>
@@ -149,7 +176,7 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 			<div className="game">
 				<DndProvider backend={HTML5Backend}>
 					<>
-						{message && message.type == MESSAGE_TYPE_POWER && <EnhancedPowerMessage id={message.source} power={message.power} onBreak={onBreak} />}
+						{message && message.type == MESSAGE_TYPE_POWER && <EnhancedPowerMessage id={message.source || 'source'} power={message.power} onBreak={onBreak} />}
 						{message && message.type == MESSAGE_TYPE_RELIC && <RelicMessage card={message.card} player={message.player} />}
 						{message && message.type == MESSAGE_TYPE_SPELL && <SpellMessage card={message.card} player={message.player} />}
 						{message && message.type == MESSAGE_TYPE_CREATURE && <CreatureMessage card={message.card} player={message.player} />}

@@ -14,7 +14,7 @@ export class ChallengesService {
     public async getChallenges(): Promise<ChallengeType[]> {
         const fetchFunction = isTauri() ? tauriFetch : fetch;
 
-        const result = await fetchFunction('http://13.53.133.189:80/challenge/list', { mode: 'no-cors' })
+        const result = await fetchFunction('http://ec2-13-60-188-142.eu-north-1.compute.amazonaws.com:80/challenge/list', { mode: 'no-cors' })
         const json = await result.json() as ChallengeType[]
 
         return json;
@@ -23,7 +23,7 @@ export class ChallengesService {
     public connectToChallenges(setter: (
         challenges: ChallengeType[] | ((oldChallenges: ChallengeType[]) => ChallengeType[])
     ) => void, onAccept: (secret: string) => void): Socket {
-        const socket = io('ws://13.53.133.189:80/challenge', {
+        const socket = io('ws://ec2-13-60-188-142.eu-north-1.compute.amazonaws.com:80/challenge', {
             autoConnect: true,
         });
 
