@@ -84,6 +84,7 @@ type CardProps = {
 	className: string;
 	attacker: boolean;
 	engineConnector: EngineConnector;
+	playerNumber: number;
 }
 
 const getEnergyChange = (id: string) => (state: State) => state.energyLosses.filter(loss => loss.card === id)
@@ -106,6 +107,7 @@ function Card({
 	target,
 	onPackHunt,
 	engineConnector,
+	playerNumber,
 	cardStyle = CARD_STYLE_NORMAL,
 }: CardProps) {
 	useLayoutEffect(() => {
@@ -241,7 +243,7 @@ function Card({
 					source: item.id,
 					target: id,
 					additionalAttackers: item.pack ? item.pack.hunters : [],
-					player: 1,
+					player: playerNumber,
 				});
 			} else if (canPackHunt) {
 				onPackHunt(id, item.id);

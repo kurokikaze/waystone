@@ -1,24 +1,24 @@
 /* global window */
-// import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
 } from 'moonlands/src/const';
-// import {getPromptGeneratedBy} from '../../selectors';
 import { EngineConnector } from '../../types';
+import { getPlayerNumber } from '../../selectors';
 
 type Props = {
-  engineConnector: EngineConnector
+	engineConnector: EngineConnector
 }
-function PromptChoosePlayer({engineConnector}: Props) {
-	// const generatedBy = useSelector(getPromptGeneratedBy);
+function PromptChoosePlayer({ engineConnector }: Props) {
+	const playerNumber = useSelector(getPlayerNumber);
 	const handleSend = (player: number) => {
-    engineConnector.emit({
-      type: ACTION_RESOLVE_PROMPT,
-      // promptType: PROMPT_TYPE_PLAYER,
-      targetPlayer: player,
-      // generatedBy,
-      player: 1,
-    });
+		engineConnector.emit({
+			type: ACTION_RESOLVE_PROMPT,
+			// promptType: PROMPT_TYPE_PLAYER,
+			targetPlayer: player,
+			// generatedBy,
+			player: playerNumber,
+		});
 	};
 
 	return (

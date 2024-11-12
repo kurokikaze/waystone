@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
 } from 'moonlands/src/const.ts';
-import {getPromptGeneratedBy, getPromptMessage, getPromptType} from '../../selectors';
+import {getPromptGeneratedBy, getPromptMessage, getPromptType, getPlayerNumber} from '../../selectors';
 
 function PromptChooseCards({engineConnector}) {
 	const generatedBy = useSelector(getPromptGeneratedBy);
@@ -12,6 +12,7 @@ function PromptChooseCards({engineConnector}) {
 	const cards = useSelector(state => state.energyPrompt.cards);
 	const message = useSelector(getPromptMessage);
 	const promptType = useSelector(getPromptType);
+	const playerNumber = useSelector(getPlayerNumber);
 
 	const handleSend = () => {
 		if (freeEnergy === 0) {
@@ -20,7 +21,7 @@ function PromptChooseCards({engineConnector}) {
 				promptType,
 				energyOnCreatures: cards,
 				generatedBy,
-				player: 1,
+				player: playerNumber,
 			});
 		}
 	};

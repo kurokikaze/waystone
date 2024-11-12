@@ -6,21 +6,25 @@ import { LogEntryType } from 'moonlands/src/types';
 
 import {mapEntryToText} from './utils';
 import './style.css';
+import { getPlayerNumber } from '../../selectors';
 
 const SHOW_CLASS = 'show';
 
 const getLogEntries = (state: AppState) => state.log;
 
 type LogEntryProps = {
-	entry: LogEntryType;
+	entry: LogEntryType
+	playerNumber: number
 }
 // @ts-ignore
-const LogEntry = ({entry}: LogEntryProps) => <div className={cn('logEntry', {'ours': ('player' in entry && entry.player === 1), 'theirs': ('player' in entry && entry.player !== 1)})}>{mapEntryToText(entry)}</div>;
+const LogEntry = ({entry, playerNumber}: LogEntryProps) => <div className={cn('logEntry', {'ours': ('player' in entry && entry.player === playerNumber), 'theirs': ('player' in entry && entry.player !== playerNumber)})}>{mapEntryToText(entry)}</div>;
 
 const Log = () => {
 	const listRef = useRef<HTMLDivElement>(null);
 
 	const entries = useSelector(getLogEntries);
+	const playerNumber = useSelector(getPlayerNumber);
+
 	useEffect(() => {
 		const listElement = listRef.current;
 		if (listElement && listElement.children.length) {
@@ -37,7 +41,7 @@ const Log = () => {
 		}, 10);
 	}, [entries]);
 
-	return <div className='actionLog' ref={listRef}>{entries.map((entry, i) => <LogEntry key={i} entry={entry} />)}</div>;
+	return <div className='actionLog' ref={listRef}>{entries.map((entry, i) => <LogEntry key={i} entry={entry} playerNumber={playerNumber} />)}</div>;
 };
 
 type AppState = {

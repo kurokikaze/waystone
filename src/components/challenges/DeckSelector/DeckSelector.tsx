@@ -1,14 +1,16 @@
-import {connect} from 'react-redux';
+// @ts-nocheck
+import {connect, useSelector} from 'react-redux';
 import Select from 'antd/es/select';
 import Space from 'antd/es/space';
-import {A} from 'hookrouter';
-import {DeckContent} from './DeckContent/index';
-import Edit from './icons/Edit.jsx';
-import {changeCurrentDeck} from '../actions/index.js';
+import {DeckContent} from '../DeckContent/DeckContent.jsx';
+import Edit from '../../icons/Edit.jsx';
+import {changeCurrentDeck} from '../../../actions/index.js';
 
 const {Option} = Select;
 
-function DeckSelector({deck, decks, currentDeck, setDeck}) {
+function DeckSelector() {
+	const deck = useSelector(state => state.decks)
+
 	return <div>
 		<h2>Decks</h2>
 		<div>

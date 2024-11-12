@@ -338,7 +338,10 @@ export class GameState {
     return this.state.opponentId;
   }
 
-  private getZoneName = (serverZoneType: string, source: Card | ConvertedCard | HiddenConvertedCard): keyof typeof this.state.zones => {
+  private getZoneName = (
+    serverZoneType: string,
+    source: Card | ConvertedCard | HiddenConvertedCard
+  ): keyof typeof this.state.zones => {
     if (!(serverZoneType in clientZoneNames)) {
       throw new Error(`Unknown zone: ${serverZoneType}`);
     }
@@ -368,12 +371,6 @@ export class GameState {
         };
       }
       case ACTION_PASS: {
-        // postMessage({
-        //   botState: JSON.stringify({
-        //     ...state,
-        //     step: action.newStep,
-        //   }, null, 2),
-        // })
         return {
           ...state,
           step: action.newStep,

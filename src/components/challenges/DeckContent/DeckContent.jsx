@@ -2,7 +2,7 @@ import {connect} from 'react-redux';
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
 import {camelCase} from '../../../common/utils.js';
-import CardView from	'../CardView/CardView.jsx';
+import CardView from	'../../CardView/CardView.jsx';
 
 import './style.css';
 

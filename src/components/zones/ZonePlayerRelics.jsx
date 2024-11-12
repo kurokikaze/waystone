@@ -14,6 +14,7 @@ import {
 	isPromptActive,
 	getPromptGeneratedBy,
 	getPromptType,
+	getPlayerNumber,
 } from '../../selectors';
 import {
 	getCardDetails,
@@ -32,9 +33,10 @@ function ZonePlayerRelics({
 	engineConnector,
 }) {
 	const rawContent = useSelector(getCardDetails);
+	const playerNumber = useSelector(getPlayerNumber);
 	const content = rawContent.inPlay.filter(card =>
 		card.card.type === TYPE_RELIC &&
-		((zoneId === 'playerRelics') ? card.data.controller === 1 : card.data.controller !== 1)
+		((zoneId === 'playerRelics') ? card.data.controller === playerNumber : card.data.controller !== playerNumber)
 	);
 	const isOnPrompt = useSelector(isPromptActive);
 	const promptType = useSelector(getPromptType);

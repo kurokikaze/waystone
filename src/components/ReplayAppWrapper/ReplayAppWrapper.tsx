@@ -1,4 +1,5 @@
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { isTauri } from "@tauri-apps/api/core";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import { ACTION_PLAYER_WINS } from "moonlands";
 import { useRef, useEffect, useState } from "react";
@@ -18,14 +19,6 @@ import GameApp from "../GameApp/GameApp"
 import { ReplayLogService } from "../../services/ReplayLogService";
 
 import './style.css';
-function isTauri() {
-	return Boolean(
-		typeof window !== 'undefined' &&
-		window !== undefined &&
-		// @ts-ignore
-		window.__TAURI_IPC__ !== undefined
-	)
-}
 
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(
@@ -155,7 +148,7 @@ export const ReplayAppWrapper = ({
 	return (
 		<div className="replayWrapper">
 			<Provider store={store}>
-				{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} />}
+				{loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} playerId={1} />}
 				<div className="controls">
 					{playing ? <button onClick={pause}>Pause</button>
 						: <button onClick={play}>Play</button>}

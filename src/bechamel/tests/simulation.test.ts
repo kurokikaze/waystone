@@ -12,6 +12,7 @@ import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
 import { AnyEffectType } from 'moonlands/src/types';
 import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
+import { Socket } from 'socket.io-client';
 
 const fs = require('node:fs');
 
@@ -2092,9 +2093,9 @@ describe('Simulations', () => {
     }
 
     console.log(`Connecting strategies to game`)
-    const strategyConnectorOne = new StrategyConnector(connectorOne);
+    const strategyConnectorOne = new StrategyConnector(connectorOne as Socket);
     strategyConnectorOne.connect(new SimulationStrategy())
-    const strategyConnectorTwo = new StrategyConnector(connectorTwo);
+    const strategyConnectorTwo = new StrategyConnector(connectorTwo as Socket);
     strategyConnectorTwo.connect(new SimulationStrategy())
 
     console.log(`Turning off debug`)
@@ -2635,9 +2636,9 @@ describe('Simulations', () => {
     }
 
     console.log(`Connecting strategies to game`)
-    const strategyConnectorOne = new StrategyConnector(connectorOne);
+    const strategyConnectorOne = new StrategyConnector(connectorOne as Socket);
     strategyConnectorOne.connect(new SimulationStrategy())
-    const strategyConnectorTwo = new StrategyConnector(connectorTwo);
+    const strategyConnectorTwo = new StrategyConnector(connectorTwo as Socket);
     strategyConnectorTwo.connect(new SimulationStrategy())
 
     // console.log(`Turning off debug`)
@@ -2918,9 +2919,9 @@ describe('Simulations', () => {
       }
     }
 
-    const strategyConnectorOne = new StrategyConnector(connectorOne);
+    const strategyConnectorOne = new StrategyConnector(connectorOne as Socket);
     strategyConnectorOne.connect(new SimulationStrategy())
-    const strategyConnectorTwo = new StrategyConnector(connectorTwo);
+    const strategyConnectorTwo = new StrategyConnector(connectorTwo as Socket);
     strategyConnectorTwo.connect(new SimulationStrategy())
 
     game.debug = false;

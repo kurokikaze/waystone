@@ -4,12 +4,11 @@ import { Provider } from "react-redux"
 import { createStore, compose, applyMiddleware } from "redux";
 import { createEpicMiddleware } from "redux-observable";
 import thunk from "redux-thunk";
-import { C2SAction, ClientAction } from "../../clientProtocol";
-import { defaultState } from "../../reducers/reducer";
-import { EngineConnector } from "../../types";
-import rootReducer from '../../reducers';
-import GameApp from "../GameApp/GameApp"
-import { connectToEngine } from "./engineUtils";
+import { C2SAction } from "../../../clientProtocol";
+import { defaultState } from "../../../reducers/reducer";
+import { DeckType, EngineConnector } from "../../../types";
+import rootReducer from '../../../reducers';
+import ChallengeApp from "../ChallengeApp/ChallengeApp";
 
 const epicMiddleware = createEpicMiddleware();
 const store = createStore(
@@ -26,28 +25,22 @@ var emptyEngineConnector: EngineConnector = {
 };
 
 type GameAppWrapperProps = {
-  playerDeck: string[]
-  opponentDeck: string[]
-  onReturnToBase: () => void
+  playerDeck: DeckType
+  onChallengeAccepted: (secret: string) => void
+  onReturnToMenu: () => void
 }
 
-export const GameAppWrapper = ({
+export const ChallengeAppWrapper = ({
   playerDeck,
-  opponentDeck,
-  onReturnToBase,
+  onChallengeAccepted,
+  onReturnToMenu,
 }: GameAppWrapperProps) => {
-  let breakCallback = () => {}
-
   const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
   useEffect(() => {
-   const [realEngineConnector, callback] = connectToEngine(store, playerDeck, opponentDeck)
-
-   setEngineConnector(realEngineConnector)
-   breakCallback = callback
   }, []);
 
   return (<Provider store={store}>
-    <GameApp engineConnector={engineConnector} onBreak={breakCallback} onReturnToBase={onReturnToBase} playerId={1} />
+    <ChallengeApp playerDeck={playerDeck} onChallengeAccepted={onChallengeAccepted} onReturnToMenu={onReturnToMenu} />
   </Provider>)
 }

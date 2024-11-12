@@ -29,6 +29,19 @@
     "shell:allow-open",
     "fs:default",
     "shell:default",
-    "fs:default"
+    "fs:default",
+    "websocket:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "http://localhost:3000"
+        },
+        {
+          "url": "https://localhost"
+        }
+      ],
+      "deny": []
+    }
   ]
 }

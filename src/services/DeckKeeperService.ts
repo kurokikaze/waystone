@@ -1,7 +1,7 @@
 import { BaseDirectory, readTextFile, writeTextFile, create, exists } from '@tauri-apps/plugin-fs';
 import { byName } from 'moonlands/src/cards';
 import { TYPE_MAGI } from 'moonlands/src/const';
-import DeckEditor from '../components/DeckEditor/DeckEditor';
+import { isTauri } from "@tauri-apps/api/core";
 
 type DecksResult = { player: string[], opponent: string[] }
 
@@ -9,12 +9,7 @@ export class DeckKeeperService {
   static DECKS_DIR = 'decks'
 
   private isTauri() {
-    return Boolean(
-      typeof window !== 'undefined' &&
-      window !== undefined &&
-      // @ts-ignore
-      window.__TAURI_IPC__ !== undefined
-    )
+    return isTauri()
   }
 
   static defaultPlayerDeck = [

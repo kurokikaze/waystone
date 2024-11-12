@@ -99,14 +99,6 @@ export class StrategyConnector {
     })
   }
 
-  private isTauri() {
-    return Boolean(
-      typeof window !== 'undefined' &&
-      window !== undefined &&
-      // @ts-ignore
-      window.__TAURI_IPC__ !== undefined
-    )
-  }
   private requestAndSendAction() {
     if (!this.gameState) {
       this.io.emit('clientAction', { type: ACTION_PASS, player: this.playerId } as FromClientPassAction)

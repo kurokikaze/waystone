@@ -838,6 +838,11 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@socket.io/component-emitter@~3.1.0":
+  version "3.1.2"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
+  integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
+
 "@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.0.3":
   version "2.0.3"
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/api/-/api-2.0.3.tgz"
@@ -871,10 +876,24 @@
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
+"@tauri-apps/plugin-http@^2.0.1":
+  version "2.0.1"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/plugin-http/-/plugin-http-2.0.1.tgz"
+  integrity sha512-j6IA3pVBybSCwPpsihpX4z8bs6PluuGtr06ahL/xy4D8HunNBTmRmadJrFOQi0gOAbaig4MkQ15nzNLBLy8R1A==
+  dependencies:
+    "@tauri-apps/api" "^2.0.0"
+
 "@tauri-apps/plugin-shell@^2.0.1":
   version "2.0.1"
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/plugin-shell/-/plugin-shell-2.0.1.tgz"
   integrity sha512-akU1b77sw3qHiynrK0s930y8zKmcdrSD60htjH+mFZqv5WaakZA/XxHR3/sF1nNv9Mgmt/Shls37HwnOr00aSw==
+  dependencies:
+    "@tauri-apps/api" "^2.0.0"
+
+"@tauri-apps/plugin-websocket@^2.0.0":
+  version "2.0.0"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/@tauri-apps/plugin-websocket/-/plugin-websocket-2.0.0.tgz"
+  integrity sha512-O2qRxZCljd4g+ceJhW7LfgQr+fg0fBBiAaLiMopoKL6TXKMnhBHOenp4nZ5/MoVTr77OQIDNO6Jp/c1YwiRVtQ==
   dependencies:
     "@tauri-apps/api" "^2.0.0"
 
@@ -1393,7 +1412,7 @@ dayjs@^1.11.10, "dayjs@>= 1.x":
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/dayjs/-/dayjs-1.11.11.tgz"
   integrity sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==
 
-debug@^4.1.0, debug@^4.1.1, debug@^4.3.1:
+debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@~4.3.1, debug@~4.3.2:
   version "4.3.4"
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/debug/-/debug-4.3.4.tgz"
   integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
@@ -1443,6 +1462,22 @@ emoji-regex@^8.0.0:
   version "8.0.0"
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz"
   integrity sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==
+
+engine.io-client@~6.6.1:
+  version "6.6.2"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/engine.io-client/-/engine.io-client-6.6.2.tgz"
+  integrity sha512-TAr+NKeoVTjEVW8P3iHguO1LO6RlUz9O5Y8o7EY0fU+gY1NYqas7NN3slpFtbXEsLMHk0h90fJMfKjRkQ0qUIw==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.1"
+    engine.io-parser "~5.2.1"
+    ws "~8.17.1"
+    xmlhttprequest-ssl "~2.1.1"
+
+engine.io-parser@~5.2.1:
+  version "5.2.3"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/engine.io-parser/-/engine.io-parser-5.2.3.tgz"
+  integrity sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==
 
 error-ex@^1.3.1:
   version "1.3.2"
@@ -2985,6 +3020,24 @@ slash@^3.0.0:
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/slash/-/slash-3.0.0.tgz"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
 
+socket.io-client@^4.8.1:
+  version "4.8.1"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/socket.io-client/-/socket.io-client-4.8.1.tgz"
+  integrity sha512-hJVXfu3E28NmzGk8o1sHhN3om52tRvwYeidbj7xKy2eIIse5IoKX3USlS6Tqt3BHAtflLIkCQBkzVrEEfWUyYQ==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.2"
+    engine.io-client "~6.6.1"
+    socket.io-parser "~4.2.4"
+
+socket.io-parser@~4.2.4:
+  version "4.2.4"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/socket.io-parser/-/socket.io-parser-4.2.4.tgz"
+  integrity sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.1"
+
 source-map-js@^1.2.0:
   version "1.2.0"
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/source-map-js/-/source-map-js-1.2.0.tgz"
@@ -3246,6 +3299,16 @@ write-file-atomic@^4.0.2:
   dependencies:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.7"
+
+ws@~8.17.1:
+  version "8.17.1"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/ws/-/ws-8.17.1.tgz"
+  integrity sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==
+
+xmlhttprequest-ssl@~2.1.1:
+  version "2.1.2"
+  resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/xmlhttprequest-ssl/-/xmlhttprequest-ssl-2.1.2.tgz"
+  integrity sha512-TEU+nJVUUnA4CYJFLvK5X9AOeH4KvDvhIfm0vV1GaQRtchnG0hgK5p8hw/xjv8cunWYCsiPCSDzObPyhEwq3KQ==
 
 y18n@^5.0.5:
   version "5.0.8"

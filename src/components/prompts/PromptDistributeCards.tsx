@@ -18,6 +18,7 @@ import PromptCardTarget from './PromptCardTarget';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import {
+	getPlayerNumber,
 	getPromptCards,
 	getPromptGeneratedBy,
 	getPromptTargetZones,
@@ -46,8 +47,9 @@ function PromptDistributeCards({ engineConnector }: PromptDistributeCardsProps) 
 	const cards = useSelector(getPromptCards) || [];
 	const targetZones = useSelector(getPromptTargetZones) || [];
 	const generatedBy = useSelector(getPromptGeneratedBy) || '';
+	const playerNumber = useSelector(getPlayerNumber);
 	const cardIndices = cards.map((_, i) => i)
-	const initialValue: CardsInZones = Object.fromEntries(targetZones.map(index => [index as ZoneType, []]))
+	const initialValue: CardsInZones = Object.fromEntries(targetZones.map((index: ZoneType) => [index as ZoneType, []]))
 	initialValue[targetZones[0] as ZoneType]!.push(...cardIndices)
 
 	const [order, setOrder] = useState<CardsInZones>(initialValue);
@@ -93,7 +95,7 @@ function PromptDistributeCards({ engineConnector }: PromptDistributeCardsProps) 
 			// promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
 			cards: result,
 			generatedBy,
-			player: 1,
+			player: playerNumber,
 		});
 	};
 
