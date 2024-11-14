@@ -75,6 +75,7 @@ function ZonePlayerRelics({
 						actionsAvailable={prsAvailable}
 						onAbilityUse={abilityUseHandler}
 						cardStyle={CARD_STYLE_LOCKET}
+                        playerNumber={playerNumber}
 					/>;
 				})}
 			</div> : null}
@@ -91,6 +92,7 @@ function ZonePlayerRelics({
 						actionsAvailable={prsAvailable}
 						onAbilityUse={abilityUseHandler}
 						cardStyle={CARD_STYLE_LOCKET}
+                        playerNumber={playerNumber}
 					/>;
 				})}
 			</div> : null}

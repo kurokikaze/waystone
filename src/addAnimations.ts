@@ -60,9 +60,9 @@ const convertAction = (action: ClientCommand, store: Store<any, Action<any>>, on
 	if (!('type' in action)) {
 		return action;
 	}
+    const state = store.getState();
 	switch(action.type) {
 		case ACTION_RESOLVE_PROMPT:
-			const state = store.getState();
 			if (!action.target) {
 				return [action]
 			}
