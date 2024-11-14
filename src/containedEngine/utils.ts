@@ -130,7 +130,8 @@ import {
   ClientPlayAction,
   ClientPowerAction,
   ClientResolvePromptAction,
-  ConvertedCardMinimal
+  ConvertedCardMinimal,
+  ClientEffectPlayCreature
 } from '../clientProtocol';
 
 const hiddenZonesHash: Record<ZoneType, boolean> = {
@@ -774,10 +775,11 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           } as ClientEffectCreatureAttacks;
         }
         case EFFECT_TYPE_PLAY_CREATURE: {
-          return {
+          const result: ClientEffectPlayCreature = {
             ...action,
-            card: convertCard(action.card),
+            card: convertCard(action.card) as ConvertedCard,
           };
+          return result;
         }
         // case EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
         // 	const targetCards = (typeof action.target == 'string') ?

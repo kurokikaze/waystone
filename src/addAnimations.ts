@@ -1,4 +1,5 @@
 /* global window */
+// @ts-nocheck
 import { Observable } from 'rxjs';
 
 import {
@@ -155,8 +156,9 @@ const TIMERS_BY_EVENT = {
     [END_STEP_ANIMATION]: STEP_TIMEOUT,
 };
 
-const convertTimer = (type: any) => {
-    return TIMERS_BY_EVENT[type] || 0;
+type TimersKeyType = keyof typeof TIMERS_BY_EVENT;
+const convertTimer = (type: TimersKeyType | any) => {
+    return type in TIMERS_BY_EVENT ? TIMERS_BY_EVENT[type as TimersKeyType] : 0;
 };
 
 export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>, onlyEnemy = true) {
@@ -169,15 +171,17 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, bre
         const streamActions = () => {
             while (actionsStorage.length) {
                 const action = actionsStorage.shift();
-                const delayBy = convertTimer(action.type)
-                observer.next(action);
-                if (delayBy > 0) {
-                    timeout = setTimeout(() => {
-                        delaying = false;
-                        streamActions();
-                    }, delayBy);
-                    delaying = true;
-                    return;
+                if (action) {
+                    const delayBy = convertTimer(action.type)
+                    observer.next(action);
+                    if (delayBy > 0) {
+                        timeout = setTimeout(() => {
+                            delaying = false;
+                            streamActions();
+                        }, delayBy);
+                        delaying = true;
+                        return;
+                    }
                 }
             }
             if (finished) {
