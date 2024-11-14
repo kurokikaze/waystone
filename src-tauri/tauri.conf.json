@@ -51,6 +51,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
+        "dragDropEnabled": false,
         "title": "Waystone",
         "width": 800
       }
