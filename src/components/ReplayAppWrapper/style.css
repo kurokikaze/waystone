@@ -8,6 +8,17 @@
 
 .replayWrapper .controls {
     position: absolute;
+    background-color: white;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
     top: 600px;
-    left: 450px;
+    width: 600px;
+    left: calc(35% - 300px);
+}
+
+.replayWrapper .controls .playPause {
+    display: flex;
+    justify-content: space-around;
 }
