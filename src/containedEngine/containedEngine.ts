@@ -1,4 +1,4 @@
-import {State} from 'moonlands/src/index';
+import {State} from 'moonlands/dist/esm/index';
 
 export const createGame = (): State => {
   const defaultState = {

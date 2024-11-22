@@ -1,5 +1,5 @@
-import { ACTION_EFFECT, State } from "moonlands/src";
-import {EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY} from "moonlands/src/const";
+import { ACTION_EFFECT, State } from "moonlands/dist/esm";
+import {EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY} from "moonlands/dist/esm/const";
 export class IdentityKeeper {
   private creaturePlays: Record<string, string>
   constructor(sim: State) {

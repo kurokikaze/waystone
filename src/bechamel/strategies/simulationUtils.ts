@@ -1,11 +1,11 @@
-import {byName} from 'moonlands/src/cards'
-import {State, TYPE_RELIC} from 'moonlands/src'
-import CardInGame from 'moonlands/src/classes/CardInGame'
-import Zone from 'moonlands/src/classes/Zone'
+import {byName} from 'moonlands/dist/esm/cards'
+import {State, TYPE_RELIC} from 'moonlands/dist/esm'
+import CardInGame from 'moonlands/dist/esm/classes/CardInGame'
+import Zone from 'moonlands/dist/esm/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
 import { GameState } from '../GameState';
-import Card from 'moonlands/src/classes/Card';
+import Card from 'moonlands/dist/esm/classes/Card';
 
 const addCardData = (card: any) => ({
   ...card,

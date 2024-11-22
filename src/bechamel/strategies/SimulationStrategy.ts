@@ -1,6 +1,6 @@
-import { byName } from 'moonlands/src/cards'
-import { AnyEffectType } from 'moonlands/src/types';
-import CardInGame from 'moonlands/src/classes/CardInGame';
+import { byName } from 'moonlands/dist/esm/cards'
+import { AnyEffectType } from 'moonlands/dist/esm/types';
+import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 
 import {
   PROMPT_TYPE_MAY_ABILITY,
@@ -19,7 +19,7 @@ import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SerializedClientState, SimulationEntity, StateRepresentation } from '../types';
 import { ActionExtractor } from './ActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/src/const';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
 
 const STEP_NAME = {

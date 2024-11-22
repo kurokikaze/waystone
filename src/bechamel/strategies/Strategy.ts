@@ -1,4 +1,4 @@
-import { ACTION_PASS } from "moonlands/src/const";
+import { ACTION_PASS } from "moonlands/dist/esm/const";
 import { C2SAction } from "../../clientProtocol";
 import { GameState } from "../GameState";
 

@@ -40,10 +40,10 @@ import {
   ZONE_TYPE_HAND,
   ZONE_TYPE_MAGI_PILE,
 } from './const'
-import { byName } from 'moonlands/src/cards'
+import { byName } from 'moonlands/dist/esm/cards'
 import { HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation } from './types'
 import { ClientAction } from '../clientProtocol'
-import { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame'
+import { ConvertedCard, HiddenConvertedCard } from 'moonlands/dist/esm/classes/CardInGame'
 import {
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
@@ -55,7 +55,7 @@ import {
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
   PROMPT_TYPE_PAYMENT_SOURCE
-} from 'moonlands/src/const'
+} from 'moonlands/dist/esm/const'
 import { getCardDetails } from './common'
 import { tickDownContinuousEffects } from '../reducers/utils'
 

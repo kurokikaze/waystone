@@ -1,4 +1,4 @@
-import {State} from 'moonlands/src/index'
+import {State} from 'moonlands/dist/esm/index'
 import {PROPERTY_ATTACKS_PER_TURN, TYPE_CREATURE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY} from "../const"
 
 export class HashBuilder {

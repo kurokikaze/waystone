@@ -1,4 +1,4 @@
-import { State } from 'moonlands/src/index';
+import { State } from 'moonlands/dist/esm';
 import { ActionOnHold, SimulationEntity } from "../types";
 import { HashBuilder } from "./HashBuilder";
 import { ActionExtractor } from "./ActionExtractor";

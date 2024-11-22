@@ -1,16 +1,16 @@
 // globals describe, it
-import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/src/index'
-import { byName } from 'moonlands/src/cards';
-import Card from 'moonlands/src/classes/Card';
-import CardInGame from 'moonlands/src/classes/CardInGame';
+import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/dist/esm/index'
+import { byName } from 'moonlands/dist/esm/cards';
+import Card from 'moonlands/dist/esm/classes/Card';
+import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 import { SimulationStrategy } from '../strategies/SimulationStrategy'
 import { GameState } from '../GameState';
 import { createZones } from '../strategies/simulationUtils';
 import { SerializedClientState } from '../types';
-import { ACTION_ATTACK, ACTION_PASS, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/src/const';
+import { ACTION_ATTACK, ACTION_PASS, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
 import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
-import { AnyEffectType } from 'moonlands/src/types';
+import { AnyEffectType } from 'moonlands/dist/esm/types';
 import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
 import { Socket } from 'socket.io-client';
 
@@ -62,7 +62,7 @@ describe.skip('Simulations', () => {
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
 
-    const serializedState = gameState.serializeData(ACTIVE_PLAYER) as SerializedClientState
+    const serializedState = gameState.serializeData(ACTIVE_PLAYER) as unknown as SerializedClientState
 
     const stateRepresentation = new GameState(serializedState)
     stateRepresentation.setPlayerId(ACTIVE_PLAYER)
@@ -99,7 +99,7 @@ describe.skip('Simulations', () => {
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
     gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
 
-    const serializedState = gameState.serializeData(ACTIVE_PLAYER) as SerializedClientState
+    const serializedState = gameState.serializeData(ACTIVE_PLAYER) as unknown as SerializedClientState
 
     // console.dir(serializedState.zones.opponentActiveMagi)
     const stateRepresentation = new GameState(serializedState)

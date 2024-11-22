@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "outDir": "./sim-dist",
+        "useDefineForClassFields": true,
+        "lib": [
+            "ESNext"
+        ],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": false,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true
+    },
+    "tsc-alias": {
+        "resolveFullPaths": true,
+        "resolveFullExtension": ".js",
+        "replacers": {
+            "moonlands": {
+                "enabled": true,
+                "file": "./build-utils/importReplacer.cjs"
+            }
+        },
+    },
+    "include": [
+        "src/bechamel/tests/simulation.ts"
+    ],
+}

@@ -1,12 +1,12 @@
-import { State, ZONE_TYPE_ACTIVE_MAGI } from 'moonlands/src/index';
+import { State, ZONE_TYPE_ACTIVE_MAGI } from 'moonlands/dist/esm/index';
 import { HashBuilder } from '../strategies/HashBuilder'
-import CardInGame from 'moonlands/src/classes/CardInGame';
-import { byName } from 'moonlands/src/cards';
+import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
+import { byName } from 'moonlands/dist/esm/cards';
 import { createZones } from '../strategies/simulationUtils';
 import { STEP_CREATURES, STEP_PRS_SECOND } from '../../const';
-import Card from 'moonlands/src/classes/Card';
+import Card from 'moonlands/dist/esm/classes/Card';
 import { ACTION_EFFECT, ACTION_PLAY, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY } from '../const';
-import { AnyEffectType } from 'moonlands/src/types';
+import { AnyEffectType } from 'moonlands/dist/esm/types';
 
 describe('hashBuilder', () => {
     it('builds hashes', () => {

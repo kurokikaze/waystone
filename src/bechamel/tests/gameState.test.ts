@@ -1,4 +1,4 @@
-import { ACTION_EFFECT, EFFECT_TYPE_START_OF_TURN } from 'moonlands/src/index';
+import { ACTION_EFFECT, EFFECT_TYPE_START_OF_TURN } from 'moonlands/dist/esm/index';
 import { GameState } from '../GameState'
 import { SerializedClientState } from '../types';
 import { SimulationStrategy } from '../strategies/SimulationStrategy';

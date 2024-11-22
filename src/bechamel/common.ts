@@ -1,7 +1,7 @@
 /* global window */
 // @ts-nocheck
-import { byName } from 'moonlands/src/cards';
-import clone from 'moonlands/src/clone';
+import { byName } from 'moonlands/dist/esm/cards';
+import clone from 'moonlands/dist/esm/clone';
 import {
 	TYPE_CREATURE,
 	TYPE_RELIC,
@@ -62,8 +62,8 @@ import {
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 
 	STATUS_BURROWED,
-} from 'moonlands/src/const';
-import { PromptParams, PromptType, RestrictionType, StaticAbilityType } from 'moonlands/src/types';
+} from 'moonlands/dist/esm/const';
+import { PromptParams, PromptType, RestrictionType, StaticAbilityType } from 'moonlands/dist/esm/types';
 
 import { ExpandedClientCard, StateRepresentation } from './types';
 

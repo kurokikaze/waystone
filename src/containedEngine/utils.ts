@@ -1,5 +1,5 @@
-import { MetaDataRecord, State } from 'moonlands/src/index';
-import CardInGame, { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
+import { MetaDataRecord, State } from 'moonlands/dist/esm/index';
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
 import {
   ACTION_ATTACK,
   ACTION_EFFECT,
@@ -82,11 +82,11 @@ import {
   ZONE_TYPE_HAND,
   ZONE_TYPE_IN_PLAY,
   ZONE_TYPE_MAGI_PILE,
-} from 'moonlands/src/const';
-import { ZoneType } from 'moonlands/src/types/common';
-import { AnyEffectType, NormalPlayType } from 'moonlands/src/types/index';
+} from 'moonlands/dist/esm/const';
+import { ZoneType } from 'moonlands/dist/esm/types/common';
+import { AnyEffectType, NormalPlayType } from 'moonlands/dist/esm/types/index';
 
-import clone from 'moonlands/src/clone';
+import clone from 'moonlands/dist/esm/clone';
 import { RestrictionType } from 'moonlands/src/types';
 import {
   ClientAction,

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import {byName} from 'moonlands/src/cards'
+import {byName} from 'moonlands/dist/esm/cards'
 
 import {
   ACTION_ATTACK,
