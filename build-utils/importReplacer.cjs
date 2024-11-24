@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = exampleReplacer;
 function exampleReplacer({ orig, file, config }) {
     
-    if (orig.startsWith("from 'moonlands/dist")) {
+    if (orig.startsWith("from 'moonlands/dist") && !orig.endsWith('.js')) {
         console.log(orig)
         const module = /'([^']*)+/g.exec(orig)[1]
         return `from '${module}.js'`

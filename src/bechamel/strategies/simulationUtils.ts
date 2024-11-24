@@ -1,5 +1,5 @@
 import {byName} from 'moonlands/dist/esm/cards'
-import {State, TYPE_RELIC} from 'moonlands/dist/esm'
+import {State, TYPE_RELIC} from 'moonlands/dist/esm/index'
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame'
 import Zone from 'moonlands/dist/esm/classes/Zone'
 

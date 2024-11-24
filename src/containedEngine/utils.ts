@@ -299,7 +299,6 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           } as ClientEnterPromptRearrangeEnergyOnCreatures;
         }
         case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-          debugger;
           const restrictions = action.restrictions || (action.restriction ? [
             {
               type: game.getMetaValue(action.restriction, action.generatedBy) as RestrictionType,
@@ -1327,18 +1326,22 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
         }
         case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
           if (action.zone) {
+            console.log(`We have zone`)
             const zone = action.zone === ZONE_TYPE_IN_PLAY ? game.getZone(ZONE_TYPE_IN_PLAY) : game.getZone(action.zone, action.zoneOwner);
             const zoneContent = zone.cards;
             const actionCards = action.cards;
-            if (actionCards) {
-              const cards = zoneContent.filter(card => (actionCards instanceof Array && actionCards.includes(card.id)));
+            if (actionCards instanceof Array) {
+                console.log(`We have cards`)
+                const cards = zoneContent.filter(card => (actionCards instanceof Array && actionCards.includes(card.id)));
               return {
                 type: action.type,
                 cards,
                 player: action.player,
               };
             }
+            console.log(`We have no cards`)
           }
+          console.log(`We have no zone`)
           return null;
         }
         case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {

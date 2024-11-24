@@ -1,6 +1,6 @@
 import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/dist/esm/index'
 import { SimulationStrategy } from '../strategies/SimulationStrategy'
-import { ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
+import { EFFECT_TYPE_START_OF_TURN, ACTION_EFFECT, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
 import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
 import { AnyEffectType } from 'moonlands/dist/esm/types';
@@ -10,50 +10,51 @@ import { Socket } from 'socket.io-client';
 import * as fs from 'node:fs';
 
 const deckOne = [
-    'Motash',
-    'Strag',
-    'Ulk',
+    'Whall',
+    'Orlon',
+    'Ebylon',
+    'Giant Parathin',
+    'Giant Parathin',
     'Water of Life',
-    'Water of Life',
-    'Water of Life',
+    'Sphor',
+    'Sphor',
+    'Sphor',
+    'Sphor',
+    'Sphor',
+    'Bwill',
+    'Bwill',
+    'Bwill',
     'Dream Balm',
     'Dream Balm',
     'Dream Balm',
-    'Korrit',
-    'Korrit',
-    'Korrit',
-    'Giant Korrit',
-    'Giant Korrit',
-    'Giant Korrit',
-    'Pack Korrit',
-    'Pack Korrit',
-    'Pack Korrit',
-    'Staff of Korrits',
-    'Staff of Korrits',
-    'Staff of Korrits',
-    'Crystal Arboll',
-    'Crystal Arboll',
-    'Crystal Arboll',
-    'Bottomless Pit',
-    'Bottomless Pit',
-    'Bottomless Pit',
-    'Pharan',
-    'Pharan',
-    'Pharan',
-    'Cloud Narth',
-    'Cloud Narth',
-    'Cloud Narth',
-    'Cave Rudwot',
-    'Cave Rudwot',
-    'Cave Rudwot',
-    'Agovo',
-    'Agovo',
-    'Agovo',
-    'Giant Parmalag',
-    'Giant Parmalag',
-    'Giant Parmalag',
-    'Motash\'s Staff'
+    'Dream Balm',
+    'Paralit',
+    'Wellisk Pup',
+    'Wellisk Pup',
+    'Wellisk Pup',
+    'Wellisk Pup',
+    'Weebo',
+    'Weebo',
+    'Undertow',
+    'Undertow',
+    'Corf',
+    'Corf',
+    'Submerge',
+    'Submerge',
+    'Submerge',
+    'Sea Barl',
+    'Sea Barl',
+    'Sea Barl',
+    'Sea Barl',
+    'Sea Barl',
+    'Sea Barl',
+    'Orathan',
+    'Orathan',
+    'Ancestral Flute',
+    'Warrior\'s Boots',
+    'Dream Balm'
 ];
+
 
 const deckTwo = [
     'Poad',
@@ -102,12 +103,12 @@ const deckTwo = [
 ]
 
 const game = createGame()
+// @ts-ignore
+game.initiatePRNG(2021);
 game.setPlayers(1, 2);
 game.setDeck(1, deckOne);
 game.setDeck(2, deckTwo);
 
-// @ts-ignore
-game.initiatePRNG(2029);
 game.setup();
 
 const gameLog: any[] = [];
@@ -118,16 +119,89 @@ let actionCallbackOne: Function = () => { };
 let gameDataCallbackTwo: Function = () => { };
 let actionCallbackTwo: Function = () => { };
 
+let turn = 0;
+let priorityNumber = 1;
+
+const queue: AnyEffectType[] = []
+let intervalTimer = setInterval(() => {
+    if (queue.length) {
+        const action = queue.shift()
+        if (action) {
+            game.update(action)
+
+            if (turn == 27 && (priorityNumber == 5 || priorityNumber == 6)) {
+                console.log(`Inner state`)
+                console.dir({
+                    prompt: game.state.prompt,
+                    promptType: game.state.promptType,
+                    promptPlayer: game.state.promptPlayer,
+                    promptGeneratedBy: game.state.promptGeneratedBy,
+                })
+            }
+
+            const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+
+            if (activePlayer == 1) {
+                console.log(`Priority player 1: ${priorityNumber}`)
+                actionCallbackOne({
+                    type: 'display/priority',
+                    player: activePlayer,
+                })
+            } else {
+                console.log(`Priority player 2: ${priorityNumber}`)
+                actionCallbackTwo({
+                    type: 'display/priority',
+                    player: activePlayer,
+                })
+            }
+            priorityNumber++
+        }
+    }
+}, 10)
+
+let strat1 = new SimulationStrategy()
 const connectorOne = {
-    on: (type: string, callback: Function) => {
+    gameLog: [] as any[],
+    commands: [] as any[],
+    states: [] as any[],
+    commandCount: 0,
+    on: function (type: string, callback: Function) {
         if (type == 'gameData') {
-            gameDataCallbackOne = callback;
+            const wrappedCallback = (state: any) => {
+                this.gameLog.push({
+                    for: 1,
+                    state,
+                })
+                callback(state)
+            }
+            gameDataCallbackOne = wrappedCallback;
         } else if (type == 'action') {
-            actionCallbackOne = callback;
+            const wrappedCallback = (action: any) => {
+                console.dir(action)
+                this.gameLog.push({
+                    for: 1,
+                    action,
+                })
+                callback(action)
+            }
+            actionCallbackOne = wrappedCallback;
         }
     },
-    emit: (type: string, action: any) => {
+    emit: function (type: string, action: any, state: any) {
         if (type === 'clientAction') {
+            this.gameLog.push({
+                from: 1,
+                count: this.commandCount,
+                action,
+            })
+
+            // if (turn == 27) {
+            //     console.log(`Turn ${turn}, priority number ${priorityNumber}`)
+            //     console.dir(action)
+            //     console.log(JSON.stringify(state))
+            //     console.dir(strat1.getHeldActions())
+            // }
+            this.commandCount++;
             const convertedCommand = convertClientCommands({
                 ...action,
                 player: 1,
@@ -139,7 +213,8 @@ const connectorOne = {
                     throw new Error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.name} [${action.payload.card.id}]`)
                 }
                 try {
-                    game.update(convertedCommand);
+                    // game.update(convertedCommand);
+                    queue.push(convertedCommand)
                 } catch (e: any) {
                     if (e && 'message' in e && e.message == 'Non-prompt action in the prompt state') {
                         actionCallbackOne({
@@ -153,49 +228,80 @@ const connectorOne = {
                     }
                     throw e;
                 }
-                const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+                // const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
 
-                if (activePlayer == 1) {
-                    actionCallbackOne({
-                        type: 'display/priority',
-                        player: activePlayer,
-                    })
-                } else {
-                    actionCallbackTwo({
-                        type: 'display/priority',
-                        player: activePlayer,
-                    })
-                }
+                // if (activePlayer == 1) {
+                //     actionCallbackOne({
+                //         type: 'display/priority',
+                //         player: activePlayer,
+                //     })
+                // } else {
+                //     actionCallbackTwo({
+                //         type: 'display/priority',
+                //         player: activePlayer,
+                //     })
+                // }
             }
         }
     },
-    close: () => {
+    close: function () {
+        fs.writeFileSync('./replayPlayerOne-node.json', JSON.stringify(this.gameLog, null, 2));
+        fs.writeFileSync('./commandsPlayerOne-node.json', JSON.stringify(this.commands, null, 2));
         // console.log(`Closing the connection`);
     }
 }
 
 const connectorTwo = {
-    on: (type: string, callback: Function) => {
+    gameLog: [] as any[],
+    commands: [] as any[],
+    states: [] as any[],
+    commandCount: 0,
+    on: function (type: string, callback: Function) {
         if (type == 'gameData') {
-            gameDataCallbackTwo = callback;
+            const wrappedCallback = (state: any) => {
+                this.gameLog.push({
+                    for: 2,
+                    state,
+                })
+                callback(state)
+            }
+            gameDataCallbackTwo = wrappedCallback;
         } else if (type == 'action') {
-            actionCallbackTwo = callback;
+            const wrappedCallback = (action: any) => {
+                this.gameLog.push({
+                    for: 2,
+                    action,
+                })
+                callback(action)
+            }
+            actionCallbackTwo = wrappedCallback;
         }
+        // if (type == 'gameData') {
+        //     gameDataCallbackTwo = callback;
+        // } else if (type == 'action') {
+        //     actionCallbackTwo = callback;
+        // }
     },
-    emit: (_type: string, action: any) => {
+    emit: function (_type: string, action: any, state: any) {
         const convertedCommand = convertClientCommands({
             ...action,
             player: 2,
         }, game);
+        this.gameLog.push({
+            from: 2,
+            count: this.commandCount,
+            action,
+        })
+        this.commandCount++
         if (convertedCommand) {
             if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
                 console.error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.card} [${action.payload.card.id}]`)
                 console.log(game.getZone(ZONE_TYPE_HAND, 2).cards.map(card => `[${card.id}] ${card.card.name}`).join(', '))
                 console.dir(action?.payload?.card);
-                expect(true).toEqual(false);
             }
             try {
-                game.update(convertedCommand);
+                // game.update(convertedCommand);
+                queue.push(convertedCommand)
             } catch (e: any) {
                 if (e && 'message' in e && e.message == 'Non-prompt action in the prompt state') {
                     actionCallbackOne({
@@ -215,19 +321,20 @@ const connectorTwo = {
             // }
             // console.log(`Sending out priority display for player ${activePlayer}`);
 
-            if (activePlayer == 1) {
-                actionCallbackOne({
-                    type: 'display/priority',
-                    player: activePlayer,
-                })
-            } else {
-                actionCallbackTwo({
-                    type: 'display/priority',
-                    player: activePlayer,
-                })
-            }
+            // if (activePlayer == 1) {
+            //     actionCallbackOne({
+            //         type: 'display/priority',
+            //         player: activePlayer,
+            //     })
+            // } else {
+            //     actionCallbackTwo({
+            //         type: 'display/priority',
+            //         player: activePlayer,
+            //     })
+            // }
         } else {
             console.log(`Fail to convert command, oh my`)
+            console.dir(action)
             console.log(JSON.stringify(game.serializeData(2)))
 
             // if (action.type !== 'display/dump') {
@@ -240,15 +347,20 @@ const connectorTwo = {
             throw new Error('Conversion error')
         }
     },
-    close: () => {
+    close: function () {
+        fs.writeFileSync('./replayPlayerTwo-node.json', JSON.stringify(this.gameLog, null, 2));
+        fs.writeFileSync('./commandsPlayerTwo-node.json', JSON.stringify(this.commands, null, 2));
+
+        // fs.writeFileSync('./replayPlayerTwo.json', JSON.stringify(gameLog, null, 2));
         // console.log(`Closing the connection`);
     }
 }
 
 console.log(`Connecting strategies to game`)
-const strategyConnectorOne = new StrategyConnector(connectorOne as Socket);
-strategyConnectorOne.connect(new SimulationStrategy())
-const strategyConnectorTwo = new StrategyConnector(connectorTwo as Socket);
+const strategyConnectorOne = new StrategyConnector(connectorOne as unknown as Socket);
+
+strategyConnectorOne.connect(strat1)
+const strategyConnectorTwo = new StrategyConnector(connectorTwo as unknown as Socket);
 strategyConnectorTwo.connect(new SimulationStrategy())
 
 // console.log(`Turning off debug`)
@@ -267,6 +379,11 @@ game.setOnAction((action: AnyEffectType) => {
     //   console.log(`Drawing a card ${action.target.card.name} [${action.target.id}]`);
     // }
     //}
+    if (action.type == ACTION_EFFECT && action.effectType == EFFECT_TYPE_START_OF_TURN) {
+        turn++
+        priorityNumber = 1
+        console.log(`Start of turn ${turn}`)
+    }
     // try {
     const commandForBotOne = convertServerCommand(action, game, 1);
     actionCallbackOne(commandForBotOne);
@@ -305,10 +422,11 @@ game.setOnAction((action: AnyEffectType) => {
 
     if (action.type === ACTION_PLAYER_WINS) {
         if (action.player === 1) {
-            console.log('Arderial Energy won')
+            console.log('Orothe Draft won')
         } else {
             console.log('Naroom Default won')
         }
+        clearInterval(intervalTimer)
 
         const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
         const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
@@ -322,3 +440,17 @@ gameLog.push({ for: 2, state: game.serializeData(2) });
 console.log(`Sending state data to players`)
 gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
 gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
+
+const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+
+if (activePlayer == 1) {
+    actionCallbackOne({
+        type: 'display/priority',
+        player: activePlayer,
+    })
+} else {
+    actionCallbackTwo({
+        type: 'display/priority',
+        player: activePlayer,
+    })
+}
