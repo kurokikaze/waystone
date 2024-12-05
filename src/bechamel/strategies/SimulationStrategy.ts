@@ -762,12 +762,11 @@ export class SimulationStrategy implements Strategy {
     }
     const availableCards = this.gameState.state.promptParams.cards || []
     if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE) {
-        console.log(`We're resolving the choose up to n cards prompt`)
-        console.log(`Available cards:`)
-        console.dir(availableCards)
+      if (availableCards.length == 0) {
+        throw new Error('Cannot resolve PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE with 0 cards (can I?)')
+      }
     }
     // The conversion to CardInGame is OK because resolveCardPrompt only cares about card ids
-    debugger;
     return this.resolveCardsPrompt(
       availableCards.slice(0, this.gameState.state.promptParams.numberOfCards || 0)
         .map(card => card as unknown as CardInGame),

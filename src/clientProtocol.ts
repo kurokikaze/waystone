@@ -58,7 +58,7 @@ import {
 } from "moonlands/src/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/src/types"
 import { ExpirationObjectType, RestrictionType } from "moonlands/src/types/common"
-import { AlternativeType } from "moonlands/src/types/prompt"
+import { AlternativeType } from "moonlands/src/types/promptParams"
 
 export type ConvertedCardMinimal = {
     id: string,

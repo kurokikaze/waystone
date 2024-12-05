@@ -4,7 +4,7 @@ import CardInGame from 'moonlands/dist/esm/classes/CardInGame'
 import Zone from 'moonlands/dist/esm/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
-import { GameState } from '../GameState';
+import { GameState } from '../GameState.js';
 import Card from 'moonlands/dist/esm/classes/Card';
 
 const addCardData = (card: any) => ({

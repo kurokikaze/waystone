@@ -2,7 +2,7 @@ import Card from "moonlands/src/classes/Card"
 import { ConvertedCard, HiddenConvertedCard, InGameData } from "moonlands/src/classes/CardInGame"
 import { LogEntryType, PromptParams, PromptTypeType, ZoneType } from "moonlands/src/types"
 import { C2SAction } from "./clientProtocol"
-import { AlternativeType } from "moonlands/src/types/prompt"
+import { AlternativeType } from "moonlands/src/types/promptParams"
 import { TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from "moonlands"
 import { CARD_STYLE_DRAGGABLE, CARD_STYLE_LOCKET, CARD_STYLE_NORMAL } from "./const"
 

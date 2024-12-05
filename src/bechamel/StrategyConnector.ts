@@ -1,10 +1,10 @@
 // @ts-nocheck
 import { ACTION_PASS } from 'moonlands/dist/esm/const'
 import { Socket } from "socket.io-client"
-import { ClientAction, FromClientPassAction } from "../clientProtocol"
-import { GameState } from "./GameState"
-import { Strategy } from './strategies/Strategy'
-import { SerializedClientState } from "./types"
+import { ClientAction, FromClientPassAction } from "../clientProtocol.js"
+import { GameState } from "./GameState.js"
+import { Strategy } from './strategies/Strategy.js'
+import { SerializedClientState } from "./types.js"
 
 const STEP_NAMES: Record<number, string> = {
     0: 'Energize',

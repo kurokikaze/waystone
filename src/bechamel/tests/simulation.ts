@@ -1,10 +1,10 @@
 import { ACTION_PLAY, ACTION_PLAYER_WINS, State } from 'moonlands/dist/esm/index'
-import { SimulationStrategy } from '../strategies/SimulationStrategy'
+import { SimulationStrategy } from '../strategies/SimulationStrategy.js'
 import { EFFECT_TYPE_START_OF_TURN, ACTION_EFFECT, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
-import { createGame } from '../../containedEngine/containedEngine';
-import { StrategyConnector } from '../StrategyConnector';
+import { createGame } from '../../containedEngine/containedEngine.js';
+import { StrategyConnector } from '../StrategyConnector.js';
 import { AnyEffectType } from 'moonlands/dist/esm/types';
-import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
+import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils.js';
 import { Socket } from 'socket.io-client';
 
 import * as fs from 'node:fs';
@@ -129,26 +129,16 @@ let intervalTimer = setInterval(() => {
         if (action) {
             game.update(action)
 
-            if (turn == 27 && (priorityNumber == 5 || priorityNumber == 6)) {
-                console.log(`Inner state`)
-                console.dir({
-                    prompt: game.state.prompt,
-                    promptType: game.state.promptType,
-                    promptPlayer: game.state.promptPlayer,
-                    promptGeneratedBy: game.state.promptGeneratedBy,
-                })
-            }
-
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
 
             if (activePlayer == 1) {
-                console.log(`Priority player 1: ${priorityNumber}`)
+                // console.log(`Priority player 1: ${priorityNumber}`)
                 actionCallbackOne({
                     type: 'display/priority',
                     player: activePlayer,
                 })
             } else {
-                console.log(`Priority player 2: ${priorityNumber}`)
+                // console.log(`Priority player 2: ${priorityNumber}`)
                 actionCallbackTwo({
                     type: 'display/priority',
                     player: activePlayer,
@@ -177,7 +167,6 @@ const connectorOne = {
             gameDataCallbackOne = wrappedCallback;
         } else if (type == 'action') {
             const wrappedCallback = (action: any) => {
-                console.dir(action)
                 this.gameLog.push({
                     for: 1,
                     action,
