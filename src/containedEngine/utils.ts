@@ -167,21 +167,7 @@ const templateMessage = (message: string, metadata: MetaDataRecord) => {
 type HiddenCardInGame = CardInGame & { card: null, data: {} }
 
 const convertCard = (cardInGame: CardInGame, hidden = false): ConvertedCard | HiddenConvertedCard => {
-  return cardInGame.serialize(hidden);
-  /*if (!cardInGame.card) {
-    return {
-      id: cardInGame.id,
-      owner: cardInGame.owner,
-      card: null,
-      data: null,
-    }
-  }
-  return {
-    id: cardInGame.id,
-    owner: cardInGame.owner,
-    card: cardInGame.card.name,
-    data: cardInGame.data,
-  }*/
+  return hidden ? cardInGame.serialize(hidden) : cardInGame.serialize();
 };
 
 const convertCardMinimal = (cardInGame: CardInGame): ConvertedCardMinimal => ({
