@@ -182,12 +182,12 @@ const connectorOne = {
                 action,
             })
 
-            // if (turn == 27) {
-            //     console.log(`Turn ${turn}, priority number ${priorityNumber}`)
-            //     console.dir(action)
-            //     console.log(JSON.stringify(state))
-            //     console.dir(strat1.getHeldActions())
-            // }
+            if (turn == 27) {
+                console.log(`Turn ${turn}, priority number ${priorityNumber}`)
+                console.dir(action)
+                console.log(JSON.stringify(state, null, 2))
+                console.dir(strat1.getHeldActions())
+            }
             this.commandCount++;
             const convertedCommand = convertClientCommands({
                 ...action,
@@ -317,6 +317,7 @@ const connectorTwo = {
         }
     },
     close: function () {
+        console.log('Writing out the logs')
         fs.writeFileSync('./replayPlayerTwo-node.json', JSON.stringify(this.gameLog, null, 2));
         fs.writeFileSync('./commandsPlayerTwo-node.json', JSON.stringify(this.commands, null, 2));
 
