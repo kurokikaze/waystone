@@ -54,7 +54,8 @@ import {
   RESTRICTION_OWN_CREATURE,
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
   EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
-  PROMPT_TYPE_PAYMENT_SOURCE
+  PROMPT_TYPE_PAYMENT_SOURCE,
+  EFFECT_TYPE_PROMPT_ENTERED,
 } from 'moonlands/dist/esm/const'
 import { getCardDetails } from './common'
 import { tickDownContinuousEffects } from '../reducers/utils'
@@ -166,7 +167,7 @@ export class GameState {
   public getPaymentSourceCards(): string[] {
     if (!this.waitingForPaymentSourceSelection()) { return [] }
 
-    return this.state.promptParams?.cards?.map(({id}) => id) || []
+    return this.state.promptParams?.cards?.map(({ id }) => id) || []
   }
 
   public isInPromptState(playerId: number): boolean {
@@ -741,6 +742,78 @@ export class GameState {
           },
         };
         return newState;
+      }
+      case EFFECT_TYPE_PROMPT_ENTERED: {
+        var promptParams = {};
+        var energyPrompt = state.energyPrompt;
+
+        switch (action.promptType) {
+          case PROMPT_TYPE_NUMBER: {
+            promptParams = {
+              min: action.min,
+              max: action.max
+            };
+            break;
+          }
+          case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+            promptParams = {
+              source: action.source,
+            };
+            break;
+          }
+          case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+            if ('restrictions' in action.promptParams) {
+              promptParams = {
+                restrictions: action.promptParams.restrictions,
+              }
+            } else {
+              promptParams = {
+                restriction: action.promptParams.restriction,
+                restrictionValue: action.promptParams.restrictionValue,
+              };
+            }
+            break;
+          }
+          case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+            promptParams = {
+              zone: action.promptParams.zone,
+              restrictions: action.promptParams.restrictions,
+              cards: action.promptParams.cards,
+              zoneOwner: action.promptParams.zoneOwner,
+              numberOfCards: action.promptParams.numberOfCards,
+            };
+            break;
+          }
+          case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+            promptParams = {
+              zone: action.promptParams.zone,
+              restrictions: action.promptParams.restrictions,
+              cards: action.promptParams.cards,
+              zoneOwner: action.promptParams.zoneOwner,
+              numberOfCards: action.promptParams.numberOfCards,
+            };
+            break;
+          }
+          case PROMPT_TYPE_PAYMENT_SOURCE: {
+            promptParams = {
+              cards: action.promptParams.cards,
+            };
+            break;
+          }
+        }
+
+        return {
+          ...state,
+          prompt: true,
+          promptPlayer: action.player,
+          promptType: action.promptType,
+          promptMessage: 'message' in action ? (action.message || '') : null,
+          promptParams,
+          promptGeneratedBy: action.generatedBy,
+          // @ts-ignore
+          promptAvailableCards: 'availableCards' in action ? action.availableCards : [],
+          energyPrompt,
+        };
       }
       // Unused effects
       case EFFECT_TYPE_DRAW: {

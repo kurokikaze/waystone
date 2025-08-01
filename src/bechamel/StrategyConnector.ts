@@ -115,15 +115,17 @@ export class StrategyConnector {
                 const action = this.strategy.requestAction()
                 if (action) {
                     if (this.gameState.isInPromptState(this.playerId) && action.type == ACTION_PASS) {
-                        console.log(`Here we go, returning pass for the prompt`)
+                        throw new Error(`Here we go, returning pass for the prompt`)
                     }
                     this.io.emit('clientAction', action, this.gameState.state)
                 } else {
-                    console.log('No action returned from request')
+                    throw new Error('No action returned from request')
                 }
             } else {
-                console.log(`We are here in step ${currentStep}, and cannot request action`)
+                throw new Error(`We are here in step ${currentStep}, and shouldn't request actions`)
             }
+        } else {
+            throw new Error(`Some strange conditions to call requestAndSendAction`)
         }
     }
 }

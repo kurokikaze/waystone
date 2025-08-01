@@ -36,6 +36,7 @@ import {
     EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
     EFFECT_TYPE_START_OF_TURN,
     EFFECT_TYPE_PLAY_CREATURE,
+    EFFECT_TYPE_PROMPT_ENTERED,
 
     PROMPT_TYPE_ALTERNATIVE,
     PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
@@ -57,6 +58,22 @@ import {
     TYPE_SPELL,
 } from "moonlands/src/const"
 import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/src/types"
+import {
+    AlternativePromptParams,
+    AnyCreatureExceptSourcePromptParams,
+    ChooseCardsPromptParams,
+    ChooseNCardsFromZonePromptParams,
+    ChooseUpToNCardsFromZonePromptParams,
+    DistributeCardsInZonesPromptParams,
+    DistributeDamagePromptParams,
+    DistributeEnergyPromptParams,
+    MayAbilityPromptParams,
+    PaymentSourcePromptParams,
+    PlayerPromptParams,
+    RearrangeCardsOfZonePromptParams,
+    RearrangeEnergyPromptParams,
+    SingleCreatureFilteredPromptParams
+} from 'moonlands/src/types/promptParams';
 import { ExpirationObjectType, RestrictionType } from "moonlands/src/types/common"
 import { AlternativeType } from "moonlands/src/types/promptParams"
 
@@ -149,12 +166,7 @@ export type ClientEnterPromptChooseCards = ClientEnterPromptInterface & {
     player: number,
 }
 
-export type ClientEnterPromptSingleCreatureFiltered = ClientEnterPromptInterface & {
-    promptType: typeof PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-    restrictions: RestrictionObjectType[],
-    restriction: RestrictionType,
-    restrictionValue: string | string[] | number
-}
+export type ClientEnterPromptSingleCreatureFiltered = ClientEnterPromptInterface & SingleCreatureFilteredPromptParams
 
 export type ClientEnterPromptPowerOnMagi = ClientEnterPromptInterface & {
     promptType: typeof PROMPT_TYPE_POWER_ON_MAGI,
@@ -387,6 +399,69 @@ export type ClientEffectDiscardCardFromHand = {
 }
 
 
+interface ClientEffectPromptEntered {
+    type: typeof ACTION_EFFECT
+    effectType: typeof EFFECT_TYPE_PROMPT_ENTERED
+    player: number
+    generatedBy: string
+}
+
+// expands object types one level deep
+type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+
+// expands object types recursively
+type ExpandRecursively<T> = T extends object
+    ? T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never
+    : T;
+
+export type ClientEffectPromptEnteredAlternative = ClientEffectPromptEntered & Omit<AlternativePromptParams, 'variable'>
+export type ClientEffectPromptEnteredChooseCards = ClientEffectPromptEntered & ChooseCardsPromptParams
+export type ClientEffectPromptEnteredChooseCardsFromZone = ClientEffectPromptEntered & ChooseNCardsFromZonePromptParams
+export type ClientEffectPromptEnteredUpToNCardsFromZone = ClientEffectPromptEntered & ChooseUpToNCardsFromZonePromptParams
+type CardsToDistribute = {
+    cards: ConvertedCard[]
+}
+export type ClientEffectPromptEnteredDistributeCardsInZones = ClientEffectPromptEntered & DistributeCardsInZonesPromptParams & CardsToDistribute
+export type ClientEffectPromptEnteredDistributeDamage = ClientEffectPromptEntered & DistributeDamagePromptParams
+export type ClientEffectPromptEnteredDistributeEnergy = ClientEffectPromptEntered & DistributeEnergyPromptParams
+export type ClientEffectPromptEnteredMayAbility = ClientEffectPromptEntered & MayAbilityPromptParams
+export type ClientEffectPromptEnteredPaymentSource = ClientEffectPromptEntered & Omit<PaymentSourcePromptParams, "promptParams"> & {
+    promptParams: Omit<PaymentSourcePromptParams['promptParams'], "cards"> & {
+        cards: ConvertedCard[]
+    },
+    generatedBy?: string
+    player: number
+}
+type DistributiveOmit<T, K extends keyof any> = T extends any
+    ? Omit<T, K>
+    : never;
+export type ClientEffectPromptEnteredAnyCreatureExceptSource = ClientEffectPromptEntered & Omit<AnyCreatureExceptSourcePromptParams, "source"> & { source: ConvertedCard }
+export type ClientEffectPromptEnteredSingleCreatureFiltered = ClientEffectPromptEntered & DistributiveOmit<SingleCreatureFilteredPromptParams, "source">
+export type ClientEffectPromptEnteredPlayer = ClientEffectPromptEntered & PlayerPromptParams
+export type ClientEffectPromptEnteredRearrangeCardsOfZone = ClientEffectPromptEntered & RearrangeCardsOfZonePromptParams
+export type ClientEffectPromptEnteredRearrangeEnergy = ClientEffectPromptEntered & RearrangeEnergyPromptParams
+export type ClientEffectPromptEnteredNumber = ClientEffectPromptEntered & {
+    promptType: typeof PROMPT_TYPE_NUMBER
+    min: number
+    max: number
+}
+
+export type ClientEffectPromptEnteredAny = ClientEffectPromptEnteredAlternative |
+    ClientEffectPromptEnteredChooseCards |
+    ClientEffectPromptEnteredChooseCardsFromZone |
+    ClientEffectPromptEnteredUpToNCardsFromZone |
+    ClientEffectPromptEnteredDistributeCardsInZones |
+    ClientEffectPromptEnteredDistributeDamage |
+    ClientEffectPromptEnteredDistributeEnergy |
+    ClientEffectPromptEnteredMayAbility |
+    ClientEffectPromptEnteredPaymentSource |
+    ClientEffectPromptEnteredSingleCreatureFiltered |
+    ClientEffectPromptEnteredAnyCreatureExceptSource |
+    ClientEffectPromptEnteredPlayer |
+    ClientEffectPromptEnteredRearrangeCardsOfZone |
+    ClientEffectPromptEnteredRearrangeEnergy |
+    ClientEffectPromptEnteredNumber
+
 // export type ClientEffectDiscardEnergyFromCreature = {
 //   type: typeof ACTION_EFFECT,
 //   effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -541,7 +616,7 @@ export type ClientResolvePromptAction = {
     generatedBy?: string
 }
 
-type CommonAction = ClientAttackAction | ClientEnterPromptAction | ClientEffectAction
+type CommonAction = ClientAttackAction | ClientEnterPromptAction | ClientEffectAction | ClientEffectPromptEnteredAny
 export type ClientAction = CommonAction | ClientPassAction | ClientPlayAction | ClientPowerAction | ClientResolvePromptAction | PlayerWinsAction;
 
 // @deprecated Merged into ClientAction

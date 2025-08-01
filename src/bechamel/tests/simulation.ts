@@ -4,7 +4,7 @@ import { EFFECT_TYPE_START_OF_TURN, ACTION_EFFECT, ZONE_TYPE_ACTIVE_MAGI, ZONE_T
 import { createGame } from '../../containedEngine/containedEngine.js';
 import { StrategyConnector } from '../StrategyConnector.js';
 import { AnyEffectType } from 'moonlands/dist/esm/types';
-import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils.js';
+import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
 import { Socket } from 'socket.io-client';
 
 import * as fs from 'node:fs';
@@ -132,13 +132,11 @@ let intervalTimer = setInterval(() => {
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
 
             if (activePlayer == 1) {
-                // console.log(`Priority player 1: ${priorityNumber}`)
                 actionCallbackOne({
                     type: 'display/priority',
                     player: activePlayer,
                 })
             } else {
-                // console.log(`Priority player 2: ${priorityNumber}`)
                 actionCallbackTwo({
                     type: 'display/priority',
                     player: activePlayer,
@@ -213,30 +211,16 @@ const connectorOne = {
                             type: 'display/status',
                         })
                     } else {
-                        console.log(`Strange error: ${e?.message}`)
+                        throw new Error(`Strange error: ${e?.message}`)
                     }
                     throw e;
                 }
-                // const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
-
-                // if (activePlayer == 1) {
-                //     actionCallbackOne({
-                //         type: 'display/priority',
-                //         player: activePlayer,
-                //     })
-                // } else {
-                //     actionCallbackTwo({
-                //         type: 'display/priority',
-                //         player: activePlayer,
-                //     })
-                // }
             }
         }
     },
     close: function () {
         fs.writeFileSync('./replayPlayerOne-node.json', JSON.stringify(this.gameLog, null, 2));
         fs.writeFileSync('./commandsPlayerOne-node.json', JSON.stringify(this.commands, null, 2));
-        // console.log(`Closing the connection`);
     }
 }
 
@@ -326,11 +310,7 @@ const connectorTwo = {
             console.dir(action)
             console.log(JSON.stringify(game.serializeData(2)))
 
-            // if (action.type !== 'display/dump') {
-            //   actionCallbackTwo({
-            //     type: 'display/status',
-            //   })
-            // }
+
             fs.writeFileSync('./replayPlayerTwo.json', JSON.stringify(gameLog, null, 2));
 
             throw new Error('Conversion error')

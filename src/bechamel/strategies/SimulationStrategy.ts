@@ -414,9 +414,9 @@ export class SimulationStrategy implements Strategy {
     }
 
     if (this.gameState.isInMyPromptState() && action.type !== ACTION_RESOLVE_PROMPT) {
-      console.log('Non-prompt action in the prompt state (simulation)')
       console.dir(action)
       console.dir(this.actionsOnHold)
+      //throw new Error('Non-prompt action in the prompt state (simulation strategy)')
       return true
     }
 
@@ -763,7 +763,7 @@ export class SimulationStrategy implements Strategy {
     const availableCards = this.gameState.state.promptParams.cards || []
     if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE) {
       if (availableCards.length == 0) {
-        throw new Error('Cannot resolve PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE with 0 cards (can I?)')
+        // throw new Error('Cannot resolve PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE with 0 cards (can I?)')
       }
     }
     // The conversion to CardInGame is OK because resolveCardPrompt only cares about card ids
