@@ -104,7 +104,7 @@ const deckTwo = [
 
 const game = createGame()
 // @ts-ignore
-game.initiatePRNG(2021);
+game.initiatePRNG(2023);
 game.setPlayers(1, 2);
 game.setDeck(1, deckOne);
 game.setDeck(2, deckTwo);

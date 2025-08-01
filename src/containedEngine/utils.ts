@@ -140,7 +140,11 @@ import {
   ClientEffectPromptEnteredChooseCards,
   ClientEffectPromptEnteredAnyCreatureExceptSource,
   ClientEffectPromptEnteredSingleCreatureFiltered,
-  ClientEffectPromptEnteredPaymentSource
+  ClientEffectPromptEnteredPaymentSource,
+  ClientEffectPromptEnteredUpToNCardsFromZone,
+  ClientEffectPromptEnteredChooseCardsFromZone,
+  ClientEffectPromptEnteredRearrangeCardsOfZone,
+  ClientEffectPromptEnteredDistributeCardsInZones
 } from '../clientProtocol';
 
 const hiddenZonesHash: Record<ZoneType, boolean> = {
@@ -595,16 +599,20 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
               const promptPlayer = game.getMetaValue(action.player, action.generatedBy);
 
               return {
-                type: ACTION_ENTER_PROMPT,
+                type: action.type,
+                effectType: action.effectType,
                 promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
                 player: promptPlayer,
-                zone,
-                restrictions,
-                cards: cards.map(card => convertCard(card)),
-                zoneOwner,
+                promptParams: {
+                  zone,
+                  restrictions,
+                  cards: cards.map(card => convertCard(card)),
+                  numberOfCards,
+                  zoneOwner,
+                },
                 ...(action.message ? { message: action.message } : {}),
-                numberOfCards,
-              } as ClientEnterPromptChooseUpToNCardsFromZone;
+                generatedBy: action.generatedBy,
+              } as ClientEffectPromptEnteredUpToNCardsFromZone;
             }
             case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
               const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
@@ -623,16 +631,19 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
               const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
 
               return {
-                type: ACTION_ENTER_PROMPT,
+                type: action.type,
+                effectType: action.effectType,
                 promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
                 player: promptPlayer,
-                zone,
-                restrictions,
+                promptParams: {
+                  zone,
+                  restrictions,
+                  cards: cards.map(card => convertCard(card)),
+                  zoneOwner,
+                  numberOfCards,
+                },
                 ...(action.message ? { message: action.message } : {}),
-                cards: cards.map(card => convertCard(card)),
-                zoneOwner,
-                numberOfCards,
-              } as ClientEnterPromptChooseNCardsFromZone;
+              } as ClientEffectPromptEnteredChooseCardsFromZone;
             }
             case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
               const zone = game.getMetaValue(action.promptParams.zone, action.generatedBy);
@@ -642,35 +653,43 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
               const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
 
               return {
-                type: ACTION_ENTER_PROMPT,
+                type: action.type,
+                effectType: action.effectType,
                 promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
                 player: action.player,
-                zone,
+                promptParams: {
+                  zone,
+                  cards: cards.map(card => convertCard(card)),
+                  zoneOwner,
+                  numberOfCards,
+                },
                 ...(action.message ? { message: action.message } : {}),
-                cards: cards.map(card => convertCard(card)),
-                zoneOwner,
-                numberOfCards,
-              } as ClientEnterPromptRearrangeCardsOfZone;
+                generatedBy: action.generatedBy
+              } as ClientEffectPromptEnteredRearrangeCardsOfZone;
             }
             case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
               const sourceZone = game.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
-              const zoneOwner = game.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
+              const sourceZoneOwner = game.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
               const numberOfCards = game.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
               // targetZones cannot be metadata values because you cannot store set of zones in a value for now
-              const zoneContent = game.getZone(sourceZone, zoneOwner).cards;
+              const zoneContent = game.getZone(sourceZone, sourceZoneOwner).cards;
               const cards = zoneContent.slice(0, parseInt(numberOfCards, 10));
               const player: number = game.getMetaValue<number>(action.player || 1, action.generatedBy);
 
-              const result: ClientEnterPromptDistributeCardsInZones = {
-                type: ACTION_ENTER_PROMPT,
+              const result: ClientEffectPromptEnteredDistributeCardsInZones = {
+                type: action.type,
+                effectType: action.effectType,
                 promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
                 player,
-                sourceZone,
+                promptParams: {
+                  sourceZone,
+                  sourceZoneOwner,
+                  targetZones: action.promptParams.targetZones as ZoneType[],
+                  numberOfCards,
+                },
                 ...(action.message ? { message: action.message } : {}),
                 cards: cards.map(card => convertCard(card) as ConvertedCard), // These are never hidden
-                zoneOwner,
-                targetZones: action.promptParams.targetZones as ZoneType[],
-                numberOfCards,
+                generatedBy: action.generatedBy,
               };
               return result;
             }
@@ -691,6 +710,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             case PROMPT_TYPE_SINGLE_CREATURE: {
               return {
                 type: action.type,
+                effectType: action.effectType,
                 promptType: action.promptType,
                 // promptParams: action.promptParams,
                 generatedBy: action.generatedBy,
@@ -743,6 +763,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
               const promptPlayer = action.player || actionSource.owner;
               return {
                 type: action.type,
+                effectType: action.effectType,
                 promptType: action.promptType,
                 // promptParams: action.promptParams,
                 ...(action.message ? { message: action.message } : {}),
@@ -755,6 +776,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
               const magi: CardInGame[] = game.getMetaValue(action?.magi, action.generatedBy);
               return {
                 type: action.type,
+                effectType: action.effectType,
                 promptType: action.promptType,
                 magi: convertCard(magi[0]),
                 generatedBy: action.generatedBy,
@@ -798,7 +820,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                 player: action.player,
               }
             }
-          }
+          } // End of EFFECT_TYPE_PROMPT_ENTERED
         }
         case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
           const sourceCardOwner = action.sourceCard.owner;
@@ -1483,6 +1505,10 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 export function convertClientCommands(action: ClientAction, game: State): AnyEffectType | null {
   switch (action.type) {
     case ACTION_RESOLVE_PROMPT: {
+      if (!game.state.prompt) {
+        console.dir(action)
+        throw new Error('ACTION_RESOLVE_PROMPT in non-prompt state!')
+      }
       switch (game.state.promptType) {
         case PROMPT_TYPE_RELIC: {
           if (action.target) {

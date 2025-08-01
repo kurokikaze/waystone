@@ -62,6 +62,11 @@ export class StrategyConnector {
                         "player": 1
                     }
                     */
+                    if (this.gameState.isInMyPromptState()) {
+                        console.dir(action)
+                        console.log('State:')
+                        console.dir(this.gameState.state)
+                    }
                     if (
                         action.type == "actions/enter_prompt" &&
                         action.promptType == "prompt/payment_source" &&

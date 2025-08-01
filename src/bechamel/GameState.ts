@@ -403,7 +403,7 @@ export class GameState {
           },
         };
       }
-      case ACTION_ENTER_PROMPT: {
+      /*case ACTION_ENTER_PROMPT: {
         var promptParams = action.promptParams;
         var energyPrompt = state.energyPrompt;
 
@@ -468,7 +468,7 @@ export class GameState {
           promptAvailableCards: action.availableCards || [],
           energyPrompt,
         };
-      }
+      }*/
 
       case ACTION_RESOLVE_PROMPT: {
         return {
