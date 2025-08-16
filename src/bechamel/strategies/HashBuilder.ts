@@ -24,15 +24,17 @@ export class HashBuilder {
     }
     const handCards = sim.getZone(ZONE_TYPE_HAND, sim.players[0]).cards
     const handHashes: string[] = []
-    for (const card of handCards) {
-      handHashes.push(this.convertHash(card.id).toString())
+    const handCardNames = handCards.map(card => card.card.name)
+    handCardNames.sort()
+    for (const cardName of handCardNames) {
+      handHashes.push(this.convertHash(cardName).toString())
     }
     const ourMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, sim.players[0]).card
     const ourMagiHash = ourMagi ? `@${ourMagi.data.energy}[${ourMagi.data.actionsUsed.map((action: string) => this.convertHash(action)).join(',')}]` : 'X'
     const enemyMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, sim.players[1]).card
     const enemyMagiHash = enemyMagi ? `@${enemyMagi.data.energy}` : 'X'
 
-    return (sim.state.activePlayer === sim.players[0] ? '*' : 'v') + sim.state.step?.toString() + '{' + handHashes.join(',') + '}' + ourMagiHash + '|' + cardHashes.join('|') + '|' + enemyMagiHash + (sim.state.prompt ? '?'+ this.convertHash(sim.state.promptGeneratedBy || '') : '')
+    return (sim.state.activePlayer === sim.players[0] ? '*' : 'v') + sim.state.step?.toString() + '{' + handHashes.join(',') + '}' + ourMagiHash + '|' + cardHashes.join('|') + '|' + enemyMagiHash + (sim.state.prompt ? `?${sim.state.promptPlayer}:` + this.convertHash(sim.state.promptGeneratedBy || '') + `[${sim.state.promptGeneratedBy}]` : '')
   }
 
   private convertHash(hash: string): number {

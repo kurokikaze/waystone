@@ -1,6 +1,6 @@
 /* global window */
-import {useCallback} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import { useCallback } from 'react';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import cn from 'classnames';
 import {
 	ACTION_RESOLVE_PROMPT,
@@ -37,8 +37,8 @@ import {
 	getPromptFilter,
 	getCardDetails,
 } from '../common';
-import {withAbilities} from '../CardAbilities.tsx';
-import {withEnergyManipulation} from '../CardEnergyManipulation.jsx';
+import { withAbilities } from '../CardAbilities.tsx';
+import { withEnergyManipulation } from '../CardEnergyManipulation.jsx';
 import Velociraptor from '../icons/Velociraptor.tsx';
 
 import './style.css';
@@ -55,7 +55,7 @@ function ZonePlayerInPlay({
 	engineConnector,
 }) {
 	const packs = useSelector(getPacks);
-	const rawContent = useSelector(getCardDetails);
+	const rawContent = useSelector(getCardDetails, shallowEqual);
 	const playerNumber = useSelector(getPlayerNumber);
 	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === playerNumber);
 
@@ -82,7 +82,7 @@ function ZonePlayerInPlay({
 	const dispatch = useDispatch();
 
 	const hasPackHunters = content.some(packHuntFilter);
-	const packHuntersList = content.filter(packHuntFilter).map(({id}) => id);
+	const packHuntersList = content.filter(packHuntFilter).map(({ id }) => id);
 
 	const isOnUnfilteredPrompt = isOnPrompt && UNFILTERED_CREATURE_PROMPTS.includes(promptType);
 	const isOnFilteredPrompt = isOnPrompt && FILTERED_CREATURE_PROMPTS.includes(promptType);
@@ -102,7 +102,7 @@ function ZonePlayerInPlay({
 			target: cardId,
 			generatedBy: promptGeneratedBy,
 		});
-	} : () => {};
+	} : () => { };
 
 	const abilityUseHandler = (id, powerName) => engineConnector.emit({
 		type: ACTION_POWER,
@@ -113,8 +113,8 @@ function ZonePlayerInPlay({
 	const defeatedId = useSelector(getDefeatedCreatureId);
 
 	return (
-		<div className={cn('zone', 'zone-player-creatures', 'zone-creatures', {'zone-active' : active})} data-zone-name={name}>
-			{content.filter(({id}) => !packs.some(pack => pack.hunters.includes(id))).map(cardData =>
+		<div className={cn('zone', 'zone-player-creatures', 'zone-creatures', { 'zone-active': active })} data-zone-name={name}>
+			{content.filter(({ id }) => !packs.some(pack => pack.hunters.includes(id))).map(cardData =>
 				<div key={cardData.id} className='packHolder'>
 					<SelectedCard
 						id={cardData.id}
@@ -125,21 +125,21 @@ function ZonePlayerInPlay({
 						isDefeated={defeatedId === cardData.id}
 						isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}
 						draggable={active && cardData.card.type === TYPE_CREATURE && cardData.data.attacked < cardData.card.data.attacksPerTurn}
-						target={active && hasPackHunters && cardData.data.attacked < cardData.card.data.attacksPerTurn && !packs.some(({leader}) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
+						target={active && hasPackHunters && cardData.data.attacked < cardData.card.data.attacksPerTurn && !packs.some(({ leader }) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
 						pack={packs.find(({ leader }) => leader === cardData.id)}
-						droppable={active && hasPackHunters && !packs.some(({leader}) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
+						droppable={active && hasPackHunters && !packs.some(({ leader }) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
 						available={active && cardData.card.type === TYPE_CREATURE && cardData.data.attacked < cardData.card.data.attacksPerTurn}
 						actionsAvailable={prsAvailable}
 						onAbilityUse={abilityUseHandler}
 						onPackHunt={onAddToPack}
 						engineConnector={engineConnector} // Just make onAttack
-						className={cn({'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
+						className={cn({ 'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id })}
 						cardStyle={CARD_STYLE_DRAGGABLE}
 						attacker={animation && animation.source === cardData.id}
 						attackNumber={cardData.data.attacked}
 						playerNumber={playerNumber}
 					/>
-					{packs.some(({leader}) => leader === cardData.id) ? 
+					{packs.some(({ leader }) => leader === cardData.id) ?
 						<div className='packHuntCounter' onClick={() => onRemovePack(cardData.id)}>+ <Velociraptor size={20} fillColor='#fff' /></div>
 						: null}
 				</div>

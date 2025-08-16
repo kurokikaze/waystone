@@ -318,7 +318,7 @@ export class ActionExtractor {
           const innerSim = sim.clone()
           const action: AnyEffectType = {
             type: ACTION_RESOLVE_PROMPT,
-            promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+            promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
             target: innerSim.getZone(ZONE_TYPE_IN_PLAY).byId(creature.id),
             generatedBy: innerSim.state.promptGeneratedBy,
             player: innerSim.state.promptPlayer,

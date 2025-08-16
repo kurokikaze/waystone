@@ -19,7 +19,6 @@ export class StrategyConnector {
     private playerId: number = 2
     private gameState?: GameState
     private strategy?: Strategy
-    private queue = []
     public constructor(private readonly io: Socket) {}
 
     public connect(strategy: Strategy) {
@@ -32,41 +31,13 @@ export class StrategyConnector {
             this.gameState.setPlayerId(data.playerId)
 
             strategy.setup(this.gameState, this.playerId)
-
-            // if (this.gameState.playerPriority(this.playerId) || this.gameState.isInPromptState(this.playerId)) {
-            //     // this.gameState.state
-            //     this.requestAndSendAction()
-            // }
         })
 
         this.io.on('action', (action: ClientAction | { type: 'display/priority', player: number }) => {
             if (this.gameState && this.playerId && action) {
                 try {
                     this.gameState.update(action)
-                    // this.queue.push(action)
-                    /*
-                    {
-                        "type": "actions/enter_prompt",
-                        "promptType": "prompt/payment_source",
-                        "paymentType": "types/creature",
-                        "cards": [
-                            {
-                                "id": "vxDvbFfzbUiysvsLBEtFB"
-                            },
-                            {
-                                "id": "hWMPXqay5rju-XAsUqL1T"
-                            }
-                        ],
-                        "amount": 5,
-                        "generatedBy": "rxnIY6xUWtaYeimhvL2Mp",
-                        "player": 1
-                    }
-                    */
-                    if (this.gameState.isInMyPromptState()) {
-                        console.dir(action)
-                        console.log('State:')
-                        console.dir(this.gameState.state)
-                    }
+
                     if (
                         action.type == "actions/enter_prompt" &&
                         action.promptType == "prompt/payment_source" &&
@@ -88,25 +59,11 @@ export class StrategyConnector {
 
                     return true;
                 }
-
-                if (action.type === 'display/priority') {
-                  // console.log('Got priority action')
-                  if (action.player === this.playerId) {
-                    this.requestAndSendAction()
-                  }
-                }
-
-                /*if (action.type == 'display/status') {
-                  this.io.emit('clientAction', {
-                    type: 'display/dump',
-                    state: JSON.stringify(this.strategy.getHistory()),
-                  })
-                }*/
             }
         })
     }
 
-    private requestAndSendAction() {
+    public requestAndSendAction() {
         if (!this.gameState) {
             this.io.emit('clientAction', { type: ACTION_PASS, player: this.playerId } as FromClientPassAction)
             return;
@@ -118,8 +75,10 @@ export class StrategyConnector {
         ) {
             if (currentStep !== 5) {
                 const action = this.strategy.requestAction()
+
                 if (action) {
                     if (this.gameState.isInPromptState(this.playerId) && action.type == ACTION_PASS) {
+                        console.log(`${this.gameState.turnNumber}:${this.gameState.getStep()}`)
                         throw new Error(`Here we go, returning pass for the prompt`)
                     }
                     this.io.emit('clientAction', action, this.gameState.state)

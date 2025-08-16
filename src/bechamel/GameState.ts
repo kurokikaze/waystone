@@ -2,7 +2,6 @@ import {
   ACTION_TIME_NOTIFICATION,
   ACTION_ATTACK,
   ACTION_EFFECT,
-  ACTION_ENTER_PROMPT,
   ACTION_PASS,
   ACTION_PLAYER_WINS,
   ACTION_POWER,
@@ -202,6 +201,10 @@ export class GameState {
 
   public getTurn() {
     return this.turnNumber;
+  }
+
+  public setTurn(turnNumber: number) {
+    this.turnNumber = turnNumber
   }
 
   public getPlayableCards(): ClientCard[] {

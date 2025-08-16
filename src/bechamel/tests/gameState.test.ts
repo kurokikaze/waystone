@@ -2,6 +2,7 @@ import { ACTION_EFFECT, EFFECT_TYPE_START_OF_TURN } from 'moonlands/dist/esm/ind
 import { GameState } from '../GameState'
 import { SerializedClientState } from '../types';
 import { SimulationStrategy } from '../strategies/SimulationStrategy';
+import { ActionExtractor } from '../strategies/ActionExtractor';
 
 describe('GameState tests', () => {
     it('Ticking down the continuous effects', () => {
@@ -22,15 +23,2285 @@ describe('GameState tests', () => {
         console.dir(state.getContinuousEffects())
     })
 
-    it.only('Strange prompt entering', () => {
-        const stateObj = {"staticAbilities":[{"card":"Yaki","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"gydA_P_Wnw"},{"card":"Orlon","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"zZbt_Vqoe2"},{"card":"Water of Life","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"gmbRJ5eZ3w"}],"energyPrompt":false,"turnTimer":false,"turnSecondsLeft":0,"promptAvailableCards":[],"zones":{"playerHand":[{"card":"Dream Balm","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"g9QgbVoWVQ"}],"opponentHand":[{"card":null,"data":{},"owner":2,"id":"lgx95-a90E"},{"card":null,"data":{},"owner":2,"id":"6lrassfSOE"},{"card":null,"data":{},"owner":2,"id":"i3wuRX9Jn3"},{"card":null,"data":{},"owner":2,"id":"2EVfmhwg0W"},{"card":null,"data":{},"owner":2,"id":"j5dLvExI1J"},{"card":null,"data":{},"owner":2,"id":"YghHjbTh-6"},{"card":null,"data":{},"owner":2,"id":"nKk9Lc76B7"},{"card":null,"data":{},"owner":2,"id":"aUL5WZDx8t"},{"card":null,"data":{},"owner":2,"id":"CYK8vcXd-R"},{"card":null,"data":{},"owner":2,"id":"4RqhVoFpsc"}],"playerDeck":[{"card":null,"data":{},"owner":1,"id":"m9vBKUIq_j"},{"card":null,"data":{},"owner":1,"id":"yvj55Lx4ZA"},{"card":null,"data":{},"owner":1,"id":"BdiTh8vGrn"},{"card":null,"data":{},"owner":1,"id":"eWgG3rRtnX"},{"card":null,"data":{},"owner":1,"id":"DwGbDh8e75"},{"card":null,"data":{},"owner":1,"id":"czhp8Yu9LR"}],"opponentDeck":[{"card":null,"data":{},"owner":2,"id":"htfRreLJ4v"},{"card":null,"data":{},"owner":2,"id":"_o90oeqB_q"},{"card":null,"data":{},"owner":2,"id":"jdcOnJkU9P"},{"card":null,"data":{},"owner":2,"id":"YdS_DLOiVe"},{"card":null,"data":{},"owner":2,"id":"r2s7bcO3tz"}],"playerActiveMagi":[{"card":"Orlon","data":{"energy":11,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"zZbt_Vqoe2"}],"opponentActiveMagi":[{"card":"Yaki","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"gydA_P_Wnw"}],"playerMagiPile":[],"opponentMagiPile":[],"inPlay":[{"card":"Dream Balm","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"lWE_k5i30J"},{"card":"Water of Life","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"gmbRJ5eZ3w"},{"card":"Sphor","data":{"energy":1,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"VDugmubwdF"},{"card":"Wellisk Pup","data":{"energy":1,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"pTiUM91K5A"},{"card":"Sea Barl","data":{"energy":1,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"25Fv50cBlD"},{"card":"Warrior's Boots","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"rtYysfQnVg"},{"card":"Sea Barl","data":{"energy":7,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"NAdFwQc5aG"},{"card":"Robe of Vines","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"sHJmkbn3ci"},{"card":"Giant Carillion","data":{"energy":9,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"7nS-v7Zs-n"},{"card":"Ancestral Flute","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":["Song of the Family"],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"Y5tn1rAs3j"}],"playerDefeatedMagi":[{"card":"Whall","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"PxZotZ4BG9"},{"card":"Ebylon","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"GqpxqJTyjz"}],"opponentDefeatedMagi":[{"card":"Poad","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"BgG0ZZtHCG"},{"card":"Tryn","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"xz17kEZ8I8"}],"playerDiscard":[{"card":"Weebo","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"ZAOs1N7VYB"},{"card":"Sea Barl","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"MnvUoCXdJs"},{"card":"Dream Balm","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"3jHt16abLg"},{"card":"Corf","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"LkiAu8hxOE"},{"card":"Submerge","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"ubA2vviGoz"},{"card":"Weebo","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"d88OO4TArO"},{"card":"Giant Parathin","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"C2F-7lo7xt"},{"card":"Dream Balm","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"nCzObrFuyw"},{"card":"Sea Barl","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"JJMZ_7CrHT"},{"card":"Orathan","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"08f2drSoZt"},{"card":"Undertow","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"EXw2FyscB2"},{"card":"Bwill","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"GfE2QfhM8M"},{"card":"Wellisk Pup","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"7n2XAsCxXK"},{"card":"Sea Barl","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"SFIeaDzcHi"},{"card":"Wellisk Pup","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"Adb9f7dnJa"},{"card":"Sphor","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"Q4O-PeHHq-"},{"card":"Sphor","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"eA9BzT1N2c"},{"card":"Wellisk Pup","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"ksegHtI_nt"},{"card":"Undertow","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"_dhOSST6fZ"},{"card":"Bwill","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"LZH3hNz-CO"},{"card":"Sphor","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"iZ4D3rpJEy"},{"card":"Orathan","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"5V87-O7cQD"},{"card":"Dream Balm","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"NOTt2T9t1c"},{"card":"Corf","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"sRjf0_nQfK"},{"card":"Submerge","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"GRTNc4ngch"}],"opponentDiscard":[{"card":"Bhatar","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"R9AppNLzr_"},{"card":"Leaf Hyren","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"8CTFVkOx9E"},{"card":"Plith","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"yupuwjt6C_"},{"card":"Giant Carillion","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"CuWugsCJbX"},{"card":"Balamant Pup","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"KvmqDt9CLV"},{"card":"Ancestral Flute","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"dKqjDOtltQ"},{"card":"Robe of Vines","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"8RPIoHw-P3"},{"card":"Rudwot","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"ys42S7Y6oa"},{"card":"Balamant Pup","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"d0yMPtzifJ"},{"card":"Carillion","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"n5mypveLzU"},{"card":"Leaf Hyren","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"NGJIxuNqgb"},{"card":"Water of Life","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"1tABqOFfWt"},{"card":"Timber Hyren","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"A526I3cp81"},{"card":"Ancestral Flute","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"3a3Rg2W1TR"},{"card":"Water of Life","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"zWN1aAlE1_"},{"card":"Ancestral Flute","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"ItER2C0RvD"},{"card":"Weebo","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"_k3-YyemZK"},{"card":"Furok","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"FuH4x5_8W-"},{"card":"Arboll","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"pvsdYWx1od"},{"card":"Weebo","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"J3v0oj06TM"},{"card":"Arboll","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"Rz5RDPRJ3l"},{"card":"Balamant Pup","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"_BFBHRZ5BM"},{"card":"Giant Carillion","data":{"energy":0,"controller":2,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":2,"id":"ehUAiTIINx"}]},"continuousEffects":[],"step":1,"turn":1,"goesFirst":1,"activePlayer":1,"prompt":true,"promptType":"prompt/creature","promptMessage":null,"promptPlayer":1,"promptGeneratedBy":"Y5tn1rAs3j","opponentId":2,"log":[],"gameEnded":false,"winner":null,"cardsAttached":{}}
+    it.only('Held actions end in prompt', () => {
+        const stateObj = { "staticAbilities": [{ "card": "Water of Life", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "hhdOXfvOW3" }, { "card": "Water of Life", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "0d-tRCWV_F" }], "energyPrompt": false, "turnTimer": false, "turnSecondsLeft": 0, "promptAvailableCards": [], "zones": { "playerHand": [{ "card": "Grow", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "CQ8V4VqpEi" }, { "card": "Grow", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Fr6Xem38fb" }, { "card": "Bhatar", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Cw0V_H1zTE" }], "opponentHand": [{ "card": null, "data": {}, "owner": 1, "id": "pO4pE9g2gm" }, { "card": null, "data": {}, "owner": 1, "id": "uQEsqhvCwX" }, { "card": null, "data": {}, "owner": 1, "id": "q2TGYPNiSO" }], "playerDeck": [{ "card": null, "data": {}, "owner": 2, "id": "sIiFIaDkbC" }, { "card": null, "data": {}, "owner": 2, "id": "ViWm_wQ8No" }, { "card": null, "data": {}, "owner": 2, "id": "VlmEazsSzg" }, { "card": null, "data": {}, "owner": 2, "id": "q6SEeuxK7d" }, { "card": null, "data": {}, "owner": 2, "id": "z5RhjMB9rG" }, { "card": null, "data": {}, "owner": 2, "id": "99tfbgUuqv" }, { "card": null, "data": {}, "owner": 2, "id": "fPb-UsrKNr" }, { "card": null, "data": {}, "owner": 2, "id": "ajnz85jz7Z" }, { "card": null, "data": {}, "owner": 2, "id": "mn7Xd_CIAw" }, { "card": null, "data": {}, "owner": 2, "id": "3RRV85itAq" }, { "card": null, "data": {}, "owner": 2, "id": "guU0NdzOhm" }, { "card": null, "data": {}, "owner": 2, "id": "SUhxxyvcUz" }, { "card": null, "data": {}, "owner": 2, "id": "4upjb1HYJg" }, { "card": null, "data": {}, "owner": 2, "id": "H6jTIQNv1L" }, { "card": null, "data": {}, "owner": 2, "id": "TJSFtCwymp" }, { "card": null, "data": {}, "owner": 2, "id": "ZMclkPHLj0" }, { "card": null, "data": {}, "owner": 2, "id": "ASC4eaLND9" }, { "card": null, "data": {}, "owner": 2, "id": "ophyAIsu53" }, { "card": null, "data": {}, "owner": 2, "id": "R5hVdRHOct" }, { "card": null, "data": {}, "owner": 2, "id": "KCb0qtN-AS" }, { "card": null, "data": {}, "owner": 2, "id": "vZ1G4aRFkn" }, { "card": null, "data": {}, "owner": 2, "id": "T7FCjf19VB" }, { "card": null, "data": {}, "owner": 2, "id": "RDlOBfGUAy" }, { "card": null, "data": {}, "owner": 2, "id": "JUHnGL-RMP" }, { "card": null, "data": {}, "owner": 2, "id": "tm3fMvRvnO" }, { "card": null, "data": {}, "owner": 2, "id": "rT97z9N9j5" }, { "card": null, "data": {}, "owner": 2, "id": "DO4XdIO6Ow" }, { "card": "Giant Carillion", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Oh5sTBeJkG" }], "opponentDeck": [{ "card": null, "data": {}, "owner": 1, "id": "AzmKjuTPA0" }, { "card": null, "data": {}, "owner": 1, "id": "1nLjW2EM0c" }, { "card": null, "data": {}, "owner": 1, "id": "4gHIe01IyC" }, { "card": null, "data": {}, "owner": 1, "id": "BSxn4jhzWl" }, { "card": null, "data": {}, "owner": 1, "id": "4LbPKODcIQ" }, { "card": null, "data": {}, "owner": 1, "id": "4srxLH80rb" }, { "card": null, "data": {}, "owner": 1, "id": "WlEr6yLP4a" }, { "card": null, "data": {}, "owner": 1, "id": "HoQSeAHe9k" }, { "card": null, "data": {}, "owner": 1, "id": "3c6axDQJoG" }, { "card": null, "data": {}, "owner": 1, "id": "JZ_gNc9GS4" }, { "card": null, "data": {}, "owner": 1, "id": "B5VowFvpO_" }, { "card": null, "data": {}, "owner": 1, "id": "4rKwyiW-5k" }, { "card": null, "data": {}, "owner": 1, "id": "De0-v69-YQ" }, { "card": null, "data": {}, "owner": 1, "id": "JesRYGsET-" }, { "card": null, "data": {}, "owner": 1, "id": "KYaLVBAArM" }, { "card": null, "data": {}, "owner": 1, "id": "fn92B9dLtR" }, { "card": null, "data": {}, "owner": 1, "id": "DxbaVyS4dE" }, { "card": null, "data": {}, "owner": 1, "id": "N0BR41_2cs" }, { "card": null, "data": {}, "owner": 1, "id": "FiNcmkCTJG" }, { "card": null, "data": {}, "owner": 1, "id": "6Txw0p_-Yn" }, { "card": null, "data": {}, "owner": 1, "id": "aHyMx3i0ut" }, { "card": null, "data": {}, "owner": 1, "id": "gFPuUjaGUd" }, { "card": null, "data": {}, "owner": 1, "id": "EpWls7a2rc" }, { "card": null, "data": {}, "owner": 1, "id": "5wrzLDetHj" }, { "card": null, "data": {}, "owner": 1, "id": "RJ-C__X6IW" }, { "card": null, "data": {}, "owner": 1, "id": "PLgRcrN1F2" }, { "card": null, "data": {}, "owner": 1, "id": "HrfdSpm5BR" }], "playerActiveMagi": [{ "card": "Poad", "data": { "energy": 4, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "powoI2Dc6T" }], "opponentActiveMagi": [{ "card": "Whall", "data": { "energy": 5, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "_lVnW5s64Y" }], "playerMagiPile": [{ "card": "Tryn", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "iga6sPcH6Z" }, { "card": "Yaki", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Dmf5ZDk7wK" }], "opponentMagiPile": [{ "card": null, "data": {}, "owner": 1, "id": "SBhKqfHXEM" }, { "card": null, "data": {}, "owner": 1, "id": "dmtG1t5agR" }], "inPlay": [{ "card": "Water of Life", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "hhdOXfvOW3" }, { "card": "Arboll", "data": { "energy": 1, "controller": 2, "attacked": 1, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": true, "wasAttacked": false }, "owner": 2, "id": "kOxqMrBVgO" }, { "card": "Robe of Vines", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "ELMvnJhhnl" }, { "card": "Water of Life", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "0d-tRCWV_F" }, { "card": "Timber Hyren", "data": { "energy": 3, "controller": 2, "attacked": 1, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": true, "wasAttacked": false }, "owner": 2, "id": "66AakNhpdx" }, { "card": "Ancestral Flute", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "B3bFxmxuo-" }, { "card": "Weebo", "data": { "energy": 3, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "OoBzGum410" }], "playerDefeatedMagi": [], "opponentDefeatedMagi": [], "playerDiscard": [{ "card": "Carillion", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "HFkV-eVEY6" }, { "card": "Plith", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Nl_GLch97H" }, { "card": "Twee", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Pl56rkr9Ld" }], "opponentDiscard": [{ "card": "Sea Barl", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "sX0fYh7N0D" }, { "card": "Weebo", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "814Ykrnj2E" }, { "card": "Sphor", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "UQez8n4xju" }, { "card": "Sphor", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "DPfw1CJr_Z" }, { "card": "Undertow", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "FxGVXu02uc" }, { "card": "Dream Balm", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "9AbawVybFk" }, { "card": "Warrior's Boots", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "7y1_ujHRgC" }, { "card": "Wellisk Pup", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "lTexlr6FJ7" }, { "card": "Sphor", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "m_zEZxMY3t" }] }, "continuousEffects": [], "step": 4, "turn": 1, "goesFirst": 1, "activePlayer": 2, "prompt": false, "promptType": null, "promptMessage": null, "promptPlayer": null, "promptGeneratedBy": null, "promptParams": {}, "opponentId": 1, "log": [], "gameEnded": false, "winner": null, "cardsAttached": {} }
 
         const state = new GameState(stateObj as unknown as SerializedClientState);
+        state.setPlayerId(2)
+        state.setTurn(8)
+
+        const strategy = new SimulationStrategy()
+        strategy.setup(state, 2);
+
+        const action = strategy.requestAction()
+        console.log(strategy.getGraph())
+        console.dir(action)
+
+        console.dir(strategy.getHeldActions())
+    })
+
+    it('Strange pass action', () => {
+        const stateObj = {
+            "staticAbilities": [
+                { "card": "Water of Life", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "hhdOXfvOW3" }, { "card": "Water of Life", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "0d-tRCWV_F" }], "energyPrompt": false, "turnTimer": false, "turnSecondsLeft": 0, "promptAvailableCards": [], "zones": { "playerHand": [{ "card": "Bhatar", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Cw0V_H1zTE" }], "opponentHand": [{ "card": null, "data": {}, "owner": 1, "id": "pO4pE9g2gm" }, { "card": null, "data": {}, "owner": 1, "id": "uQEsqhvCwX" }, { "card": null, "data": {}, "owner": 1, "id": "q2TGYPNiSO" }], "playerDeck": [{ "card": null, "data": {}, "owner": 2, "id": "sIiFIaDkbC" }, { "card": null, "data": {}, "owner": 2, "id": "ViWm_wQ8No" }, { "card": null, "data": {}, "owner": 2, "id": "VlmEazsSzg" }, { "card": null, "data": {}, "owner": 2, "id": "q6SEeuxK7d" }, { "card": null, "data": {}, "owner": 2, "id": "z5RhjMB9rG" }, { "card": null, "data": {}, "owner": 2, "id": "99tfbgUuqv" }, { "card": null, "data": {}, "owner": 2, "id": "fPb-UsrKNr" }, { "card": null, "data": {}, "owner": 2, "id": "ajnz85jz7Z" }, { "card": null, "data": {}, "owner": 2, "id": "mn7Xd_CIAw" }, { "card": null, "data": {}, "owner": 2, "id": "3RRV85itAq" }, { "card": null, "data": {}, "owner": 2, "id": "guU0NdzOhm" }, { "card": null, "data": {}, "owner": 2, "id": "SUhxxyvcUz" }, { "card": null, "data": {}, "owner": 2, "id": "4upjb1HYJg" }, { "card": null, "data": {}, "owner": 2, "id": "H6jTIQNv1L" }, { "card": null, "data": {}, "owner": 2, "id": "TJSFtCwymp" }, { "card": null, "data": {}, "owner": 2, "id": "ZMclkPHLj0" }, { "card": null, "data": {}, "owner": 2, "id": "ASC4eaLND9" }, { "card": null, "data": {}, "owner": 2, "id": "ophyAIsu53" }, { "card": null, "data": {}, "owner": 2, "id": "R5hVdRHOct" }, { "card": null, "data": {}, "owner": 2, "id": "KCb0qtN-AS" }, { "card": null, "data": {}, "owner": 2, "id": "vZ1G4aRFkn" }, { "card": null, "data": {}, "owner": 2, "id": "T7FCjf19VB" }, { "card": null, "data": {}, "owner": 2, "id": "RDlOBfGUAy" }, { "card": null, "data": {}, "owner": 2, "id": "JUHnGL-RMP" }, { "card": null, "data": {}, "owner": 2, "id": "tm3fMvRvnO" }, { "card": null, "data": {}, "owner": 2, "id": "rT97z9N9j5" }, { "card": null, "data": {}, "owner": 2, "id": "DO4XdIO6Ow" }, { "card": "Giant Carillion", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Oh5sTBeJkG" }], "opponentDeck": [{ "card": null, "data": {}, "owner": 1, "id": "AzmKjuTPA0" }, { "card": null, "data": {}, "owner": 1, "id": "1nLjW2EM0c" }, { "card": null, "data": {}, "owner": 1, "id": "4gHIe01IyC" }, { "card": null, "data": {}, "owner": 1, "id": "BSxn4jhzWl" }, { "card": null, "data": {}, "owner": 1, "id": "4LbPKODcIQ" }, { "card": null, "data": {}, "owner": 1, "id": "4srxLH80rb" }, { "card": null, "data": {}, "owner": 1, "id": "WlEr6yLP4a" }, { "card": null, "data": {}, "owner": 1, "id": "HoQSeAHe9k" }, { "card": null, "data": {}, "owner": 1, "id": "3c6axDQJoG" }, { "card": null, "data": {}, "owner": 1, "id": "JZ_gNc9GS4" }, { "card": null, "data": {}, "owner": 1, "id": "B5VowFvpO_" }, { "card": null, "data": {}, "owner": 1, "id": "4rKwyiW-5k" }, { "card": null, "data": {}, "owner": 1, "id": "De0-v69-YQ" }, { "card": null, "data": {}, "owner": 1, "id": "JesRYGsET-" }, { "card": null, "data": {}, "owner": 1, "id": "KYaLVBAArM" }, { "card": null, "data": {}, "owner": 1, "id": "fn92B9dLtR" }, { "card": null, "data": {}, "owner": 1, "id": "DxbaVyS4dE" }, { "card": null, "data": {}, "owner": 1, "id": "N0BR41_2cs" }, { "card": null, "data": {}, "owner": 1, "id": "FiNcmkCTJG" }, { "card": null, "data": {}, "owner": 1, "id": "6Txw0p_-Yn" }, { "card": null, "data": {}, "owner": 1, "id": "aHyMx3i0ut" }, { "card": null, "data": {}, "owner": 1, "id": "gFPuUjaGUd" }, { "card": null, "data": {}, "owner": 1, "id": "EpWls7a2rc" }, { "card": null, "data": {}, "owner": 1, "id": "5wrzLDetHj" }, { "card": null, "data": {}, "owner": 1, "id": "RJ-C__X6IW" }, { "card": null, "data": {}, "owner": 1, "id": "PLgRcrN1F2" }, { "card": null, "data": {}, "owner": 1, "id": "HrfdSpm5BR" }], "playerActiveMagi": [{ "card": "Poad", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": ["Heroes' Feast"], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "powoI2Dc6T" }], "opponentActiveMagi": [{ "card": "Whall", "data": { "energy": 5, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "_lVnW5s64Y" }], "playerMagiPile": [{ "card": "Tryn", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "iga6sPcH6Z" }, { "card": "Yaki", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Dmf5ZDk7wK" }], "opponentMagiPile": [{ "card": null, "data": {}, "owner": 1, "id": "SBhKqfHXEM" }, { "card": null, "data": {}, "owner": 1, "id": "dmtG1t5agR" }], "inPlay": [{ "card": "Water of Life", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "hhdOXfvOW3" }, { "card": "Robe of Vines", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "ELMvnJhhnl" }, { "card": "Water of Life", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "0d-tRCWV_F" }, { "card": "Timber Hyren", "data": { "energy": 4, "controller": 2, "attacked": 1, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": true, "wasAttacked": false }, "owner": 2, "id": "66AakNhpdx" }, { "card": "Ancestral Flute", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "B3bFxmxuo-" }, { "card": "Weebo", "data": { "energy": 10, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "OoBzGum410" }], "playerDefeatedMagi": [], "opponentDefeatedMagi": [], "playerDiscard": [{ "card": "Carillion", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "HFkV-eVEY6" }, { "card": "Plith", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Nl_GLch97H" }, { "card": "Twee", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "Pl56rkr9Ld" }, { "card": "Grow", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "7Q7C3ltwDC" }, { "card": "Arboll", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "V5h-ATisrC" }, { "card": "Grow", "data": { "energy": 0, "controller": 2, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 2, "id": "f21Ezz_ru9" }], "opponentDiscard": [{ "card": "Sea Barl", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "sX0fYh7N0D" }, { "card": "Weebo", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "814Ykrnj2E" }, { "card": "Sphor", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "UQez8n4xju" }, { "card": "Sphor", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "DPfw1CJr_Z" }, { "card": "Undertow", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "FxGVXu02uc" }, { "card": "Dream Balm", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "9AbawVybFk" }, { "card": "Warrior's Boots", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "7y1_ujHRgC" }, { "card": "Wellisk Pup", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "lTexlr6FJ7" }, { "card": "Sphor", "data": { "energy": 0, "controller": 1, "attacked": 0, "actionsUsed": [], "energyLostThisTurn": 0, "defeatedCreature": false, "hasAttacked": false, "wasAttacked": false }, "owner": 1, "id": "m_zEZxMY3t" }] },
+            "continuousEffects": [],
+            "step": 4,
+            "turn": 1,
+            "goesFirst": 1,
+            "activePlayer": 2,
+            "prompt": true,
+            "promptType": "prompt/creature",
+            "promptMessage": "Choose a creature to add 6 energy to",
+            "promptPlayer": 2,
+            "promptGeneratedBy": "CQ8V4VqpEi",
+            "promptParams": {},
+            "opponentId": 1,
+            "log": [],
+            "gameEnded": false,
+            "winner": null,
+            "cardsAttached": {}
+        }
+
+        const state = new GameState(stateObj as unknown as SerializedClientState);
+        state.setPlayerId(2)
+
+        const strategy = new SimulationStrategy()
+        strategy.setup(state, 2);
+
+        const action = strategy.requestAction()
+        console.log(strategy.getGraph())
+        console.dir(action)
+
+        console.dir(strategy.getHeldActions())
+    })
+
+    it('Corf action', () => {
+        const stateObj = {
+            "staticAbilities": [
+                {
+                    "card": "Water of Life",
+                    "data": {
+                        "energy": 0,
+                        "controller": 2,
+                        "attacked": 0,
+                        "actionsUsed": [],
+                        "energyLostThisTurn": 0,
+                        "defeatedCreature": false,
+                        "hasAttacked": false,
+                        "wasAttacked": false
+                    },
+                    "owner": 2,
+                    "id": "SegbrAVVoh"
+                },
+                {
+                    "card": "Orlon",
+                    "data": {
+                        "energy": 0,
+                        "controller": 1,
+                        "attacked": 0,
+                        "actionsUsed": [],
+                        "energyLostThisTurn": 0,
+                        "defeatedCreature": false,
+                        "hasAttacked": false,
+                        "wasAttacked": false
+                    },
+                    "owner": 1,
+                    "id": "54brb5ESKK"
+                }
+            ],
+            "energyPrompt": false,
+            "turnTimer": false,
+            "turnSecondsLeft": 0,
+            "promptAvailableCards": [],
+            "zones": {
+                "playerHand": [
+                    {
+                        "card": "Submerge",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "D1sPqxyCtC"
+                    },
+                    {
+                        "card": "Submerge",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "qS6LGHWg7X"
+                    },
+                    {
+                        "card": "Dream Balm",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "S9UsuBlls8"
+                    }
+                ],
+                "opponentHand": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "lvt1kt6xaG"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "bs1ILgGW6l"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "rmbJ7hUBHT"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "WwdisChH0s"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "yekOSYJero"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "wcuQ6B8mdg"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "YFLBoholwT"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "7393aGy2Cc"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "c4thRwJMkk"
+                    }
+                ],
+                "playerDeck": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "4FL-fxeAHY"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "hvN3eq4vjj"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "Zo4vCQHkZV"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "ynHYaKgLHB"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "CA6KOyowrC"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "i7x7hAJXto"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "PxD6I1n-Vb"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "OxKGdXNOYx"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "qBav4OKIxf"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "KwQROG0LUr"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "cowXGyepwC"
+                    }
+                ],
+                "opponentDeck": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "9OV8qQ0JVG"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "7yaI09saqI"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "Rub3SFOzM-"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "chYrkUHyPB"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "P7wlwecNPL"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "l63c5Rqucd"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "rFKsExMqP_"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "9Yh4M68L8j"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "O0XheQy-mx"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "yzlBkolBMD"
+                    }
+                ],
+                "playerActiveMagi": [
+                    {
+                        "card": "Orlon",
+                        "data": {
+                            "energy": 2,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "54brb5ESKK"
+                    }
+                ],
+                "opponentActiveMagi": [
+                    {
+                        "card": "Poad",
+                        "data": {
+                            "energy": 3,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "K6i7CyJpi5"
+                    }
+                ],
+                "playerMagiPile": [
+                    {
+                        "card": "Ebylon",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "J_5RqD_9Dd"
+                    }
+                ],
+                "opponentMagiPile": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "aL-rf3uYXn"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "1qZwbH-pUS"
+                    }
+                ],
+                "inPlay": [
+                    {
+                        "card": "Ancestral Flute",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "MIg3P1TytV"
+                    },
+                    {
+                        "card": "Timber Hyren",
+                        "data": {
+                            "energy": 1,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "qVaRVacBMy"
+                    },
+                    {
+                        "card": "Robe of Vines",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "NjbdbJLHDG"
+                    },
+                    {
+                        "card": "Water of Life",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "SegbrAVVoh"
+                    },
+                    {
+                        "card": "Dream Balm",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "DNAUZJDaRm"
+                    },
+                    {
+                        "card": "Leaf Hyren",
+                        "data": {
+                            "energy": 2,
+                            "controller": 2,
+                            "attacked": 1,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": true,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "tzHIziI0DA"
+                    },
+                    {
+                        "card": "Bhatar",
+                        "data": {
+                            "energy": 5,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "LSEjqoukNV"
+                    },
+                    {
+                        "card": "Giant Parathin",
+                        "data": {
+                            "energy": 10,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "hBaeoOb5kB"
+                    },
+                    {
+                        "card": "Corf",
+                        "data": {
+                            "energy": 3,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "cOKWZRuBJb"
+                    }
+                ],
+                "playerDefeatedMagi": [
+                    {
+                        "card": "Whall",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "7sY49r8qE8"
+                    }
+                ],
+                "opponentDefeatedMagi": [],
+                "playerDiscard": [
+                    {
+                        "card": "Submerge",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "VJFZnYFuDV"
+                    },
+                    {
+                        "card": "Sphor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "yw9-XqIBqg"
+                    },
+                    {
+                        "card": "Weebo",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "TmgjPluPcz"
+                    },
+                    {
+                        "card": "Bwill",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "n6FIqJffEr"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "HLaIF6p8oC"
+                    },
+                    {
+                        "card": "Sphor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "Ga0x4g8QI_"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "1cjh8jun6u"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "dnAkXNqNU5"
+                    },
+                    {
+                        "card": "Orathan",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "K0pEyZC6FX"
+                    },
+                    {
+                        "card": "Bwill",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "bR9QsDi0h-"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "WusnwH6yel"
+                    },
+                    {
+                        "card": "Sphor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "dMIzcWvHo1"
+                    },
+                    {
+                        "card": "Orathan",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "jMwIYG_wS6"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "KpNP8KANpK"
+                    },
+                    {
+                        "card": "Dream Balm",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "4U50_4mrWb"
+                    },
+                    {
+                        "card": "Ancestral Flute",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "QLWgp8Kdno"
+                    },
+                    {
+                        "card": "Water of Life",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "oqbRMmGvrD"
+                    },
+                    {
+                        "card": "Undertow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "3qSL_1GaNl"
+                    },
+                    {
+                        "card": "Corf",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "YH4xJC6HOJ"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "za8nlEq-mH"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "UmJtWryeQl"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "csYLIeoaKB"
+                    },
+                    {
+                        "card": "Paralit",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "mNU3usnGNr"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "tDfkIz5bAv"
+                    }
+                ],
+                "opponentDiscard": [
+                    {
+                        "card": "Leaf Hyren",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "ux1NZR3dEP"
+                    },
+                    {
+                        "card": "Weebo",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "3gfhY2BEXI"
+                    },
+                    {
+                        "card": "Rudwot",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "DHKNXfBgkf"
+                    },
+                    {
+                        "card": "Plith",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "YTwOXKwEAx"
+                    },
+                    {
+                        "card": "Twee",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "7qczqz-2JS"
+                    },
+                    {
+                        "card": "Grow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "0aUyl0Ov0P"
+                    },
+                    {
+                        "card": "Carillion",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "m3KgMOqEzg"
+                    },
+                    {
+                        "card": "Carillion",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "iSK1NRtSgB"
+                    },
+                    {
+                        "card": "Plith",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "EmkYLM9wid"
+                    },
+                    {
+                        "card": "Balamant Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "bmxxijzawZ"
+                    },
+                    {
+                        "card": "Arboll",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "tClthmtkDM"
+                    },
+                    {
+                        "card": "Grow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "M7Ei-jsvuV"
+                    },
+                    {
+                        "card": "Grow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "R2ZHBQ_GPO"
+                    },
+                    {
+                        "card": "Rudwot",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "4fPLsPY3Tm"
+                    },
+                    {
+                        "card": "Carillion",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "JX6Bmj0uzQ"
+                    }
+                ]
+            },
+            "continuousEffects": [],
+            "step": 4,
+            "turn": 1,
+            "goesFirst": 1,
+            "activePlayer": 1,
+            "prompt": false,
+            "promptType": null,
+            "promptMessage": "Choose a Creature to discard and shuffle into deck",
+            "promptPlayer": null,
+            "promptGeneratedBy": null,
+            "promptParams": {},
+            "opponentId": 2,
+            "log": [],
+            "gameEnded": false,
+            "winner": null,
+            "cardsAttached": {}
+        }
+
+        const state = new GameState(stateObj as unknown as SerializedClientState);
+        state.setPlayerId(1)
 
         const strategy = new SimulationStrategy()
         strategy.setup(state, 1);
 
-        console.dir(strategy.requestAction())
+        const action = strategy.requestAction()
+        console.log(strategy.getGraph())
+        console.dir(action)
+
+        console.dir(strategy.getHeldActions())
+    })
+
+    it('Strange prompt entering', () => {
+        const stateObj = {
+            "staticAbilities": [
+                {
+                    "card": "Water of Life",
+                    "data": {
+                        "energy": 0,
+                        "controller": 2,
+                        "attacked": 0,
+                        "actionsUsed": [],
+                        "energyLostThisTurn": 0,
+                        "defeatedCreature": false,
+                        "hasAttacked": false,
+                        "wasAttacked": false
+                    },
+                    "owner": 2,
+                    "id": "SegbrAVVoh"
+                },
+                {
+                    "card": "Orlon",
+                    "data": {
+                        "energy": 0,
+                        "controller": 1,
+                        "attacked": 0,
+                        "actionsUsed": [],
+                        "energyLostThisTurn": 0,
+                        "defeatedCreature": false,
+                        "hasAttacked": false,
+                        "wasAttacked": false
+                    },
+                    "owner": 1,
+                    "id": "54brb5ESKK"
+                }
+            ],
+            "energyPrompt": false,
+            "turnTimer": false,
+            "turnSecondsLeft": 0,
+            "promptAvailableCards": [],
+            "zones": {
+                "playerHand": [
+                    {
+                        "card": "Submerge",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "D1sPqxyCtC"
+                    },
+                    {
+                        "card": "Submerge",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "qS6LGHWg7X"
+                    },
+                    {
+                        "card": "Dream Balm",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "S9UsuBlls8"
+                    }
+                ],
+                "opponentHand": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "lvt1kt6xaG"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "bs1ILgGW6l"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "rmbJ7hUBHT"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "WwdisChH0s"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "yekOSYJero"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "wcuQ6B8mdg"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "YFLBoholwT"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "7393aGy2Cc"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "c4thRwJMkk"
+                    }
+                ],
+                "playerDeck": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "4FL-fxeAHY"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "hvN3eq4vjj"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "Zo4vCQHkZV"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "ynHYaKgLHB"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "CA6KOyowrC"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "i7x7hAJXto"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "PxD6I1n-Vb"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "OxKGdXNOYx"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "qBav4OKIxf"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "KwQROG0LUr"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "cowXGyepwC"
+                    }
+                ],
+                "opponentDeck": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "9OV8qQ0JVG"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "7yaI09saqI"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "Rub3SFOzM-"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "chYrkUHyPB"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "P7wlwecNPL"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "l63c5Rqucd"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "rFKsExMqP_"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "9Yh4M68L8j"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "O0XheQy-mx"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "yzlBkolBMD"
+                    }
+                ],
+                "playerActiveMagi": [
+                    {
+                        "card": "Orlon",
+                        "data": {
+                            "energy": 2,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "54brb5ESKK"
+                    }
+                ],
+                "opponentActiveMagi": [
+                    {
+                        "card": "Poad",
+                        "data": {
+                            "energy": 3,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "K6i7CyJpi5"
+                    }
+                ],
+                "playerMagiPile": [
+                    {
+                        "card": "Ebylon",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "J_5RqD_9Dd"
+                    }
+                ],
+                "opponentMagiPile": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "aL-rf3uYXn"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "1qZwbH-pUS"
+                    }
+                ],
+                "inPlay": [
+                    {
+                        "card": "Ancestral Flute",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "MIg3P1TytV"
+                    },
+                    {
+                        "card": "Timber Hyren",
+                        "data": {
+                            "energy": 1,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "qVaRVacBMy"
+                    },
+                    {
+                        "card": "Robe of Vines",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "NjbdbJLHDG"
+                    },
+                    {
+                        "card": "Water of Life",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "SegbrAVVoh"
+                    },
+                    {
+                        "card": "Dream Balm",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "DNAUZJDaRm"
+                    },
+                    {
+                        "card": "Leaf Hyren",
+                        "data": {
+                            "energy": 2,
+                            "controller": 2,
+                            "attacked": 1,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": true,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "tzHIziI0DA"
+                    },
+                    {
+                        "card": "Bhatar",
+                        "data": {
+                            "energy": 5,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "LSEjqoukNV"
+                    },
+                    {
+                        "card": "Giant Parathin",
+                        "data": {
+                            "energy": 10,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "hBaeoOb5kB"
+                    }
+                ],
+                "playerDefeatedMagi": [
+                    {
+                        "card": "Whall",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "7sY49r8qE8"
+                    }
+                ],
+                "opponentDefeatedMagi": [],
+                "playerDiscard": [
+                    {
+                        "card": "Submerge",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "VJFZnYFuDV"
+                    },
+                    {
+                        "card": "Sphor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "yw9-XqIBqg"
+                    },
+                    {
+                        "card": "Weebo",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "TmgjPluPcz"
+                    },
+                    {
+                        "card": "Bwill",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "n6FIqJffEr"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "HLaIF6p8oC"
+                    },
+                    {
+                        "card": "Sphor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "Ga0x4g8QI_"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "1cjh8jun6u"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "dnAkXNqNU5"
+                    },
+                    {
+                        "card": "Orathan",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "K0pEyZC6FX"
+                    },
+                    {
+                        "card": "Bwill",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "bR9QsDi0h-"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "WusnwH6yel"
+                    },
+                    {
+                        "card": "Sphor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "dMIzcWvHo1"
+                    },
+                    {
+                        "card": "Orathan",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "jMwIYG_wS6"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "KpNP8KANpK"
+                    },
+                    {
+                        "card": "Dream Balm",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "4U50_4mrWb"
+                    },
+                    {
+                        "card": "Ancestral Flute",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "QLWgp8Kdno"
+                    },
+                    {
+                        "card": "Water of Life",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "oqbRMmGvrD"
+                    },
+                    {
+                        "card": "Undertow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "3qSL_1GaNl"
+                    },
+                    {
+                        "card": "Corf",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "YH4xJC6HOJ"
+                    },
+                    {
+                        "card": "Sea Barl",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "za8nlEq-mH"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "UmJtWryeQl"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "csYLIeoaKB"
+                    },
+                    {
+                        "card": "Paralit",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "mNU3usnGNr"
+                    },
+                    {
+                        "card": "Wellisk Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "tDfkIz5bAv"
+                    },
+                    {
+                        "card": "Corf",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "Ws1E6VVsTg"
+                    }
+                ],
+                "opponentDiscard": [
+                    {
+                        "card": "Leaf Hyren",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "ux1NZR3dEP"
+                    },
+                    {
+                        "card": "Weebo",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "3gfhY2BEXI"
+                    },
+                    {
+                        "card": "Rudwot",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "DHKNXfBgkf"
+                    },
+                    {
+                        "card": "Plith",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "YTwOXKwEAx"
+                    },
+                    {
+                        "card": "Twee",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "7qczqz-2JS"
+                    },
+                    {
+                        "card": "Grow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "0aUyl0Ov0P"
+                    },
+                    {
+                        "card": "Carillion",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "m3KgMOqEzg"
+                    },
+                    {
+                        "card": "Carillion",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "iSK1NRtSgB"
+                    },
+                    {
+                        "card": "Plith",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "EmkYLM9wid"
+                    },
+                    {
+                        "card": "Balamant Pup",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "bmxxijzawZ"
+                    },
+                    {
+                        "card": "Arboll",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "tClthmtkDM"
+                    },
+                    {
+                        "card": "Grow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "M7Ei-jsvuV"
+                    },
+                    {
+                        "card": "Grow",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "R2ZHBQ_GPO"
+                    },
+                    {
+                        "card": "Rudwot",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "4fPLsPY3Tm"
+                    },
+                    {
+                        "card": "Carillion",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "JX6Bmj0uzQ"
+                    }
+                ]
+            },
+            "continuousEffects": [],
+            "step": 4,
+            "turn": 1,
+            "goesFirst": 1,
+            "activePlayer": 1,
+            "prompt": true,
+            "promptType": "prompt/creature_filtered",
+            "promptMessage": null,
+            "promptPlayer": 1,
+            "promptParams": {
+                "restrictions": [
+                    {
+                        "type": "restrictions/creature_was_attacked"
+                    }
+                ]
+            },
+            "opponentId": 2,
+            "log": [],
+            "gameEnded": false,
+            "winner": null,
+            "cardsAttached": {}
+        }
+
+        const state = new GameState(stateObj as unknown as SerializedClientState);
+        state.setPlayerId(1)
+
+        const strategy = new SimulationStrategy()
+        strategy.setup(state, 1);
+
+        debugger;
+        const action = strategy.requestAction()
+        console.dir(action)
 
         console.dir(strategy.getHeldActions())
     })

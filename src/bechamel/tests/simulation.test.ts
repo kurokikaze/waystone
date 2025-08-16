@@ -2632,9 +2632,9 @@ describe('Simulations', () => {
                         count: this.commandCount,
                         action,
                     })
-                    if (this.commandCount == 7) {
-                        console.log(JSON.stringify(state))
-                    }
+                    // if (this.commandCount == 7) {
+                    //     console.log(JSON.stringify(state))
+                    // }
                     this.commandCount++;
                     if (convertedCommand.type === ACTION_PLAY && 'payload' in convertedCommand && !convertedCommand.payload.card) {
                         console.error(`Cannot convert ACTION_PLAY command, source card: ${action.payload.card.card} [${action.payload.card.id}]`)

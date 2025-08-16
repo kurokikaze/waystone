@@ -223,7 +223,8 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
       } as ClientPassAction;
     }
     case ACTION_PLAY: {
-      const cardPlayed = 'card' in action ? game.getMetaValue(action.card, action.generatedBy) : action.payload.card;// ? action.payload.card : metaCard;
+      const cardsPlayed = 'card' in action ? game.getMetaValue(action.card, action.generatedBy) : action.payload.card;// ? action.payload.card : metaCard;
+      const cardPlayed = cardsPlayed instanceof Array ? cardsPlayed[0] : cardsPlayed;
 
       return {
         ...action,
@@ -547,6 +548,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                 max: parseInt(game.getMetaValue(action.promptParams.max, action.generatedBy), 10),
                 ...(action.message ? { message: action.message } : {}),
                 player: action.player,
+                generatedBy: action.generatedBy,
               } as ClientEffectPromptEnteredNumber;
             }
             case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
@@ -559,6 +561,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                   amount: parseInt(game.getMetaValue(action.promptParams.amount, action.generatedBy), 10),
                 },
                 player: action.player,
+                generatedBy: action.generatedBy,
               } as ClientEffectPromptEnteredDistributeEnergy;// ClientEnterPromptDistributeEnergyOnCreatures;
             }
             case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
@@ -571,7 +574,8 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                   amount: parseInt(game.getMetaValue(action.promptParams.amount, action.generatedBy), 10),
                 },
                 player: action.player,
-              } as ClientEffectPromptEnteredDistributeDamage; //ClientEnterPromptDistributeDamageOnCreatures;
+                generatedBy: action.generatedBy,
+              } as ClientEffectPromptEnteredDistributeDamage;
             }
             case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
               return {
@@ -580,7 +584,8 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                 promptType: action.promptType,
                 ...(action.message ? { message: action.message } : {}),
                 player: action.player,
-              } as ClientEffectPromptEnteredRearrangeEnergy;//ClientEnterPromptRearrangeEnergyOnCreatures;
+                generatedBy: action.generatedBy,
+              } as ClientEffectPromptEnteredRearrangeEnergy;
             }
             case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
               const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
@@ -643,6 +648,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                   numberOfCards,
                 },
                 ...(action.message ? { message: action.message } : {}),
+                generatedBy: action.generatedBy,
               } as ClientEffectPromptEnteredChooseCardsFromZone;
             }
             case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
@@ -728,6 +734,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                     restrictions: action.promptParams.restrictions,
                   },
                   ...(action.message ? { message: action.message } : {}),
+                  generatedBy: action.generatedBy,
                   player: action.player,
                 } as ClientEffectPromptEnteredSingleCreatureFiltered;
               } else {
@@ -740,6 +747,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                     restriction: action.promptParams.restriction,
                     restrictionValue: action.promptParams.restrictionValue,
                   },
+                  generatedBy: action.generatedBy,
                   player: action.player,
                 } as ClientEffectPromptEnteredSingleCreatureFiltered;
               }
@@ -888,6 +896,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             effectType: action.effectType,
             target: convertCardMinimal(actionTarget),
             player: action.player,
+            generatedBy: action.generatedBy,
           }
         }
         case EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {
@@ -1631,12 +1640,10 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
         }
         case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
           if (action.zone) {
-            console.log(`We have zone`)
             const zone = action.zone === ZONE_TYPE_IN_PLAY ? game.getZone(ZONE_TYPE_IN_PLAY) : game.getZone(action.zone, action.zoneOwner);
             const zoneContent = zone.cards;
             const actionCards = action.cards;
             if (actionCards instanceof Array) {
-              console.log(`We have cards`)
               const cards = zoneContent.filter(card => (actionCards instanceof Array && actionCards.includes(card.id)));
               return {
                 type: action.type,
@@ -1644,9 +1651,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
                 player: action.player,
               };
             }
-            console.log(`We have no cards`)
           }
-          console.log(`We have no zone`)
           return null;
         }
         case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
@@ -1827,7 +1832,8 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
     }
     case ACTION_PLAY: {
       const player = action.player;
-      const cardInHand = game.getZone(ZONE_TYPE_HAND, player).byId(action.payload.card.id);
+      const cardsInHand = game.getZone(ZONE_TYPE_HAND, player).byId(action.payload.card.id);
+      const cardInHand = cardsInHand instanceof Array ? cardsInHand[0] : cardsInHand;
       // expandedAction.payload.card = cardInHand;
       // expandedAction.forcePriority = false;
       return {

@@ -1,5 +1,5 @@
 /* global window */
-import {useSelector} from 'react-redux';
+import {shallowEqual, useSelector} from 'react-redux';
 import cn from 'classnames';
 import {
 	ACTION_RESOLVE_PROMPT,
@@ -29,7 +29,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 	const ourTurn = useSelector(isOurTurn);
 	const active = ourTurn && currentStep === STEP_ATTACK;
 	const animation = useSelector(getAnimation);
-	const inPlayContent = useSelector(getCardDetails);
+	const inPlayContent = useSelector(getCardDetails, shallowEqual);
 	const playerNumber = useSelector(getPlayerNumber);
 	const guarded = inPlayContent.inPlay.some(card => card.data.controller !== playerNumber && card.card.type === TYPE_CREATURE);
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);

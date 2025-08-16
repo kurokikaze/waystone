@@ -166,7 +166,14 @@ export function createState(
   sim.state.continuousEffects = gameState.getContinuousEffects();
   sim.state.step = gameState.getStep()
   const seed = gameState.getTurn() * 100 + gameState.getStep() * 10 + gameState.playerId
+  // console.log(`${gameState.getTurn()} * 100 + ${gameState.getStep()} * 10 + ${gameState.playerId}`)
   sim.initiatePRNG(seed)
+  if (gameState.state.prompt) {
+    sim.state.prompt = true
+    sim.state.promptPlayer = gameState.state.promptPlayer!
+    sim.state.promptType = gameState.state.promptType
+    sim.state.promptGeneratedBy = gameState.state.promptGeneratedBy!
+  }
   return sim
 }
 

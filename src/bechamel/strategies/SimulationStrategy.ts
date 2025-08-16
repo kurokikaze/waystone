@@ -16,7 +16,7 @@ import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
 import { createState, getStateScore } from './simulationUtils'
 import { HashBuilder } from './HashBuilder';
-import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SerializedClientState, SimulationEntity, StateRepresentation } from '../types';
+import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
@@ -317,27 +317,29 @@ export class SimulationStrategy implements Strategy {
         }
         const score = getStateScore(workEntity.sim, this.playerId, opponentId)
         const hash = this.hashBuilder.makeHash(workEntity.sim)
-        try {
-          this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)}"]\n`
-        } catch (_e) {
-          console.error('Error generating label perhaps')
-          console.dir(_e)
-        }
-        if (hashes.has(hash)) {
-          continue
-        }
+        if (hash !== workEntity.previousHash) {
+          try {
+            this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)} (${score})"]\n`
+          } catch (_e) {
+            console.error('Error generating label perhaps')
+            console.dir(_e)
+          }
+          if (hashes.has(hash)) {
+            continue
+          }
 
-        hashes.add(hash)
-        this.leaves.delete(workEntity.previousHash)
-        this.leaves.set(hash, {
-          hash,
-          parentHash: hash,
-          score,
-          actionLog: workEntity.actionLog,
-          isPrompt: Boolean(workEntity.sim.state.prompt),
-        })
-        simulationQueue.push(...ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder))
-        // delete workEntity.sim;
+          hashes.add(hash)
+          this.leaves.delete(workEntity.previousHash)
+          this.leaves.set(hash, {
+            hash,
+            parentHash: hash,
+            score,
+            actionLog: workEntity.actionLog,
+            isPrompt: Boolean(workEntity.sim.state.prompt),
+          })
+          simulationQueue.push(...ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder))
+          // delete workEntity.sim;
+        }
       }
     }
 
@@ -363,15 +365,31 @@ export class SimulationStrategy implements Strategy {
     return bestAction.actions
   }
 
+  public getGraph() {
+    return `
+     digraph sim {
+       ${this.graph}
+     }`
+  }
+
   public getHeldActions() {
     return this.actionsOnHold
+  }
+
+  public getExtractedActions(playerId: number, opponentId: number) {
+    if (!this.gameState) return [];
+
+    const simState = createState(this.gameState, playerId, opponentId)
+    return ActionExtractor.extractActions(simState, playerId, opponentId, [],
+      this.hashBuilder.makeHash(simState)
+      , this.hashBuilder)
   }
 
   private shouldClearHeldActions(): boolean {
     if (!this.actionsOnHold.length) return false
     if (!this.gameState) return false
 
-    const { action } = this.actionsOnHold[0]
+    const { action, hash } = this.actionsOnHold[0]
     if (this.gameState.getStep() === STEP_NAME.CREATURES) {
       const playableCards = this.gameState.getPlayableCards()
       const ids = new Set(playableCards.map(({ id }) => id))
@@ -414,15 +432,29 @@ export class SimulationStrategy implements Strategy {
     }
 
     if (this.gameState.isInMyPromptState() && action.type !== ACTION_RESOLVE_PROMPT) {
+      console.log(`Non-prompt action in the prompt state.`)
       console.dir(action)
       console.dir(this.actionsOnHold)
       //throw new Error('Non-prompt action in the prompt state (simulation strategy)')
       return true
     }
 
+    const testSim = createState(
+      this.gameState,
+      this.playerId || 2,
+      this.gameState.getOpponentId(),
+    )
+
+    const checkHash = this.hashBuilder.makeHash(testSim);
+
+    if (checkHash !== hash) {
+      console.log(`Hash mismatch: ${checkHash} <> ${hash}`)
+      debugger;
+      return true
+    }
+
     return false
   }
-
 
   private fixTargetPromptResolution(action: C2SAction & { targetName: string }): C2SAction {
     const promptAvailableCards = this.gameState?.state.promptParams.cards?.map(({ id }) => id);
@@ -498,10 +530,13 @@ export class SimulationStrategy implements Strategy {
     return this.history;
   }
 
+  private generateNumber = 0;
   private generateAction(): C2SAction {
+    this.generateNumber++
     this.actionCameFromHold = false
 
     if (this.shouldClearHeldActions()) {
+      console.log(`Clearing held actions`)
       this.actionsOnHold = []
     }
 
@@ -513,22 +548,25 @@ export class SimulationStrategy implements Strategy {
       this.actionCameFromHold = true
       const { action, hash } = this.actionsOnHold.shift()!
 
-      // const testSim = createState(
-      //   this.gameState,
-      //   this.playerId || 2,
-      //   this.gameState.getOpponentId(),
-      // )
+      const testSim = createState(
+        this.gameState,
+        this.playerId || 2,
+        this.gameState.getOpponentId(),
+      )
 
-      // const checkHash = this.hashBuilder.makeHash(testSim);
+      const checkHash = this.hashBuilder.makeHash(testSim);
 
       // If we are passing at the creatures step, clear the actions on hold
       if (action && action.type === ACTION_PASS && this.gameState.getStep() === STEP_NAME.CREATURES) {
+        console.log(`Clearing held actions going into CREATURES step`)
+        console.dir(this.actionsOnHold)
         this.actionsOnHold = []
       }
-      // if (checkHash !== hash) {
-      //   console.error(`Hashes do not match. Probably something strange has happened.`)
-      //   console.error(`Action hash: ${hash}, state hash: ${checkHash}`);
-      // }
+
+      if (checkHash !== hash) {
+        console.error(`Hashes do not match. Probably something strange has happened.`)
+        console.error(`Action hash: ${hash}, state hash: ${checkHash}`);
+      }
 
       if (action.type == ACTION_RESOLVE_PROMPT && (
         this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE
@@ -611,14 +649,14 @@ export class SimulationStrategy implements Strategy {
                 this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE
               ) {
                 return this.resolveChooseCardsPrompt()
+              } else {
+                console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
               }
-              // console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
             }
             const playable = this.gameState.getPlayableCards()
               .map(addCardData)
               .filter((card: any) => card._card.type === TYPE_RELIC)
             const relics = this.gameState.getMyRelicsInPlay().map(card => card._card?.name)
-
             if (playable.some(card => !relics.includes(card._card.name))) {
               const playableRelic = playable.find(card => !relics.includes(card._card.name))
               if (playableRelic) {
@@ -644,6 +682,7 @@ export class SimulationStrategy implements Strategy {
             const hash = this.hashBuilder.makeHash(outerSim)
             const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
 
+            // console.log(`OuterSim twister seed: ${outerSim.twisterSeed}`)
             const simulationQueue = new SimulationQueue();
             simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
             //const simulationQueue: SimulationEntity[] = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
@@ -663,14 +702,19 @@ export class SimulationStrategy implements Strategy {
             ).map(({ action, hash }) => ({
               action: this.simulationActionToClientAction(action),
               hash,
+              fromTurn: this.gameState?.turnNumber,
+              fromStep: this.gameState?.getStep(),
+              generateNumber: this.generateNumber,
             }));
 
             // console.log('Saving the graph data as ' + finalHash);
             // console.log(btoa(this.graph));
-            // if (this.actionsOnHold.length) {
-            // console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
-            // console.dir(this.actionsOnHold)
-            // }
+            if (this.generateNumber == 45) {
+              console.log(`Main action:`)
+              console.log(JSON.stringify(bestActions[0], null, 2))
+              console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
+              console.log(JSON.stringify(this.actionsOnHold, null, 2))
+            }
             const bestAction = bestActions[0]
             // if (bestAction.type === ACTION_PLAY) {
             //   // console.error(`Playing the card`);

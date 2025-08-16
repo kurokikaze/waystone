@@ -1,5 +1,5 @@
 /* global window */
-import {useSelector} from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import cn from 'classnames';
 import {
 	TYPE_CREATURE,
@@ -7,7 +7,7 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 } from 'moonlands/src/const';
 import Card from '../Card.tsx';
-import {withAbilities} from '../CardAbilities.tsx';
+import { withAbilities } from '../CardAbilities.tsx';
 import {
 	ANIMATION_CREATURE_DISCARDED,
 	STEP_ATTACK,
@@ -28,7 +28,7 @@ import {
 	getAnimation,
 	getPlayerNumber,
 } from '../../selectors';
-import {withEnergyManipulation} from '../CardEnergyManipulation.jsx';
+import { withEnergyManipulation } from '../CardEnergyManipulation.jsx';
 import { useCallback } from 'react';
 
 const CardWithAbilities = withAbilities(Card);
@@ -38,10 +38,10 @@ function ZoneOpponentInPlay({
 	name,
 	engineConnector,
 }) {
-	const rawContent = useSelector(getCardDetails);
+	const rawContent = useSelector(getCardDetails, shallowEqual);
 	const playerNumber = useSelector(getPlayerNumber)
 	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller !== playerNumber);
-	
+
 	const currentStep = useSelector(getCurrentStep);
 	const ourTurn = useSelector(isOurTurn);
 	const active = ourTurn && currentStep === STEP_ATTACK;
@@ -65,13 +65,13 @@ function ZoneOpponentInPlay({
 			target: cardId,
 			generatedBy: promptGeneratedBy,
 		});
-	} : () => {};
+	} : () => { };
 
 	return (
-		<div className={cn('zone', 'zone-creatures', {'zone-active' : active})} data-zone-name={name} data-items={content.length}>
+		<div className={cn('zone', 'zone-creatures', { 'zone-active': active })} data-zone-name={name} data-items={content.length}>
 			{content.length ? content.map(cardData =>
 				<div key={cardData.id}>
-					<SelectedCard	
+					<SelectedCard
 						id={cardData.id}
 						card={cardData.card}
 						data={cardData.data}
@@ -82,7 +82,7 @@ function ZoneOpponentInPlay({
 						droppable={active && cardData.card.type === TYPE_CREATURE}
 						target={active && cardData.card.type === TYPE_CREATURE}
 						engineConnector={engineConnector}
-						className={cn({'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id})}
+						className={cn({ 'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id })}
 						attacker={animation && animation.source === cardData.id}
 						attackNumber={cardData.data.attacked}
 					/>

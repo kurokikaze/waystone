@@ -1,5 +1,5 @@
 /* global window */
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
 import cn from 'classnames';
 import {
 	ACTION_POWER,
@@ -32,7 +32,7 @@ function ZonePlayerRelics({
 	zoneId,
 	engineConnector,
 }) {
-	const rawContent = useSelector(getCardDetails);
+	const rawContent = useSelector(getCardDetails, shallowEqual);
 	const playerNumber = useSelector(getPlayerNumber);
 	const content = rawContent.inPlay.filter(card =>
 		card.card.type === TYPE_RELIC &&
