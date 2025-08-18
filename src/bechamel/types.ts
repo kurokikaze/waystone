@@ -209,5 +209,6 @@ export type SimulationEntity = {
     sim: State,
     action: any,
     actionLog: ActionOnHold[],
+    rawActionLog?: C2SAction[]
     previousHash: string,
 }
