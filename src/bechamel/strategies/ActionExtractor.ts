@@ -82,6 +82,7 @@ export class ActionExtractor {
                 const innerSim = sim.clone()
                 const source = innerSim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
                 if (source) {
+                  // console.log(`Planning a ${magiCard.card.name} power (${power.name})`)
                   const action: AnyEffectType = {
                     type: ACTION_POWER,
                     source,

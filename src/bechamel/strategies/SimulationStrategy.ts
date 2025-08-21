@@ -2,6 +2,8 @@ import { byName } from 'moonlands/dist/esm/cards'
 import { AnyEffectType } from 'moonlands/dist/esm/types';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 
+import * as fs from 'node:fs';
+
 import {
     PROMPT_TYPE_MAY_ABILITY,
     ACTION_ATTACK,
@@ -315,7 +317,10 @@ export class SimulationStrategy implements Strategy {
 
             if (workEntity && workEntity.action) {
                 const actionLog: any[] = workEntity?.rawActionLog || []
-                workEntity.sim.onAction = (action: any) => actionLog.push(convertServerCommand(action, workEntity.sim, this.playerId || 1))
+                workEntity.sim.onAction = (action: any) => actionLog.push({
+                    command: convertServerCommand(action, workEntity.sim, this.playerId || 1),
+                    fromAction: this.actionToLabel(workEntity.action),
+                })
                 try {
                     workEntity.sim.update(workEntity.action)
                 } catch (e: any) {
@@ -349,7 +354,7 @@ export class SimulationStrategy implements Strategy {
                     })
                     workEntity.sim.onAction = null
                     const extractedActions = ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder)
-                    simulationQueue.push(...extractedActions.map(simEntity => ({...simEntity, rawActionLog: actionLog})))
+                    simulationQueue.push(...extractedActions.map(simEntity => ({ ...simEntity, rawActionLog: actionLog })))
                     // delete workEntity.sim;
                 }
             }
@@ -360,10 +365,19 @@ export class SimulationStrategy implements Strategy {
             actions: []
         }
 
+        if (this.generateNumber == 90 && this.playerId == 2) {
+            debugger;
+        }
         this.leaves.forEach((value: Leaf) => {
             if (!value.isPrompt && (value.score > bestAction.score) || (value.score == bestAction.score && value.actionLog.length < bestAction.actions.length)) {
                 bestAction.score = value.score
                 bestAction.actions = value.actionLog
+
+                console.log('')
+                console.log(JSON.stringify(value.rawActionLog, null, 4))
+                // if (this.generateNumber == 90 && this.playerId == 2) {
+                //     fs.writeFileSync('./replay-sim-content.json', JSON.stringify(value.rawActionLog, null, 2));
+                // }
             }
         })
 

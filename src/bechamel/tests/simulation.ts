@@ -255,7 +255,7 @@ function simulateGame(deck1: string[], deck1name: string, deck2: string[], deck2
                 console.dir(action)
                 console.log(JSON.stringify(game.serializeData(2)))
 
-                fs.writeFileSync('./replayPlayerTwo.json', JSON.stringify(gameLog, null, 2));
+                fs.writeFileSync('./replayPlayerTwo.json', JSON.stringify(this.gameLog, null, 2));
 
                 throw new Error('Conversion error')
             }
@@ -309,6 +309,7 @@ function simulateGame(deck1: string[], deck1name: string, deck2: string[], deck2
                 console.log(`${deck2name} won`)
             }
 
+            fs.writeFileSync('./replayPlayerTwo-connector.json', JSON.stringify(gameLog, null, 2));
             const magiLeft = game.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards.length + 1 // plus active magi
             const energyLeft = game.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card?.data.energy
             const creaturesLeft = game.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player).length
