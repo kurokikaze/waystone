@@ -18,11 +18,13 @@ import { createState, getStateScore } from './simulationUtils'
 import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
+import { DirectActionExtractor } from './DirectActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
 import { convertServerCommand } from '../../containedEngine/utils';
-
+import { State } from 'moonlands';
+import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
 const STEP_NAME = {
     ENERGIZE: 0,
     PRS1: 1,
@@ -52,13 +54,10 @@ type HistoryEntry = {
     fromHold: boolean
 }
 
-export class SimulationStrategy implements Strategy {
-    // public static deckId = '62ed47ae99dd0db04e9f657b' // Online deck
-    // public static deckId = '5f60e45e11283f7c98d9259b' // Local deck (Naroom)
+export class ReconSimulationStrategy implements Strategy {
     public static deckId = '5f60e45e11283f7c98d9259c' // Local deck (Arderial)
-    // public static deckId = '6305ec3aa14ce19348dfd7f9' // Local deck (Underneath/Naroom)
 
-    public static failsafe = 4500
+    public static failsafe = 500
 
     private waitingTarget?: {
         source: string
@@ -225,7 +224,7 @@ export class SimulationStrategy implements Strategy {
             return this.pass()
         }
         // Simulation itself
-        let failsafe = SimulationStrategy.failsafe
+        let failsafe = ReconSimulationStrategy.failsafe
         let counter = 0
         while (simulationQueue.hasItems() && failsafe > 0) {
             failsafe -= 1
@@ -292,90 +291,43 @@ export class SimulationStrategy implements Strategy {
         return `Unknown action: ${action.type}`
     }
 
-    private simulateActionsQueue(simulationQueue: SimulationQueue, initialScore: number, opponentId: number): ActionOnHold[] {
-        const hashes = new Set<string>()
-        if (!this.playerId) {
-            return [{
-                action: this.pass(),
-                hash: '*',
-            }]
-        }
-        // Simulation itself
-        let counter = 0
+    private counter = 0
+    private hashes: Set<string> = new Set<string>()
 
-        this.leaves.clear()
+    public startSolving(sim: State, unmaker: Unmaker, playerId: number, opponentId: number) {
+        this.counter = 0;
+        this.hashes = new Set<string>()
+        this.graph = ''
+        console.log(`Hash of the initial state: ${this.hashBuilder.makeHash(sim)}`)
+        const result = this.solveState(sim, unmaker, playerId, opponentId)
+        console.log(`Counter: ${this.counter}`)
+        // console.log(this.getGraph())
+        return result
+    }
 
-        if (this.generateNumber == 90 && this.playerId == 2) {
-            debugger;
-        }
+    private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, depth = 1): { score: number, actions: any[] } {
+        // console.log(`solveState at depth ${depth}`)
+        let actions: string[] = [];
+        let score = 0;
+        this.counter++;
 
-        while (simulationQueue.hasItems() && counter <= SimulationStrategy.failsafe) {
-            const workEntity = simulationQueue.shift()
+        const parentHash = this.hashBuilder.makeHash(state)
+        const possibleActions = DirectActionExtractor.extractActions(state, playerId, opponentId)
 
-            if (workEntity && workEntity.action) {
-                const actionLog: any[] = workEntity?.rawActionLog || []
-                workEntity.sim.onAction = (action: any) => actionLog.push(convertServerCommand(action, workEntity.sim, this.playerId || 1))
-                try {
-                    workEntity.sim.update(workEntity.action)
-                } catch (e: any) {
-                    console.log('Error applying action')
-                    console.dir(workEntity.action)
-                    console.log(`Message: ${e.message}`)
-                    console.dir(e.stack)
-                }
-                const score = getStateScore(workEntity.sim, this.playerId, opponentId)
-                const hash = this.hashBuilder.makeHash(workEntity.sim)
-                if (hash !== workEntity.previousHash) {
-                    try {
-                        this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)} (${score})"]\n`
-                    } catch (_e) {
-                        console.error('Error generating label perhaps')
-                        console.dir(_e)
-                    }
-                    if (hashes.has(hash)) {
-                        continue
-                    }
-
-                    counter += 1
-                    hashes.add(hash)
-                    this.leaves.delete(workEntity.previousHash)
-                    this.leaves.set(hash, {
-                        hash,
-                        parentHash: hash,
-                        score,
-                        rawActionLog: actionLog,
-                        actionLog: workEntity.actionLog,
-                        isPrompt: Boolean(workEntity.sim.state.prompt),
-                    })
-                    workEntity.sim.onAction = null
-                    const extractedActions = ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder)
-                    simulationQueue.push(...extractedActions.map(simEntity => ({...simEntity, rawActionLog: actionLog})))
-                    // delete workEntity.sim;
-                }
+        const scores: any[] = []
+        for (const action of possibleActions) {
+            unmaker.setCheckpoint()
+            DirectActionExtractor.applyAction(state, action, playerId, opponentId)
+            const childHash = this.hashBuilder.makeHash(state)
+            const label = ('label' in action ? action.label : 'Pass').replace(/"/g, '\\"')
+            this.graph += `  "${parentHash}" -> "${childHash}" [label="${label}"]\n`
+            if (!this.hashes.has(childHash)) {
+                this.hashes.add(childHash)
+                scores.push(this.solveState(state, unmaker, playerId, opponentId, depth + 1))
             }
+            unmaker.revertToCheckpoint(state)
         }
-
-        let bestAction: { score: number, actions: ActionOnHold[] } = {
-            score: initialScore,
-            actions: []
-        }
-
-        this.leaves.forEach((value: Leaf) => {
-            if (!value.isPrompt && (value.score > bestAction.score) || (value.score == bestAction.score && value.actionLog.length < bestAction.actions.length)) {
-                bestAction.score = value.score
-                bestAction.actions = value.actionLog
-            }
-        })
-
-        console.log(`Counter: ${counter}`)
-        // console.log(`
-        // digraph sim {
-        //   ${this.graph}
-        // }
-        // `)
-        // console.log(`Done ${counter} power simulations. Leaves reached: ${this.leaves.size}`)
-        // console.log(`Best found score is ${bestAction.score} (initial is ${initialScore})`)
-        return bestAction.actions
+        return { score, actions };
     }
 
     public getGraph() {
@@ -557,8 +509,6 @@ export class SimulationStrategy implements Strategy {
         }
 
         if (!this.gameState) {
-            console.log(`Pass`)
-
             return this.pass()
         }
 
@@ -605,8 +555,6 @@ export class SimulationStrategy implements Strategy {
         }
 
         if (this.gameState && this.playerId) {
-            console.log(`Sim start`)
-
             if (this.gameState.waitingForCardSelection()) {
                 return {
                     type: ACTION_RESOLVE_PROMPT,
@@ -662,7 +610,7 @@ export class SimulationStrategy implements Strategy {
                     }
                     case STEP_NAME.PRS1:
                     case STEP_NAME.PRS2: {
-                        console.log(`PRS phase`)
+
                         if (this.gameState.isInMyPromptState()) {
                             if (
                                 this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE ||
@@ -700,50 +648,50 @@ export class SimulationStrategy implements Strategy {
                         )
 
                         const hash = this.hashBuilder.makeHash(outerSim)
-                        console.log(`Initial hash: ${hash}`)
                         const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
 
+                        const unmaker = new Unmaker(outerSim);
+                        console.dir(this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID))
                         // console.log(`OuterSim twister seed: ${outerSim.twisterSeed}`)
-                        const simulationQueue = new SimulationQueue();
-                        simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
-                        //const simulationQueue: SimulationEntity[] = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
-                        const bestActions = this.simulateActionsQueue(simulationQueue, initialScore, TEMPORARY_OPPONENT_ID)
-                        const finalHash = this.hashBuilder.makeHash(outerSim)
-                        if (finalHash !== hash) {
-                            console.log(`Change leak! hashes mismatch: ${hash} => ${finalHash}`)
-                        }
-                        
-                        // console.log('Saving the graph data as ' + finalHash);
-                        console.log(this.graph);
-
-                        if (!bestActions[0]) {
-                            return this.pass()
-                        }
-
-                        this.actionsOnHold = bestActions.slice(1).filter(({ action }) =>
-                            (action.type === ACTION_PLAY && 'payload' in action && action.payload.player === this.playerId) ||
-                            ('player' in action && action.player === this.playerId)
-                        ).map(({ action, hash }) => ({
-                            action: this.simulationActionToClientAction(action),
-                            hash,
-                            fromTurn: this.gameState?.turnNumber,
-                            fromStep: this.gameState?.getStep(),
-                            generateNumber: this.generateNumber,
-                        }));
-
-                        if (this.generateNumber == 90 && this.playerId == 2) {
-                            debugger;
-                            console.log(`Main action:`)
-                            console.log(JSON.stringify(bestActions[0], null, 2))
-                            console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
-                            console.log(JSON.stringify(this.actionsOnHold, null, 2))
-                        }
-                        const bestAction = bestActions[0]
-                        // if (bestAction.type === ACTION_PLAY) {
-                        //   // console.error(`Playing the card`);
-                        //   // console.dir(bestAction.payload.card);
+                        // const simulationQueue = new SimulationQueue();
+                        // simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
+                        // //const simulationQueue: SimulationEntity[] = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
+                        // const bestActions = this.simulateActionsQueue(simulationQueue, initialScore, TEMPORARY_OPPONENT_ID)
+                        // const finalHash = this.hashBuilder.makeHash(outerSim)
+                        // if (finalHash !== hash) {
+                        //     console.log(`Change leak! hashes mismatch: ${hash} => ${finalHash}`)
                         // }
-                        return this.simulationActionToClientAction(bestAction.action)
+
+                        // if (!bestActions[0]) {
+                        //     return this.pass()
+                        // }
+
+                        // this.actionsOnHold = bestActions.slice(1).filter(({ action }) =>
+                        //     (action.type === ACTION_PLAY && 'payload' in action && action.payload.player === this.playerId) ||
+                        //     ('player' in action && action.player === this.playerId)
+                        // ).map(({ action, hash }) => ({
+                        //     action: this.simulationActionToClientAction(action),
+                        //     hash,
+                        //     fromTurn: this.gameState?.turnNumber,
+                        //     fromStep: this.gameState?.getStep(),
+                        //     generateNumber: this.generateNumber,
+                        // }));
+
+                        // // console.log('Saving the graph data as ' + finalHash);
+                        console.log(this.graph);
+                        // if (this.generateNumber == 90 && this.playerId == 2) {
+                        //     debugger;
+                        //     console.log(`Main action:`)
+                        //     console.log(JSON.stringify(bestActions[0], null, 2))
+                        //     console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
+                        //     console.log(JSON.stringify(this.actionsOnHold, null, 2))
+                        // }
+                        // const bestAction = bestActions[0]
+                        // // if (bestAction.type === ACTION_PLAY) {
+                        // //   // console.error(`Playing the card`);
+                        // //   // console.dir(bestAction.payload.card);
+                        // // }
+                        // return this.simulationActionToClientAction(bestAction.action)
                     }
 
                     case STEP_NAME.CREATURES: {

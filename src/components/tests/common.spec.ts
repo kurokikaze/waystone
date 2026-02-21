@@ -1,9 +1,9 @@
 /* global expect, describe, it */
-import {byName} from 'moonlands/src/cards';
+import {byName} from 'moonlands/dist/esm/cards';
 import {mapCardDataFromProps, transformCard, getCardDetails} from '../common';
 // import { state } from '../../spec/abilityState'
 import { ExtendedCard, State } from '../../types';
-import { ConvertedCard, InGameData } from 'moonlands/src/classes/CardInGame';
+import { ConvertedCard, InGameData } from 'moonlands/dist/esm/classes/CardInGame';
 // import { StaticAbilityType } from 'moonlands/src/types';
 
 describe('Common code from components', () => {
