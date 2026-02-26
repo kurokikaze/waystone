@@ -8,14 +8,10 @@ import { GameState } from '../GameState.ts';
 import { createState, createZones } from '../strategies/simulationUtils';
 import { SerializedClientState } from '../types';
 import { ACTION_ATTACK, ACTION_PASS, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
-import { createGame } from '../../containedEngine/containedEngine';
-import { StrategyConnector } from '../StrategyConnector';
-import { AnyEffectType } from 'moonlands/dist/esm/types';
-import convertClientCommands, { convertServerCommand } from '../../containedEngine/utils';
-import { Socket } from 'socket.io-client';
 
 import * as  fs from 'node:fs';
 import { DirectActionExtractor } from '../strategies/DirectActionExtractor.ts';
+import { getStandardState } from './testUtils.ts';
 
 const STEP_NAME = {
     ENERGIZE: 0,
@@ -35,8 +31,8 @@ const STEP_NAMES: Record<number, string> = {
     5: 'Draw',
 }
 
-describe.only('Action extraction (Unmaker)', () => {
-    it.only('test', () => {
+describe('Action extraction (Unmaker)', () => {
+    it('test', () => {
         const ACTIVE_PLAYER = 422;
         const NON_ACTIVE_PLAYER = 1310;
 
@@ -49,7 +45,7 @@ describe.only('Action extraction (Unmaker)', () => {
         const lavaAq = new CardInGame(byName('Lava Aq') as Card, NON_ACTIVE_PLAYER).addEnergy(2);
         const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
         const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
-        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion, lavaBalamant, kelthet, lavaAq]);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, lavaBalamant, kelthet]);
 
         // @ts-ignore
         const gameState = new State({
@@ -74,33 +70,12 @@ describe.only('Action extraction (Unmaker)', () => {
     });
 });
 
-describe('Simulations (Unmaker)', () => {
-    it('test', () => {
+describe.only('Simulations (Unmaker)', () => {
+    it.only('test', () => {
         const ACTIVE_PLAYER = 422;
         const NON_ACTIVE_PLAYER = 1310;
 
-        const weebo = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
-        const timberHyren = new CardInGame(byName('Timber Hyren') as Card, ACTIVE_PLAYER).addEnergy(6);
-        const weebo2 = new CardInGame(byName('Weebo') as Card, ACTIVE_PLAYER).addEnergy(1);
-        const carillion = new CardInGame(byName('Carillion') as Card, ACTIVE_PLAYER).addEnergy(3);
-        const lavaBalamant = new CardInGame(byName('Lava Balamant') as Card, NON_ACTIVE_PLAYER).addEnergy(5);
-        const kelthet = new CardInGame(byName('Kelthet') as Card, NON_ACTIVE_PLAYER).addEnergy(4);
-        const lavaAq = new CardInGame(byName('Lava Aq') as Card, NON_ACTIVE_PLAYER).addEnergy(2);
-        const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
-        const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
-        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, weebo2, carillion, lavaBalamant, kelthet, lavaAq]);
-
-        // @ts-ignore
-        const gameState = new State({
-            zones,
-            step: STEP_NAME.PRS1,
-            activePlayer: ACTIVE_PLAYER,
-        });
-
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-
-        gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]);
-        gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+        const gameState = getStandardState(ACTIVE_PLAYER, NON_ACTIVE_PLAYER)
 
         const serializedState = gameState.serializeData(ACTIVE_PLAYER) as unknown as SerializedClientState
 
@@ -108,10 +83,12 @@ describe('Simulations (Unmaker)', () => {
         stateRepresentation.setPlayerId(ACTIVE_PLAYER)
 
         const strategy = new ReconSimulationStrategy()
-
+        gameState.enableDebug()
         strategy.setup(stateRepresentation, ACTIVE_PLAYER)
 
         console.dir(strategy.requestAction())
+
+        fs.writeFileSync('reconGraph.dot', strategy.getGraph())
     })
 
     it('Killing Adis', () => {

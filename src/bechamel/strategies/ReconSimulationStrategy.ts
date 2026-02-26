@@ -1,6 +1,7 @@
 import { byName } from 'moonlands/dist/esm/cards'
 import { AnyEffectType } from 'moonlands/dist/esm/types';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
+import * as  fs from 'node:fs';
 
 import {
     PROMPT_TYPE_MAY_ABILITY,
@@ -18,13 +19,14 @@ import { createState, getStateScore } from './simulationUtils'
 import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
-import { DirectActionExtractor } from './DirectActionExtractor';
+import { DirectAction, DirectActionExtractor } from './DirectActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
 import { convertServerCommand } from '../../containedEngine/utils';
 import { State } from 'moonlands';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
+import { fstat } from 'node:fs';
 const STEP_NAME = {
     ENERGIZE: 0,
     PRS1: 1,
@@ -57,7 +59,7 @@ type HistoryEntry = {
 export class ReconSimulationStrategy implements Strategy {
     public static deckId = '5f60e45e11283f7c98d9259c' // Local deck (Arderial)
 
-    public static failsafe = 500
+    public static failsafe = 20000
 
     private waitingTarget?: {
         source: string
@@ -298,36 +300,56 @@ export class ReconSimulationStrategy implements Strategy {
         this.counter = 0;
         this.hashes = new Set<string>()
         this.graph = ''
-        console.log(`Hash of the initial state: ${this.hashBuilder.makeHash(sim)}`)
-        const result = this.solveState(sim, unmaker, playerId, opponentId)
+        const result = this.solveState(sim, unmaker, playerId, opponentId, this.hashBuilder.makeHash(sim))
         console.log(`Counter: ${this.counter}`)
-        // console.log(this.getGraph())
         return result
     }
 
-    private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, depth = 1): { score: number, actions: any[] } {
-        // console.log(`solveState at depth ${depth}`)
-        let actions: string[] = [];
-        let score = 0;
+    private errorCount = 1
+
+    private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = ''): { score: number, actions: any[] } {
         this.counter++;
 
-        const parentHash = this.hashBuilder.makeHash(state)
+        const parentHash = hash == '' ? this.hashBuilder.makeHash(state) : hash
         const possibleActions = DirectActionExtractor.extractActions(state, playerId, opponentId)
 
-        const scores: any[] = []
+        let maxScore = -100000;
+        let maxAction: DirectAction[] = []
+
         for (const action of possibleActions) {
+            // const savedStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
             unmaker.setCheckpoint()
             DirectActionExtractor.applyAction(state, action, playerId, opponentId)
             const childHash = this.hashBuilder.makeHash(state)
-            const label = ('label' in action ? action.label : 'Pass').replace(/"/g, '\\"')
-            this.graph += `  "${parentHash}" -> "${childHash}" [label="${label}"]\n`
+            // const label = ('label' in action ? action.label : 'Pass').replace(/"/g, '\\"')
+            // this.graph += `  "${parentHash}" -> "${childHash}" [label="${label}"]\n`
+            this.graph += `  "${parentHash}" -> "${childHash}"\n`
             if (!this.hashes.has(childHash)) {
                 this.hashes.add(childHash)
-                scores.push(this.solveState(state, unmaker, playerId, opponentId, depth + 1))
+                let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash)
+                if (scoredAction.score > maxScore) {
+                    maxScore = scoredAction.score
+                    maxAction = [action, ...scoredAction.actions]
+                }
+                // this.graph += `"${childHash}" [label="${maxScore}"]\n`
             }
             unmaker.revertToCheckpoint(state)
+            // const newStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
+            // if (!(newStateOne === savedStateOne)) {
+            //     state.debug = false;
+            //     console.error(`State mismatch before and after restore! Problem #${this.errorCount}`)
+            //     console.log(`Hash is ${childHash} from ${parentHash}`)
+            //     console.dir(action)
+            //     fs.writeFileSync(`stateMismatches/${this.errorCount}_old.json`, savedStateOne)
+            //     fs.writeFileSync(`stateMismatches/${this.errorCount}_new.json`, newStateOne)
+            //     this.errorCount++
+            // }
         }
-        return { score, actions };
+        if (possibleActions.length == 0) {
+            maxScore = getStateScore(state, playerId, opponentId)
+            // this.graph += `"${parentHash}" [label="${maxScore}"]\n`
+        }
+        return { score: maxScore, actions: maxAction };
     }
 
     public getGraph() {
@@ -647,51 +669,9 @@ export class ReconSimulationStrategy implements Strategy {
                             TEMPORARY_OPPONENT_ID,
                         )
 
-                        const hash = this.hashBuilder.makeHash(outerSim)
-                        const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
-
                         const unmaker = new Unmaker(outerSim);
-                        console.dir(this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID))
-                        // console.log(`OuterSim twister seed: ${outerSim.twisterSeed}`)
-                        // const simulationQueue = new SimulationQueue();
-                        // simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
-                        // //const simulationQueue: SimulationEntity[] = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
-                        // const bestActions = this.simulateActionsQueue(simulationQueue, initialScore, TEMPORARY_OPPONENT_ID)
-                        // const finalHash = this.hashBuilder.makeHash(outerSim)
-                        // if (finalHash !== hash) {
-                        //     console.log(`Change leak! hashes mismatch: ${hash} => ${finalHash}`)
-                        // }
-
-                        // if (!bestActions[0]) {
-                        //     return this.pass()
-                        // }
-
-                        // this.actionsOnHold = bestActions.slice(1).filter(({ action }) =>
-                        //     (action.type === ACTION_PLAY && 'payload' in action && action.payload.player === this.playerId) ||
-                        //     ('player' in action && action.player === this.playerId)
-                        // ).map(({ action, hash }) => ({
-                        //     action: this.simulationActionToClientAction(action),
-                        //     hash,
-                        //     fromTurn: this.gameState?.turnNumber,
-                        //     fromStep: this.gameState?.getStep(),
-                        //     generateNumber: this.generateNumber,
-                        // }));
-
-                        // // console.log('Saving the graph data as ' + finalHash);
-                        console.log(this.graph);
-                        // if (this.generateNumber == 90 && this.playerId == 2) {
-                        //     debugger;
-                        //     console.log(`Main action:`)
-                        //     console.log(JSON.stringify(bestActions[0], null, 2))
-                        //     console.log(`Stored ${this.actionsOnHold.length} actions on hold`)
-                        //     console.log(JSON.stringify(this.actionsOnHold, null, 2))
-                        // }
-                        // const bestAction = bestActions[0]
-                        // // if (bestAction.type === ACTION_PLAY) {
-                        // //   // console.error(`Playing the card`);
-                        // //   // console.dir(bestAction.payload.card);
-                        // // }
-                        // return this.simulationActionToClientAction(bestAction.action)
+                        const result = this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID)
+                        return result.actions[0]
                     }
 
                     case STEP_NAME.CREATURES: {

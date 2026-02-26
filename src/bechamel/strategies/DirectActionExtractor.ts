@@ -190,7 +190,10 @@ export class DirectActionExtractor {
                     sim.getZone(ZONE_TYPE_IN_PLAY).byId(action.targetId) ??
                     sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).byId(action.targetId) ??
                     sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).byId(action.targetId)
-                if (!target) break
+                if (!target) {
+                    console.error(`No target found: ${action.targetId}`)
+                    break
+                }
                 sim.update({
                     type: ACTION_RESOLVE_PROMPT,
                     target,
@@ -299,7 +302,7 @@ export class DirectActionExtractor {
         const magiCard: CardInGame | null = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
         if (!magiCard) return [{ type: 'PASS' }]
 
-        const actions: DirectAction[] = [{ type: 'PASS' }]
+        const actions: DirectAction[] = []
 
         // Creature / relic powers
         const myCreatures = (sim.getZone(ZONE_TYPE_IN_PLAY).cards as CardInGame[])
@@ -346,6 +349,7 @@ export class DirectActionExtractor {
                 actions.push({ type: 'PLAY', cardId: spell.id, label: `Play ${spell.card.name}` })
             })
 
+        actions.push({ type: 'PASS' })
         return actions
     }
 

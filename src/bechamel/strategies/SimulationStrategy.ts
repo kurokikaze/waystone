@@ -58,7 +58,7 @@ export class SimulationStrategy implements Strategy {
     public static deckId = '5f60e45e11283f7c98d9259c' // Local deck (Arderial)
     // public static deckId = '6305ec3aa14ce19348dfd7f9' // Local deck (Underneath/Naroom)
 
-    public static failsafe = 4500
+    public static failsafe = 10000
 
     private waitingTarget?: {
         source: string
@@ -327,7 +327,8 @@ export class SimulationStrategy implements Strategy {
                 const hash = this.hashBuilder.makeHash(workEntity.sim)
                 if (hash !== workEntity.previousHash) {
                     try {
-                        this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)} (${score})"]\n`
+                        // this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}" [label="${this.actionToLabel(workEntity.action)} (${score})"]\n`
+                        this.graph = this.graph + `  "${workEntity.previousHash}" -> "${hash}"\n`
                     } catch (_e) {
                         console.error('Error generating label perhaps')
                         console.dir(_e)
@@ -351,6 +352,8 @@ export class SimulationStrategy implements Strategy {
                     const extractedActions = ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder)
                     simulationQueue.push(...extractedActions.map(simEntity => ({...simEntity, rawActionLog: actionLog})))
                     // delete workEntity.sim;
+                } else {
+                    console.error(`Empty action`)
                 }
             }
         }
@@ -714,7 +717,7 @@ export class SimulationStrategy implements Strategy {
                         }
                         
                         // console.log('Saving the graph data as ' + finalHash);
-                        console.log(this.graph);
+                        // console.log(this.graph);
 
                         if (!bestActions[0]) {
                             return this.pass()
