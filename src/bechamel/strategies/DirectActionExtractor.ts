@@ -169,6 +169,8 @@ export class DirectActionExtractor {
                     type: ACTION_ATTACK,
                     source,
                     target,
+                    sourceAtStart: source.copy(),
+                    targetAtStart: target.copy(),
                     additionalAttackers,
                     player: playerId,
                 } as AnyEffectType)
