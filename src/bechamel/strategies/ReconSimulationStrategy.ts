@@ -317,7 +317,7 @@ export class ReconSimulationStrategy implements Strategy {
         let maxAction: DirectAction[] = []
 
         for (const action of possibleActions) {
-            // const savedStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
+            const savedStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
             unmaker.setCheckpoint()
             DirectActionExtractor.applyAction(state, action, playerId, opponentId)
             const childHash = this.hashBuilder.makeHash(state)
@@ -334,16 +334,17 @@ export class ReconSimulationStrategy implements Strategy {
                 // this.graph += `"${childHash}" [label="${maxScore}"]\n`
             }
             unmaker.revertToCheckpoint(state)
-            // const newStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
-            // if (!(newStateOne === savedStateOne)) {
-            //     state.debug = false;
-            //     console.error(`State mismatch before and after restore! Problem #${this.errorCount}`)
-            //     console.log(`Hash is ${childHash} from ${parentHash}`)
-            //     console.dir(action)
-            //     fs.writeFileSync(`stateMismatches/${this.errorCount}_old.json`, savedStateOne)
-            //     fs.writeFileSync(`stateMismatches/${this.errorCount}_new.json`, newStateOne)
-            //     this.errorCount++
-            // }
+            const newStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
+            if (!(newStateOne === savedStateOne)) {
+                state.debug = false;
+                console.error(`State mismatch before and after restore! Problem #${this.errorCount}`)
+                console.log(`Hash is ${childHash} from ${parentHash}`)
+                console.dir(action)
+                fs.writeFileSync(`stateMismatches/${this.errorCount}_old.json`, savedStateOne)
+                fs.writeFileSync(`stateMismatches/${this.errorCount}_new.json`, newStateOne)
+                this.errorCount++
+                throw new Error('Enough')
+            }
         }
         if (possibleActions.length == 0) {
             maxScore = getStateScore(state, playerId, opponentId)

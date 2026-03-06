@@ -292,6 +292,10 @@ export class DirectActionExtractor {
                 break
             }
         }
+
+        if (sim.state.actions.length) {
+            sim.state.actions = []
+        }
     }
 
     // -----------------------------------------------------------------------
