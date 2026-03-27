@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import {
     ACTION_RESOLVE_PROMPT,
     PROMPT_TYPE_NUMBER
-} from 'moonlands/src/const.ts';
+} from 'moonlands/dist/esm/const';
 import { getPromptMin, getPromptMax, getPromptGeneratedBy, getPlayerNumber } from '../../selectors';
 
 const makeArray = (min, max) => Array.apply(null, { length: max + 1 }).map(Number.call, Number).slice(min);

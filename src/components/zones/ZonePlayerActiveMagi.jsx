@@ -8,8 +8,8 @@ import {
     PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
     PROMPT_TYPE_PAYMENT_SOURCE,
     TYPE_CREATURE,
-} from 'moonlands/src/const';
-import { byName } from 'moonlands/src/cards';
+} from 'moonlands/dist/esm/const';
+import { byName } from 'moonlands/dist/esm/cards';
 import Card from '../Card.tsx';
 import { isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy, getMagiEnergy, getPlayerNumber } from '../../selectors';
 import { withAbilities } from '../CardAbilities.tsx';

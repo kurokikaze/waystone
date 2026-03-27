@@ -1,7 +1,7 @@
 import {
 	TYPE_CREATURE,
 	TYPE_MAGI,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 import { DraggedItem, SecondCard } from '../types';
 
 export function canFirstAttackSecond(first: DraggedItem, second: SecondCard) {

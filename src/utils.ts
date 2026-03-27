@@ -1,8 +1,8 @@
 /* global window */
-import { byName } from 'moonlands/src/cards';
-import Card from 'moonlands/src/classes/Card';
-import { ConvertedCard } from 'moonlands/src/classes/CardInGame';
-import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, TYPE_CREATURE } from 'moonlands/src/const';
+import { byName } from 'moonlands/dist/esm/cards';
+import Card from 'moonlands/dist/esm/classes/Card';
+import { ConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
+import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, TYPE_CREATURE } from 'moonlands/dist/esm/const';
 import { ExtendedCard, State } from './types';
 
 export function camelCase(str: string):string {

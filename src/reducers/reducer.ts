@@ -28,14 +28,14 @@ import {
 	PROMPT_TYPE_PAYMENT_SOURCE,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_POWER_ON_MAGI,
-	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
 	LOG_ENTRY_POWER_ACTIVATION,
 	LOG_ENTRY_TARGETING,
 	LOG_ENTRY_NUMBER_CHOICE,
 	LOG_ENTRY_PLAY,
-} from 'moonlands/src/const';
-import { byName } from 'moonlands/src/cards';
+} from 'moonlands/dist/esm/const';
+import { byName } from 'moonlands/dist/esm/cards';
 
 import {
 	START_POWER_ANIMATION,
@@ -91,8 +91,8 @@ import {
 
 import { applyEffect } from './applyEffect';
 import { findInPlay } from './utils';
-import { ClientAction } from '../clientProtocol';
-import { LogEntryType } from 'moonlands/src/types';
+import { ClientAction, ClientAttackAction, ClientEffectAction, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptNumber, ClientEnterPromptSingleCreatureFiltered } from '../clientProtocol';
+import { LogEntryType } from 'moonlands/dist/esm/types';
 import { ExpandedPromptParams, MessageType, State } from '../types';
 
 const INITIAL_STATE = 'setInitialState';
@@ -321,17 +321,18 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 		}
 		/* End Animations */
 		case ADD_TO_PACK: {
+			action = action as AddToPackAction
 			return {
 				...state,
-				packs: state.packs.some(pack => pack.leader === action.leader) ?
-					state.packs.map(pack => pack.leader === action.leader ? { ...pack, hunters: [...pack.hunters, action.hunter] } : pack) :
+				packs: state.packs.some(pack => pack.leader === (action as AddToPackAction).leader) ?
+					state.packs.map(pack => pack.leader === (action as AddToPackAction).leader ? { ...pack, hunters: [...pack.hunters, (action as AddToPackAction).hunter] } : pack) :
 					[...state.packs, { leader: action.leader, hunters: [action.hunter] }],
 			};
 		}
 		case DISMISS_PACK: {
 			return {
 				...state,
-				packs: state.packs.filter(pack => pack.leader !== action.leader),
+				packs: state.packs.filter(pack => pack.leader !== (action as DismissPackAction).leader),
 			};
 		}
 		case ACTION_POWER: {
@@ -379,24 +380,31 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 
 			switch (action.promptType) {
 				case PROMPT_TYPE_NUMBER: {
+					action = action as ClientEnterPromptNumber
 					promptParams = {
 						min: action.min,
 						max: action.max
 					};
-					break;
 				}
 				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+					action = action as ClientEnterPromptAnyCreatureExceptSource
 					promptParams = {
 						source: action.source.id,
 					};
 					break;
 				}
 				case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-					promptParams = {
-						restrictions: action.restrictions,
-						restriction: action.restriction,
-						restrictionValue: action.restrictionValue,
-					};
+					action = action as ClientEnterPromptSingleCreatureFiltered
+					if ('restrictions' in action.promptParams) {
+						promptParams = {
+							restrictions: action.promptParams.restrictions,
+						};
+					} else if ('restriction' in action.promptParams) {
+						promptParams = {
+							restriction: action.promptParams.restriction,
+							restrictionValue: action.promptParams.restrictionValue,
+						};
+					}
 					break;
 				}
 				case PROMPT_TYPE_CHOOSE_CARDS: {
@@ -429,7 +437,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					};
 					break;
 				}
-				case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+				case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
 					promptParams = {
 						zone: action.sourceZone,
 						cards: action.cards,
@@ -590,7 +598,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 								},
 							}
 						}
-						if (card.id === action.target) {
+						if (card.id === (action as ClientAttackAction).target) {
 							return {
 								...card,
 								data: {
@@ -605,7 +613,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case ACTION_EFFECT: {
-			return applyEffect(state, action);
+			return applyEffect(state, action as ClientEffectAction);
 		}
 		case PLUS_ENERGY_ON_CREATURE: {
 			return {

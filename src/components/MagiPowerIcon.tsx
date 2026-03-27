@@ -1,7 +1,12 @@
-import {cloneElement} from 'react';
+import {cloneElement, ReactElement} from 'react';
 import Power from './icons/Power.tsx';
 
-function MagiPowerIcon({active = false, number = null, icon = null}) {
+type PropTypes = {
+	active?: boolean
+	number?: number | string | null
+	icon?: JSX.Element | null
+}
+function MagiPowerIcon({active = false, number = null, icon = null}: PropTypes) {
 	const fillColor = active ? '#F8E71C' : '#9A9A8F';
 
 	return (

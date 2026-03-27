@@ -1,16 +1,16 @@
 /* global window */
-import { RefObject, createRef, useEffect, useState } from 'react';
+import { RefObject, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
-	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_DEFEATED_MAGI,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_MAGI_PILE,
-} from 'moonlands/src/const';
+	ZONE_TYPE_DECK,
+} from 'moonlands/dist/esm/const';
 import { DndProvider } from 'react-dnd';
 // @ts-ignore
 import PromptCardImage from './PromptCardImage.jsx';
@@ -24,8 +24,7 @@ import {
 	getPromptTargetZones,
 } from '../../selectors/index';
 import { EngineConnector } from '../../types.js';
-import { ZoneType } from 'moonlands/dist/types/common.js';
-import { ZONE_TYPE_DECK } from 'moonlands';
+import { ZoneType } from 'moonlands/dist/esm/types/common.js';
 
 const ZoneNames: Record<ZoneType, string> = {
 	[ZONE_TYPE_DECK]: 'Deck',

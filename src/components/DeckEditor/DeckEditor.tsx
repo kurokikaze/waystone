@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { LogicalSize } from "@tauri-apps/api/dpi"
 
-import Card from 'moonlands/src/classes/Card';
-import { Region } from 'moonlands/src/types';
+import Card from 'moonlands/dist/esm/classes/Card';
+import { Region } from 'moonlands/dist/esm/types';
 import { Tooltip } from 'antd';
 import { isTauri } from '@tauri-apps/api/core';
 
@@ -15,9 +15,9 @@ import Button from 'antd/es/button';
 
 import Add from '../icons/Add';
 
-import { byName, cards } from 'moonlands/src/cards';
+import { byName, cards } from 'moonlands/dist/esm/cards';
 import cn from 'classnames';
-import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/src/const';
+import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/dist/esm/const';
 
 import CardFilter, { CardFilterType, defaultFilter } from '../CardFilter/CardFilter.jsx';
 import { MAX_COPIES_IN_DECK } from '../../const';

@@ -1,7 +1,7 @@
 /* global window */
 import {
     ACTION_RESOLVE_PROMPT,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 import { useSelector } from 'react-redux';
 import { getAlternatives, getPlayerNumber } from '../../selectors';
 import { EngineConnector } from '../../types';

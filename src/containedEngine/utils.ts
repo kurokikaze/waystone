@@ -71,7 +71,7 @@ import {
   PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
   PROMPT_TYPE_SINGLE_CREATURE,
   PROMPT_TYPE_SINGLE_MAGI,
-  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+  PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
   PROPERTY_CONTROLLER,
 
@@ -88,7 +88,7 @@ import { ZoneType } from 'moonlands/dist/esm/types/common';
 import { AnyEffectType, NormalPlayType } from 'moonlands/dist/esm/types/index';
 
 import clone from 'moonlands/dist/esm/clone';
-import { RestrictionType } from 'moonlands/src/types';
+import { RestrictionType } from 'moonlands/dist/esm/types';
 import {
   ClientAction,
   ClientAttachCardToCard,
@@ -372,7 +372,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
             numberOfCards,
           } as ClientEnterPromptRearrangeCardsOfZone;
         }
-        case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+        case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
           const sourceZone = game.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
           const zoneOwner = game.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
           const numberOfCards = game.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
@@ -383,7 +383,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
 
           const result: ClientEnterPromptDistributeCardsInZones = {
             type: ACTION_ENTER_PROMPT,
-            promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+            promptType: PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
             player,
             sourceZone,
             ...(action.message ? { message: action.message } : {}),
@@ -673,7 +673,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
                 generatedBy: action.generatedBy
               } as ClientEffectPromptEnteredRearrangeCardsOfZone;
             }
-            case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+            case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
               const sourceZone = game.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
               const sourceZoneOwner = game.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
               const numberOfCards = game.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
@@ -685,7 +685,7 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
               const result: ClientEffectPromptEnteredDistributeCardsInZones = {
                 type: action.type,
                 effectType: action.effectType,
-                promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+                promptType: PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
                 player,
                 promptParams: {
                   sourceZone,
@@ -1716,7 +1716,7 @@ export function convertClientCommands(action: ClientAction, game: State): AnyEff
             target,
           } as AnyEffectType;
         }
-        case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+        case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
           if (
             'sourceZone' in game.state.promptParams &&
             game.state.promptParams.sourceZone &&

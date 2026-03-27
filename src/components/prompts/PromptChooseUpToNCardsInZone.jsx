@@ -9,7 +9,7 @@ import Contract from '../icons/Contract';
 import {
     ACTION_RESOLVE_PROMPT,
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-} from 'moonlands/src/const.ts';
+} from 'moonlands/dist/esm/const';
 import {
     getPromptCards,
     getPromptZone,

@@ -1,11 +1,11 @@
 import {useSelector} from 'react-redux';
-import {byName} from 'moonlands/src/cards';
+import {byName} from 'moonlands/dist/esm/cards';
 import {
 	REGION_UNIVERSAL,
 	TYPE_CREATURE,
 	TYPE_RELIC,
 	TYPE_SPELL,
-} from 'moonlands/src/const.ts';
+} from 'moonlands/dist/esm/const';
 import Card from '../Card.tsx';
 import {
 	getCurrentStep,

@@ -2,7 +2,7 @@
 import { useSelector } from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 import { EngineConnector } from '../../types';
 import { getPlayerNumber } from '../../selectors';
 

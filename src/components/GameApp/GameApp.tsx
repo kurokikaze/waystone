@@ -7,7 +7,7 @@ import { DndProvider } from 'react-dnd';
 import {
 	ACTION_PASS,
 	ACTION_PLAY,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 import { FloatButton } from 'antd';
 import Log from '../Log/Log.tsx';
 // @ts-ignore-next

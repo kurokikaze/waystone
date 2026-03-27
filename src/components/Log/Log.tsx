@@ -2,7 +2,7 @@
 import {useEffect, useRef} from 'react';
 import cn from 'classnames';
 import {useSelector} from 'react-redux';
-import { LogEntryType } from 'moonlands/src/types';
+import { LogEntryType } from 'moonlands/dist/esm/types';
 
 import {mapEntryToText} from './utils';
 import './style.css';

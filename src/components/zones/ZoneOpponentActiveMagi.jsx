@@ -5,7 +5,7 @@ import {
 	ACTION_RESOLVE_PROMPT,
 	TYPE_CREATURE,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 import Card from '../Card.tsx';
 import {withAbilities} from '../CardAbilities.tsx';
 import {

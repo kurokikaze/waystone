@@ -1,4 +1,4 @@
-import { ZoneType } from 'moonlands/src/types';
+import { ZoneType } from 'moonlands/dist/esm/types';
 import { useRef } from 'react';
 import { DndProvider, useDrop } from 'react-dnd';
 // @ts-ignore

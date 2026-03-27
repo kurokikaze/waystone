@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import {
     ACTION_RESOLVE_PROMPT,
     PROMPT_TYPE_MAY_ABILITY,
-} from 'moonlands/src/const.ts';
+} from 'moonlands/dist/esm/const';
 import { getPromptGeneratedBy, getPlayerNumber } from '../../selectors';
 
 const getPromptEffect = state => state.promptParams.effect || { name: 'none', text: 'none' };

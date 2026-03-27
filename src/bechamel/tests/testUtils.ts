@@ -28,7 +28,7 @@ export function getStandardState(ACTIVE_PLAYER: number, NON_ACTIVE_PLAYER: numbe
     const pruitt = new CardInGame(byName('Pruitt') as Card, ACTIVE_PLAYER).addEnergy(5);
     const magam = new CardInGame(byName('Magam') as Card, ACTIVE_PLAYER).addEnergy(4);
     // pruitt.setActionUsed('Refresh')
-    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, /*fireChogo, weebo2, carillion,*/ kelthet, lavaBalamant, lavaAq]);
+    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, timberHyren, fireChogo, weebo2, /*carillion,*/ kelthet, lavaBalamant, lavaAq]);
     
     // @ts-ignore
     const gameState = new State({

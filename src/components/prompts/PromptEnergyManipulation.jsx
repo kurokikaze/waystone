@@ -2,7 +2,7 @@
 import {useSelector} from 'react-redux';
 import {
 	ACTION_RESOLVE_PROMPT,
-} from 'moonlands/src/const.ts';
+} from 'moonlands/dist/esm/const';
 import {getPromptGeneratedBy, getPromptMessage, getPromptType, getPlayerNumber} from '../../selectors';
 
 function PromptChooseCards({engineConnector}) {

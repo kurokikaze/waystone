@@ -1,4 +1,4 @@
-import { ConvertedCard, HiddenConvertedCard } from "moonlands/src/classes/CardInGame"
+import { ConvertedCard, HiddenConvertedCard } from "moonlands/dist/esm/classes/CardInGame"
 import {
     ACTION_ATTACK,
     ACTION_EFFECT,
@@ -51,13 +51,13 @@ import {
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
     PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-    PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+    PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
     TYPE_CREATURE,
     TYPE_RELIC,
     TYPE_SPELL,
-} from "moonlands/src/const"
-import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/src/types"
+} from "moonlands/dist/esm/const"
+import { ZoneType, RestrictionObjectType, StaticAbilityType, TriggerEffectType } from "moonlands/dist/esm/types"
 import {
     AlternativePromptParams,
     AnyCreatureExceptSourcePromptParams,
@@ -73,9 +73,9 @@ import {
     RearrangeCardsOfZonePromptParams,
     RearrangeEnergyPromptParams,
     SingleCreatureFilteredPromptParams
-} from 'moonlands/src/types/promptParams';
-import { ExpirationObjectType, RestrictionType } from "moonlands/src/types/common"
-import { AlternativeType } from "moonlands/src/types/promptParams"
+} from 'moonlands/dist/esm/types/promptParams';
+import { ExpirationObjectType, RestrictionType } from "moonlands/dist/esm/types/common"
+import { AlternativeType } from "moonlands/dist/esm/types/promptParams"
 
 export type ConvertedCardMinimal = {
     id: string,
@@ -143,7 +143,7 @@ export type ClientEnterPromptRearrangeCardsOfZone = ClientEnterPromptInterface &
 }
 
 export type ClientEnterPromptDistributeCardsInZones = ClientEnterPromptInterface & {
-    promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+    promptType: typeof PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
     sourceZone: ZoneType,
     targetZones: ZoneType[],
     cards: ConvertedCard[],

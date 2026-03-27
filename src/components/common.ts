@@ -1,7 +1,7 @@
 /* global window */
 import { connect, useSelector } from 'react-redux';
-import { byName } from 'moonlands/src/cards';
-import clone from 'moonlands/src/clone';
+import { byName } from 'moonlands/dist/esm/cards';
+import clone from 'moonlands/dist/esm/clone';
 import {
 	TYPE_CREATURE,
 	TYPE_RELIC,
@@ -65,14 +65,13 @@ import {
 
 	STATUS_BURROWED,
 	TYPE_SPELL,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 
 import { ZoneIdentifier, getZoneContent } from '../selectors';
 import { EnrichedCard, ExtendedCard, State } from '../types';
-import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType } from 'moonlands/src/types';
-import { ConvertedCard, HiddenConvertedCard } from 'moonlands/src/classes/CardInGame';
-import Card from 'moonlands/src/classes/Card';
-import { PropertyType } from 'moonlands/src/types';
+import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType, PropertyType } from 'moonlands/dist/esm/types';
+import { ConvertedCard, HiddenConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
+import Card from 'moonlands/dist/esm/classes/Card';
 
 export const cardMatchesSelector = (card: EnrichedCard, selector: SelectorTypeType, selectorParameter: any = null, sourceController: number) => {
 	switch (selector) {
@@ -284,15 +283,18 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 		case PROMPT_TYPE_OWN_SINGLE_CREATURE:
 			return card => (card.data.controller || card.owner) === playerNumber && card.card.type === TYPE_CREATURE;
 		case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-			return card => card.id !== promptParams.source;
+			if ('promptParams' in promptParams && promptParams.promptParams) {
+				return card => card.id !== promptParams.promptParams?.source;
+			}
+			return () => false
 		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
 			if (promptParams) {
-				if (promptParams.restrictions && promptParams.restrictions.length) {
-					const checkers: SelectorFunction[] = promptParams.restrictions.map(({ type, value }: RestrictionObjectType): SelectorFunction => getRestrictionFilter(type, value, playerNumber));
+				if (promptParams.promptParams?.restrictions && promptParams.promptParams?.restrictions.length) {
+					const checkers: SelectorFunction[] = promptParams.promptParams?.restrictions.map(({ type, value }: RestrictionObjectType): SelectorFunction => getRestrictionFilter(type, value, playerNumber));
 					return card =>
 						checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
 				} else {
-					return getRestrictionFilter(promptParams.restriction!, promptParams.restrictionValue, playerNumber);
+					return getRestrictionFilter(promptParams.promptParams?.restriction!, promptParams.promptParams?.restrictionValue, playerNumber);
 				}
 			} else {
 				return () => true;

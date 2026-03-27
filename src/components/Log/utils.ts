@@ -15,8 +15,8 @@ import {
 	LOG_ENTRY_MAGI_DEFEATED,
 	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 	LOG_ENTRY_DIE_ROLLED
-} from 'moonlands/src/const';
-import { LogEntryType } from 'moonlands/src/types';
+} from 'moonlands/dist/esm/const';
+import { LogEntryType } from 'moonlands/dist/esm/types';
 
 export const mapEntryToText = (entry: LogEntryType): string => {
 	switch (entry.type) {

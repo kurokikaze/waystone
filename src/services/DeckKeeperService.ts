@@ -1,6 +1,6 @@
 import { BaseDirectory, readTextFile, writeTextFile, create, exists } from '@tauri-apps/plugin-fs';
-import { byName } from 'moonlands/src/cards';
-import { TYPE_MAGI } from 'moonlands/src/const';
+import { byName } from 'moonlands/dist/esm/cards';
+import { TYPE_MAGI } from 'moonlands/dist/esm/const';
 import { isTauri } from "@tauri-apps/api/core";
 
 type DecksResult = { player: string[], opponent: string[] }

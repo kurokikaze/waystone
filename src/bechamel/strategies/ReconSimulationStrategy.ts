@@ -333,7 +333,7 @@ export class ReconSimulationStrategy implements Strategy {
                 }
                 // this.graph += `"${childHash}" [label="${maxScore}"]\n`
             }
-            unmaker.revertToCheckpoint(state)
+            unmaker.revertToCheckpoint()
             const newStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
             if (!(newStateOne === savedStateOne)) {
                 state.debug = false;

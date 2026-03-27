@@ -4,7 +4,7 @@ import {mapCardDataFromProps, transformCard, getCardDetails} from '../common';
 // import { state } from '../../spec/abilityState'
 import { ExtendedCard, State } from '../../types';
 import { ConvertedCard, InGameData } from 'moonlands/dist/esm/classes/CardInGame';
-// import { StaticAbilityType } from 'moonlands/src/types';
+// import { StaticAbilityType } from 'moonlands/dist/esm/types';
 
 describe('Common code from components', () => {
 	it('Fetches card by id from zones', () => {

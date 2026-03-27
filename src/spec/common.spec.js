@@ -5,7 +5,7 @@ import {
 	PROPERTY_CONTROLLER,
 	SELECTOR_ID,
 	CALCULATION_SET,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 
 describe('Selectors', () => {
 	const ACTIVE_PLAYER = 22;

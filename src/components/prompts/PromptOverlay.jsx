@@ -11,11 +11,11 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 	PROMPT_TYPE_PLAYER,
 	PROMPT_TYPE_ALTERNATIVE,
 	PROMPT_TYPE_POWER_ON_MAGI,
-} from 'moonlands/src/const';
+} from 'moonlands/dist/esm/const';
 
 import PromptChooseCards from './PromptChooseCards.jsx';
 import PromptChooseCardsInZone from './PromptChooseCardsInZone.jsx';
@@ -60,7 +60,7 @@ function PromptOverlay({ engineConnector }) {
 			{promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES && <PromptEnergyDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES && <PromptDamageDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE && <PromptRearrangeCards engineConnector={engineConnector} />}
-			{promptType === PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES && <PromptDistributeCards engineConnector={engineConnector} />}
+			{promptType === PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES && <PromptDistributeCards engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_PLAYER && <PromptChoosePlayer engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_POWER_ON_MAGI && <PromptChoosePowerOnMagi engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_ALTERNATIVE && <PromptAlternatives engineConnector={engineConnector} />}

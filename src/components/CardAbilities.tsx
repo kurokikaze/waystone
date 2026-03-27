@@ -12,10 +12,10 @@ import Energize from './icons/Energize.js';
 import Velociraptor from './icons/Velociraptor.js';
 
 import cn from 'classnames';
-import { COST_X, TYPE_MAGI, TYPE_RELIC } from 'moonlands/src/const';
-import { AnyEffectType, CardData } from 'moonlands/src/types/index.js';
-import Card from 'moonlands/src/classes/Card';
-import { InGameData } from 'moonlands/src/classes/CardInGame';
+import { COST_X, TYPE_MAGI, TYPE_RELIC } from 'moonlands/dist/esm/const';
+import { AnyEffectType, CardData } from 'moonlands/dist/esm/types/index.js';
+import Card from 'moonlands/dist/esm/classes/Card';
+import { InGameData } from 'moonlands/dist/esm/classes/CardInGame';
 import { MouseEventHandler } from 'react';
 import React from 'react';
 

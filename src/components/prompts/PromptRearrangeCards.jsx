@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import {
     ACTION_RESOLVE_PROMPT,
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-} from 'moonlands/src/const.ts';
+} from 'moonlands/dist/esm/const';
 import { DndProvider } from 'react-dnd';
 import PromptCardImage from './PromptCardImage.jsx';
 import { HTML5Backend } from 'react-dnd-html5-backend';
