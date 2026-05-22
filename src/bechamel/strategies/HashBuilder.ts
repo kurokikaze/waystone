@@ -5,6 +5,7 @@ export class HashBuilder {
   private ids = new Map<string, number>()
   private comesFrom = new Map<string, string>()
   private childIds = new Map<string, number>()
+  private childParentNames = new Map<string, string>()
 
   constructor() {}
 
@@ -44,12 +45,21 @@ export class HashBuilder {
 
     const nextId = this.ids.size + 1
     if (this.comesFrom.has(hash)) {
+      const parentId = this.comesFrom.get(hash);
+      const parentName = this.childParentNames.get(hash);
+      const resolvedParentHash = parentName || parentId;
+
       // Okay, we've either already seen this pair...
-      if (this.childIds.has(hash)) {
-        return this.childIds.get(hash) as number;
+      if (resolvedParentHash && this.childIds.has(resolvedParentHash)) {
+        const id = this.childIds.get(resolvedParentHash) as number;
+        this.ids.set(hash, id);
+        return id;
       } else {
         // ...or it's our first time.
-        this.childIds.set(hash, nextId);
+        if (resolvedParentHash) {
+          this.childIds.set(resolvedParentHash, nextId);
+        }
+        this.ids.set(hash, nextId);
         return nextId;
       }
     }
@@ -57,7 +67,10 @@ export class HashBuilder {
     return nextId
   }
 
-  public registerChildHash(parent: string, child: string) {
+  public registerChildHash(parent: string, child: string, parentName?: string) {
     this.comesFrom.set(child, parent);
+    if (parentName) {
+      this.childParentNames.set(child, parentName);
+    }
   }
 }

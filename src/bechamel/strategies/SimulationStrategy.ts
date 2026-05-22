@@ -22,6 +22,7 @@ import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPas
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
 import { convertServerCommand } from '../../containedEngine/utils';
+import { ErrorDumpService } from '../../services/ErrorDumpService';
 
 const STEP_NAME = {
     ENERGIZE: 0,
@@ -199,7 +200,7 @@ export class SimulationStrategy implements Strategy {
                     // @ts-ignore
                     return this.resolveCardsPrompt(simAction.cards, '', simAction.zone, simAction.zoneOwner);
                 }
-                console.log('No transformer for ACTION_RESOLVE_PROMPT action')
+                console.error('No transformer for ACTION_RESOLVE_PROMPT action')
                 console.dir(simAction)
                 break
             }
@@ -242,7 +243,12 @@ export class SimulationStrategy implements Strategy {
                     }
                     console.dir(workEntity)
                     console.dir(e.stack)
-                    throw new Error('Away!')
+                    try {
+                        ErrorDumpService.dumpActionFailure(workEntity.action, (typeof workEntity.sim?.state !== 'undefined') ? JSON.parse(JSON.stringify(workEntity.sim.state)) : null, e, { location: 'SimulationStrategy.simulateAttacksQueue', playerId: this.playerId, previousHash: workEntity.previousHash })
+                    } catch (_err) {
+                        // ignore
+                    }
+                    throw e
                 }
                 const score = getStateScore(workEntity.sim, this.playerId, opponentId)
                 if (score > bestAction.score) {
@@ -316,12 +322,18 @@ export class SimulationStrategy implements Strategy {
                 const actionLog: any[] = workEntity?.rawActionLog || []
                 workEntity.sim.onAction = (action: any) => actionLog.push(convertServerCommand(action, workEntity.sim, this.playerId || 1))
                 try {
+                    const stateBefore = JSON.parse(JSON.stringify(workEntity.sim.state))
                     workEntity.sim.update(workEntity.action)
                 } catch (e: any) {
                     console.log('Error applying action')
                     console.dir(workEntity.action)
                     console.log(`Message: ${e.message}`)
                     console.dir(e.stack)
+                    try {
+                        ErrorDumpService.dumpActionFailure(workEntity.action, (typeof workEntity.sim?.state !== 'undefined') ? JSON.parse(JSON.stringify(workEntity.sim.state)) : null, e, { location: 'SimulationStrategy.simulateActionsQueue', playerId: this.playerId })
+                    } catch (_err) {
+                        // ignore
+                    }
                 }
                 const score = getStateScore(workEntity.sim, this.playerId, opponentId)
                 const hash = this.hashBuilder.makeHash(workEntity.sim)
@@ -353,7 +365,9 @@ export class SimulationStrategy implements Strategy {
                     simulationQueue.push(...extractedActions.map(simEntity => ({...simEntity, rawActionLog: actionLog})))
                     // delete workEntity.sim;
                 } else {
-                    console.error(`Empty action`)
+                    // console.error(`Empty action? State hash matches previous state hash.`)
+                    // console.dir(workEntity)
+                    // throw new Error('Empty action encountered')
                 }
             }
         }
@@ -628,7 +642,7 @@ export class SimulationStrategy implements Strategy {
                 }
             }
 
-            if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_MAY_ABILITY) {
+            if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_MAY_ABILITY) {                
                 const myMagi = this.gameState.getMyMagi()
                 if (myMagi.card === 'Stradus' && this.gameState.state.promptGeneratedBy === myMagi.id) {
                     return {
@@ -647,12 +661,14 @@ export class SimulationStrategy implements Strategy {
             }
 
             if (this.waitingTarget && this.gameState.waitingForTarget(this.waitingTarget.source, this.playerId)) {
+                console.log(`Resolve Target Prompt for source ${this.waitingTarget.source} and target ${this.waitingTarget.target}`)
                 // console.log(`Waiting for target resolve path`)
                 // console.dir(this.waitingTarget)
                 return this.resolveTargetPrompt(this.waitingTarget.target, 'waitingTarget')
             }
 
             if (this.gameState.playerPriority(this.playerId)) {
+                console.log(`Player has priority, generating actions`)
                 const step = this.gameState.getStep()
                 switch (step) {
                     case STEP_NAME.ENERGIZE: {
@@ -673,7 +689,7 @@ export class SimulationStrategy implements Strategy {
                             ) {
                                 return this.resolveChooseCardsPrompt()
                             } else {
-                                console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
+                                console.log(`[s] Prompt state without previous action: ${this.gameState.getPromptType()}`)
                             }
                         }
                         const playable = this.gameState.getPlayableCards()
@@ -720,6 +736,7 @@ export class SimulationStrategy implements Strategy {
                         // console.log(this.graph);
 
                         if (!bestActions[0]) {
+                            console.log(`No best action found, passing`)
                             return this.pass()
                         }
 
@@ -746,10 +763,12 @@ export class SimulationStrategy implements Strategy {
                         //   // console.error(`Playing the card`);
                         //   // console.dir(bestAction.payload.card);
                         // }
+                        console.log(`Outputting simulation action`)
                         return this.simulationActionToClientAction(bestAction.action)
                     }
 
                     case STEP_NAME.CREATURES: {
+                        console.log(`Creatures phase`)
                         const myMagiCard = this.gameState.getMyMagi()
                         if (!myMagiCard) {
                             return this.pass()
@@ -773,6 +792,7 @@ export class SimulationStrategy implements Strategy {
                             const playableCreature = playable[0]
                             return this.play(playableCreature.id)
                         }
+                        console.log(`No playable creatures, passing`)
                         return this.pass()
                     }
                     case STEP_NAME.ATTACK: {
@@ -816,13 +836,16 @@ export class SimulationStrategy implements Strategy {
                             }
                             throw new Error(`Unexpected prompt type in ATTACK step: ${this.gameState.getPromptType()}`);
                         }
+                        console.log(`End-selection pass`)
                         return this.pass()
                     }
                     default:
+                        console.log(`Unknown step ${step}, passing by default`)
                         return this.pass()
                 }
             }
         }
+        console.log(`Last chance pass`)
         return this.pass()
     }
 

@@ -152,6 +152,7 @@ export class GameState {
   }
 
   public playerPriority(playerId: number): boolean {
+    console.dir(this.state.activePlayer)
     return this.state.activePlayer === playerId
   }
 

@@ -3,6 +3,7 @@ import { GameState } from "./GameState"
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED } from "./const"
 import { Strategy } from './strategies/Strategy'
 import { ClientResolvePromptAction } from "../clientProtocol"
+import { ErrorDumpService } from '../services/ErrorDumpService'
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Energize',
@@ -38,11 +39,17 @@ export class WorkerStrategyConnector {
         const action = message.data;
         if (this.gameState && this.playerId && action) {
           try {
+            const stateBefore = JSON.parse(JSON.stringify(this.gameState.state))
             this.gameState.update(action)
           } catch (e: any) {
             console.log('Error applying the action')
             console.dir(action)
             console.log(e?.message)
+            try {
+              ErrorDumpService.dumpActionFailure(action, (this.gameState && this.gameState.state) ? JSON.parse(JSON.stringify(this.gameState.state)) : null, e, { location: 'WorkerStrategyConnector', playerId: this.playerId })
+            } catch (_err) {
+              // ignore
+            }
           }
 
           if (this.gameState.hasGameEnded()) {

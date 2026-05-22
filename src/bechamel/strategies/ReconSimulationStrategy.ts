@@ -23,10 +23,9 @@ import { DirectAction, DirectActionExtractor } from './DirectActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
-import { convertServerCommand } from '../../containedEngine/utils';
 import { State } from 'moonlands';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
-import { fstat } from 'node:fs';
+import { ErrorDumpService } from '../../services/ErrorDumpService';
 const STEP_NAME = {
     ENERGIZE: 0,
     PRS1: 1,
@@ -234,6 +233,7 @@ export class ReconSimulationStrategy implements Strategy {
             const workEntity = simulationQueue.shift()
             if (workEntity) {
                 try {
+                    // const stateBefore = JSON.parse(JSON.stringify(workEntity.sim.state))
                     workEntity.sim.update(workEntity.action)
                 } catch (e: any) {
                     debugger;
@@ -243,7 +243,12 @@ export class ReconSimulationStrategy implements Strategy {
                     }
                     console.dir(workEntity)
                     console.dir(e.stack)
-                    throw new Error('Away!')
+                    try {
+                        ErrorDumpService.dumpActionFailure(workEntity.action, (typeof workEntity.sim?.state !== 'undefined') ? JSON.parse(JSON.stringify(workEntity.sim.state)) : null, e, { location: 'ReconSimulationStrategy.simulateAttacksQueue', playerId: this.playerId, previousHash: workEntity.previousHash })
+                    } catch (_err) {
+                        // ignore
+                    }
+                    throw e
                 }
                 const score = getStateScore(workEntity.sim, this.playerId, opponentId)
                 if (score > bestAction.score) {
@@ -641,7 +646,7 @@ export class ReconSimulationStrategy implements Strategy {
                             ) {
                                 return this.resolveChooseCardsPrompt()
                             } else {
-                                console.log(`Prompt state without previous action: ${this.gameState.getPromptType()}`)
+                                console.log(`[r] Prompt state without previous action: ${this.gameState.getPromptType()}`)
                             }
                         }
                         const playable = this.gameState.getPlayableCards()

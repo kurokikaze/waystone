@@ -1,6 +1,6 @@
 import { ACTION_PLAY, ACTION_PLAYER_WINS } from 'moonlands/dist/esm/index'
 import { SimulationStrategy } from '../strategies/SimulationStrategy.js'
-import { EFFECT_TYPE_START_OF_TURN, ACTION_EFFECT, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
+import { ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
 import { createGame } from '../../containedEngine/containedEngine.js';
 import { StrategyConnector } from '../StrategyConnector.js';
 import { AnyEffectType } from 'moonlands/dist/esm/types';
@@ -342,4 +342,4 @@ function simulateGame(deck1: string[], deck1name: string, deck2: string[], deck2
     }
 }
 
-simulateGame(deckOne, 'Orothe Draft', deckTwo, 'Naroom Default', 2000)
+simulateGame(deckOne, 'Orothe Draft', deckTwo, 'Naroom Default', 2053)

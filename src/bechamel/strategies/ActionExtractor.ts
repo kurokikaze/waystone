@@ -190,7 +190,7 @@ export class ActionExtractor {
                   // action.sourceZone === ZONE_TYPE_HAND &&
                   // action.destinationZone === ZONE_TYPE_IN_PLAY
                 ) {
-                  hashBuilder.registerChildHash(action.sourceCard.id, action.destinationCard.id);
+                  hashBuilder.registerChildHash(action.sourceCard.id, action.destinationCard.id, action.sourceCard.card.name);
                 }
               });
               const card = innerSim.getZone(ZONE_TYPE_HAND, playerId).byId(creature.id)
