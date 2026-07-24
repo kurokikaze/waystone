@@ -322,7 +322,7 @@ export class SimulationStrategy implements Strategy {
                 const actionLog: any[] = workEntity?.rawActionLog || []
                 workEntity.sim.onAction = (action: any) => actionLog.push(convertServerCommand(action, workEntity.sim, this.playerId || 1))
                 try {
-                    const stateBefore = JSON.parse(JSON.stringify(workEntity.sim.state))
+                    // const stateBefore = JSON.parse(JSON.stringify(workEntity.sim.state))
                     workEntity.sim.update(workEntity.action)
                 } catch (e: any) {
                     console.log('Error applying action')

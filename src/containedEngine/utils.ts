@@ -453,7 +453,10 @@ export function convertServerCommand(initialAction: AnyEffectType, game: State, 
           } as ClientEnterPromptAnyCreatureExceptSource;
         }
         case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
-          const actionSource = game.getMetaValue(action.promptParams.source, action.generatedBy);
+          if (!('source' in action)) {
+            throw new Error(`Missing source for PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI`);
+          }
+          const actionSource = game.getMetaValue(action.source, action.generatedBy);
           const promptPlayer = action.player || actionSource.owner;
           return {
             type: action.type,

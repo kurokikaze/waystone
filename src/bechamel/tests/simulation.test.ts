@@ -51,8 +51,6 @@ describe.only('Simulations', () => {
         strategy.setup(stateRepresentation, ACTIVE_PLAYER)
 
         console.dir(strategy.requestAction())
-
-        fs.writeFileSync('./strategyGraph.dot', strategy.getGraph())
     })
 
     it('Killing Adis', () => {
