@@ -39,6 +39,7 @@ const defaultState: StateShape = {
 	fallbackActions: [],
 	continuousEffects: [],
 	activePlayer: 0,
+  controllingPlayer: 0,
 	prompt: false,
 	promptType: null,
 	promptParams: {},

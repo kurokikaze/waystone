@@ -27,6 +27,7 @@ export const createGame = (): State => {
     ...defaultState,
     zones,
     activePlayer: 1,
+    controllingPlayer: 1,
   });
 
   // @ts-ignore

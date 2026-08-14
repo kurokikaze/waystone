@@ -1,4 +1,5 @@
-import { MetaDataRecord, State } from 'moonlands/dist/esm/index';
+import { State } from 'moonlands/dist/esm/index';
+import { MetaDataRecord } from 'moonlands/dist/esm/types';
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
 import {
   ACTION_ATTACK,

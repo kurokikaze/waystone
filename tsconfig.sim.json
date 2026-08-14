@@ -28,6 +28,8 @@
         },
     },
     "include": [
-        "src/bechamel/tests/simulation.ts"
+        "src/bechamel/tests/simulation.ts",
+        "src/bechamel/tests/DeckSampler.ts",
+        "src/bechamel/tests/simulationHarness.ts"
     ],
 }

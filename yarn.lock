@@ -2581,10 +2581,10 @@ minimist@^1.2.5:
   resolved "https://artifactory.devops.telekom.de/artifactory/api/npm/registry.npmjs.org/minimist/-/minimist-1.2.8.tgz"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
 
-"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.33.3.tar.gz":
-  version "v0.33.3"
-  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.33.3.tar.gz"
-  integrity sha512-9k6M9xBkJvrvoZYIycJ7SFvmT2q4Fi+QPZlfQuFboTUK58pcQkuU6ATn6G1HSIgKtSfKOruWo+eX2mHurc8unA==
+"moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.35.2.tar.gz":
+  version "v0.35.2"
+  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.35.2.tar.gz"
+  integrity sha512-17mIiVIxciA2t+2ArY2RO5CPFBEIcubc2717QtiwtUTvHJWzDEZ+QkWCyRXO3HXwIL6pbohu18Wif2xzlNxGag==
   dependencies:
     nanoid "^3.0.0"
 
