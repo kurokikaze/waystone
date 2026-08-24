@@ -16,6 +16,7 @@ import { Socket } from 'socket.io-client';
 
 import * as  fs from 'node:fs';
 import { getStandardState } from './testUtils';
+import { Simulation } from './simulation';
 
 const STEP_NAME = {
     ENERGIZE: 0,
@@ -35,8 +36,141 @@ const STEP_NAMES: Record<number, string> = {
     5: 'Draw',
 }
 
-describe.only('Simulations', () => {
-    it.only('test', () => {
+describe('Simulations', () => {
+    it('pass to prompt', () => {
+        const seed = 6247;
+        const playerOneDeck = [
+            "Whall",
+            "Orlon",
+            "Ebylon",
+            "Corf",
+            "Ancestral Flute",
+            "Sphor",
+            "Ancestral Flute",
+            "Sea Barl",
+            "Undertow",
+            "Giant Parathin",
+            "Orathan",
+            "Wellisk Pup",
+            "Wellisk Pup",
+            "Bwill",
+            "Sea Barl",
+            "Giant Parathin",
+            "Ancestral Flute",
+            "Paralit",
+            "Sphor",
+            "Wellisk Pup",
+            "Bwill",
+            "Corf",
+            "Dream Balm",
+            "Submerge",
+            "Weebo",
+            "Dream Balm",
+            "Sphor",
+            "Paralit",
+            "Dream Balm",
+            "Warrior's Boots",
+            "Undertow",
+            "Corf",
+            "Weebo",
+            "Water of Life",
+            "Giant Parathin",
+            "Bwill",
+            "Submerge",
+            "Undertow",
+            "Water of Life",
+            "Sea Barl",
+            "Paralit",
+            "Submerge",
+            "Warrior's Boots"
+        ];
+        const playerTwoDeck = [
+            "Poad",
+            "Tryn",
+            "Yaki",
+            "Robe of Vines",
+            "Giant Carillion",
+            "Vortex of Knowledge",
+            "Grow",
+            "Leaf Hyren",
+            "Carillion",
+            "Leaf Hyren",
+            "Hyren's Call",
+            "Giant Carillion",
+            "Plith",
+            "Robe of Vines",
+            "Leaf Hyren",
+            "Bhatar",
+            "Vortex of Knowledge",
+            "Ancestral Flute",
+            "Water of Life",
+            "Robe of Vines",
+            "Rudwot",
+            "Grow",
+            "Rudwot",
+            "Furok",
+            "Timber Hyren",
+            "Bhatar",
+            "Rudwot",
+            "Weebo",
+            "Hyren's Call",
+            "Ancestral Flute",
+            "Arboll",
+            "Furok",
+            "Timber Hyren",
+            "Hyren's Call",
+            "Balamant Pup",
+            "Twee",
+            "Timber Hyren",
+            "Orwin's Gaze",
+            "Giant Carillion",
+            "Plith",
+            "Bhatar",
+            "Plith",
+            "Twee"
+        ];
+
+        const simulation = new Simulation({
+            rng: seed,
+            playerOne: {name: 'PL1', cards: playerOneDeck},
+            playerTwo: {name: 'PL2', cards: playerTwoDeck},
+            writeLogs: false,
+            maxIterations: 1000,
+        });
+
+        let winner: 1 | 2 | null = null;
+        let winnerName: string | null = null;
+        let error: string | null = null;
+
+        simulation.subscribe({
+            next: (result) => {
+                winner = result.winner;
+                winnerName = result.winnerName;
+            },
+            error: (runError) => {
+                error = runError.message;
+            },
+        });
+
+        const runSimulation = () => {
+            try {
+                const result = simulation.run();
+                winner = result.winner;
+                winnerName = result.winnerName;
+            } catch (runError: unknown) {
+                const message = runError instanceof Error ? runError.message : String(runError);
+                error = message;
+            }
+        };
+        runSimulation()
+        console.dir({
+            winner,
+            error,
+            winnerName
+        })
+    });
+
+    it('test', () => {
         const ACTIVE_PLAYER = 422;
         const NON_ACTIVE_PLAYER = 1310;
         const gameState = getStandardState(ACTIVE_PLAYER, NON_ACTIVE_PLAYER)
@@ -95,6 +229,21 @@ describe.only('Simulations', () => {
         if (action.type === ACTION_ATTACK) {
             expect(action.target).toEqual(adis.id);
         }
+    })
+
+    it.only('Dropped actions after simple spell', () => {
+        const stateJson = {"staticAbilities":[],"energyPrompt":false,"turnTimer":false,"turnSecondsLeft":0,"promptAvailableCards":[],"zones":{"playerHand":[{"card":"Bwill","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"sPgVvBB30K"},{"card":"Submerge","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"3E5gBxvp5h"},{"card":"Undertow","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"qoNWfsh5fu"},{"card":"Sphor","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"vo03FefWxE"},{"card":"Sphor","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"6zBv6GHLXj"}],"opponentHand":[],"playerDeck":[{"card":null,"data":{},"owner":1,"id":"kTQRJxq98Q"},{"card":null,"data":{},"owner":1,"id":"7HHdTQPCG2"},{"card":null,"data":{},"owner":1,"id":"hrVqP7McWF"},{"card":null,"data":{},"owner":1,"id":"qUmm90Zvmo"},{"card":null,"data":{},"owner":1,"id":"1pOq3X_YZU"},{"card":null,"data":{},"owner":1,"id":"wsON95gBc7"},{"card":null,"data":{},"owner":1,"id":"irooVwdzuS"},{"card":null,"data":{},"owner":1,"id":"cJobJfR7gA"},{"card":null,"data":{},"owner":1,"id":"h0jjFbm99t"},{"card":null,"data":{},"owner":1,"id":"rOv6oYeCW9"},{"card":null,"data":{},"owner":1,"id":"9lN_vAaQvm"},{"card":null,"data":{},"owner":1,"id":"yUBVsove47"},{"card":null,"data":{},"owner":1,"id":"Dp-JQA1XeR"},{"card":null,"data":{},"owner":1,"id":"tSbxyI5w8P"},{"card":null,"data":{},"owner":1,"id":"DPzfR1UkJO"},{"card":null,"data":{},"owner":1,"id":"F96f8-vCQu"},{"card":null,"data":{},"owner":1,"id":"Rz-tpgVaSw"},{"card":null,"data":{},"owner":1,"id":"0cnlhVSY5r"},{"card":null,"data":{},"owner":1,"id":"L_H8hTIWDA"},{"card":null,"data":{},"owner":1,"id":"F_jw_Xpyxn"},{"card":null,"data":{},"owner":1,"id":"3yGR6yFc5S"},{"card":null,"data":{},"owner":1,"id":"2pXl8KvAx9"},{"card":null,"data":{},"owner":1,"id":"mDaWaZ8KKV"},{"card":null,"data":{},"owner":1,"id":"NLblYNuN88"},{"card":null,"data":{},"owner":1,"id":"YYAyK2i6cu"},{"card":null,"data":{},"owner":1,"id":"o-iSCu2psW"},{"card":null,"data":{},"owner":1,"id":"b-_S872phm"},{"card":null,"data":{},"owner":1,"id":"00r-sjFdQI"},{"card":null,"data":{},"owner":1,"id":"34Qt18GVVm"},{"card":null,"data":{},"owner":1,"id":"6-EQ9Xi4sy"},{"card":null,"data":{},"owner":1,"id":"lxTVTl35as"},{"card":null,"data":{},"owner":1,"id":"iiXJfm-a3m"},{"card":null,"data":{},"owner":1,"id":"eDdkexUzXs"},{"card":null,"data":{},"owner":1,"id":"cTfhhCjkJZ"},{"card":null,"data":{},"owner":1,"id":"wrTyC-s7pQ"}],"opponentDeck":[{"card":null,"data":{},"owner":2,"id":"eUt0Zf6ZGl"},{"card":null,"data":{},"owner":2,"id":"d_Kns63m4G"},{"card":null,"data":{},"owner":2,"id":"DacAOgHr8f"},{"card":null,"data":{},"owner":2,"id":"aW63uVNhIV"},{"card":null,"data":{},"owner":2,"id":"N984_3V4ei"},{"card":null,"data":{},"owner":2,"id":"vLlc7w3G59"},{"card":null,"data":{},"owner":2,"id":"w6emEFj_yo"},{"card":null,"data":{},"owner":2,"id":"li2lBv87OK"},{"card":null,"data":{},"owner":2,"id":"hZuYxHsKQX"},{"card":null,"data":{},"owner":2,"id":"TDLZm9zyD6"},{"card":null,"data":{},"owner":2,"id":"ymcIBN66Oc"},{"card":null,"data":{},"owner":2,"id":"fAG-Qjl9OW"},{"card":null,"data":{},"owner":2,"id":"Qo6gNGPJm_"},{"card":null,"data":{},"owner":2,"id":"qOt4XoiExq"},{"card":null,"data":{},"owner":2,"id":"J0Be5jyB22"},{"card":null,"data":{},"owner":2,"id":"FayEgOLfQw"},{"card":null,"data":{},"owner":2,"id":"JYMdqnvFF6"},{"card":null,"data":{},"owner":2,"id":"hjXRIxyTI_"},{"card":null,"data":{},"owner":2,"id":"pss4CY_w2g"},{"card":null,"data":{},"owner":2,"id":"Bc0XJMHI1d"},{"card":null,"data":{},"owner":2,"id":"7snCZWktnk"},{"card":null,"data":{},"owner":2,"id":"Y_xLfXIg5z"},{"card":null,"data":{},"owner":2,"id":"WOhUunyVab"},{"card":null,"data":{},"owner":2,"id":"y1AxvPTtET"},{"card":null,"data":{},"owner":2,"id":"NOt3qAKRxx"},{"card":null,"data":{},"owner":2,"id":"OdTvW_5VCu"},{"card":null,"data":{},"owner":2,"id":"ud1Z5RcOtl"},{"card":null,"data":{},"owner":2,"id":"0E9w29144w"},{"card":null,"data":{},"owner":2,"id":"Y7VBfKRepT"},{"card":null,"data":{},"owner":2,"id":"20KdMkMUwQ"},{"card":null,"data":{},"owner":2,"id":"XA4hvA49Yo"},{"card":null,"data":{},"owner":2,"id":"yeJIo-euLs"},{"card":null,"data":{},"owner":2,"id":"rW4lSL7CcT"},{"card":null,"data":{},"owner":2,"id":"kBP0vNj8jq"},{"card":null,"data":{},"owner":2,"id":"ybPKdkKfL2"},{"card":null,"data":{},"owner":2,"id":"e9jgIgYS4I"},{"card":null,"data":{},"owner":2,"id":"-l20i2Z-BP"},{"card":null,"data":{},"owner":2,"id":"Ke-rz6DkQ3"},{"card":null,"data":{},"owner":2,"id":"V9MsZ0dS-A"},{"card":null,"data":{},"owner":2,"id":"YfSkHnyi7p"}],"playerActiveMagi":[{"card":"Whall","data":{"energy":10,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"JWSQ2CBoq9"}],"opponentActiveMagi":[],"playerMagiPile":[{"card":"Orlon","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"gX6Fnujsv6"},{"card":"Ebylon","data":{"energy":0,"controller":1,"attacked":0,"actionsUsed":[],"energyLostThisTurn":0,"defeatedCreature":false,"hasAttacked":false,"wasAttacked":false},"owner":1,"id":"7h9umzNdF7"}],"opponentMagiPile":[{"card":null,"data":{},"owner":2,"id":"Hh-lNG4t2Z"},{"card":null,"data":{},"owner":2,"id":"rEpSOz7h4i"},{"card":null,"data":{},"owner":2,"id":"sI1iVWWTHs"}],"inPlay":[],"playerDefeatedMagi":[],"opponentDefeatedMagi":[],"playerDiscard":[],"opponentDiscard":[]},"continuousEffects":[],"step":3,"turn":1,"goesFirst":1,"activePlayer":1,"prompt":false,"promptType":null,"promptMessage":null,"promptPlayer":null,"promptGeneratedBy":null,"promptParams":{},"opponentId":2,"log":[{"type":"log_entry/magi_energy_gain","card":"Whall","amount":10},{"type":"log_entry/choose_starting_cards","player":1},{"type":"log_entry/draw","player":1},{"type":"log_entry/draw","player":1},{"type":"log_entry/draw","player":1},{"type":"log_entry/draw","player":1},{"type":"log_entry/draw","player":1}],"gameEnded":false,"winner":null,"cardsAttached":{}};
+        const ACTIVE_PLAYER = 1;
+        const stateRepresentation = new GameState(stateJson as unknown as SerializedClientState);
+        stateRepresentation.setPlayerId(ACTIVE_PLAYER);
+
+        const strategy = new SimulationStrategy()
+
+        strategy.setup(stateRepresentation, ACTIVE_PLAYER)
+
+        const action = strategy.requestAction();
+        console.dir(action)
+        console.dir(strategy.getHeldActions())
     })
 
     it('Failed power activation', () => {

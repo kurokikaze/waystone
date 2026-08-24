@@ -12,6 +12,9 @@ import {
     ACTION_RESOLVE_PROMPT,
     TYPE_CREATURE, TYPE_RELIC,
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+    PROMPT_TYPE_NUMBER,
+    PROMPT_TYPE_OWN_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 } from "../const";
 import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
@@ -21,7 +24,7 @@ import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard,
 import { ActionExtractor } from './ActionExtractor';
 import { DirectAction, DirectActionExtractor } from './DirectActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
 import { State } from 'moonlands';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
@@ -619,6 +622,14 @@ export class ReconSimulationStrategy implements Strategy {
                 }
             }
 
+            if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_OWN_SINGLE_CREATURE) {
+                const available = this.gameState.state.promptAvailableCards as { id: string }[]
+                const creature = available[0] ?? this.gameState.getMyCreaturesInPlay()[0]
+                if (creature) {
+                    return this.resolveTargetPrompt(creature.id)
+                }
+            }
+
             if (this.waitingTarget && this.gameState.waitingForTarget(this.waitingTarget.source, this.playerId)) {
                 // console.log(`Waiting for target resolve path`)
                 // console.dir(this.waitingTarget)
@@ -645,6 +656,14 @@ export class ReconSimulationStrategy implements Strategy {
                                 this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE
                             ) {
                                 return this.resolveChooseCardsPrompt()
+                            } else if (this.gameState.getPromptType() === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE) {
+                                const available = this.gameState.state.promptAvailableCards as { id: string }[]
+                                return {
+                                    type: ACTION_RESOLVE_PROMPT,
+                                    cardsOrder: available.map(c => c.id),
+                                    generatedBy: this.gameState.state.promptGeneratedBy || '',
+                                    player: this.playerId,
+                                } as C2SAction
                             } else {
                                 console.log(`[r] Prompt state without previous action: ${this.gameState.getPromptType()}`)
                             }
@@ -745,12 +764,24 @@ export class ReconSimulationStrategy implements Strategy {
                             if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
                                 return this.resolveChooseCardsPrompt()
                             }
+                            if (this.gameState.getPromptType() == PROMPT_TYPE_NUMBER) {
+                                const max = this.gameState.state.promptParams.max
+                                return this.resolveNumberPrompt(typeof max === 'number' ? max : 0)
+                            }
                             throw new Error(`Unexpected prompt type in ATTACK step: ${this.gameState.getPromptType()}`);
                         }
                         return this.pass()
                     }
-                    default:
+                    default: {
+                        if (this.gameState.isInMyPromptState() &&
+                            this.gameState.getPromptType() === PROMPT_TYPE_SINGLE_CREATURE_FILTERED
+                        ) {
+                            const available = this.gameState.state.promptAvailableCards as { id: string }[]
+                            const creature = available[0] ?? this.gameState.getMyCreaturesInPlay()[0]
+                            if (creature) return this.resolveTargetPrompt(creature.id)
+                        }
                         return this.pass()
+                    }
                 }
             }
         }

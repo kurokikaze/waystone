@@ -1,5 +1,6 @@
 import { byName } from 'moonlands/dist/esm/cards'
 import { AnyEffectType } from 'moonlands/dist/esm/types';
+import { State } from 'moonlands/dist/esm/index';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 
 import {
@@ -11,6 +12,11 @@ import {
     ACTION_RESOLVE_PROMPT,
     TYPE_CREATURE, TYPE_RELIC,
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+    ZONE_TYPE_HAND,
+    ZONE_TYPE_ACTIVE_MAGI,
+    PROMPT_TYPE_NUMBER,
+    PROMPT_TYPE_OWN_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 } from "../const";
 import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
@@ -19,7 +25,7 @@ import { HashBuilder } from './HashBuilder';
 import { ActionOnHold, C2SActionOnHold, ExpandedClientCard, ProcessedClientCard, SimulationEntity } from '../types';
 import { ActionExtractor } from './ActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
-import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY } from 'moonlands/dist/esm/const';
+import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE } from 'moonlands/dist/esm/const';
 import { SimulationQueue } from './SimulationQueue';
 import { convertServerCommand } from '../../containedEngine/utils';
 import { ErrorDumpService } from '../../services/ErrorDumpService';
@@ -268,6 +274,20 @@ export class SimulationStrategy implements Strategy {
         return bestAction.action[0]
     }
 
+    // Removes hand cards that can no longer be afforded, keeping the sim hand consistent with createState re-evaluation
+    private trimHandToAffordable(sim: State, playerId: number): void {
+        const magiCard = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).card
+        if (!magiCard) return
+        const handZone = sim.getZone(ZONE_TYPE_HAND, playerId)
+        for (const card of [...handZone.cards]) {
+            if (typeof card.card.cost !== 'number') continue
+            const regionTax = (magiCard.card.region === card.card.region) ? 0 : 1
+            if (card.card.cost + regionTax > magiCard.data.energy) {
+                handZone.removeById(card.id)
+            }
+        }
+    }
+
     private actionToLabel(action: Record<string, any>): string {
         switch (action.type) {
             case ACTION_PLAY: {
@@ -335,6 +355,7 @@ export class SimulationStrategy implements Strategy {
                         // ignore
                     }
                 }
+                this.trimHandToAffordable(workEntity.sim, this.playerId)
                 const score = getStateScore(workEntity.sim, this.playerId, opponentId)
                 const hash = this.hashBuilder.makeHash(workEntity.sim)
                 if (hash !== workEntity.previousHash) {
@@ -378,7 +399,7 @@ export class SimulationStrategy implements Strategy {
         }
 
         this.leaves.forEach((value: Leaf) => {
-            if (!value.isPrompt && (value.score > bestAction.score) || (value.score == bestAction.score && value.actionLog.length < bestAction.actions.length)) {
+            if (!value.isPrompt && ((value.score > bestAction.score) || (value.score == bestAction.score && value.actionLog.length < bestAction.actions.length))) {
                 bestAction.score = value.score
                 bestAction.actions = value.actionLog
             }
@@ -449,7 +470,19 @@ export class SimulationStrategy implements Strategy {
 
                 return true;
             }
-        } else if (this.gameState.getStep() === STEP_NAME.ATTACK) {
+        }
+
+        if (
+            (this.gameState.getStep() === STEP_NAME.PRS1 || this.gameState.getStep() === STEP_NAME.PRS2) &&
+            action.type === ACTION_PLAY &&
+            'payload' in action &&
+            !this.gameState.getPlayableCards().some(({ id }) => id === action.payload.card.id)
+        ) {
+            console.log(`Failed spell play, card ${action.payload.card.id} not in hand. Dropping ${this.actionsOnHold.length} actions on hold.`)
+            return true;
+        }
+
+        if (this.gameState.getStep() === STEP_NAME.ATTACK) {
             if (!(action.type === ACTION_PASS || action.type === ACTION_ATTACK)) {
                 console.log('Non-attack action in the attack step')
                 return true
@@ -583,6 +616,7 @@ export class SimulationStrategy implements Strategy {
             this.actionCameFromHold = true
             const { action, hash } = this.actionsOnHold.shift()!
 
+            console.log(JSON.stringify(this.gameState.state))
             const testSim = createState(
                 this.gameState,
                 this.playerId || 2,
@@ -660,6 +694,14 @@ export class SimulationStrategy implements Strategy {
                 }
             }
 
+            if (this.gameState.isInPromptState(this.playerId) && this.gameState.getPromptType() === PROMPT_TYPE_OWN_SINGLE_CREATURE) {
+                const available = this.gameState.state.promptAvailableCards as { id: string }[]
+                const creature = available[0] ?? this.gameState.getMyCreaturesInPlay()[0]
+                if (creature) {
+                    return this.resolveTargetPrompt(creature.id)
+                }
+            }
+
             if (this.waitingTarget && this.gameState.waitingForTarget(this.waitingTarget.source, this.playerId)) {
                 console.log(`Resolve Target Prompt for source ${this.waitingTarget.source} and target ${this.waitingTarget.target}`)
                 // console.log(`Waiting for target resolve path`)
@@ -688,6 +730,14 @@ export class SimulationStrategy implements Strategy {
                                 this.gameState.getPromptType() === PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE
                             ) {
                                 return this.resolveChooseCardsPrompt()
+                            } else if (this.gameState.getPromptType() === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE) {
+                                const available = this.gameState.state.promptAvailableCards as { id: string }[]
+                                return {
+                                    type: ACTION_RESOLVE_PROMPT,
+                                    cardsOrder: available.map(c => c.id),
+                                    generatedBy: this.gameState.state.promptGeneratedBy || '',
+                                    player: this.playerId,
+                                } as C2SAction
                             } else {
                                 console.log(`[s] Prompt state without previous action: ${this.gameState.getPromptType()}`)
                             }
@@ -834,14 +884,26 @@ export class SimulationStrategy implements Strategy {
                             if (this.gameState.getPromptType() == PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE) {
                                 return this.resolveChooseCardsPrompt()
                             }
+                            if (this.gameState.getPromptType() == PROMPT_TYPE_NUMBER) {
+                                const max = this.gameState.state.promptParams.max
+                                return this.resolveNumberPrompt(typeof max === 'number' ? max : 0)
+                            }
                             throw new Error(`Unexpected prompt type in ATTACK step: ${this.gameState.getPromptType()}`);
                         }
                         console.log(`End-selection pass`)
                         return this.pass()
                     }
-                    default:
+                    default: {
+                        if (this.gameState.isInMyPromptState() &&
+                            this.gameState.getPromptType() === PROMPT_TYPE_SINGLE_CREATURE_FILTERED
+                        ) {
+                            const available = this.gameState.state.promptAvailableCards as { id: string }[]
+                            const creature = available[0] ?? this.gameState.getMyCreaturesInPlay()[0]
+                            if (creature) return this.resolveTargetPrompt(creature.id)
+                        }
                         console.log(`Unknown step ${step}, passing by default`)
                         return this.pass()
+                    }
                 }
             }
         }

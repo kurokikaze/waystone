@@ -3,6 +3,7 @@ import { type DeckConfig } from './simulation';
 export type DeckPool = {
     name: string;
     cards: string[];
+    magi?: string[];
 };
 
 export type DeckSamplerOptions = {
@@ -24,14 +25,16 @@ export class DeckSampler {
     public sampleDeck(pool: DeckPool, deckSize: number, seed: number): DeckConfig {
         this.validateInput(pool, deckSize);
 
-        const magiCards = this.getMagiCards(pool);
-        const nonMagiPool = this.getNonMagiPool(pool);
+        const rng = this.makeRng(seed);
+        const magiCards = pool.magi
+            ? this.sampleUniqueMagi(pool.magi, rng)
+            : this.getMagiCards(pool);
+        const nonMagiPool = pool.magi ? pool.cards : this.getNonMagiPool(pool);
 
         if (nonMagiPool.length === 0 && deckSize > this.magiCount) {
             throw new Error(`Pool ${pool.name} has no non-Magi cards to fill deck size ${deckSize}`);
         }
 
-        const rng = this.makeRng(seed);
         const cards: string[] = [...magiCards];
         const copyCountByName = new Map<string, number>();
 
@@ -58,13 +61,26 @@ export class DeckSampler {
     }
 
     protected validateInput(pool: DeckPool, deckSize: number) {
-        if (pool.cards.length < this.magiCount) {
-            throw new Error(`Pool ${pool.name} must contain at least ${this.magiCount} cards, with first cards being Magi`);
+        const magiSource = pool.magi ?? pool.cards;
+        if (magiSource.length < this.magiCount) {
+            throw new Error(`Pool ${pool.name} must contain at least ${this.magiCount} Magi cards`);
         }
 
         if (deckSize < this.magiCount) {
             throw new Error(`Deck size must be at least ${this.magiCount} to include required Magi cards`);
         }
+    }
+
+    // Picks magiCount unique entries from the list without replacement.
+    private sampleUniqueMagi(magiList: string[], rng: SeededRng): string[] {
+        const pool = [...magiList];
+        const result: string[] = [];
+        for (let i = 0; i < this.magiCount; i++) {
+            const index = Math.floor(rng() * (pool.length - i));
+            result.push(pool[index]);
+            pool[index] = pool[pool.length - 1 - i];
+        }
+        return result;
     }
 
     protected getMagiCards(pool: DeckPool): string[] {
@@ -92,3 +108,4 @@ export class DeckSampler {
         };
     }
 }
+

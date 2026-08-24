@@ -80,7 +80,7 @@ export class StrategyConnector {
         if (this.strategy && this.gameState && this.playerId &&
             (this.gameState.playerPriority(this.playerId) || inPromptState)
         ) {
-            if (currentStep !== 5) {
+            if (currentStep !== 5 || inPromptState) {
                 const action = this.strategy.requestAction()
 
                 if (action) {

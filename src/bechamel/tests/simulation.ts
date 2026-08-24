@@ -175,6 +175,7 @@ export class Simulation {
         game.setPlayers(1, 2);
         game.setDeck(1, this.options.playerOne.cards);
         game.setDeck(2, this.options.playerTwo.cards);
+
         game.setup();
 
         const gameLog: any[] = [];
@@ -194,7 +195,7 @@ export class Simulation {
 
         let winnerData: SimulationResult | null = null;
 
-        game.debug = false;
+        game.debug = true;
         game.setOnAction((action: AnyEffectType) => {
             const commandForBotOne = convertServerCommand(action, game, 1);
             connectorOne.dispatchAction(commandForBotOne);
