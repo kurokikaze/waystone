@@ -10,6 +10,7 @@ type HarnessConfig = {
     outputDir: string;
     verbose: boolean;
     maxIterations: number;
+    strategy: 'simulation' | 'recon';
     playerOnePool: DeckPool;
     playerTwoPool: DeckPool;
 };
@@ -30,7 +31,7 @@ type HarnessOutput = {
     results: SimulationRunResult[];
 };
 
-type CliOverrides = Partial<Pick<HarnessConfig, 'runs' | 'baseSeed' | 'deckSize' | 'outputDir' | 'verbose' | 'maxIterations'>>;
+type CliOverrides = Partial<Pick<HarnessConfig, 'runs' | 'baseSeed' | 'deckSize' | 'outputDir' | 'verbose' | 'maxIterations' | 'strategy'>>;
 
 const defaultConfig: HarnessConfig = {
     runs: 5,
@@ -39,6 +40,7 @@ const defaultConfig: HarnessConfig = {
     outputDir: './stateDumps',
     verbose: false,
     maxIterations: 5000,
+    strategy: 'simulation',
     playerOnePool: {
         name: 'Cald Pool',
         magi: ['Grega', 'Magam', 'Sinder', 'Gar', 'Barak', 'Valkan', 'Ashgar'],
@@ -121,6 +123,9 @@ function parseCliOverrides(args: string[]): CliOverrides {
             case 'verbose':
                 overrides.verbose = value === 'true' || value === '1';
                 break;
+            case 'strategy':
+                if (value === 'recon' || value === 'simulation') overrides.strategy = value;
+                break;
             default:
                 break;
         }
@@ -154,6 +159,7 @@ function runSingleSimulation(config: HarnessConfig, runIndex: number): Simulatio
         playerTwo: playerTwoDeck,
         writeLogs: false,
         maxIterations: config.maxIterations,
+        strategy: config.strategy,
     });
 
     let winner: 1 | 2 | null = null;

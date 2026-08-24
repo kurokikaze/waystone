@@ -1,5 +1,6 @@
 import { ACTION_PLAY, ACTION_PLAYER_WINS } from 'moonlands/dist/esm/index'
 import { SimulationStrategy } from '../strategies/SimulationStrategy'
+import { ReconSimulationStrategy } from '../strategies/ReconSimulationStrategy'
 import { ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from 'moonlands/dist/esm/const';
 import { createGame } from '../../containedEngine/containedEngine';
 import { StrategyConnector } from '../StrategyConnector';
@@ -33,6 +34,7 @@ export type SimulationOptions = {
     playerTwo: DeckConfig;
     writeLogs?: boolean;
     maxIterations?: number;
+    strategy?: 'simulation' | 'recon';
 };
 
 type WinnerSummary = {
@@ -190,8 +192,9 @@ export class Simulation {
         const strategyConnectorOne = new StrategyConnector(connectorOne as unknown as Socket);
         const strategyConnectorTwo = new StrategyConnector(connectorTwo as unknown as Socket);
 
-        strategyConnectorOne.connect(new SimulationStrategy());
-        strategyConnectorTwo.connect(new SimulationStrategy());
+        const StrategyClass = this.options.strategy === 'recon' ? ReconSimulationStrategy : SimulationStrategy;
+        strategyConnectorOne.connect(new StrategyClass());
+        strategyConnectorTwo.connect(new StrategyClass());
 
         let winnerData: SimulationResult | null = null;
 

@@ -1,7 +1,6 @@
 import { byName } from 'moonlands/dist/esm/cards'
 import { AnyEffectType } from 'moonlands/dist/esm/types';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
-import * as  fs from 'node:fs';
 
 import {
     PROMPT_TYPE_MAY_ABILITY,
@@ -25,7 +24,6 @@ import { ActionExtractor } from './ActionExtractor';
 import { DirectAction, DirectActionExtractor } from './DirectActionExtractor';
 import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPassAction, FromClientPlayAction, FromClientPowerAction } from '../../clientProtocol';
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE } from 'moonlands/dist/esm/const';
-import { SimulationQueue } from './SimulationQueue';
 import { State } from 'moonlands';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
 import { ErrorDumpService } from '../../services/ErrorDumpService';
@@ -218,57 +216,25 @@ export class ReconSimulationStrategy implements Strategy {
         return this.pass()
     }
 
-    private simulateAttacksQueue(simulationQueue: SimulationQueue, initialScore: number, opponentId: number): AnyEffectType {
-        const hashes = new Set<string>()
-        let bestAction: { score: number, action: AnyEffectType[] } = {
-            score: initialScore,
-            action: [this.pass()]
+    // Converts a DirectAction (internal search descriptor) to a real C2SAction.
+    private directActionToClientAction(action: DirectAction): C2SAction {
+        switch (action.type) {
+            case 'PASS':         return this.pass()
+            case 'PLAY':         return this.play(action.cardId)
+            case 'POWER':        return this.power(action.sourceId, action.powerName)
+            case 'ATTACK':       return this.attack(action.sourceId, action.targetId, action.additionalAttackerId)
+            case 'MAY_ABILITY':  return { type: ACTION_RESOLVE_PROMPT, useEffect: action.useEffect, player: this.playerId } as C2SAction
+            case 'TARGET':       return this.resolveTargetPrompt(action.targetId)
+            case 'NUMBER':       return this.resolveNumberPrompt(action.number)
+            case 'CARDS':        return { type: ACTION_RESOLVE_PROMPT, zone: action.zone, zoneOwner: action.zoneOwner, cards: action.cardIds, player: this.playerId } as C2SAction
+            case 'CARDS_ORDER':  return { type: ACTION_RESOLVE_PROMPT, cardsOrder: action.cardsOrder, generatedBy: this.gameState?.state.promptGeneratedBy || '', player: this.playerId } as C2SAction
+            case 'DAMAGE_MAP':   return { type: ACTION_RESOLVE_PROMPT, damageMap: action.damageMap, player: this.playerId } as C2SAction
+            case 'ENERGY_MAP':   return { type: ACTION_RESOLVE_PROMPT, energyMap: action.energyMap, player: this.playerId } as C2SAction
+            case 'PLAYER':       return { type: ACTION_RESOLVE_PROMPT, targetPlayer: action.targetPlayer, player: this.playerId } as C2SAction
+            case 'ALTERNATIVE':  return { type: ACTION_RESOLVE_PROMPT, alternative: String(action.alternative), player: this.playerId } as C2SAction
+            case 'POWER_ON_MAGI':return { type: ACTION_RESOLVE_PROMPT, powerName: action.powerName, player: this.playerId } as C2SAction
+            default:             return this.pass()
         }
-        if (!this.playerId) {
-            return this.pass()
-        }
-        // Simulation itself
-        let failsafe = ReconSimulationStrategy.failsafe
-        let counter = 0
-        while (simulationQueue.hasItems() && failsafe > 0) {
-            failsafe -= 1
-            counter += 1
-            const workEntity = simulationQueue.shift()
-            if (workEntity) {
-                try {
-                    // const stateBefore = JSON.parse(JSON.stringify(workEntity.sim.state))
-                    workEntity.sim.update(workEntity.action)
-                } catch (e: any) {
-                    debugger;
-                    console.error('Error applying action')
-                    if ('payload' in workEntity.action) {
-                        console.dir(workEntity.action.payload.card);
-                    }
-                    console.dir(workEntity)
-                    console.dir(e.stack)
-                    try {
-                        ErrorDumpService.dumpActionFailure(workEntity.action, (typeof workEntity.sim?.state !== 'undefined') ? JSON.parse(JSON.stringify(workEntity.sim.state)) : null, e, { location: 'ReconSimulationStrategy.simulateAttacksQueue', playerId: this.playerId, previousHash: workEntity.previousHash })
-                    } catch (_err) {
-                        // ignore
-                    }
-                    throw e
-                }
-                const score = getStateScore(workEntity.sim, this.playerId, opponentId)
-                if (score > bestAction.score) {
-                    bestAction.score = score
-                    bestAction.action = workEntity?.actionLog.map(({ action }) => action) || []
-                }
-                const hash = this.hashBuilder.makeHash(workEntity.sim)
-                if (hashes.has(hash)) {
-                    continue
-                }
-
-                hashes.add(hash)
-                simulationQueue.push(...ActionExtractor.extractActions(workEntity.sim, this.playerId, opponentId, workEntity.actionLog, hash, this.hashBuilder))
-            }
-        }
-
-        return bestAction.action[0]
     }
 
     private actionToLabel(action: Record<string, any>): string {
@@ -313,9 +279,10 @@ export class ReconSimulationStrategy implements Strategy {
         return result
     }
 
-    private errorCount = 1
-
     private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = ''): { score: number, actions: any[] } {
+        if (this.counter > ReconSimulationStrategy.failsafe) {
+            return { score: getStateScore(state, playerId, opponentId), actions: [] }
+        }
         this.counter++;
 
         const parentHash = hash == '' ? this.hashBuilder.makeHash(state) : hash
@@ -325,7 +292,6 @@ export class ReconSimulationStrategy implements Strategy {
         let maxAction: DirectAction[] = []
 
         for (const action of possibleActions) {
-            const savedStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
             unmaker.setCheckpoint()
             DirectActionExtractor.applyAction(state, action, playerId, opponentId)
             const childHash = this.hashBuilder.makeHash(state)
@@ -342,17 +308,6 @@ export class ReconSimulationStrategy implements Strategy {
                 // this.graph += `"${childHash}" [label="${maxScore}"]\n`
             }
             unmaker.revertToCheckpoint()
-            const newStateOne = JSON.stringify(state.serializeData(playerId, false), null, 2)
-            if (!(newStateOne === savedStateOne)) {
-                state.debug = false;
-                console.error(`State mismatch before and after restore! Problem #${this.errorCount}`)
-                console.log(`Hash is ${childHash} from ${parentHash}`)
-                console.dir(action)
-                fs.writeFileSync(`stateMismatches/${this.errorCount}_old.json`, savedStateOne)
-                fs.writeFileSync(`stateMismatches/${this.errorCount}_new.json`, newStateOne)
-                this.errorCount++
-                throw new Error('Enough')
-            }
         }
         if (possibleActions.length == 0) {
             maxScore = getStateScore(state, playerId, opponentId)
@@ -696,7 +651,10 @@ export class ReconSimulationStrategy implements Strategy {
 
                         const unmaker = new Unmaker(outerSim);
                         const result = this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID)
-                        return result.actions[0]
+                        if (!result.actions[0]) {
+                            return this.pass()
+                        }
+                        return this.directActionToClientAction(result.actions[0])
                     }
 
                     case STEP_NAME.CREATURES: {
@@ -730,11 +688,6 @@ export class ReconSimulationStrategy implements Strategy {
 
                         if (opponentMagi) {
                             const TEMPORARY_OPPONENT_ID = this.gameState.getOpponentId();
-                            const myCreatures = this.gameState.getMyCreaturesInPlay()
-
-                            if (myCreatures.length == 0) {
-                                return this.pass()
-                            }
 
                             const outerSim = createState(
                                 this.gameState,
@@ -742,20 +695,10 @@ export class ReconSimulationStrategy implements Strategy {
                                 TEMPORARY_OPPONENT_ID,
                             )
 
-                            const hash = this.hashBuilder.makeHash(outerSim)
-                            const simulationQueue = new SimulationQueue();
-                            simulationQueue.addFromSim(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
-                            // const simulationQueue = ActionExtractor.extractActions(outerSim, this.playerId, TEMPORARY_OPPONENT_ID, [], hash, this.hashBuilder)
-
-                            const initialScore = getStateScore(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
-
-                            const bestAction = this.simulateAttacksQueue(simulationQueue, initialScore, TEMPORARY_OPPONENT_ID)
-                            if (!bestAction) {
-                                console.error(`Some strange actions encountered`);
-                                console.dir(bestAction);
-                            }
-                            if (bestAction.type === ACTION_ATTACK || bestAction.type === ACTION_RESOLVE_PROMPT) {
-                                return this.simulationActionToClientAction(bestAction)
+                            const unmaker = new Unmaker(outerSim);
+                            const result = this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID)
+                            if (result.actions[0]) {
+                                return this.directActionToClientAction(result.actions[0])
                             }
                         }
                         // We get here if we accidentally (yeah) killed opposing Adis. It's ATTACK step, we're in the prompt state.
