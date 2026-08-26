@@ -13,8 +13,16 @@ import {
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_OWN_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+    PROMPT_TYPE_SINGLE_MAGI,
+    PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+    PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+    PROMPT_TYPE_PLAYER,
 } from "../const";
+import {
+    PROMPT_TYPE_ALTERNATIVE,
+} from 'moonlands/dist/esm/const';
 import { ClientCard, GameState } from "../GameState";
 import { Strategy } from './Strategy';
 import { createState, getStateScore } from './simulationUtils'
@@ -26,7 +34,7 @@ import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPas
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE } from 'moonlands/dist/esm/const';
 import { State } from 'moonlands';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
-import { ErrorDumpService } from '../../services/ErrorDumpService';
+// import { ErrorDumpService } from '../../services/ErrorDumpService';
 const STEP_NAME = {
     ENERGIZE: 0,
     PRS1: 1,
@@ -293,11 +301,23 @@ export class ReconSimulationStrategy implements Strategy {
 
         for (const action of possibleActions) {
             unmaker.setCheckpoint()
-            DirectActionExtractor.applyAction(state, action, playerId, opponentId)
+            try {
+                DirectActionExtractor.applyAction(state, action, playerId, opponentId)
+            } catch (e: any) {
+                console.error(`Unmaking from catch`)
+                console.error(e.message)
+                if (e.message.startsWith("Cannot read properties of null")) {
+                    console.error(e.stack)
+                }
+                unmaker.revertToCheckpoint()
+                continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
+            }
             const childHash = this.hashBuilder.makeHash(state)
-            // const label = ('label' in action ? action.label : 'Pass').replace(/"/g, '\\"')
-            // this.graph += `  "${parentHash}" -> "${childHash}" [label="${label}"]\n`
-            this.graph += `  "${parentHash}" -> "${childHash}"\n`
+            // skip no-op actions (engine silently rejected, e.g. forcePriority check failed)
+            if (childHash === parentHash) {
+                unmaker.revertToCheckpoint()
+                continue
+            }
             if (!this.hashes.has(childHash)) {
                 this.hashes.add(childHash)
                 let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash)
@@ -583,12 +603,74 @@ export class ReconSimulationStrategy implements Strategy {
                 if (creature) {
                     return this.resolveTargetPrompt(creature.id)
                 }
+                // no own creatures: sending a non-creature (e.g. magi) crashes the moonlands
+                // restriction check. Pass priority so the spell fizzles.
+                return this.pass()
+            }
+
+            if (this.gameState.isInPromptState(this.playerId) && (
+                this.gameState.getPromptType() === PROMPT_TYPE_SINGLE_CREATURE_FILTERED ||
+                this.gameState.getPromptType() === PROMPT_TYPE_SINGLE_CREATURE
+            )) {
+                const available = this.gameState.state.promptAvailableCards as { id: string }[] | null
+                const creature = available?.[0]
+                    ?? this.gameState.getMyCreaturesInPlay()[0]
+                    ?? this.gameState.getEnemyCreaturesInPlay()[0]
+                if (creature) {
+                    return this.resolveTargetPrompt(creature.id)
+                }
+                // no valid creature — resolve with own magi to let the spell fizzle gracefully
+                const myMagi = this.gameState.getMyMagi()
+                if (myMagi) return this.resolveTargetPrompt(myMagi.id)
+                return this.resolveTargetPrompt('') // last resort
             }
 
             if (this.waitingTarget && this.gameState.waitingForTarget(this.waitingTarget.source, this.playerId)) {
-                // console.log(`Waiting for target resolve path`)
-                // console.dir(this.waitingTarget)
                 return this.resolveTargetPrompt(this.waitingTarget.target, 'waitingTarget')
+            }
+
+            // Generic prompt fallbacks — runs before playerPriority check so these fire even
+            // when playerPriority() = false (which can happen when in a prompt state)
+            if (this.gameState.isInPromptState(this.playerId)) {
+                const opponentId = this.gameState.getOpponentId()
+                const promptType = this.gameState.getPromptType()
+                if (promptType === PROMPT_TYPE_ALTERNATIVE) {
+                    const alternatives = (this.gameState.state.promptParams as any)?.alternatives as any[] | null
+                    const firstAlt = alternatives?.[0]?.value ?? 0
+                    return { type: ACTION_RESOLVE_PROMPT, alternative: String(firstAlt), player: this.playerId } as C2SAction
+                }
+                if (promptType === PROMPT_TYPE_PLAYER) {
+                    return { type: ACTION_RESOLVE_PROMPT, targetPlayer: opponentId, player: this.playerId } as C2SAction
+                }
+                if (promptType === PROMPT_TYPE_SINGLE_MAGI) {
+                    const available = this.gameState.state.promptAvailableCards as { id: string }[] | null
+                    const oppMagi = this.gameState.getOpponentMagi()
+                    const myMagi = this.gameState.getMyMagi()
+                    const target = available?.[0] ?? oppMagi ?? myMagi
+                    if (target) return this.resolveTargetPrompt(target.id)
+                }
+                if (promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI) {
+                    const available = this.gameState.state.promptAvailableCards as { id: string }[] | null
+                    const target = available?.[0]
+                        ?? this.gameState.getMyCreaturesInPlay()[0]
+                        ?? this.gameState.getEnemyCreaturesInPlay()[0]
+                    if (target) return this.resolveTargetPrompt(target.id)
+                }
+                if (promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE) {
+                    const available = this.gameState.state.promptAvailableCards as { id: string }[] | null
+                    // promptAvailableCards already excludes the source; only fall back if it's empty
+                    const sourceId = (this.gameState.state.promptParams as any)?.source?.id as string | undefined
+                    const target = available?.[0]
+                        ?? [...this.gameState.getEnemyCreaturesInPlay(), ...this.gameState.getMyCreaturesInPlay()]
+                            .find(c => c.id !== sourceId)
+                    if (target) return this.resolveTargetPrompt(target.id)
+                }
+                if (promptType === PROMPT_TYPE_NUMBER) {
+                    return this.resolveNumberPrompt(1)
+                }
+                // last resort: try promptAvailableCards
+                const available = this.gameState.state.promptAvailableCards as { id: string }[] | null
+                if (available?.[0]) return this.resolveTargetPrompt(available[0].id)
             }
 
             if (this.gameState.playerPriority(this.playerId)) {

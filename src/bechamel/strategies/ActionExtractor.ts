@@ -1016,10 +1016,15 @@ export class ActionExtractor {
 
   public static getAllAttackPatterns(sim: State, attacker: number, opponent: number): AttackPattern[] {
     const creatures = sim.getZone(ZONE_TYPE_IN_PLAY).cards.filter((card: CardInGame) => card.card.type === TYPE_CREATURE)
-    const attackers = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === attacker && sim.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK) === true)
-    const defenders = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== attacker && sim.modifyByStaticAbilities(card, PROPERTY_CAN_BE_ATTACKED) === true)
+    // PROPERTY_CONTROLLER is queried 3× per creature without caching
+    const controllerOf = new Map<string, number>()
+    for (const card of creatures) {
+      controllerOf.set(card.id, sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) as number)
+    }
+    const attackers = creatures.filter((card: CardInGame) => controllerOf.get(card.id) === attacker && sim.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK) === true)
+    const defenders = creatures.filter((card: CardInGame) => controllerOf.get(card.id) !== attacker && sim.modifyByStaticAbilities(card, PROPERTY_CAN_BE_ATTACKED) === true)
 
-    const allOpponentCreatures = creatures.filter((card: CardInGame) => sim.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== attacker)
+    const allOpponentCreatures = creatures.filter((card: CardInGame) => controllerOf.get(card.id) !== attacker)
 
     const enemyMagi = sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards[0]
     const magiCanBeAttacked = sim.modifyByStaticAbilities(enemyMagi, PROPERTY_CAN_BE_ATTACKED)

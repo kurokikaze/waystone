@@ -343,13 +343,15 @@ export class DirectActionExtractor {
             })
         }
 
-        // Playable spells
+        // Playable spells — skipping ones whose creature-targeting prompt has no valid targets
+        const inPlay = sim.getZone(ZONE_TYPE_IN_PLAY).cards as CardInGame[]
         sim.getZone(ZONE_TYPE_HAND, playerId).cards
             .filter(card =>
                 card.card.type === TYPE_SPELL &&
                 typeof card.card.cost === 'number' &&
                 card.card.cost <= magiCard.data.energy &&
-                !FORBIDDEN_SPELLS.includes(card.card.name)
+                !FORBIDDEN_SPELLS.includes(card.card.name) &&
+                DirectActionExtractor.spellHasValidTargets(card, inPlay, sim, playerId)
             )
             .forEach(spell => {
                 actions.push({ type: 'PLAY', cardId: spell.id, label: `Play ${spell.card.name}` })
@@ -405,6 +407,36 @@ export class DirectActionExtractor {
             })
 
         return actions
+    }
+
+    /** Returns false if the spell's first enter_prompt effect targets creatures but none are available. */
+    private static spellHasValidTargets(spell: CardInGame, inPlay: CardInGame[], sim: State, playerId: number): boolean {
+        const effects: any[] = spell.card.data?.effects ?? []
+        const promptEffect = effects.find((e: any) => e.type === 'actions/enter_prompt')
+        if (!promptEffect) return true
+
+        const { promptType, promptParams } = promptEffect
+        if (promptType === 'prompt/creature') {
+            return inPlay.some(c => c.card.type === TYPE_CREATURE)
+        }
+        if (promptType === 'prompt/own_creature') {
+            // own_creature only accepts own creatures - must check controller, not just type
+            return inPlay.some(c => c.card.type === TYPE_CREATURE &&
+                sim.modifyByStaticAbilities(c, PROPERTY_CONTROLLER) === playerId)
+        }
+        if (promptType === 'prompt/creature_filtered') {
+            const restriction = promptParams?.restriction
+            const value = promptParams?.restrictionValue
+            if (restriction === 'restrictions/region') {
+                return inPlay.some(c => c.card.type === TYPE_CREATURE && (c.card as any).region === value)
+            }
+            if (restriction === 'restrictions/type') {
+                return inPlay.some(c => c.card.type === TYPE_CREATURE &&
+                    ((c.card.data as any)?.types ?? []).includes(value))
+            }
+            return inPlay.some(c => c.card.type === TYPE_CREATURE)
+        }
+        return true
     }
 
     private static extractPromptActions(sim: State, playerId: number, opponentId: number): DirectAction[] {

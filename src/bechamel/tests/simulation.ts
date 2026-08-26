@@ -239,19 +239,47 @@ export class Simulation {
 
         const maxIterations = this.options.maxIterations ?? 5000;
         let iterations = 0;
+        const actionLog: string[] = [];
+        const firstLog: string[] = [];
+        const ACTION_LOG_SIZE = 30;
 
         while (!game.hasWinner()) {
             iterations++;
             if (iterations > maxIterations) {
-                throw new Error(`Simulation exceeded max iterations (${maxIterations})`);
+                const step = game.state.step;
+                const turn = game.turn;
+                const activeP = game.state.activePlayer;
+                const inPlay = (game.getZone('zones/in_play', null)?.cards ?? [])
+                    .map((c: any) => `${c.card.name}[${c.data.energy}]`).join(', ');
+                const prompt = game.state.prompt
+                    ? `PROMPT(${game.state.promptType}, player=${game.state.promptPlayer}, generatedBy=${game.state.promptGeneratedBy})`
+                    : 'no prompt';
+                throw new Error(
+                    `Simulation exceeded max iterations (${maxIterations}) ` +
+                    `@ turn ${turn} step ${step} activePlayer ${activeP} ${prompt} | in-play: ${inPlay}\n` +
+                    `First 10 actions:\n` + firstLog.join('\n') + '\n' +
+                    `Last ${ACTION_LOG_SIZE} actions:\n` + actionLog.join('\n')
+                );
             }
 
             const activePlayer = game.state.prompt ? game.state.promptPlayer : game.state.activePlayer;
+            const stateBefore = `T${game.turn}S${game.state.step}P${activePlayer}${game.state.prompt ? `(${game.state.promptType?.slice(-20)})` : ''}`;
             if (activePlayer === 1) {
                 strategyConnectorOne.requestAndSendAction();
             } else {
                 strategyConnectorTwo.requestAndSendAction();
             }
+            const lastEntry = (activePlayer === 1 ? connectorOne : connectorTwo).gameLog.slice(-1)[0] as any;
+            const lastAction = lastEntry?.action;
+            const actionDesc = lastAction?.type === 'actions/play'
+                ? `PLAY(${lastAction?.payload?.card?.card ?? lastAction?.payload?.card?.id})`
+                : lastAction?.type === 'actions/power'
+                ? `POWER(${lastAction?.power})`
+                : lastAction?.type ?? '?';
+            const stateAfter = `T${game.turn}S${game.state.step}P${game.state.activePlayer}${game.state.prompt ? `(${game.state.promptType?.slice(-20)})` : ''}`;
+            if (actionLog.length >= ACTION_LOG_SIZE) actionLog.shift();
+            actionLog.push(`#${iterations} ${stateBefore}→${stateAfter} [${actionDesc}]`);
+            if (iterations <= 10) firstLog.push(`#${iterations} ${stateBefore}→${stateAfter} [${actionDesc}]`);
         }
 
         if (this.options.writeLogs) {

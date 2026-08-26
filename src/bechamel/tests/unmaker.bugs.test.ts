@@ -198,3 +198,342 @@ describe('Unmaker bug – PLAY with roll_die (Grow)', () => {
         expect(secondRoll).toBe(firstRoll);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Arderial bug A – POWER: Thunder Hyren's Replenish
+//   Creature discards itself immediately (no prompt) then adds energy to another.
+//   Unmaker.generateUnAction throws null (reading 'id') for the discard effect.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER that discards source creature (Thunder Hyren Replenish)', () => {
+    it('reverts state correctly after Replenish is applied', () => {
+        const thunderHyren = new CardInGame(byName('Thunder Hyren') as Card, PLAYER).addEnergy(5);
+        const lovian       = new CardInGame(byName('Lovian')        as Card, PLAYER).addEnergy(2);
+        const adis  = new CardInGame(byName('Adis')  as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [thunderHyren, lovian], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (thunderHyren.card.data.powers as any[]).find(p => p.name === 'Replenish');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: thunderHyren, power, player: PLAYER } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug B – POWER: Alaban's Undream
+//   Power enters a prompt, then returns a creature and discards Alaban.
+//   Unmaker.generateUnAction throws null (reading 'id') for the discard effect.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER that discards source after prompt (Alaban Undream)', () => {
+    it('reverts state correctly after Undream power is applied', () => {
+        const alaban = new CardInGame(byName('Alaban') as Card, PLAYER).addEnergy(6);
+        const lovian = new CardInGame(byName('Lovian') as Card, PLAYER).addEnergy(3);
+        const adis   = new CardInGame(byName('Adis')   as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [alaban, lovian], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (alaban.card.data.powers as any[]).find(p => p.name === 'Undream');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: alaban, power, player: PLAYER } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug C – POWER: Xyx Elder's Shockstorm
+//   Uses effects/roll_die then selects creatures and discards energy from them.
+//   Unmaker.generateUnAction throws undefined (reading 'length') for this effect.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER with roll_die and discard_energy_from_creatures (Xyx Elder Shockstorm)', () => {
+    it('reverts state correctly after Shockstorm power is applied', () => {
+        const xyxElder = new CardInGame(byName('Xyx Elder') as Card, PLAYER).addEnergy(8);
+        const lovian   = new CardInGame(byName('Lovian')    as Card, PLAYER).addEnergy(4);
+        const adis  = new CardInGame(byName('Adis')  as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [xyxElder, lovian], [], [], adis, sinder);
+        state.initiatePRNG(99);
+        const before = snapshot(state);
+
+        const power = (xyxElder.card.data.powers as any[]).find(p => p.name === 'Shockstorm');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: xyxElder, power, player: PLAYER } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug D – POWER: Orish's Hypnotize
+//   Moves cards from opponent's hand between zones (move_cards_between_zones).
+//   Unmaker.generateUnAction throws undefined (reading 'length') for the zone op.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER with move_cards_between_zones (Orish Hypnotize)', () => {
+    it('reverts state correctly after Hypnotize power is applied', () => {
+        const orish  = new CardInGame(byName('Orish')  as Card, PLAYER).addEnergy(5);
+        const adis   = new CardInGame(byName('Adis')   as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        // Give opponent some hand cards to be moved.
+        const oppHandCards = ['Leaf Hyren', 'Furok', 'Rudwot'].map(
+            name => new CardInGame(byName(name) as Card, OPPONENT),
+        );
+
+        const state = makeState(STEP_PRS1, [orish], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, OPPONENT).add(oppHandCards);
+
+        const before = snapshot(state);
+
+        const power = (orish.card.data.powers as any[]).find(p => p.name === 'Hypnotize');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        // Hypnotize enters a prompt/player first.
+        state.update({ type: ACTION_POWER, source: orish, power, player: PLAYER } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Engine bug – PLAY Fog Bank with no own creatures in play
+//   Fog Bank uses EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE with attachmentTarget: '$target'.
+//   When the DFS resolves the OWN_SINGLE_CREATURE prompt with no creatures available,
+//   '$target' is null → applyPlayAttachedToCreatureEffect passes null to
+//   EFFECT_TYPE_ATTACH_CARD_TO_CARD → applyAttachCardToCardEffect throws null (reading 'id').
+// ---------------------------------------------------------------------------
+describe('Engine bug – PLAY Fog Bank attached to creature when no creatures in play', () => {
+    it('does not crash when Fog Bank prompt is resolved with no own creatures', () => {
+        const fogBank = new CardInGame(byName('Fog Bank') as Card, PLAYER);
+        const adis    = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(15);
+        const sinder  = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        // No PLAYER creatures in play – '$target' will be null after prompt resolves.
+        const state = makeState(STEP_PRS1, [], [fogBank], [], adis, sinder);
+
+        const fogBankCard = state.getZone(ZONE_TYPE_HAND, PLAYER).byId(fogBank.id)!;
+        state.update({ type: ACTION_PLAY, payload: { card: fogBankCard, player: PLAYER }, forcePriority: false, player: PLAYER } as any);
+
+        // Resolving the own_creature prompt with null/empty selection should not crash.
+        expect(() => {
+            state.update({
+                type: ACTION_RESOLVE_PROMPT,
+                cards: [],
+                generatedBy: (state.state as any).promptGeneratedBy,
+                player: PLAYER,
+            } as any);
+        }).not.toThrow();
+
+        // Fog Bank should NOT be in play (play was aborted due to no valid target).
+        const fogBankInPlay = state.getZone(ZONE_TYPE_IN_PLAY).cards.find((c: any) => c.card.name === 'Fog Bank');
+        expect(fogBankInPlay).toBeUndefined();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug E – POWER resolve: Alaban's Undream (full resolution)
+//   effects/return_creature_discarding_energy is not handled by the Unmaker.
+//   After the creature prompt resolves, the Unmaker may crash accessing
+//   Alaban's id after it has been discarded (null → 'id').
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER return_creature_discarding_energy resolved (Alaban Undream)', () => {
+    it('reverts state correctly after Undream resolves', () => {
+        const alaban  = new CardInGame(byName('Alaban') as Card, PLAYER).addEnergy(6);
+        const lovian  = new CardInGame(byName('Lovian') as Card, PLAYER).addEnergy(3);
+        const adis   = new CardInGame(byName('Adis')   as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [alaban, lovian], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (alaban.card.data.powers as any[]).find(p => p.name === 'Undream');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: alaban, power, player: PLAYER } as any);
+
+        // Resolve the creature prompt with Lovian as the return target.
+        const target = state.getZone(ZONE_TYPE_IN_PLAY).byId(lovian.id)!;
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug F – PLAY spell: Updraft (return_creature_returning_energy)
+//   effects/return_creature_returning_energy is not handled by the Unmaker.
+//   Energy is moved from the creature back to the magi, and the creature
+//   returns to hand; the Unmaker cannot record/revert this composite effect.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – PLAY spell return_creature_returning_energy (Updraft)', () => {
+    it('reverts state correctly after Updraft returns a creature', () => {
+        const updraft = new CardInGame(byName('Updraft') as Card, PLAYER);
+        const lovian  = new CardInGame(byName('Lovian') as Card, PLAYER).addEnergy(3);
+        const adis   = new CardInGame(byName('Adis')   as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [lovian], [updraft], [], adis, sinder);
+        const before = snapshot(state);
+
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        const updraftCard = state.getZone(ZONE_TYPE_HAND, PLAYER).byId(updraft.id)!;
+        state.update({ type: ACTION_PLAY, payload: { card: updraftCard, player: PLAYER }, forcePriority: false, player: PLAYER } as any);
+
+        // Resolve own_creature prompt: return Lovian to hand.
+        const target = state.getZone(ZONE_TYPE_IN_PLAY).byId(lovian.id)!;
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug G – POWER: Cloud Sceptre's Mindwinds
+//   effects/move_cards_between_zones and effects/draw_n_cards — the Unmaker
+//   must correctly revert bulk zone moves and card draws from the prompt
+//   resolution context.
+//   Note: ACTION_RESOLVE_PROMPT.cards must contain CardInGame objects (as the
+//   real game provides after convertClientCommands), not bare ID strings.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER move_cards_between_zones + draw_n_cards (Cloud Sceptre Mindwinds)', () => {
+    it('reverts state correctly after Mindwinds discards and redraws', () => {
+        const sceptre    = new CardInGame(byName('Cloud Sceptre') as Card, PLAYER);
+        const adis       = new CardInGame(byName('Adis')          as Card, PLAYER).addEnergy(10);
+        const sinder     = new CardInGame(byName('Sinder')        as Card, OPPONENT).addEnergy(6);
+        const handCards  = ['Lovian', 'Orish', 'Thunder Hyren'].map(
+            name => new CardInGame(byName(name) as Card, PLAYER),
+        );
+        const deckCards  = ['Xyx', 'Vellup', 'Ayebaw'].map(
+            name => new CardInGame(byName(name) as Card, PLAYER),
+        );
+
+        const state = makeState(STEP_PRS1, [sceptre], handCards, deckCards, adis, sinder);
+        const before = snapshot(state);
+
+        const power = (sceptre.card.data.powers as any[]).find(p => p.name === 'Mindwinds');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: sceptre, power, player: PLAYER, forcePriority: true } as any);
+
+        // Resolve: choose 2 hand cards to discard (pass CardInGame objects as the engine expects).
+        const hand = state.getZone(ZONE_TYPE_HAND, PLAYER).cards as CardInGame[];
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            zone: ZONE_TYPE_HAND,
+            zoneOwner: PLAYER,
+            cards: hand.slice(0, 2),
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Arderial bug H – POWER: Eye of the Storm Energy Boost (roll = 1)
+//   When the die shows 1, effects/move_cards_between_zones moves the hand to
+//   discard.  This effect is not handled by the Unmaker.
+//   PRNG seed 7 produces roll = 1 for this power.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – POWER with move_cards_between_zones discard hand (Eye of the Storm roll=1)', () => {
+    it('reverts state correctly after Energy Boost discards the hand', () => {
+        const eye      = new CardInGame(byName('Eye of the Storm') as Card, PLAYER);
+        const adis     = new CardInGame(byName('Adis')             as Card, PLAYER).addEnergy(10);
+        const sinder   = new CardInGame(byName('Sinder')           as Card, OPPONENT).addEnergy(6);
+        const handCards = ['Lovian', 'Orish', 'Thunder Hyren'].map(
+            name => new CardInGame(byName(name) as Card, PLAYER),
+        );
+
+        const state = makeState(STEP_PRS1, [eye], handCards, [], adis, sinder);
+        state.initiatePRNG(7); // seed 7 → die rolls 1 → discard hand path
+        const before = snapshot(state);
+
+        const power = (eye.card.data.powers as any[]).find(p => p.name === 'Energy Boost');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: eye, power, player: PLAYER } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// cards.js bug – Cyclone Vashp's Cyclone power
+//   The third effect has target: 'ownCreature' (missing '$' prefix) instead of
+//   target: '$ownCreature'.  When the engine dispatches DISCARD_CREATURE_FROM_PLAY
+//   with this raw string as target, convertServerCommand does:
+//     'length' in 'ownCreature'  →  TypeError (cannot use 'in' on primitive).
+// ---------------------------------------------------------------------------
+describe('cards.js bug – Cyclone Vashp Cyclone: DISCARD_CREATURE_FROM_PLAY with target $ownCreature', () => {
+    it('reverts state correctly after Cyclone fully resolves', () => {
+        const vashp   = new CardInGame(byName('Cyclone Vashp') as Card, PLAYER).addEnergy(5);
+        const target  = new CardInGame(byName('Furok')         as Card, OPPONENT).addEnergy(4);
+        const adis    = new CardInGame(byName('Adis')          as Card, PLAYER).addEnergy(10);
+        const sinder  = new CardInGame(byName('Sinder')        as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [vashp, target], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (vashp.card.data.powers as any[]).find(p => p.name === 'Cyclone');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: vashp, power, player: PLAYER } as any);
+
+        // Resolve first prompt: choose own creature (Vashp itself)
+        const ownTarget = state.getZone(ZONE_TYPE_IN_PLAY).byId(vashp.id)!;
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: ownTarget,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        // Resolve second prompt: choose opponent's creature
+        const oppTarget = state.getZone(ZONE_TYPE_IN_PLAY).byId(target.id)!;
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: oppTarget,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});

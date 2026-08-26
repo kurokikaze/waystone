@@ -39,31 +39,39 @@ const defaultConfig: HarnessConfig = {
     deckSize: 43,
     outputDir: './stateDumps',
     verbose: false,
-    maxIterations: 5000,
+    maxIterations: 500,
     strategy: 'simulation',
     playerOnePool: {
-        name: 'Cald Pool',
-        magi: ['Grega', 'Magam', 'Sinder', 'Gar', 'Barak', 'Valkan', 'Ashgar'],
+        name: 'Arderial Pool',
+        magi: ['Adis', 'Stradus', 'Nimbulo', 'Ora', 'Shimmer', 'Lasada', 'Jaela'],
         cards: [
-            'Fire Chogo',
-            'Water of Life',
-            'Fire Grag',
-            'Arbolit',
-            'Dream Balm',
-            'Magma Hyren',
-            'Kelthet',
-            'Lava Aq',
-            'Lava Arboll',
-            'Diobor',
-            'Drakan',
-            'Thermal Blast',
-            'Flame Geyser',
-            'Lava Balamant',
-            "Magma Armor",
-            "Magma Hyren",
-            'Quor',
-            'Quor Pup',
-            'Greater Vaal'
+            'Alaban',
+            'Lovian',
+            'Ayebaw',
+            'Epik',
+            'Thunder Vashp',
+            'Vellup',
+            'Thunder Hyren',
+            'Xyx',
+            'Xyx Elder',
+            'Xyx Minor',
+            'Cloud Narth',
+            'Pharan',
+            'Orish',
+            'Lightning Hyren',
+            'Orathan Flyer',
+            'Cyclone Vashp',
+            'Eclipse',
+            'Fog Bank',
+            'Lightning',
+            'Updraft',
+            'Shooting Star',
+            'Storm Cloud',
+            'Shockwave',
+            'Cloud Sceptre',
+            "Arderial's Crown",
+            'Storm Ring',
+            'Eye of the Storm',
         ],
     },
     playerTwoPool: {
@@ -183,7 +191,7 @@ function runSingleSimulation(config: HarnessConfig, runIndex: number): Simulatio
             winnerName = result.winnerName;
         } catch (runError: unknown) {
             const message = runError instanceof Error ? runError.message : String(runError);
-            error = message;
+            error = runError instanceof Error ? (runError.stack ?? message) : message;
         }
     };
 

@@ -13,9 +13,10 @@ export class HashBuilder {
     const battlefieldCards = sim.getZone(ZONE_TYPE_IN_PLAY).cards
     let cardHashes: string[] = []
     for (const card of battlefieldCards) {
-      const attacks = sim.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN)
-      const attacked = card.data.attacked
-      const attackPart = (card.card.type === TYPE_CREATURE && card.data.controller == sim.getActivePlayer()) ? `(${attacked}/${attacks})` : ''
+      const isOwnCreature = card.card.type === TYPE_CREATURE && card.data.controller == sim.getActivePlayer()
+      const attackPart = isOwnCreature
+        ? `(${card.data.attacked}/${sim.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN)})`
+        : ''
       const energyPart = card.card.type === TYPE_CREATURE ? card.data.energy : '*'
       let powersPart = ''
       if (card.data.actionsUsed && card.data.actionsUsed.length) {
