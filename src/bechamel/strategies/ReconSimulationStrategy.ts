@@ -227,21 +227,21 @@ export class ReconSimulationStrategy implements Strategy {
     // Converts a DirectAction (internal search descriptor) to a real C2SAction.
     private directActionToClientAction(action: DirectAction): C2SAction {
         switch (action.type) {
-            case 'PASS':         return this.pass()
-            case 'PLAY':         return this.play(action.cardId)
-            case 'POWER':        return this.power(action.sourceId, action.powerName)
-            case 'ATTACK':       return this.attack(action.sourceId, action.targetId, action.additionalAttackerId)
-            case 'MAY_ABILITY':  return { type: ACTION_RESOLVE_PROMPT, useEffect: action.useEffect, player: this.playerId } as C2SAction
-            case 'TARGET':       return this.resolveTargetPrompt(action.targetId)
-            case 'NUMBER':       return this.resolveNumberPrompt(action.number)
-            case 'CARDS':        return { type: ACTION_RESOLVE_PROMPT, zone: action.zone, zoneOwner: action.zoneOwner, cards: action.cardIds, player: this.playerId } as C2SAction
-            case 'CARDS_ORDER':  return { type: ACTION_RESOLVE_PROMPT, cardsOrder: action.cardsOrder, generatedBy: this.gameState?.state.promptGeneratedBy || '', player: this.playerId } as C2SAction
-            case 'DAMAGE_MAP':   return { type: ACTION_RESOLVE_PROMPT, damageMap: action.damageMap, player: this.playerId } as C2SAction
-            case 'ENERGY_MAP':   return { type: ACTION_RESOLVE_PROMPT, energyMap: action.energyMap, player: this.playerId } as C2SAction
-            case 'PLAYER':       return { type: ACTION_RESOLVE_PROMPT, targetPlayer: action.targetPlayer, player: this.playerId } as C2SAction
-            case 'ALTERNATIVE':  return { type: ACTION_RESOLVE_PROMPT, alternative: String(action.alternative), player: this.playerId } as C2SAction
-            case 'POWER_ON_MAGI':return { type: ACTION_RESOLVE_PROMPT, powerName: action.powerName, player: this.playerId } as C2SAction
-            default:             return this.pass()
+            case 'PASS': return this.pass()
+            case 'PLAY': return this.play(action.cardId)
+            case 'POWER': return this.power(action.sourceId, action.powerName)
+            case 'ATTACK': return this.attack(action.sourceId, action.targetId, action.additionalAttackerId)
+            case 'MAY_ABILITY': return { type: ACTION_RESOLVE_PROMPT, useEffect: action.useEffect, player: this.playerId } as C2SAction
+            case 'TARGET': return this.resolveTargetPrompt(action.targetId)
+            case 'NUMBER': return this.resolveNumberPrompt(action.number)
+            case 'CARDS': return { type: ACTION_RESOLVE_PROMPT, zone: action.zone, zoneOwner: action.zoneOwner, cards: action.cardIds, player: this.playerId } as C2SAction
+            case 'CARDS_ORDER': return { type: ACTION_RESOLVE_PROMPT, cardsOrder: action.cardsOrder, generatedBy: this.gameState?.state.promptGeneratedBy || '', player: this.playerId } as C2SAction
+            case 'DAMAGE_MAP': return { type: ACTION_RESOLVE_PROMPT, damageMap: action.damageMap, player: this.playerId } as C2SAction
+            case 'ENERGY_MAP': return { type: ACTION_RESOLVE_PROMPT, energyMap: action.energyMap, player: this.playerId } as C2SAction
+            case 'PLAYER': return { type: ACTION_RESOLVE_PROMPT, targetPlayer: action.targetPlayer, player: this.playerId } as C2SAction
+            case 'ALTERNATIVE': return { type: ACTION_RESOLVE_PROMPT, alternative: String(action.alternative), player: this.playerId } as C2SAction
+            case 'POWER_ON_MAGI': return { type: ACTION_RESOLVE_PROMPT, powerName: action.powerName, player: this.playerId } as C2SAction
+            default: return this.pass()
         }
     }
 
@@ -287,8 +287,8 @@ export class ReconSimulationStrategy implements Strategy {
         return result
     }
 
-    private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = ''): { score: number, actions: any[] } {
-        if (this.counter > ReconSimulationStrategy.failsafe) {
+    private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = '', depth = 0): { score: number, actions: any[] } {
+        if (this.counter > ReconSimulationStrategy.failsafe || depth > 500) {
             return { score: getStateScore(state, playerId, opponentId), actions: [] }
         }
         this.counter++;
@@ -320,7 +320,7 @@ export class ReconSimulationStrategy implements Strategy {
             }
             if (!this.hashes.has(childHash)) {
                 this.hashes.add(childHash)
-                let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash)
+                let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash, depth + 1)
                 if (scoredAction.score > maxScore) {
                     maxScore = scoredAction.score
                     maxAction = [action, ...scoredAction.actions]
@@ -667,6 +667,11 @@ export class ReconSimulationStrategy implements Strategy {
                 }
                 if (promptType === PROMPT_TYPE_NUMBER) {
                     return this.resolveNumberPrompt(1)
+                }
+                if (promptType === PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE ||
+                    promptType === PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE
+                ) {
+                    return this.resolveChooseCardsPrompt()
                 }
                 // last resort: try promptAvailableCards
                 const available = this.gameState.state.promptAvailableCards as { id: string }[] | null
