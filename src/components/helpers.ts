@@ -1,8 +1,7 @@
-import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
 import {
 	TYPE_CREATURE,
 	TYPE_MAGI,
-} from 'moonlands/dist/const.js';
+} from 'moonlands/dist/esm/const';
 import { DraggedItem, SecondCard } from '../types';
 
 export function canFirstAttackSecond(first: DraggedItem, second: SecondCard) {

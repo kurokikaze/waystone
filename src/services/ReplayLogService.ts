@@ -1,40 +1,41 @@
-import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/api/fs"
+import { BaseDirectory, create, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
+import { isTauri } from "@tauri-apps/api/core";
 import { booleanGuard } from "../bechamel/strategies/simulationUtils";
 import { ClientMessage } from "../clientProtocol";
 import testReplay from './testReplay.json';
+import testReplay2 from './testReplay2.json';
 
 export class ReplayLogService {
     static REPLAYS_DIR = 'replays'
 
     private isTauri() {
-        return Boolean(
-            typeof window !== 'undefined' &&
-            window !== undefined &&
-            // @ts-ignore
-            window.__TAURI_IPC__ !== undefined
-        )
+        return isTauri()
     }
 
     public async getReplaysList() {
         if (this.isTauri()) {
-            const entries = await readDir(ReplayLogService.REPLAYS_DIR, { dir: BaseDirectory.AppData, recursive: false });
-            console.dir(entries);
+            const dirExists = await exists(ReplayLogService.REPLAYS_DIR, { baseDir: BaseDirectory.AppConfig })
+            if (!dirExists) {
+                await create(ReplayLogService.REPLAYS_DIR, { baseDir: BaseDirectory.AppConfig })
+            }
+            const entries = await readDir(ReplayLogService.REPLAYS_DIR, { baseDir: BaseDirectory.AppData });
+
             return entries.map(entry => entry.name).filter(booleanGuard);
         }
-        return ['testReplay'];
+        return ['testReplay', 'testReplay2'];
     }
 
     public async readReplay(replay: string):Promise<ClientMessage[]> {
         if (this.isTauri()) {
-            const contentRaw = await readTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replay}`, { dir: BaseDirectory.AppConfig });
+            const contentRaw = await readTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replay}`, { baseDir: BaseDirectory.AppConfig });
             const replayContent = JSON.parse(contentRaw) as ClientMessage[];
             return replayContent;
         }
-        return new Promise((resolve) => resolve(testReplay as ClientMessage[]));
+        return new Promise((resolve) => resolve((replay === 'testReplay' ? testReplay.filter(event => event.for == 2) : testReplay2) as ClientMessage[]));
     }
 
     private async createReplayFileIfNotExists(replayName: string, replayContents: string[]) {
-        const deckFileExists = await exists(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, { dir: BaseDirectory.AppConfig });
+        const deckFileExists = await exists(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, { baseDir: BaseDirectory.AppConfig });
         if (!deckFileExists) {
             await this.saveReplay(replayName, replayContents);
         }
@@ -42,7 +43,7 @@ export class ReplayLogService {
 
     public async saveReplay(replayName: string, replayContents: string[]) {
         if (this.isTauri()) {
-            await writeTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, "[\n" + replayContents.join(",\n") + "\n]", { dir: BaseDirectory.AppConfig })
+            await writeTextFile(`${ReplayLogService.REPLAYS_DIR}\\${replayName}.log`, "[\n" + replayContents.join(",\n") + "\n]", { baseDir: BaseDirectory.AppConfig })
         }
     }
 }

@@ -1,11 +1,11 @@
-import {byName} from 'moonlands/src/cards'
-import {State, TYPE_RELIC} from 'moonlands/src'
-import CardInGame from 'moonlands/src/classes/CardInGame'
-import Zone from 'moonlands/src/classes/Zone'
+import {byName} from 'moonlands/dist/esm/cards'
+import {State, TYPE_RELIC} from 'moonlands/dist/esm/index'
+import CardInGame from 'moonlands/dist/esm/classes/CardInGame'
+import Zone from 'moonlands/dist/esm/classes/Zone'
 
 import { ZONE_TYPE_HAND, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_IN_PLAY, TYPE_CREATURE } from "../const";
-import { GameState } from '../GameState';
-import Card from 'moonlands/src/classes/Card';
+import { GameState } from '../GameState.js';
+import Card from 'moonlands/dist/esm/classes/Card';
 
 const addCardData = (card: any) => ({
   ...card,
@@ -39,6 +39,7 @@ const defaultState: StateShape = {
 	fallbackActions: [],
 	continuousEffects: [],
 	activePlayer: 0,
+  controllingPlayer: 0,
 	prompt: false,
 	promptType: null,
 	promptParams: {},
@@ -48,6 +49,8 @@ const defaultState: StateShape = {
 	zones: [],
 	players: [],
 	spellMetaData: {},
+  attachedTo: {},
+  cardsAttached: {}
 }
 
 export const STEP_ATTACK = 2;
@@ -155,7 +158,6 @@ export function createState(
   const myDeckCardIds = gameState.getMyDeckCards()
 
   // stuff the deck with the wild cards
-  // const wildCard = new Card('<Wild>', TYPE_CREATURE, REGION_BOGRATH, 10, {})
   sim.getZone(ZONE_TYPE_DECK, playerId).add(myDeckCardIds.map(id => {
     const card = new CardInGame(byName('Grega') as Card, playerId);
     card.id = id;
@@ -164,6 +166,15 @@ export function createState(
 
   sim.state.continuousEffects = gameState.getContinuousEffects();
   sim.state.step = gameState.getStep()
+  const seed = gameState.getTurn() * 100 + gameState.getStep() * 10 + gameState.playerId
+  // console.log(`${gameState.getTurn()} * 100 + ${gameState.getStep()} * 10 + ${gameState.playerId}`)
+  sim.initiatePRNG(seed)
+  if (gameState.state.prompt) {
+    sim.state.prompt = true
+    sim.state.promptPlayer = gameState.state.promptPlayer!
+    sim.state.promptType = gameState.state.promptType
+    sim.state.promptGeneratedBy = gameState.state.promptGeneratedBy!
+  }
   return sim
 }
 

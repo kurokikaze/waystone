@@ -19,7 +19,7 @@ function startGame() {
 
 	const store = createStore(
 		rootReducer,
-		enrichState(window.initialState, 1),
+		enrichState(window.initialState),
 		composeEnhancers(
 			applyMiddleware(thunk),
 			applyMiddleware(epicMiddleware),

@@ -1,7 +1,7 @@
 /* global window */
 // @ts-nocheck
-import { byName } from 'moonlands/src/cards';
-import clone from 'moonlands/src/clone';
+import { byName } from 'moonlands/dist/esm/cards';
+import clone from 'moonlands/dist/esm/clone';
 import {
 	TYPE_CREATURE,
 	TYPE_RELIC,
@@ -22,7 +22,7 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_ENERGY_EQUALS,
-  RESTRICTION_CREATURE_WAS_ATTACKED,
+	RESTRICTION_CREATURE_WAS_ATTACKED,
 
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_OWN_MAGI,
@@ -62,10 +62,9 @@ import {
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 
 	STATUS_BURROWED,
-} from 'moonlands/src/const';
-import { PromptParams, PromptType, RestrictionType, StaticAbilityType } from 'moonlands/src/types';
+} from 'moonlands/dist/esm/const';
+import { PromptParams, PromptType, RestrictionType, StaticAbilityType } from 'moonlands/dist/esm/types';
 
-// import { getZoneContent } from '../selectors';
 import { ExpandedClientCard, StateRepresentation } from './types';
 
 export const cardMatchesSelector = (card, selector, selectorParameter = null, source) => {
@@ -249,11 +248,12 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any): CardFil
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === 1);
 		case RESTRICTION_OPPONENT_CREATURE:
 			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) !== 1);
-    case RESTRICTION_CREATURE_WAS_ATTACKED:
-      return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
+		case RESTRICTION_CREATURE_WAS_ATTACKED:
+			return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
 	}
 };
 
+// @deprecated Probably not used inside the Bechamel, user ids are hardcoded inside `getRestrictionFilter`
 export const getPromptFilter = (promptType: PromptType, promptParams: PromptParams) => {
 	switch (promptType) {
 		case PROMPT_TYPE_RELIC:
@@ -371,19 +371,19 @@ const gameStaticAbilities = [
 	},
 ];
 
-type StaticAbilityExpanded = StaticAbilityType & {player: number}
+type StaticAbilityExpanded = StaticAbilityType & { player: number }
 
 export const getCardDetails = (state: StateRepresentation) => {
 	const baseCards = state.zones.inPlay;
 
 	const allZonesCards = {
 		inPlay: [...baseCards].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
-		activePlayerMagi: [...(state.zones.playerActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
+		playerActiveMagi: [...(state.zones.playerActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
 		opponentActiveMagi: [...(state.zones.opponentActiveMagi || [])].map(card => ({ ...card, card: byName(card.card), originalCard: byName(card.card) })),
 	};
 
 	const continuousStaticAbilities: StaticAbilityType[] = state.continuousEffects.map(effect => effect.staticAbilities).flat();
-	const zoneAbilities: StaticAbilityExpanded[] = [...allZonesCards.inPlay, ...allZonesCards.activePlayerMagi, ...allZonesCards.opponentActiveMagi].reduce(
+	const zoneAbilities: StaticAbilityExpanded[] = [...allZonesCards.inPlay, ...allZonesCards.playerActiveMagi, ...allZonesCards.opponentActiveMagi].reduce(
 		(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
 			...acc,
 			...(cardInPlay.card.data.staticAbilities.map(a => ({ ...a, player: cardInPlay.data.controller })))

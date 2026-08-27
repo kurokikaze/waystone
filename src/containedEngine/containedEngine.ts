@@ -1,5 +1,4 @@
-import {State, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE} from 'moonlands';
-import Zone from 'moonlands/dist/classes/Zone';
+import {State} from 'moonlands/dist/esm/index';
 
 export const createGame = (): State => {
   const defaultState = {
@@ -19,6 +18,8 @@ export const createGame = (): State => {
     zones: [],
     players: [],
     spellMetaData: {},
+    attachedTo: {},
+    cardsAttached: {}
   };
 
   const zones: any[] = []; //createZones(1, 2)
@@ -26,12 +27,12 @@ export const createGame = (): State => {
     ...defaultState,
     zones,
     activePlayer: 1,
+    controllingPlayer: 1,
   });
 
   // @ts-ignore
-  game.initiatePRNG(3);
-  // game.setPlayers(1, 2);
-  // game.setup();
+  game.initiatePRNG(Math.floor(Math.random() * 100));
+
   game.enableDebug();
 
   return game

@@ -1,8 +1,8 @@
 /* global window */
-import { byName } from 'moonlands/dist/cards.js';
-import Card from 'moonlands/dist/classes/Card';
-import { ConvertedCard } from 'moonlands/dist/classes/CardInGame';
-import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, TYPE_CREATURE } from 'moonlands/dist/const';
+import { byName } from 'moonlands/dist/esm/cards';
+import Card from 'moonlands/dist/esm/classes/Card';
+import { ConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
+import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, TYPE_CREATURE } from 'moonlands/dist/esm/const';
 import { ExtendedCard, State } from './types';
 
 export function camelCase(str: string):string {
@@ -19,7 +19,7 @@ export function camelCase(str: string):string {
 const onlyCardsWithStaticAbilities = (card: ConvertedCard) => byName(card.card)?.data.staticAbilities;
 const addCardData = (card: ConvertedCard): ExtendedCard => ({...card, card: byName(card.card) as Card});
 
-export function enrichState(state: State, playerId: number): State {
+export function enrichState(state: State): State {
 	const result = {
 		...state,
 		staticAbilities: [
@@ -28,21 +28,21 @@ export function enrichState(state: State, playerId: number): State {
 			...state.zones.opponentActiveMagi.filter(onlyCardsWithStaticAbilities).map(addCardData),
 		],
 		packs: [],
-		playerId,
+		playerId: state.playerNumber,
 	};
 
 	const isOnRearrangeEnergyPrompt = state.prompt && state.promptType === PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
 	if (isOnRearrangeEnergyPrompt) {
 		result.energyPrompt = {
 			freeEnergy: 0,
-			cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
+			cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
 		};
 	}
 	const isOnDistributeEnergyPrompt = state.prompt && state.promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
 	if (isOnDistributeEnergyPrompt) {
 		result.energyPrompt = {
 			freeEnergy: (typeof state.promptParams?.amount == 'number') ? state.promptParams?.amount : 0,
-			cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+			cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 		};
 	}
 	const isOnDistributeDamagePrompt = state.prompt && state.promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
@@ -54,3 +54,13 @@ export function enrichState(state: State, playerId: number): State {
 	}
 	return result;
 }
+
+// @deprecated
+export function isTauri() {
+    return Boolean(
+      typeof window !== 'undefined' &&
+      window !== undefined &&
+      // @ts-ignore
+      window.__TAURI_IPC__ !== undefined
+    )
+  }

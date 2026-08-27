@@ -23,16 +23,19 @@ import {
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_PAYMENT_SOURCE,
+	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+	PROMPT_TYPE_POWER_ON_MAGI,
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
 	LOG_ENTRY_POWER_ACTIVATION,
 	LOG_ENTRY_TARGETING,
 	LOG_ENTRY_NUMBER_CHOICE,
 	LOG_ENTRY_PLAY,
-	PROMPT_TYPE_CHOOSE_CARDS,
-	PROMPT_TYPE_ALTERNATIVE,
-	PROMPT_TYPE_PAYMENT_SOURCE,
-} from 'moonlands/dist/const';
-import {byName} from 'moonlands/dist/cards';
+} from 'moonlands/dist/esm/const';
+import { byName } from 'moonlands/dist/esm/cards';
 
 import {
 	START_POWER_ANIMATION,
@@ -86,12 +89,11 @@ import {
 	ANIMATION_CREATURE_DISCARDED,
 } from '../const';
 
-import {applyEffect} from './applyEffect';
-import {findInPlay} from './utils';
-import { ClientAction } from '../clientProtocol';
-import { LogEntryType } from 'moonlands/dist/types';
+import { applyEffect } from './applyEffect';
+import { findInPlay } from './utils';
+import { ClientAction, ClientAttackAction, ClientEffectAction, ClientEnterPromptAnyCreatureExceptSource, ClientEnterPromptNumber, ClientEnterPromptSingleCreatureFiltered } from '../clientProtocol';
+import { LogEntryType } from 'moonlands/dist/esm/types';
 import { ExpandedPromptParams, MessageType, State } from '../types';
-import { PROMPT_TYPE_POWER_ON_MAGI } from 'moonlands/src/const';
 
 const INITIAL_STATE = 'setInitialState';
 
@@ -142,6 +144,10 @@ export const defaultState: State = {
 	activePlayer: 0,
 	lastPositions: {},
 	energyAnimationsShown: new Set<number>(),
+	challenges: {
+		challenges: []
+	},
+	playerNumber: 1
 };
 
 
@@ -187,8 +193,8 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 	switch (action.type) {
 		case INITIAL_STATE: {
 			return {
-			...state,
-			...action.state
+				...state,
+				...action.state
 			};
 		}
 		// case ACTION_TIME_NOTIFICATION: {
@@ -228,7 +234,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				...state,
 				step: action.newStep,
 				packs: [],
-				energyLosses: state.energyLosses.map(loss => ({...loss, ttl: loss.ttl - 1})).filter(loss => loss.ttl > 0),
+				energyLosses: state.energyLosses.map(loss => ({ ...loss, ttl: loss.ttl - 1 })).filter(loss => loss.ttl > 0),
 			};
 		}
 		/* Animations */
@@ -271,6 +277,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: {
 					type: MESSAGE_TYPE_RELIC,
 					card: action.card,
+					player: action.player,
 				},
 			};
 		}
@@ -286,6 +293,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: {
 					type: MESSAGE_TYPE_SPELL,
 					card: action.card,
+					player: action.player,
 				},
 			};
 		}
@@ -301,6 +309,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				message: {
 					type: MESSAGE_TYPE_CREATURE,
 					card: action.card,
+					player: action.player,
 				},
 			};
 		}
@@ -312,17 +321,18 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 		}
 		/* End Animations */
 		case ADD_TO_PACK: {
+			action = action as AddToPackAction
 			return {
 				...state,
-				packs: state.packs.some(pack => pack.leader === action.leader) ? 
-					state.packs.map(pack => pack.leader === action.leader ? { ...pack, hunters: [ ...pack.hunters, action.hunter ] } : pack) :
-					[ ...state.packs, {leader: action.leader, hunters: [ action.hunter ] } ],
+				packs: state.packs.some(pack => pack.leader === (action as AddToPackAction).leader) ?
+					state.packs.map(pack => pack.leader === (action as AddToPackAction).leader ? { ...pack, hunters: [...pack.hunters, (action as AddToPackAction).hunter] } : pack) :
+					[...state.packs, { leader: action.leader, hunters: [action.hunter] }],
 			};
 		}
 		case DISMISS_PACK: {
 			return {
 				...state,
-				packs: state.packs.filter(pack => pack.leader !== action.leader),
+				packs: state.packs.filter(pack => pack.leader !== (action as DismissPackAction).leader),
 			};
 		}
 		case ACTION_POWER: {
@@ -347,17 +357,17 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					...state.zones,
 					inPlay: state.zones.inPlay.map(
 						card => card.id === sourceId
-							? ({...card, data: {...card.data, actionsUsed: [...card.data.actionsUsed, sourceName]}})
+							? ({ ...card, data: { ...card.data, actionsUsed: [...card.data.actionsUsed, sourceName] } })
 							: card
 					),
 					playerActiveMagi: state.zones.playerActiveMagi.map(
 						card => card.id === sourceId
-							? ({...card, data: {...card.data, actionsUsed: [...card.data.actionsUsed, sourceName]}})
+							? ({ ...card, data: { ...card.data, actionsUsed: [...card.data.actionsUsed, sourceName] } })
 							: card
 					),
 					opponentActiveMagi: state.zones.opponentActiveMagi.map(
 						card => card.id === sourceId
-							? ({...card, data: {...card.data, actionsUsed: [...card.data.actionsUsed, sourceName]}})
+							? ({ ...card, data: { ...card.data, actionsUsed: [...card.data.actionsUsed, sourceName] } })
 							: card
 					),
 				},
@@ -370,30 +380,37 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 
 			switch (action.promptType) {
 				case PROMPT_TYPE_NUMBER: {
+					action = action as ClientEnterPromptNumber
 					promptParams = {
 						min: action.min,
 						max: action.max
 					};
-					break;
 				}
 				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+					action = action as ClientEnterPromptAnyCreatureExceptSource
 					promptParams = {
 						source: action.source.id,
 					};
 					break;
 				}
 				case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-					promptParams = {
-						restrictions: action.restrictions,
-						restriction: action.restriction,
-						restrictionValue: action.restrictionValue,
-					};
+					action = action as ClientEnterPromptSingleCreatureFiltered
+					if ('restrictions' in action.promptParams) {
+						promptParams = {
+							restrictions: action.promptParams.restrictions,
+						};
+					} else if ('restriction' in action.promptParams) {
+						promptParams = {
+							restriction: action.promptParams.restriction,
+							restrictionValue: action.promptParams.restrictionValue,
+						};
+					}
 					break;
 				}
 				case PROMPT_TYPE_CHOOSE_CARDS: {
 					promptParams = {
-					startingCards: action?.promptParams.startingCards,
-					availableCards: action?.promptParams.availableCards,
+						startingCards: action?.promptParams.startingCards,
+						availableCards: action?.promptParams.availableCards,
 					}
 					break;
 				}
@@ -404,7 +421,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					}
 					promptParams = {
 						zone: action.zone,
-						...(action.restrictions ? {restrictions: action.restrictions} : {}),
+						...(action.restrictions ? { restrictions: action.restrictions } : {}),
 						cards: action.cards,
 						zoneOwner: action.zoneOwner,
 						numberOfCards: realNumberOfCards,
@@ -420,6 +437,16 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					};
 					break;
 				}
+				case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
+					promptParams = {
+						zone: action.sourceZone,
+						cards: action.cards,
+						zoneOwner: action.zoneOwner,
+						numberOfCards: action.numberOfCards,
+						targetZones: action.targetZones,
+					}
+					break;
+				}
 				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
 					const realNumberOfCards = Math.min(action.cards.length, action.numberOfCards);
 					if (realNumberOfCards === 0) {
@@ -427,7 +454,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					}
 					promptParams = {
 						zone: action.zone,
-						...(action.restrictions ? {restrictions: action.restrictions} : {}),
+						...(action.restrictions ? { restrictions: action.restrictions } : {}),
 						cards: action.cards,
 						zoneOwner: action.zoneOwner,
 						numberOfCards: realNumberOfCards,
@@ -437,7 +464,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: 0,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id, data }) => [id, data.energy])),
 					};
 					promptParams = promptParams || {};
 					break;
@@ -445,11 +472,17 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 					energyPrompt = {
 						freeEnergy: action.amount,
-						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === 1 && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
 					};
 					break;
 				}
-				case PROMPT_TYPE_POWER_ON_MAGI: {
+				case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+					energyPrompt = {
+						freeEnergy: action.amount,
+						cards: Object.fromEntries(state.zones.inPlay.filter(({ card, data }) => data.controller === state.playerNumber && byName(card)?.type === TYPE_CREATURE).map(({ id }) => [id, 0])),
+					};
+					break;
+				} case PROMPT_TYPE_POWER_ON_MAGI: {
 					promptParams = {
 						magi: action?.magi,
 					}
@@ -484,7 +517,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case START_PROMPT_RESOLUTION_ANIMATION: {
-			var messageData: MessageType | null = state.message ? {...state.message} : state.message;
+			var messageData: MessageType | null = state.message ? { ...state.message } : state.message;
 			if (typeof action.target === 'number') {
 				messageData = {
 					type: MESSAGE_TYPE_PROMPT_RESOLUTION,
@@ -512,7 +545,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			var promptLogEntry: LogEntryType | null = null;
 
 			if (
-				action.target && 
+				action.target &&
 				(
 					state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
 					state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
@@ -524,9 +557,9 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				const target = findInPlay(state, action.target);
 				if (target) {
 					promptLogEntry = {
-					type: LOG_ENTRY_TARGETING,
-					card: target.card,
-					player: action.player,
+						type: LOG_ENTRY_TARGETING,
+						card: target.card,
+						player: action.player,
 					};
 				}
 			} else if (state.promptType === PROMPT_TYPE_NUMBER) {
@@ -555,7 +588,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				zones: {
 					...state.zones,
 					inPlay: state.zones.inPlay.map(card => {
-						if (attackerIds.includes(card.id)) { 
+						if (attackerIds.includes(card.id)) {
 							return {
 								...card,
 								data: {
@@ -565,12 +598,12 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 								},
 							}
 						}
-						if (card.id === action.target) {
+						if (card.id === (action as ClientAttackAction).target) {
 							return {
 								...card,
 								data: {
-								...card.data,
-								wasAttacked: true,
+									...card.data,
+									wasAttacked: true,
 								},
 							}
 						}
@@ -580,16 +613,16 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case ACTION_EFFECT: {
-			return applyEffect(state, action);
+			return applyEffect(state, action as ClientEffectAction);
 		}
 		case PLUS_ENERGY_ON_CREATURE: {
 			return {
 				...state,
 				energyPrompt: {
 					freeEnergy: state.energyPrompt.freeEnergy - 1,
-					cards: { 
+					cards: {
 						...state.energyPrompt.cards,
-						[action.cardId]: state.energyPrompt.cards[action.cardId] + 1, 
+						[action.cardId]: (state.energyPrompt.cards[action.cardId] || 0) + 1,
 					},
 				},
 			};
@@ -601,13 +634,13 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					freeEnergy: state.energyPrompt.freeEnergy + 1,
 					cards: {
 						...state.energyPrompt.cards,
-						[action.cardId]: state.energyPrompt.cards[action.cardId] - 1, 
+						[action.cardId]: (state.energyPrompt.cards[action.cardId] || 0) - 1,
 					},
 				},
 			};
 		}
 		case CLEAR_ENTRY_ANIMATION: {
-			const { [action.id]: [], ...positions} = state.lastPositions;
+			const { [action.id]: [], ...positions } = state.lastPositions;
 			return {
 				...state,
 				lastPositions: positions,
@@ -621,7 +654,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 		}
 		case START_MAGI_DEFEAT_ANIMATION: {
 			return {
-			...state,
+				...state,
 				animation: {
 					type: ANIMATION_MAGI_DEFEATED,
 					source: '',
@@ -631,7 +664,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 		}
 		case START_CREATURE_DISCARD_ANIMATION: {
 			return {
-			...state,
+				...state,
 				animation: {
 					type: ANIMATION_CREATURE_DISCARDED,
 					source: '',

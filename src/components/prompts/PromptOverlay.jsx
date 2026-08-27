@@ -1,5 +1,5 @@
-import {useEffect, useRef} from 'react';
-import {useSelector} from 'react-redux';
+import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 
 import {
 	PROMPT_TYPE_CHOOSE_CARDS,
@@ -11,9 +11,11 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  PROMPT_TYPE_PLAYER,
-  PROMPT_TYPE_ALTERNATIVE,
-} from 'moonlands/src/const.ts';
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
+	PROMPT_TYPE_PLAYER,
+	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_POWER_ON_MAGI,
+} from 'moonlands/dist/esm/const';
 
 import PromptChooseCards from './PromptChooseCards.jsx';
 import PromptChooseCardsInZone from './PromptChooseCardsInZone.jsx';
@@ -24,15 +26,15 @@ import PromptEnergyManipulation from './PromptEnergyManipulation.jsx';
 import PromptEnergyDistribution from './PromptEnergyDistribution.jsx';
 import PromptDamageDistribution from './PromptDamageDistribution.jsx';
 import PromptRearrangeCards from './PromptRearrangeCards.jsx';
+import PromptDistributeCards from './PromptDistributeCards.tsx';
 import PromptChoosePlayer from './PromptChoosePlayer';
 import PromptAlternatives from './PromptAlternatives.tsx';
 import PromptChoosePowerOnMagi from './PromptChoosePowerOnMagi.tsx';
-import {getPromptType, getPromptMessage} from '../../selectors'; 
+import { getPromptType, getPromptMessage } from '../../selectors';
 
 import './style.css';
-import { PROMPT_TYPE_POWER_ON_MAGI } from 'moonlands/dist/const.js';
 
-function PromptOverlay({engineConnector}) {
+function PromptOverlay({ engineConnector }) {
 	const promptType = useSelector(getPromptType);
 	const promptMessage = useSelector(getPromptMessage);
 
@@ -58,6 +60,7 @@ function PromptOverlay({engineConnector}) {
 			{promptType === PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES && <PromptEnergyDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES && <PromptDamageDistribution engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE && <PromptRearrangeCards engineConnector={engineConnector} />}
+			{promptType === PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES && <PromptDistributeCards engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_PLAYER && <PromptChoosePlayer engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_POWER_ON_MAGI && <PromptChoosePowerOnMagi engineConnector={engineConnector} />}
 			{promptType === PROMPT_TYPE_ALTERNATIVE && <PromptAlternatives engineConnector={engineConnector} />}

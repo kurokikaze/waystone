@@ -2,7 +2,7 @@ import {useRef, useEffect} from 'react';
 import {useSelector} from 'react-redux';
 import cn from 'classnames';
 import Button from 'antd/es/button';
-import { getWinner } from '../../selectors';
+import { getPlayerNumber, getWinner } from '../../selectors';
 
 type EndgameOverlayProps = {
   onReturnToBase: () => void,
@@ -22,7 +22,8 @@ function EndgameOverlay({
 	}, [overlay]);
 
 	const winner = useSelector(getWinner);
-	const youWin = winner === 1;
+	const playerNumber = useSelector(getPlayerNumber)
+	const youWin = winner === playerNumber;
 
 	return (
 		<div className="promptOverlay endgame" ref={overlay}>
