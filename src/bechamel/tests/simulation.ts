@@ -62,12 +62,13 @@ class SimulationConnector {
         private readonly playerId: PlayerId,
         private readonly game: any,
         private readonly onPromptStateConflict: () => void,
+        private readonly writeLogs: boolean = true,
     ) {}
 
     public on(type: string, callback: Function) {
         if (type === 'gameData') {
             this.gameDataCallback = (state: any) => {
-                this.gameLog.push({
+                if (this.writeLogs) this.gameLog.push({
                     for: this.playerId,
                     state,
                 });
@@ -77,7 +78,7 @@ class SimulationConnector {
 
         if (type === 'action') {
             this.actionCallback = (action: any) => {
-                this.gameLog.push({
+                if (this.writeLogs) this.gameLog.push({
                     for: this.playerId,
                     action,
                 });
@@ -91,7 +92,7 @@ class SimulationConnector {
             return;
         }
 
-        this.gameLog.push({
+        if (this.writeLogs) this.gameLog.push({
             from: this.playerId,
             count: this.commandCount,
             action,
@@ -186,8 +187,8 @@ export class Simulation {
             connectorTwo.dispatchAction({ type: 'display/status' });
         };
 
-        const connectorOne = new SimulationConnector(1, game, onPromptStateConflict);
-        const connectorTwo = new SimulationConnector(2, game, onPromptStateConflict);
+        const connectorOne = new SimulationConnector(1, game, onPromptStateConflict, this.options.writeLogs ?? true);
+        const connectorTwo = new SimulationConnector(2, game, onPromptStateConflict, this.options.writeLogs ?? true);
 
         const strategyConnectorOne = new StrategyConnector(connectorOne as unknown as Socket);
         const strategyConnectorTwo = new StrategyConnector(connectorTwo as unknown as Socket);
@@ -207,7 +208,7 @@ export class Simulation {
             connectorTwo.dispatchAction(commandForBotTwo);
 
             if (commandForBotTwo) {
-                gameLog.push({ for: 2, action: commandForBotTwo });
+                if (this.options.writeLogs) gameLog.push({ for: 2, action: commandForBotTwo });
             }
 
             if (action.type === ACTION_PLAYER_WINS) {
@@ -233,7 +234,7 @@ export class Simulation {
             }
         });
 
-        gameLog.push({ for: 2, state: game.serializeData(2) });
+        if (this.options.writeLogs) gameLog.push({ for: 2, state: game.serializeData(2) });
         connectorOne.dispatchGameData({ playerId: 1, state: game.serializeData(1) });
         connectorTwo.dispatchGameData({ playerId: 2, state: game.serializeData(2) });
 

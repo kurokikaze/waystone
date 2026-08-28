@@ -80,7 +80,7 @@ export class ReconSimulationStrategy implements Strategy {
     private hashBuilder: HashBuilder
 
     private history: HistoryEntry[] = []
-    private historyLength = 15
+    private historyLength = 0  // disabled in simulation mode; set > 0 to enable action history for debugging
     private actionCameFromHold = false
 
     protected graph: string = ''
@@ -486,7 +486,7 @@ export class ReconSimulationStrategy implements Strategy {
 
     public requestAction(): C2SAction {
         const action = this.generateAction();
-        if (this.gameState) {
+        if (this.gameState && this.historyLength > 0) {
             const historyEntry: HistoryEntry = {
                 state: JSON.stringify(this.gameState.state),
                 action,
