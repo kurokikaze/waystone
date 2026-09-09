@@ -75,6 +75,43 @@ const defaultConfig: HarnessConfig = {
         ],
     },
     playerTwoPool: {
+        name: 'Cald Pool',
+        magi: ['Grega', 'Sinder', 'Valkan', 'Ashgar', 'Magam', 'Gar', 'Barak'],
+        cards: [
+            'Spirit of the Flame',
+            'Thermal Blast',
+            'Heat Lens',
+            'Rod of Coals',
+            'Raxis',
+            'Scroll of Fire',
+            'Magma Armor',
+            'Kelthet',
+            'Magma Hyren',
+            'Quor',
+            'Greater Vaal',
+            'Ancestral Flute',
+            'Arbolit',
+            'Water of Life',
+            "Fire Grag",
+            "Quor Pup",
+            'Fire Flow',
+            'Fire Ball',
+            'Lava Aq',
+            'Lava Balamant',
+            'Gorgle\'s Ring',
+            'Lava Arboll',
+            'Fire Chogo',
+            'Diobor',
+            'Drakan',
+            'Flame Geyser',
+            'Flame Control',
+            'Flame Hyren'
+        ],
+    },
+};
+
+/*
+{
         name: 'Naroom Pool',
         magi: ['Poad', 'Tryn', 'Yaki', 'Pruitt', 'Evu', 'Orwin'],
         cards: [
@@ -98,9 +135,8 @@ const defaultConfig: HarnessConfig = {
             'Grow',
             'Giant Carillion',
         ],
-    },
-};
-
+    }
+*/
 function parseCliOverrides(args: string[]): CliOverrides {
     const overrides: CliOverrides = {};
 
@@ -221,9 +257,9 @@ function withMutedConsole(callback: () => void) {
     const originalStdoutWrite = process.stdout.write.bind(process.stdout);
     const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
-    console.log = () => {};
-    console.dir = () => {};
-    console.error = () => {};
+    console.log = () => { };
+    console.dir = () => { };
+    console.error = () => { };
     process.stdout.write = (() => true) as typeof process.stdout.write;
     process.stderr.write = (() => true) as typeof process.stderr.write;
 

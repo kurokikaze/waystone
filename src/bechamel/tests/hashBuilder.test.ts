@@ -3,8 +3,8 @@ import { State, ZONE_TYPE_ACTIVE_MAGI } from 'moonlands/dist/esm/index';
 import { HashBuilder } from '../strategies/HashBuilder'
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 import { byName } from 'moonlands/dist/esm/cards';
-import { createZones } from '../strategies/simulationUtils';
-import { STEP_CREATURES, STEP_PRS_SECOND } from '../../const';
+import { createState, createZones } from '../strategies/simulationUtils';
+import { ACTION_PASS, STEP_CREATURES, STEP_PRS_SECOND } from '../../const';
 import Card from 'moonlands/dist/esm/classes/Card';
 import { ACTION_EFFECT, ACTION_PLAY, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY } from '../const';
 import { AnyEffectType } from 'moonlands/dist/esm/types';
@@ -49,6 +49,57 @@ describe('hashBuilder', () => {
 
         const builder = new HashBuilder();
         expect(builder.makeHash(gameState)).toEqual('*4{}@7[]|#1(0/1):2|#2(0/1):4|#3(0/1):4|@5');
+    });
+
+    it('preserves queued prompt internals when cloning an active prompt state', () => {
+        const ACTIVE_PLAYER = 422;
+        const NON_ACTIVE_PLAYER = 1310;
+
+        const gameState: any = {
+            playerId: ACTIVE_PLAYER,
+            state: {
+                prompt: true,
+                promptPlayer: ACTIVE_PLAYER,
+                promptType: 'prompt/relic',
+                promptMessage: 'Choose a relic',
+                promptGeneratedBy: 'g1',
+                promptVariable: 'relicTarget',
+                promptParams: { zone: 'zones/in_play' },
+                savedActions: [{ type: ACTION_PASS, player: ACTIVE_PLAYER }],
+                mayEffectActions: [{ type: ACTION_PASS, player: ACTIVE_PLAYER }],
+                fallbackActions: [{ type: ACTION_PASS, player: ACTIVE_PLAYER }],
+                continuousEffects: [],
+                step: STEP_PRS_SECOND,
+                turn: 1,
+            },
+            getMyMagi: () => ({ card: 'Adis', data: { energy: 5, actionsUsed: [] }, id: 'm1', owner: ACTIVE_PLAYER }),
+            getMyCreaturesInPlay: () => [],
+            getMyRelicsInPlay: () => [],
+            getEnemyCreaturesInPlay: () => [],
+            getEnemyRelicsInPlay: () => [],
+            getOpponentMagi: () => ({ card: 'Grega', data: { energy: 5, actionsUsed: [] }, id: 'm2', owner: NON_ACTIVE_PLAYER }),
+            getPlayableCards: () => [],
+            getMyDeckCards: () => [],
+            getMyMagiPile: () => [],
+            getContinuousEffects: () => [],
+            getStep: () => STEP_PRS_SECOND,
+            getTurn: () => 1,
+            getMyCreaturesInPlay: () => [],
+            getEnemyCreaturesInPlay: () => [],
+        };
+
+        const sim = createState(gameState, ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        expect(sim.state.prompt).toBe(true);
+        expect(sim.state.promptPlayer).toBe(ACTIVE_PLAYER);
+        expect(sim.state.promptType).toBe('prompt/relic');
+        expect(sim.state.promptMessage).toBe('Choose a relic');
+        expect(sim.state.promptGeneratedBy).toBe('g1');
+        expect(sim.state.promptVariable).toBe('relicTarget');
+        expect(sim.state.promptParams).toEqual({ zone: 'zones/in_play' });
+        expect(sim.state.savedActions).toHaveLength(1);
+        expect(sim.state.mayEffectActions).toHaveLength(1);
+        expect(sim.state.fallbackActions).toHaveLength(1);
     });
 
     it('follows summons', () => {

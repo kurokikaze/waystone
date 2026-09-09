@@ -2,6 +2,8 @@ import { ACTION_EFFECT, EFFECT_TYPE_START_OF_TURN } from 'moonlands/dist/esm/ind
 import { GameState } from '../GameState'
 import { SerializedClientState } from '../types';
 import { SimulationStrategy } from '../strategies/SimulationStrategy';
+import { ReconSimulationStrategy } from '../strategies/ReconSimulationStrategy';
+import { DirectActionExtractor } from '../strategies/DirectActionExtractor';
 
 describe('GameState tests', () => {
     it.only('Non-prrompt response in prompt state', () => {
@@ -3175,3 +3177,872 @@ describe('GameState tests', () => {
         console.dir(strategy.getHeldActions())
     })
 })
+
+describe.only('Pass in prompt state', () => {
+    it('Pass in prompt state', (done) => {
+        const stateObj: SerializedClientState = {
+            "staticAbilities": [],
+            "energyPrompt": false,
+            "turnTimer": false,
+            "turnSecondsLeft": 0,
+            "promptAvailableCards": [],
+            "zones": {
+                "playerHand": [
+                    {
+                        "card": "Flame Control",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "SIft7GKPI0"
+                    },
+                    {
+                        "card": "Spirit of the Flame",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "7f2ZYKVOYN"
+                    },
+                    {
+                        "card": "Flame Geyser",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "7aiEaQzq89"
+                    },
+                    {
+                        "card": "Thermal Blast",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "8IynotBASe"
+                    },
+                    {
+                        "card": "Fire Chogo",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "llzpgtXXUu"
+                    }
+                ],
+                "opponentHand": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "PILuX5WkdU"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "5qHrcH1gSy"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "Zo1afgzQ8S"
+                    }
+                ],
+                "playerDeck": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "PeJg477oLo"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "Wcsp1MP0uJ"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "lShF5vwZzH"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "3_S-fTwQ-V"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "hlXY5EPoVf"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "ay770DT9eS"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "ZW5686BQd_"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "4k6VP-_Bnh"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "A5TKPn0J3L"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "T2GuZDMDB0"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "c2kug-xm5U"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "gGPxqM2Eei"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "r9OkJEnOFY"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "7j7B9smdIe"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "FPprCYZXy3"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "5puL21EanQ"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "eYcTf9qfZE"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "0OW4HyaiPM"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "jVx0bumTx1"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "7_tla7sDiU"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "SlYU-A1xfW"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "tk9zZdopSg"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "eTayXtTgND"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "5LeP90S7Fl"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "E29hfgblkt"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "UGY11gjD20"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "4puZ5bZWq_"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "R0xXmdFhlQ"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "d8Xb_oK_qu"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "nGRXjufE7y"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "i5UrK9z7cR"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "xLJ7QbNcIG"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 2,
+                        "id": "mUu-GN9Yey"
+                    }
+                ],
+                "opponentDeck": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "tJA8GCCvug"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "wdUuo73dVC"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "kY5OMVQWjF"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "Q9ZBoWr08x"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "3zCl-YK7XV"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "GUNQ9eImfy"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "5MZBaupYKU"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "5_0PlZizuK"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "7zGcPrFqug"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "Yst27wRT6x"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "h7n2eQA3Rt"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "w2xNhLR85d"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "n7o_GJD_v-"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "CANYf8QeS2"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "bgHSRnusbu"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "sRV5szqtDC"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "kvjqiZpsDG"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "Ntxsrx7kXO"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "JY4qJTJ09I"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "GtLd8vnCaF"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "YfEMKfi2-E"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "gPnmmNM9lb"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "H338Win4Io"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "4KJyel9_tN"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "AimGGk9pJ6"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "4zG8ZgKJ63"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "UXgUyu1fkV"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "KmKyuNJz5q"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "7u71iXoWVc"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "-3M-snVQts"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "T-u9swTtFR"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "4SvC_w-LpI"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "TIOAjw1I0L"
+                    }
+                ],
+                "playerActiveMagi": [
+                    {
+                        "card": "Ashgar",
+                        "data": {
+                            "energy": 12,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "Phagr0YAAD"
+                    }
+                ],
+                "opponentActiveMagi": [
+                    {
+                        "card": "Ora",
+                        "data": {
+                            "energy": 6,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "qjdkZR3HQ7"
+                    }
+                ],
+                "playerMagiPile": [
+                    {
+                        "card": "Gar",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "3FYMm9FXUU"
+                    },
+                    {
+                        "card": "Valkan",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "zrXQt_UgJP"
+                    }
+                ],
+                "opponentMagiPile": [
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "bjlZikKBlW"
+                    },
+                    {
+                        "card": null,
+                        "data": {},
+                        "owner": 1,
+                        "id": "MB4Hl7z0Ap"
+                    }
+                ],
+                "inPlay": [
+                    {
+                        "card": "Magma Armor",
+                        "data": {
+                            "energy": 0,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "IdCy0Abhub"
+                    },
+                    {
+                        "card": "Raxis",
+                        "data": {
+                            "energy": 3,
+                            "controller": 2,
+                            "attacked": 0,
+                            "actionsUsed": [
+                                "Shatterfire"
+                            ],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 2,
+                        "id": "WEvyJNzzXv"
+                    },
+                    {
+                        "card": "Arderial's Crown",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "7QafPqYbXl"
+                    },
+                    {
+                        "card": "Xyx Elder",
+                        "data": {
+                            "energy": 9,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "WZOjrAVhe9"
+                    },
+                    {
+                        "card": "Epik",
+                        "data": {
+                            "energy": 5,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "4-0TbvTQbF"
+                    }
+                ],
+                "playerDefeatedMagi": [],
+                "opponentDefeatedMagi": [],
+                "playerDiscard": [],
+                "opponentDiscard": [
+                    {
+                        "card": "Shooting Star",
+                        "data": {
+                            "energy": 0,
+                            "controller": 1,
+                            "attacked": 0,
+                            "actionsUsed": [],
+                            "energyLostThisTurn": 0,
+                            "defeatedCreature": false,
+                            "hasAttacked": false,
+                            "wasAttacked": false
+                        },
+                        "owner": 1,
+                        "id": "bQkolQezL_"
+                    }
+                ]
+            },
+            "continuousEffects": [],
+            "step": 1,
+            "turn": 1,
+            "goesFirst": 2,
+            "activePlayer": 2,
+            "prompt": true,
+            "promptType": "prompt/relic",
+            "promptMessage": null,
+            "promptPlayer": 2,
+            "promptGeneratedBy": "WEvyJNzzXv",
+            "promptParams": {},
+            "opponentId": 1,
+            "log": [
+                {
+                    "type": "log_entry/magi_energy_gain",
+                    "card": "Ashgar",
+                    "amount": 10
+                },
+                {
+                    "type": "log_entry/choose_starting_cards",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/play",
+                    "card": "Magma Armor",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/play",
+                    "card": "Raxis",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/creature_energy_gain",
+                    "card": "Raxis",
+                    "amount": 4
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 2
+                },
+                {
+                    "type": "log_entry/magi_energy_gain",
+                    "card": "Ora",
+                    "amount": 12
+                },
+                {
+                    "type": "log_entry/choose_starting_cards",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/magi_energy_gain",
+                    "card": "Ora",
+                    "amount": 5
+                },
+                {
+                    "type": "log_entry/play",
+                    "card": "Arderial's Crown",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/play",
+                    "card": "Xyx Elder",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/creature_energy_gain",
+                    "card": "Xyx Elder",
+                    "amount": 6
+                },
+                {
+                    "type": "log_entry/creature_energy_gain",
+                    "card": "Xyx Elder",
+                    "amount": 1
+                },
+                {
+                    "type": "log_entry/play",
+                    "card": "Epik",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/creature_energy_gain",
+                    "card": "Epik",
+                    "amount": 4
+                },
+                {
+                    "type": "log_entry/creature_energy_gain",
+                    "card": "Epik",
+                    "amount": 1
+                },
+                {
+                    "type": "log_entry/play",
+                    "card": "Shooting Star",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/creature_energy_gain",
+                    "card": "Xyx Elder",
+                    "amount": 2
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/draw",
+                    "player": 1
+                },
+                {
+                    "type": "log_entry/magi_energy_gain",
+                    "card": "Ashgar",
+                    "amount": 6
+                },
+                {
+                    "type": "log_entry/power_activation",
+                    "card": "Raxis",
+                    "name": "Shatterfire",
+                    "player": 2
+                }
+            ],
+            "gameEnded": false,
+            "winner": null,
+            "cardsAttached": {}
+        }
+
+        // const actionExtractor = new DirectActionExtractor()
+        
+        const gameState = new GameState(stateObj as unknown as SerializedClientState)
+        gameState.setPlayerId(2)
+        console.dir(gameState.playerPriority(2))
+        const strategy = new ReconSimulationStrategy()
+        strategy.setup(gameState, 2);
+        console.log('Strategy setup complete')
+        const action = strategy.requestAction()
+        console.dir(action)
+        done()
+    }, 15000);
+});

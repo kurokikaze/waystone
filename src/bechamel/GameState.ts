@@ -137,12 +137,11 @@ export class GameState {
   state: StateRepresentation
   public constructor(serializedState: SerializedClientState) {
     this.state = {
-      // continuousEffects: [],
       staticAbilities: [],
       energyPrompt: false,
       turnTimer: false,
       turnSecondsLeft: 0,
-      promptAvailableCards: [],
+      promptAvailableCards: [] as { id: string }[],
       ...serializedState,
     }
   }

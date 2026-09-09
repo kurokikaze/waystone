@@ -1,6 +1,7 @@
 import { byName } from 'moonlands/dist/esm/cards'
 import { AnyEffectType } from 'moonlands/dist/esm/types';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
+import { createHash } from 'crypto';
 
 import {
     PROMPT_TYPE_MAY_ABILITY,
@@ -19,6 +20,7 @@ import {
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
     PROMPT_TYPE_PLAYER,
+    PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 } from "../const";
 import {
     PROMPT_TYPE_ALTERNATIVE,
@@ -34,6 +36,7 @@ import { C2SAction, ClientAttackAction, ClientResolvePromptAction, FromClientPas
 import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_TYPE_IN_PLAY, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE } from 'moonlands/dist/esm/const';
 import { State } from 'moonlands';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker'
+import UnexpectedPromptResolver from './UnexpectedPromptResolver'
 // import { ErrorDumpService } from '../../services/ErrorDumpService';
 const STEP_NAME = {
     ENERGIZE: 0,
@@ -283,51 +286,155 @@ export class ReconSimulationStrategy implements Strategy {
         this.hashes = new Set<string>()
         this.graph = ''
         const result = this.solveState(sim, unmaker, playerId, opponentId, this.hashBuilder.makeHash(sim))
-        console.log(`Counter: ${this.counter}`)
+        // console.log(`Counter: ${this.counter}`)
         return result
     }
 
+    private depthReached = 0;
     private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = '', depth = 0): { score: number, actions: any[] } {
-        if (this.counter > ReconSimulationStrategy.failsafe || depth > 500) {
+        const turn = this.gameState?.getTurn() || 0;
+        if (state.getZone(ZONE_TYPE_IN_PLAY).cards.some(c => c.card.type == TYPE_CREATURE && c.data.energy == null)) {
+            console.log(`Energy null on turn ${turn}, step ${this.gameState?.getStep()}`)
+            console.dir(state.serializeData(playerId, false), {depth: null})
+            throw new Error(`Energy null on turn ${turn}, step ${this.gameState?.getStep()}`)
+        }
+        if (this.counter > ReconSimulationStrategy.failsafe || depth > 100) {
             return { score: getStateScore(state, playerId, opponentId), actions: [] }
         }
         this.counter++;
+
+        if (depth > this.depthReached) {
+            this.depthReached = depth;
+            console.log(`Depth reached: ${depth}, pointer position: ${unmaker.getPointer()}`)
+        }
 
         const parentHash = hash == '' ? this.hashBuilder.makeHash(state) : hash
         const possibleActions = DirectActionExtractor.extractActions(state, playerId, opponentId)
 
         let maxScore = -100000;
         let maxAction: DirectAction[] = []
-
+        const snapBeforeActions = JSON.stringify(state.serializeData(playerId, false))
+        // if (turn == 3 && this.gameState?.getStep() == 1) {
+        //     console.log(`Enabling debug`)
+        //     state.enableDebug();
+        // }
+        console.dir(possibleActions, { depth: null })
         for (const action of possibleActions) {
-            unmaker.setCheckpoint()
-            try {
-                DirectActionExtractor.applyAction(state, action, playerId, opponentId)
-            } catch (e: any) {
-                console.error(`Unmaking from catch`)
-                console.error(e.message)
-                if (e.message.startsWith("Cannot read properties of null")) {
-                    console.error(e.stack)
+            if (unmaker.hasSpace()) {
+                let point = unmaker.getPointer()
+                const snapBefore = JSON.stringify(state.serializeData(playerId, false))
+
+                if (snapBefore !== snapBeforeActions) {
+                    throw new Error(`State mismatch before making action: ${JSON.stringify(action)}`)
                 }
-                unmaker.revertToCheckpoint()
-                continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
-            }
-            const childHash = this.hashBuilder.makeHash(state)
-            // skip no-op actions (engine silently rejected, e.g. forcePriority check failed)
-            if (childHash === parentHash) {
-                unmaker.revertToCheckpoint()
-                continue
-            }
-            if (!this.hashes.has(childHash)) {
-                this.hashes.add(childHash)
-                let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash, depth + 1)
-                if (scoredAction.score > maxScore) {
-                    maxScore = scoredAction.score
-                    maxAction = [action, ...scoredAction.actions]
+                let snapMiddle = ''
+                unmaker.setCheckpoint()
+
+                const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
+                const beforeStateHash = createHash('sha256').update(snapBefore).digest('hex')
+                try {
+                    if (this.gameState?.getStep() === 1 && (this.gameState?.getTurn() === 2 && actionHash.startsWith('f06c83bc8ba19b7')) && beforeStateHash.startsWith('c53651242919ea68d2b45b')) {
+                        console.log('=====*====')
+                        console.dir(action, { depth: null })
+                        console.log('==========')
+                        state.enableDebug()
+                    }
+                    DirectActionExtractor.applyAction(state, action, playerId, opponentId)
+                    snapMiddle = JSON.stringify(state.serializeData(playerId, false))
+                } catch (e: any) {
+                    console.error(`Unmaking from catch <${this.gameState?.getTurn()}:${this.gameState?.getStep()}>`)
+                    console.error(e.message)
+                    console.error(actionHash)
+                    console.error(beforeStateHash, '---')
+                    if (e.message.startsWith("Non-prompt")) {
+                        console.error(e.stack)
+                    }
+                    const actionPoint = unmaker.getPointer()
+                    if (actionPoint - point > 1000) {
+                        console.error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
+                        console.dir(action)
+                        throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
+                    }
+                    unmaker.revertToCheckpoint()
+                    const afterPoint = unmaker.getPointer()
+                    if (point !== afterPoint) {
+                        console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
+                        console.dir(action)
+                        console.dir(unmaker.dataBlob, { depth: null })
+                        throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
+                    }
+                    const snapAfter = JSON.stringify(state.serializeData(playerId, false))
+                    if (snapBefore !== snapAfter) {
+                        console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
+                        console.error(`State mismatch after unmaking action`)
+                        console.error('')
+                        console.log(snapBefore)
+                        console.error('>')
+                        console.log(snapMiddle)
+                        console.error('<')
+                        console.log(snapAfter)
+                        console.dir(action)
+                        throw new Error(`State mismatch after unmaking action`)
+                    }
+                    continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
                 }
-                // this.graph += `"${childHash}" [label="${maxScore}"]\n`
+                const childHash = this.hashBuilder.makeHash(state)
+                // skip no-op actions (engine silently rejected, e.g. forcePriority check failed)
+                if (childHash === parentHash) {
+                    const actionPoint = unmaker.getPointer()
+                    if (actionPoint - point > 1000) {
+                        console.error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
+                        console.dir(action)
+                        throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
+                    }
+                    unmaker.revertToCheckpoint()
+                    const afterPoint = unmaker.getPointer()
+                    if (point !== afterPoint) {
+                        console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
+                        console.dir(action)
+                        console.dir(unmaker.dataBlob, { depth: null })
+                        throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
+                    }
+                    continue
+                }
+                if (!this.hashes.has(childHash)) {
+                    this.hashes.add(childHash)
+                    let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash, depth + 1)
+                    if (scoredAction.score > maxScore) {
+                        maxScore = scoredAction.score
+                        maxAction = [action, ...scoredAction.actions]
+                    }
+                    // this.graph += `"${childHash}" [label="${maxScore}"]\n`
+                }
+                const actionPoint = unmaker.getPointer()
+                if (actionPoint - point > 1000) {
+                    console.error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
+                    console.dir(action)
+                    throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
+                }
+
+                unmaker.revertToCheckpoint()
+                const snapAfter = JSON.stringify(state.serializeData(playerId, false))
+                if (snapBefore !== snapAfter) {
+                    console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
+                    console.error(`State mismatch after unmaking action`)
+                    console.error('')
+                    console.log(snapBefore)
+                    console.error('')
+                    console.log(snapMiddle)
+                    console.error('')
+                    console.log(snapAfter)
+                    console.dir(action)
+                    throw new Error(`State mismatch after unmaking action`)
+                }
+                const afterPoint = unmaker.getPointer()
+                if (point !== afterPoint) {
+                    console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
+                    console.dir(action)
+                    console.dir(unmaker.dataBlob, { depth: null })
+                    throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
+                }
             }
-            unmaker.revertToCheckpoint()
         }
         if (possibleActions.length == 0) {
             maxScore = getStateScore(state, playerId, opponentId)
@@ -403,7 +510,7 @@ export class ReconSimulationStrategy implements Strategy {
         }
 
         if (this.gameState.isInMyPromptState() && action.type !== ACTION_RESOLVE_PROMPT) {
-            console.log(`Non-prompt action in the prompt state.`)
+            console.log(`() Non-prompt action in the prompt state.`)
             console.dir(action)
             console.dir(this.actionsOnHold)
             //throw new Error('Non-prompt action in the prompt state (simulation strategy)')
@@ -629,6 +736,15 @@ export class ReconSimulationStrategy implements Strategy {
                 return this.resolveTargetPrompt(this.waitingTarget.target, 'waitingTarget')
             }
 
+            // Graphic clients do not always know the full engine action queue. If we are in a prompt
+            // without a queued resolve action, choose a safe fallback instead of assuming the queue.
+            if (this.gameState.isInMyPromptState()) {
+                const fallbackAction = new UnexpectedPromptResolver().resolvePrompt(this.gameState)
+                if (fallbackAction.type === ACTION_RESOLVE_PROMPT) {
+                    return fallbackAction as C2SAction
+                }
+            }
+
             // Generic prompt fallbacks — runs before playerPriority check so these fire even
             // when playerPriority() = false (which can happen when in a prompt state)
             if (this.gameState.isInPromptState(this.playerId)) {
@@ -703,6 +819,18 @@ export class ReconSimulationStrategy implements Strategy {
                                 return {
                                     type: ACTION_RESOLVE_PROMPT,
                                     cardsOrder: available.map(c => c.id),
+                                    generatedBy: this.gameState.state.promptGeneratedBy || '',
+                                    player: this.playerId,
+                                } as C2SAction
+                            } else if (this.gameState.getPromptType() === PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES) {
+                                const energyMap = this.gameState.getMyCreaturesInPlay().reduce((acc: Record<string, number>, c) => {
+                                    acc[c.id] = c.data.energy;
+                                    return acc;
+                                }, {});
+                                console.dir(this.gameState.state)
+                                return {
+                                    type: ACTION_RESOLVE_PROMPT,
+                                    energyOnCreatures: energyMap,
                                     generatedBy: this.gameState.state.promptGeneratedBy || '',
                                     player: this.playerId,
                                 } as C2SAction

@@ -1,4 +1,5 @@
 import UnexpectedPromptResolver from '../UnexpectedPromptResolver'
+import { SimulationStrategy } from '../SimulationStrategy'
 import {
   PROMPT_TYPE_SINGLE_CREATURE,
   PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
@@ -73,6 +74,45 @@ describe('UnexpectedPromptResolver', () => {
     const action: any = resolver.resolvePrompt(state)
     expect(action.type).toBe('actions/resolve_prompt')
     expect(action.target).toBe('p1')
+  })
+
+  test('strategy falls back to unexpected-prompt resolver when there is no queued resolve action', () => {
+    const strategy = new SimulationStrategy()
+    const confusingPromptState = {
+      getPromptType: () => PROMPT_TYPE_SINGLE_CREATURE,
+      getStep: () => 1,
+      getOpponentId: () => 2,
+      playerPriority: () => false,
+      isInMyPromptState: () => true,
+      isInPromptState: () => true,
+      waitingForCardSelection: () => false,
+      waitingForPaymentSourceSelection: () => false,
+      getStartingCards: () => [],
+      getPaymentSourceCards: () => [],
+      getCardsForFilteredPrompt: () => [],
+      state: {
+        prompt: true,
+        promptPlayer: 1,
+        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+        promptParams: {},
+        promptAvailableCards: [],
+        promptGeneratedBy: 'boom',
+        zones: { playerHand: [] },
+      },
+      getMyCreaturesInPlay: () => [
+        { id: 'me-first', data: { energy: 9 }, card: { name: 'Alpha' } },
+        { id: 'me-second', data: { energy: 2 }, card: { name: 'Beta' } },
+      ],
+      getEnemyCreaturesInPlay: () => [],
+      getMyMagi: () => ({ id: 'magi', card: 'Adis', data: { energy: 5 } }),
+      getMyRelicsInPlay: () => [],
+      getPlayableCards: () => [],
+    } as any
+
+    strategy.setup(confusingPromptState, 1)
+    const action = (strategy as any).requestAction()
+    expect(action.type).toBe('actions/resolve_prompt')
+    expect(action.target).toBe('me-second')
   })
 
   test('any creature except source picks lowest-energy non-source', () => {

@@ -170,10 +170,18 @@ export function createState(
   // console.log(`${gameState.getTurn()} * 100 + ${gameState.getStep()} * 10 + ${gameState.playerId}`)
   sim.initiatePRNG(seed)
   if (gameState.state.prompt) {
+    const livePromptState = gameState.state as any
     sim.state.prompt = true
-    sim.state.promptPlayer = gameState.state.promptPlayer!
-    sim.state.promptType = gameState.state.promptType
-    sim.state.promptGeneratedBy = gameState.state.promptGeneratedBy!
+    ;(sim.state as any).promptPlayer = livePromptState.promptPlayer ?? undefined
+    sim.state.promptType = livePromptState.promptType
+    ;(sim.state as any).promptMessage = livePromptState.promptMessage ?? undefined
+    ;(sim.state as any).promptGeneratedBy = livePromptState.promptGeneratedBy ?? undefined
+    ;(sim.state as any).promptVariable = livePromptState.promptVariable ?? undefined
+    ;(sim.state as any).promptParams = { ...(livePromptState.promptParams ?? {}) }
+    ;(sim.state as any).actions = [...(livePromptState.actions ?? [])]
+    ;(sim.state as any).savedActions = [...(livePromptState.savedActions ?? [])]
+    ;(sim.state as any).mayEffectActions = [...(livePromptState.mayEffectActions ?? [])]
+    ;(sim.state as any).fallbackActions = [...(livePromptState.fallbackActions ?? [])]
   }
   return sim
 }

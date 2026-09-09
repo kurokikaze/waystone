@@ -29,6 +29,7 @@ import { PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_PAYMENT_SOURCE, ZONE_
 import { SimulationQueue } from './SimulationQueue';
 import { convertServerCommand } from '../../containedEngine/utils';
 import { ErrorDumpService } from '../../services/ErrorDumpService';
+import UnexpectedPromptResolver from './UnexpectedPromptResolver';
 
 const STEP_NAME = {
     ENERGIZE: 0,
@@ -354,6 +355,8 @@ export class SimulationStrategy implements Strategy {
                     } catch (_err) {
                         // ignore
                     }
+                    // Invalid branches should not be scored or expanded.
+                    continue
                 }
                 this.trimHandToAffordable(workEntity.sim, this.playerId)
                 const score = getStateScore(workEntity.sim, this.playerId, opponentId)
@@ -707,6 +710,15 @@ export class SimulationStrategy implements Strategy {
                 // console.log(`Waiting for target resolve path`)
                 // console.dir(this.waitingTarget)
                 return this.resolveTargetPrompt(this.waitingTarget.target, 'waitingTarget')
+            }
+
+            // Graphic clients do not always know the full engine action queue. If we are in a prompt
+            // but the prompt was not expected from a prior queued action, resolve it using a safe fallback.
+            if (this.gameState.isInMyPromptState()) {
+                const fallbackAction = new UnexpectedPromptResolver().resolvePrompt(this.gameState)
+                if (fallbackAction.type === ACTION_RESOLVE_PROMPT) {
+                    return fallbackAction as C2SAction
+                }
             }
 
             if (this.gameState.playerPriority(this.playerId)) {

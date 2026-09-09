@@ -119,6 +119,7 @@ export type SerializedClientState = {
         opponentDiscard: ClientCard[],
     }
     continuousEffects: ContinuousEffectType[];
+    staticAbilities?: any[];
     step: number;
     turn: number;
     goesFirst: number,
@@ -132,7 +133,13 @@ export type SerializedClientState = {
     log: LogEntryType[];
     gameEnded: boolean;
     opponentId: number;
+    cardsAttached: Record<string, string[]>;
     winner: number | null;
+
+    energyPrompt?: boolean;
+    turnTimer?: boolean;
+    turnSecondsLeft?: number;
+    promptAvailableCards?: { id: string }[];
 }
 
 export type StateRepresentation = {
@@ -167,7 +174,7 @@ export type StateRepresentation = {
     promptParams: PromptParamsType,
     promptGeneratedBy: string | null,
     opponentId: number,
-    promptAvailableCards: [],
+    promptAvailableCards: { id: string }[],
 }
 
 type PowerType = {

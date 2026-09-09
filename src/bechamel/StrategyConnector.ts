@@ -37,7 +37,6 @@ export class StrategyConnector {
         this.io.on('action', (action: ClientAction | { type: 'display/priority', player: number }) => {
             if (this.gameState && this.playerId && action) {
                 try {
-                    const stateBefore = {}; // JSON.parse(JSON.stringify(this.gameState.state))
                     this.gameState.update(action)
 
                     if (
@@ -54,7 +53,7 @@ export class StrategyConnector {
                     console.dir(action)
                     console.log(e?.message)
                     try {
-                        ErrorDumpService.dumpActionFailure(action, stateBefore, e, { location: 'StrategyConnector', playerId: this.playerId, turn: this.gameState?.turnNumber, step: this.gameState?.getStep?.() })
+                        ErrorDumpService.dumpActionFailure(action, {}, e, { location: 'StrategyConnector', playerId: this.playerId, turn: this.gameState?.turnNumber, step: this.gameState?.getStep?.() })
                     } catch (_err) {
                         // ignore
                     }
