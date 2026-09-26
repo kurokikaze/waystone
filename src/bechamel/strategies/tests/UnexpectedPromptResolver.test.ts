@@ -2,6 +2,7 @@ import UnexpectedPromptResolver from '../UnexpectedPromptResolver'
 import { SimulationStrategy } from '../SimulationStrategy'
 import {
   PROMPT_TYPE_SINGLE_CREATURE,
+  PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
   PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
   PROMPT_TYPE_NUMBER,
   PROMPT_TYPE_PAYMENT_SOURCE,
@@ -17,11 +18,13 @@ describe('UnexpectedPromptResolver', () => {
       state: {
         promptParams: opts.promptParams || {},
         promptAvailableCards: opts.promptAvailableCards || [],
+        zones: opts.zones || {},
       },
       getMyCreaturesInPlay: () => opts.myCreatures || [],
       getEnemyCreaturesInPlay: () => opts.enemyCreatures || [],
       getCardsForFilteredPrompt: () => opts.filtered || [],
       getPaymentSourceCards: () => opts.payment || [],
+      getMyMagi: () => opts.myMagi,
       playerId: opts.playerId || 1,
     }
   }
@@ -40,6 +43,19 @@ describe('UnexpectedPromptResolver', () => {
     const action: any = resolver.resolvePrompt(state)
     expect(action.type).toBe('actions/resolve_prompt')
     expect(action.target).toBe('b')
+  })
+
+  test('chooses a card target for creature or Magi prompt', () => {
+    const state = makeState({
+      promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+      myCreatures: [{ id: 'creature', data: { energy: 3 } }],
+      myMagi: { id: 'my-magi', data: { energy: 5 } },
+      zones: { opponentActiveMagi: [{ id: 'enemy-magi', data: { energy: 1 } }] },
+    }) as any
+
+    const action: any = resolver.resolvePrompt(state)
+    expect(action.target).toBe('enemy-magi')
+    expect(action).not.toHaveProperty('number')
   })
 
   test('chooses specified number of cards from zone', () => {

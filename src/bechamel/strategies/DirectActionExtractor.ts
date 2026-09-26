@@ -38,6 +38,8 @@ import {
     PROMPT_TYPE_POWER_ON_MAGI,
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
     PROMPT_TYPE_RELIC,
+    RESTRICTION_OPPONENT_CREATURE,
+    RESTRICTION_OWN_CREATURE,
     SELECTOR_CREATURES_OF_PLAYER,
     TYPE_RELIC,
 } from 'moonlands/dist/esm/const';
@@ -460,9 +462,30 @@ export class DirectActionExtractor {
             case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
                 const all: CardInGame[] = (sim.getZone(ZONE_TYPE_IN_PLAY).cards as CardInGame[])
                     .filter(c => c.card.type === TYPE_CREATURE)
-                const filtered = sim.state.promptParams.restrictions
-                    ? all.filter(sim.makeCardFilter(sim.state.promptParams.restrictions))
-                    : all
+                const { restrictions, restriction, restrictionValue } = sim.state.promptParams as any
+                // moonlands normalizes a card's singular `restriction` into a `restrictions` array
+                // when the prompt is entered (see index.js ACTION_ENTER_PROMPT/PROMPT_TYPE_SINGLE_CREATURE_FILTERED),
+                // but never fills in a `value` for RESTRICTION_OWN_CREATURE/RESTRICTION_OPPONENT_CREATURE — those
+                // are resolved dynamically against the controller of the card that generated the prompt (see
+                // PromptValidator.checkPrompts). Do the same substitution here before filtering.
+                const generatedBy = sim.state.promptGeneratedBy ?? ''
+                const source =
+                    sim.getZone(ZONE_TYPE_IN_PLAY).byId(generatedBy) ??
+                    sim.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).byId(generatedBy) ??
+                    sim.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).byId(generatedBy)
+                const controller = source?.data.controller ?? playerId
+                const resolveValue = (type: string, value: any) =>
+                    (type === RESTRICTION_OWN_CREATURE || type === RESTRICTION_OPPONENT_CREATURE) ? controller : value
+
+                let filtered: CardInGame[]
+                if (restrictions) {
+                    const resolved = (restrictions as any[]).map(({ type, value }) => ({ type, value: resolveValue(type, value) }))
+                    filtered = all.filter(sim.makeCardFilter(resolved))
+                } else if (restriction) {
+                    filtered = all.filter(sim.makeCardFilter([{ type: restriction, value: resolveValue(restriction, restrictionValue) }]))
+                } else {
+                    filtered = all
+                }
                 return filtered.map(c => ({
                     type: 'TARGET' as const,
                     targetId: c.id,

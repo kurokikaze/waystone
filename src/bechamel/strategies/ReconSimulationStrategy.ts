@@ -290,6 +290,27 @@ export class ReconSimulationStrategy implements Strategy {
         return result
     }
 
+    // moonlands writes spellMetaData directly (outside the tracked effect pipeline) in a few places —
+    // ACTION_PLAY sets spellMetaData[cardId].source for spells, and triggerAbilities() sets
+    // spellMetaData[triggeredId].source/sourceCreature for ANY action matching a card's triggerEffects
+    // (checked on every action, regardless of type). The Unmaker never tracks these writes, so they leak
+    // across reverts. Since spellMetaData is transient per-action scratch space, snapshot/restore the
+    // whole object around each checkpoint instead of chasing every write site.
+    private spellMetaDataCheckpoints: any[] = []
+
+    // Values inside spellMetaData can be CardInGame instances (e.g. a power's "source"). A JSON
+    // deep-clone would strip their prototype, turning them into plain objects — which then get
+    // spliced into a zone by a later effect and crash on missing methods (e.g. `.serialize`).
+    // A one-level-deep shallow clone is enough to detach the outer/per-id dicts without touching
+    // the values themselves.
+    private cloneSpellMetaData(spellMetaData: any): any {
+        const clone: any = {}
+        for (const id of Object.keys(spellMetaData || {})) {
+            clone[id] = { ...spellMetaData[id] }
+        }
+        return clone
+    }
+
     private depthReached = 0;
     private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = '', depth = 0): { score: number, actions: any[] } {
         const turn = this.gameState?.getTurn() || 0;
@@ -318,7 +339,7 @@ export class ReconSimulationStrategy implements Strategy {
         //     console.log(`Enabling debug`)
         //     state.enableDebug();
         // }
-        console.dir(possibleActions, { depth: null })
+        // console.dir(possibleActions, { depth: null })
         for (const action of possibleActions) {
             if (unmaker.hasSpace()) {
                 let point = unmaker.getPointer()
@@ -328,6 +349,8 @@ export class ReconSimulationStrategy implements Strategy {
                     throw new Error(`State mismatch before making action: ${JSON.stringify(action)}`)
                 }
                 let snapMiddle = ''
+                const spellMetaDataSnapshot = this.cloneSpellMetaData((state as any).state.spellMetaData)
+                this.spellMetaDataCheckpoints.push(spellMetaDataSnapshot)
                 unmaker.setCheckpoint()
 
                 const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
@@ -337,13 +360,14 @@ export class ReconSimulationStrategy implements Strategy {
                         console.log('=====*====')
                         console.dir(action, { depth: null })
                         console.log('==========')
-                        state.enableDebug()
+                        // state.enableDebug()
                     }
                     DirectActionExtractor.applyAction(state, action, playerId, opponentId)
                     snapMiddle = JSON.stringify(state.serializeData(playerId, false))
                 } catch (e: any) {
                     console.error(`Unmaking from catch <${this.gameState?.getTurn()}:${this.gameState?.getStep()}>`)
                     console.error(e.message)
+                    console.error(e.stack)
                     console.error(actionHash)
                     console.error(beforeStateHash, '---')
                     if (e.message.startsWith("Non-prompt")) {
@@ -356,6 +380,7 @@ export class ReconSimulationStrategy implements Strategy {
                         throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
                     }
                     unmaker.revertToCheckpoint()
+                    ;(state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
                     const afterPoint = unmaker.getPointer()
                     if (point !== afterPoint) {
                         console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
@@ -374,6 +399,7 @@ export class ReconSimulationStrategy implements Strategy {
                         console.error('<')
                         console.log(snapAfter)
                         console.dir(action)
+                        console.log(actionHash)
                         throw new Error(`State mismatch after unmaking action`)
                     }
                     continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
@@ -388,10 +414,12 @@ export class ReconSimulationStrategy implements Strategy {
                         throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
                     }
                     unmaker.revertToCheckpoint()
+                    ;(state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
                     const afterPoint = unmaker.getPointer()
                     if (point !== afterPoint) {
                         console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
                         console.dir(action)
+                        console.log(actionHash)
                         console.dir(unmaker.dataBlob, { depth: null })
                         throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
                     }
@@ -414,6 +442,7 @@ export class ReconSimulationStrategy implements Strategy {
                 }
 
                 unmaker.revertToCheckpoint()
+                ;(state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
                 const snapAfter = JSON.stringify(state.serializeData(playerId, false))
                 if (snapBefore !== snapAfter) {
                     console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
@@ -425,6 +454,7 @@ export class ReconSimulationStrategy implements Strategy {
                     console.error('')
                     console.log(snapAfter)
                     console.dir(action)
+                    console.log(actionHash)
                     throw new Error(`State mismatch after unmaking action`)
                 }
                 const afterPoint = unmaker.getPointer()

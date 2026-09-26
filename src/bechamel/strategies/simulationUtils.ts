@@ -169,6 +169,11 @@ export function createState(
   const seed = gameState.getTurn() * 100 + gameState.getStep() * 10 + gameState.playerId
   // console.log(`${gameState.getTurn()} * 100 + ${gameState.getStep()} * 10 + ${gameState.playerId}`)
   sim.initiatePRNG(seed)
+  // Carry over spellMetaData: mid-spell/power prompts (e.g. Fire Flow's "target" then "number"
+  // prompts) resolve across separate generateAction() calls, each rebuilding the sim from scratch.
+  // Without this, variables stored by an earlier real prompt resolution (like $target) are lost,
+  // and the next step's effect (e.g. move_energy) reads a null/undefined metadata value.
+  sim.state.spellMetaData = { ...(gameState.state as any).spellMetaData }
   if (gameState.state.prompt) {
     const livePromptState = gameState.state as any
     sim.state.prompt = true

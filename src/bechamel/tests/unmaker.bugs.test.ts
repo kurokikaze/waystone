@@ -7,6 +7,7 @@ import Card from 'moonlands/dist/esm/classes/Card';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 import Zone from 'moonlands/dist/esm/classes/Zone';
 import { Unmaker } from 'moonlands/dist/esm/unmaker/unmaker';
+import { DirectActionExtractor } from '../strategies/DirectActionExtractor';
 import {
     ACTION_EFFECT,
     ACTION_PASS,
@@ -351,6 +352,292 @@ describe('Unmaker bug – POWER with move_cards_between_zones (Orish Hypnotize)'
 });
 
 // ---------------------------------------------------------------------------
+// Arderial bug F – POWER: Epik's Dream Feast
+//   Power enters a PROMPT_TYPE_PLAYER prompt before the cost/actionsUsed
+//   effects of ACTION_POWER are unmade. Reverting after the PLAYER choice is
+//   resolved should restore energy/actionsUsed/energyLostThisTurn to their
+//   pre-activation values.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug - POWER with PLAYER prompt (Epik Dream Feast)', () => {
+    it('reverts state correctly after Dream Feast PLAYER prompt is resolved (opponent hand empty, power fully resolves)', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: epik.id,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    it('reverts state correctly when opponent hand has creatures (stops at CHOOSE_CARDS prompt after self-discard)', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const oppHandCards = ['Leaf Hyren', 'Furok'].map(name => new CardInGame(byName(name) as Card, OPPONENT));
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, OPPONENT).add(oppHandCards);
+        const before = snapshot(state);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: epik.id,
+        } as any);
+
+        // Engine should now be paused at the CHOOSE_CARDS prompt (Epik already discarded itself).
+        expect((state.state as any).prompt).toBe(true);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    // Mirrors what the real DFS actually does after the PLAYER prompt: with 2 creature cards in
+    // the target hand, "choose up to 2" has 4 possible resolutions (none / A / B / both). The
+    // search tries ALL of them as sibling branches, sequentially, with the SAME Unmaker instance,
+    // each getting its own nested checkpoint/apply/revert — before finally reverting the outer
+    // PLAYER checkpoint. Earlier tests only ever tried ONE resolution before reverting.
+    it('reverts state correctly after exhaustively trying every CHOOSE_CARDS combination like the real DFS', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const ownHandCards = ['Ayebaw', 'Epik'].map(name => new CardInGame(byName(name) as Card, PLAYER));
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, PLAYER).add(ownHandCards);
+        const before = snapshot(state);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+
+        unmaker.setCheckpoint();
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: PLAYER,
+            generatedBy: epik.id,
+        } as any);
+        const afterPlayerChoice = snapshot(state);
+        const generatedBy = (state.state as any).promptGeneratedBy;
+
+        const combinations: CardInGame[][] = [[], [ownHandCards[0]], [ownHandCards[1]], ownHandCards];
+        for (const cards of combinations) {
+            unmaker.setCheckpoint();
+            state.update({
+                type: ACTION_RESOLVE_PROMPT,
+                cards,
+                generatedBy,
+            } as any);
+            unmaker.revertToCheckpoint();
+            expect(snapshot(state)).toBe(afterPlayerChoice);
+        }
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    // Reproduces the exact seed-2001 turn-11 scenario: Epik targets ITS OWN CONTROLLER
+    // (targetPlayer === PLAYER, not the opponent) with the "Choose player" prompt, and that
+    // player's OWN hand has creature cards (so the CHOOSE_CARDS prompt that follows the
+    // self-discard is non-trivial). All earlier tests only ever targeted the opponent.
+    it('reverts state correctly when Epik targets its own controller and that hand has creatures', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const ownHandCards = ['Ayebaw', 'Epik'].map(name => new CardInGame(byName(name) as Card, PLAYER));
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, PLAYER).add(ownHandCards);
+        const before = snapshot(state);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: PLAYER,
+            generatedBy: epik.id,
+        } as any);
+
+        // Engine should now be paused at the CHOOSE_CARDS prompt (Epik already discarded itself).
+        expect((state.state as any).prompt).toBe(true);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    // Mirrors the real search-tree flow: ACTION_POWER is applied/committed in a
+    // separate (already-closed) checkpoint, then a NEW checkpoint is opened just
+    // for the PLAYER prompt resolution alone, matching ReconSimulationStrategy's
+    // per-depth checkpoint/revert boundaries.
+    it('reverts only the PLAYER resolution when POWER activation was committed under a prior, separate checkpoint', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const oppHandCards = ['Leaf Hyren', 'Furok'].map(name => new CardInGame(byName(name) as Card, OPPONENT));
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, OPPONENT).add(oppHandCards);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+
+        // Depth 0: activate the power for real (committed, checkpoint closed by not reverting).
+        unmaker.setCheckpoint();
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+
+        const afterActivation = snapshot(state);
+
+        // Depth 1: resolve the PLAYER prompt under its own checkpoint.
+        unmaker.setCheckpoint();
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: epik.id,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(afterActivation);
+    });
+
+    // ROOT CAUSE, reproduced minimally from a harness dump (actionHash
+    // bcda38e9174429f93d9ee899ce23a8161d744390d2e801cfd61e196954f4c96b, seed 2001, turn 11 step 2):
+    // spellMetaData['<epikId>'].source held a DIFFERENT CardInGame object than the one actually
+    // sitting in the in-play zone under the same id — the zone's copy was still pristine
+    // (energy=2, actionsUsed=[]), while the metadata's copy already reflected the power's paid
+    // cost (energy=1, actionsUsed=['Dream Feast'], energyLostThisTurn=1). Power effects resolve
+    // '$source' through spellMetaData, so the self-discard (`effects/discard_creature_from_play,
+    // target: '$source'`) moves the METADATA's (paid) object, while
+    // `sourceZone.containsId/removeById` matches by id and removes whatever the ZONE actually
+    // holds (pristine). On revert, the Unmaker splices the metadata's (paid) object back into the
+    // zone — permanently swapping in the wrong, already-paid card in place of the pristine one.
+    // (How the two objects diverge in the first place — i.e. why the zone ever ends up holding a
+    // different reference than what ACTION_POWER captured into spellMetaData — is still open;
+    // this isolates and proves the swap mechanism itself.)
+    it('swaps in a stale, already-paid CardInGame when spellMetaData.source diverges from the live zone object with the same id', () => {
+        const EPIK_ID = '9LavhqnBEo';
+
+        // The zone holds a pristine Epik (energy=2, never paid).
+        const zoneEpik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        zoneEpik.id = EPIK_ID;
+
+        // spellMetaData holds a DIFFERENT object with the SAME id, as if it already paid its
+        // Dream Feast cost.
+        const metaEpik = new CardInGame(byName('Epik') as Card, PLAYER);
+        metaEpik.id = EPIK_ID;
+        metaEpik.data.energy = 1;
+        metaEpik.data.actionsUsed = ['Dream Feast'];
+        metaEpik.data.energyLostThisTurn = 1;
+
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const state = makeState(STEP_PRS1, [zoneEpik], [], [], adis, sinder);
+
+        state.state.prompt = true;
+        state.state.promptType = 'prompt/player';
+        state.state.promptPlayer = PLAYER;
+        state.state.promptGeneratedBy = EPIK_ID;
+        state.state.promptMessage = 'Choose a player who will discard the cards';
+
+        const dreamFeastPower = (zoneEpik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        (state.state as any).spellMetaData[EPIK_ID] = {
+            source: metaEpik,
+            sourcePower: dreamFeastPower,
+            sourceCreature: metaEpik,
+            player: PLAYER,
+        };
+        (state.state as any).savedActions = [
+            { type: 'actions/effect', effectType: 'effects/discard_creature_from_play', target: '$source', source: metaEpik, player: PLAYER, power: true, generatedBy: EPIK_ID },
+            { type: 'actions/effect', effectType: 'effects/power_finished', generatedBy: EPIK_ID },
+        ];
+
+        const before = snapshot(state);
+
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: EPIK_ID,
+            player: PLAYER,
+        } as any);
+
+        // The self-discard did fire (Epik is gone mid-resolution) — confirms the effect ran
+        // against the metadata's object, not the zone's.
+        expect(state.getZone(ZONE_TYPE_IN_PLAY).byId(EPIK_ID)).toBeUndefined();
+
+        unmaker.revertToCheckpoint();
+
+        expect(snapshot(state)).toBe(before);
+    });
+
+    // Reproduces the exact corruption seen in the seed-2001 recon harness at turn 11 step 2
+    // (actionHash bcda38e9174429f93d9ee899ce23a8161d744390d2e801cfd61e196954f4c96b), using the
+    // SAME Unmaker instance across two sibling branches like the real DFS does (a fresh
+    // Unmaker per branch does NOT reproduce it — the residue lives in the shared blob/tag stack,
+    // not in spellMetaData alone). Branch 1: staleEpik activates+resolves Dream Feast fully and
+    // is reverted. Branch 2 (same unmaker, next sibling action at the same depth): activeEpik
+    // activates Dream Feast and resolves the PLAYER prompt. The dumped state showed staleEpik's
+    // own card data (energy/actionsUsed/energyLostThisTurn) corrupted after branch 2's revert.
+    it('does not corrupt a sibling Epik after an earlier Dream Feast branch (same Epik) was reverted with the same Unmaker', () => {
+        const staleEpik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const activeEpik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(5);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [staleEpik, activeEpik], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const dreamFeastPower = (staleEpik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+
+        // Branch 1: staleEpik's Dream Feast, fully resolved (opponent hand empty → auto-completes), then reverted.
+        unmaker.setCheckpoint();
+        state.update({ type: ACTION_POWER, source: staleEpik, power: dreamFeastPower, player: PLAYER, generatedBy: staleEpik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: staleEpik.id,
+        } as any);
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+
+        // Branch 2 (sibling, same unmaker instance): activeEpik's Dream Feast, PLAYER prompt only.
+        unmaker.setCheckpoint();
+        state.update({ type: ACTION_POWER, source: activeEpik, power: dreamFeastPower, player: PLAYER, generatedBy: activeEpik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: activeEpik.id,
+        } as any);
+        unmaker.revertToCheckpoint();
+
+        expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // Engine bug – PLAY Fog Bank with no own creatures in play
 //   Fog Bank uses EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE with attachmentTarget: '$target'.
 //   When the DFS resolves the OWN_SINGLE_CREATURE prompt with no creatures available,
@@ -575,6 +862,43 @@ describe('cards.js bug – Cyclone Vashp Cyclone: DISCARD_CREATURE_FROM_PLAY wit
 
         unmaker.revertToCheckpoint();
         expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Diagnostic: DirectActionExtractor must only offer OWN creatures for the
+// 'ownCreature' prompt and only OPPONENT creatures for 'opponentCreature'.
+// ---------------------------------------------------------------------------
+describe('DirectActionExtractor – Cyclone Vashp own/opponent creature filtering', () => {
+    it('does not offer the opponent creature for the own-creature prompt (or vice versa)', () => {
+        const vashp = new CardInGame(byName('Cyclone Vashp') as Card, PLAYER).addEnergy(5);
+        const myOther = new CardInGame(byName('Furok') as Card, PLAYER).addEnergy(2);
+        const theirs = new CardInGame(byName('Furok') as Card, OPPONENT).addEnergy(4);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [vashp, myOther, theirs], [], [], adis, sinder);
+
+        const power = (vashp.card.data.powers as any[]).find(p => p.name === 'Cyclone');
+        state.update({ type: ACTION_POWER, source: vashp, power, player: PLAYER } as any);
+
+        // First prompt: choose own creature — should only offer vashp/myOther, never theirs.
+        const ownActions = DirectActionExtractor.extractActions(state, PLAYER, OPPONENT);
+        const ownTargetIds = ownActions.filter(a => a.type === 'TARGET').map((a: any) => a.targetId);
+        expect(ownTargetIds).toEqual(expect.arrayContaining([vashp.id, myOther.id]));
+        expect(ownTargetIds).not.toContain(theirs.id);
+
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: state.getZone(ZONE_TYPE_IN_PLAY).byId(vashp.id)!,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        // Second prompt: choose opponent's creature — should only offer theirs.
+        const oppActions = DirectActionExtractor.extractActions(state, PLAYER, OPPONENT);
+        const oppTargetIds = oppActions.filter(a => a.type === 'TARGET').map((a: any) => a.targetId);
+        expect(oppTargetIds).toEqual([theirs.id]);
     });
 });
 

@@ -1,9 +1,11 @@
 import { ClientAction } from "../../clientProtocol";
+import { PROMPT_TYPE_RELIC, PROMPT_TYPE_SINGLE_MAGI } from "../const";
 import { GameState } from "../GameState";
 import {
     ACTION_RESOLVE_PROMPT,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_OWN_SINGLE_CREATURE,
     PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
     PROMPT_TYPE_CHOOSE_CARDS,
@@ -16,7 +18,7 @@ import {
     PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
     PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
     PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
-} from "moonlands/dist/esm/const";
+} from "moonlands/dist/esm/const.js";
 
 class UnexpectedPromptResolver  {
     public resolvePrompt(state: GameState): ClientAction {
@@ -30,6 +32,48 @@ class UnexpectedPromptResolver  {
             case PROMPT_TYPE_OWN_SINGLE_CREATURE:
                 return this.resolveCreaturePrompt(state);
 
+            case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
+                const creatures = [
+                    ...(state.getMyCreaturesInPlay() || []),
+                    ...(state.getEnemyCreaturesInPlay() || []),
+                ];
+                const magi = [
+                    (state as any).getMyMagi?.(),
+                    ...((state as any).state?.zones?.opponentActiveMagi || []),
+                ].filter(Boolean);
+                const candidates = [...creatures, ...magi];
+                if (candidates.length) {
+                    const chosen = candidates.reduce((a: any, b: any) => (a.data.energy <= b.data.energy ? a : b));
+                    return { type: ACTION_RESOLVE_PROMPT, promptType, target: chosen.id, player } as any;
+                }
+                break;
+            }
+
+            case PROMPT_TYPE_SINGLE_MAGI: {
+                const magi = [
+                    (state as any).getMyMagi?.(),
+                    ...((state as any).state?.zones?.opponentActiveMagi || []),
+                ].filter(Boolean);
+                const candidates = magi;
+                if (candidates.length) {
+                    const chosen = candidates.reduce((a: any, b: any) => (a.data.energy <= b.data.energy ? a : b));
+                    return { type: ACTION_RESOLVE_PROMPT, promptType, target: chosen.id, player } as any;
+                }
+                break;
+            }
+
+            case PROMPT_TYPE_RELIC: {
+                const relics = [
+                    ...(state.getMyRelicsInPlay() || []),
+                    ...(state.getEnemyRelicsInPlay() || []),
+                ]
+                .filter(Boolean);
+                if (relics.length) {
+                    const chosen = relics.reduce((a: any, b: any) => (a.data.energy <= b.data.energy ? a : b));
+                    return { type: ACTION_RESOLVE_PROMPT, promptType, target: chosen.id, player } as any;
+                }
+                break;
+            }
             case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
                 const src = (state as any).state?.promptParams?.source?.id;
                 const my = state.getMyCreaturesInPlay() || [];

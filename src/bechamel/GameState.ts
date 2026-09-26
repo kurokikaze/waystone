@@ -38,6 +38,7 @@ import {
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
   ZONE_TYPE_MAGI_PILE,
+  PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 } from './const'
 import { byName } from 'moonlands/dist/esm/cards'
 import { HiddenCard, ProcessedClientCard, SerializedClientState, StateRepresentation } from './types'
@@ -799,6 +800,12 @@ export class GameState {
           case PROMPT_TYPE_PAYMENT_SOURCE: {
             promptParams = {
               cards: action.promptParams.cards,
+            };
+            break;
+          }
+          case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+            promptParams = {
+               amount: action.promptParams.amount,
             };
             break;
           }

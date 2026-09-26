@@ -199,7 +199,7 @@ export class Simulation {
 
         let winnerData: SimulationResult | null = null;
 
-        game.debug = true;
+        // game.debug = true;
         game.setOnAction((action: AnyEffectType) => {
             const commandForBotOne = convertServerCommand(action, game, 1);
             connectorOne.dispatchAction(commandForBotOne);
