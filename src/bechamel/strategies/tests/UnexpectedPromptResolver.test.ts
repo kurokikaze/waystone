@@ -18,6 +18,7 @@ describe('UnexpectedPromptResolver', () => {
       state: {
         promptParams: opts.promptParams || {},
         promptAvailableCards: opts.promptAvailableCards || [],
+        promptGeneratedBy: opts.promptGeneratedBy,
         zones: opts.zones || {},
       },
       getMyCreaturesInPlay: () => opts.myCreatures || [],
@@ -79,6 +80,19 @@ describe('UnexpectedPromptResolver', () => {
     const action: any = resolver.resolvePrompt(state)
     expect(action.type).toBe('actions/resolve_prompt')
     expect(action.number).toBe(2)
+  })
+
+  test('resolves rearrangement with an empty energy map when there are no creatures', () => {
+    const state = makeState({
+      promptType: 'prompt/rearrange_energy_on_creatures',
+      promptGeneratedBy: 'spell-id',
+    }) as any
+
+    const action: any = resolver.resolvePrompt(state)
+    expect(action.type).toBe('actions/resolve_prompt')
+    expect(action.energyOnCreatures).toEqual({})
+    expect(action.generatedBy).toBe('spell-id')
+    expect(action).not.toHaveProperty('number')
   })
 
   test('chooses first payment source', () => {

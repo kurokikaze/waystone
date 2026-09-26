@@ -132,7 +132,18 @@ class UnexpectedPromptResolver  {
                 break;
             }
 
-            case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES:
+            case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
+                const creatures = state.getMyCreaturesInPlay() || [];
+                const energyOnCreatures = Object.fromEntries(creatures.map((creature: any) => [creature.id, creature.data.energy]));
+                return {
+                    type: ACTION_RESOLVE_PROMPT,
+                    promptType,
+                    energyOnCreatures,
+                    generatedBy: (state as any).state?.promptGeneratedBy || '',
+                    player,
+                } as any;
+            }
+
             case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
             case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
                 const params = (state as any).state?.promptParams || {};
@@ -143,7 +154,14 @@ class UnexpectedPromptResolver  {
                     const map: Record<string, number> = {};
                     // put everything on the first creature
                     map[ids[0]] = amount;
-                    return { type: ACTION_RESOLVE_PROMPT, promptType, energyOnCreatures: map, damageOnCreatures: map, player } as any;
+                    return {
+                        type: ACTION_RESOLVE_PROMPT,
+                        promptType,
+                        energyOnCreatures: map,
+                        damageOnCreatures: map,
+                        generatedBy: (state as any).state?.promptGeneratedBy || '',
+                        player,
+                    } as any;
                 }
                 break;
             }

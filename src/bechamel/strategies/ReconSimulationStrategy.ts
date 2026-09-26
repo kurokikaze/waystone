@@ -239,8 +239,8 @@ export class ReconSimulationStrategy implements Strategy {
             case 'NUMBER': return this.resolveNumberPrompt(action.number)
             case 'CARDS': return { type: ACTION_RESOLVE_PROMPT, zone: action.zone, zoneOwner: action.zoneOwner, cards: action.cardIds, player: this.playerId } as C2SAction
             case 'CARDS_ORDER': return { type: ACTION_RESOLVE_PROMPT, cardsOrder: action.cardsOrder, generatedBy: this.gameState?.state.promptGeneratedBy || '', player: this.playerId } as C2SAction
-            case 'DAMAGE_MAP': return { type: ACTION_RESOLVE_PROMPT, damageMap: action.damageMap, player: this.playerId } as C2SAction
-            case 'ENERGY_MAP': return { type: ACTION_RESOLVE_PROMPT, energyMap: action.energyMap, player: this.playerId } as C2SAction
+            case 'DAMAGE_MAP': return { type: ACTION_RESOLVE_PROMPT, damageOnCreatures: action.damageMap, generatedBy: this.gameState?.state.promptGeneratedBy || '', player: this.playerId } as C2SAction
+            case 'ENERGY_MAP': return { type: ACTION_RESOLVE_PROMPT, energyOnCreatures: action.energyMap, generatedBy: this.gameState?.state.promptGeneratedBy || '', player: this.playerId } as C2SAction
             case 'PLAYER': return { type: ACTION_RESOLVE_PROMPT, targetPlayer: action.targetPlayer, player: this.playerId } as C2SAction
             case 'ALTERNATIVE': return { type: ACTION_RESOLVE_PROMPT, alternative: String(action.alternative), player: this.playerId } as C2SAction
             case 'POWER_ON_MAGI': return { type: ACTION_RESOLVE_PROMPT, powerName: action.powerName, player: this.playerId } as C2SAction
@@ -316,7 +316,7 @@ export class ReconSimulationStrategy implements Strategy {
         const turn = this.gameState?.getTurn() || 0;
         if (state.getZone(ZONE_TYPE_IN_PLAY).cards.some(c => c.card.type == TYPE_CREATURE && c.data.energy == null)) {
             console.log(`Energy null on turn ${turn}, step ${this.gameState?.getStep()}`)
-            console.dir(state.serializeData(playerId, false), {depth: null})
+            console.dir(state.serializeData(playerId, false), { depth: null })
             throw new Error(`Energy null on turn ${turn}, step ${this.gameState?.getStep()}`)
         }
         if (this.counter > ReconSimulationStrategy.failsafe || depth > 100) {
@@ -326,7 +326,7 @@ export class ReconSimulationStrategy implements Strategy {
 
         if (depth > this.depthReached) {
             this.depthReached = depth;
-            console.log(`Depth reached: ${depth}, pointer position: ${unmaker.getPointer()}`)
+            console.log(`Depth reached: ${depth}`)
         }
 
         const parentHash = hash == '' ? this.hashBuilder.makeHash(state) : hash
@@ -341,130 +341,90 @@ export class ReconSimulationStrategy implements Strategy {
         // }
         // console.dir(possibleActions, { depth: null })
         for (const action of possibleActions) {
-            if (unmaker.hasSpace()) {
-                let point = unmaker.getPointer()
-                const snapBefore = JSON.stringify(state.serializeData(playerId, false))
+            const snapBefore = JSON.stringify(state.serializeData(playerId, false))
 
-                if (snapBefore !== snapBeforeActions) {
-                    throw new Error(`State mismatch before making action: ${JSON.stringify(action)}`)
+            if (snapBefore !== snapBeforeActions) {
+                throw new Error(`State mismatch before making action: ${JSON.stringify(action)}`)
+            }
+            let snapMiddle = ''
+            const spellMetaDataSnapshot = this.cloneSpellMetaData((state as any).state.spellMetaData)
+            this.spellMetaDataCheckpoints.push(spellMetaDataSnapshot)
+            const point = state.beginSearchFrame()
+
+            const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
+            const beforeStateHash = createHash('sha256').update(snapBefore).digest('hex')
+            try {
+                if (this.gameState?.getStep() === 1 && (this.gameState?.getTurn() === 2 && actionHash.startsWith('f06c83bc8ba19b7')) && beforeStateHash.startsWith('c53651242919ea68d2b45b')) {
+                    console.log('=====*====')
+                    console.dir(action, { depth: null })
+                    console.log('==========')
+                    // state.enableDebug()
                 }
-                let snapMiddle = ''
-                const spellMetaDataSnapshot = this.cloneSpellMetaData((state as any).state.spellMetaData)
-                this.spellMetaDataCheckpoints.push(spellMetaDataSnapshot)
-                unmaker.setCheckpoint()
-
-                const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
-                const beforeStateHash = createHash('sha256').update(snapBefore).digest('hex')
-                try {
-                    if (this.gameState?.getStep() === 1 && (this.gameState?.getTurn() === 2 && actionHash.startsWith('f06c83bc8ba19b7')) && beforeStateHash.startsWith('c53651242919ea68d2b45b')) {
-                        console.log('=====*====')
-                        console.dir(action, { depth: null })
-                        console.log('==========')
-                        // state.enableDebug()
-                    }
-                    DirectActionExtractor.applyAction(state, action, playerId, opponentId)
-                    snapMiddle = JSON.stringify(state.serializeData(playerId, false))
-                } catch (e: any) {
-                    console.error(`Unmaking from catch <${this.gameState?.getTurn()}:${this.gameState?.getStep()}>`)
-                    console.error(e.message)
+                DirectActionExtractor.applyAction(state, action, playerId, opponentId)
+                snapMiddle = JSON.stringify(state.serializeData(playerId, false))
+            } catch (e: any) {
+                console.error(`Unmaking from catch <${this.gameState?.getTurn()}:${this.gameState?.getStep()}>`)
+                console.error(e.message)
+                console.error(e.stack)
+                console.error(actionHash)
+                console.error(beforeStateHash, '---')
+                if (e.message.startsWith("Non-prompt")) {
                     console.error(e.stack)
-                    console.error(actionHash)
-                    console.error(beforeStateHash, '---')
-                    if (e.message.startsWith("Non-prompt")) {
-                        console.error(e.stack)
-                    }
-                    const actionPoint = unmaker.getPointer()
-                    if (actionPoint - point > 1000) {
-                        console.error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
-                        console.dir(action)
-                        throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
-                    }
-                    unmaker.revertToCheckpoint()
-                    ;(state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
-                    const afterPoint = unmaker.getPointer()
-                    if (point !== afterPoint) {
-                        console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
-                        console.dir(action)
-                        console.dir(unmaker.dataBlob, { depth: null })
-                        throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
-                    }
-                    const snapAfter = JSON.stringify(state.serializeData(playerId, false))
-                    if (snapBefore !== snapAfter) {
-                        console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
-                        console.error(`State mismatch after unmaking action`)
-                        console.error('')
-                        console.log(snapBefore)
-                        console.error('>')
-                        console.log(snapMiddle)
-                        console.error('<')
-                        console.log(snapAfter)
-                        console.dir(action)
-                        console.log(actionHash)
-                        throw new Error(`State mismatch after unmaking action`)
-                    }
-                    continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
-                }
-                const childHash = this.hashBuilder.makeHash(state)
-                // skip no-op actions (engine silently rejected, e.g. forcePriority check failed)
-                if (childHash === parentHash) {
-                    const actionPoint = unmaker.getPointer()
-                    if (actionPoint - point > 1000) {
-                        console.error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
-                        console.dir(action)
-                        throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
-                    }
-                    unmaker.revertToCheckpoint()
-                    ;(state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
-                    const afterPoint = unmaker.getPointer()
-                    if (point !== afterPoint) {
-                        console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
-                        console.dir(action)
-                        console.log(actionHash)
-                        console.dir(unmaker.dataBlob, { depth: null })
-                        throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
-                    }
-                    continue
-                }
-                if (!this.hashes.has(childHash)) {
-                    this.hashes.add(childHash)
-                    let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash, depth + 1)
-                    if (scoredAction.score > maxScore) {
-                        maxScore = scoredAction.score
-                        maxAction = [action, ...scoredAction.actions]
-                    }
-                    // this.graph += `"${childHash}" [label="${maxScore}"]\n`
-                }
-                const actionPoint = unmaker.getPointer()
-                if (actionPoint - point > 1000) {
-                    console.error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
-                    console.dir(action)
-                    throw new Error(`Unmaker pointer jumped too far: before ${point}, after ${actionPoint}`)
                 }
 
-                unmaker.revertToCheckpoint()
-                ;(state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
+                state.rollback(point)
+                    ; (state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
+
                 const snapAfter = JSON.stringify(state.serializeData(playerId, false))
                 if (snapBefore !== snapAfter) {
                     console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
                     console.error(`State mismatch after unmaking action`)
                     console.error('')
                     console.log(snapBefore)
-                    console.error('')
+                    console.error('>')
                     console.log(snapMiddle)
-                    console.error('')
+                    console.error('<')
                     console.log(snapAfter)
                     console.dir(action)
                     console.log(actionHash)
                     throw new Error(`State mismatch after unmaking action`)
                 }
-                const afterPoint = unmaker.getPointer()
-                if (point !== afterPoint) {
-                    console.error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
-                    console.dir(action)
-                    console.dir(unmaker.dataBlob, { depth: null })
-                    throw new Error(`Unmaker pointer mismatch: before ${point}, after ${afterPoint}`)
-                }
+                continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
             }
+            const childHash = this.hashBuilder.makeHash(state)
+            // skip no-op actions (engine silently rejected, e.g. forcePriority check failed)
+            if (childHash === parentHash) {
+                state.rollback(point)
+                    ; (state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
+                continue
+            }
+            if (!this.hashes.has(childHash)) {
+                this.hashes.add(childHash)
+                let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash, depth + 1)
+                if (scoredAction.score > maxScore) {
+                    maxScore = scoredAction.score
+                    maxAction = [action, ...scoredAction.actions]
+                }
+                // this.graph += `"${childHash}" [label="${maxScore}"]\n`
+            }
+
+            state.rollback(point)
+                ; (state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
+            const snapAfter = JSON.stringify(state.serializeData(playerId, false))
+            if (snapBefore !== snapAfter) {
+                console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
+                console.error(`State mismatch after unmaking action`)
+                console.error('')
+                console.log(snapBefore)
+                console.error('')
+                console.log(snapMiddle)
+                console.error('')
+                console.log(snapAfter)
+                console.dir(action)
+                console.log(actionHash)
+                throw new Error(`State mismatch after unmaking action`)
+            }
+
         }
         if (possibleActions.length == 0) {
             maxScore = getStateScore(state, playerId, opponentId)
