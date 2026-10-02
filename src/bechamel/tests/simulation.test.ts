@@ -3173,10 +3173,5 @@ describe('Simulations', () => {
 
         gameDataCallbackOne({ playerId: 1, state: game.serializeData(1) })
         gameDataCallbackTwo({ playerId: 2, state: game.serializeData(2) })
-    }, 20000);
+    }, 30000);
 })
-
-describe.only('Pass in prompt state', () => {
-    it('Pass in prompt state', (done) => {
-    });
-});

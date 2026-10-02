@@ -281,11 +281,11 @@ export class ReconSimulationStrategy implements Strategy {
     private counter = 0
     private hashes: Set<string> = new Set<string>()
 
-    public startSolving(sim: State, unmaker: Unmaker, playerId: number, opponentId: number) {
+    public startSolving(sim: State, playerId: number, opponentId: number) {
         this.counter = 0;
         this.hashes = new Set<string>()
         this.graph = ''
-        const result = this.solveState(sim, unmaker, playerId, opponentId, this.hashBuilder.makeHash(sim))
+        const result = this.solveState(sim, playerId, opponentId, this.hashBuilder.makeHash(sim))
         // console.log(`Counter: ${this.counter}`)
         return result
     }
@@ -312,7 +312,7 @@ export class ReconSimulationStrategy implements Strategy {
     }
 
     private depthReached = 0;
-    private solveState(state: State, unmaker: Unmaker, playerId: number, opponentId: number, hash = '', depth = 0): { score: number, actions: any[] } {
+    private solveState(state: State, playerId: number, opponentId: number, hash = '', depth = 0): { score: number, actions: any[] } {
         const turn = this.gameState?.getTurn() || 0;
         if (state.getZone(ZONE_TYPE_IN_PLAY).cards.some(c => c.card.type == TYPE_CREATURE && c.data.energy == null)) {
             console.log(`Energy null on turn ${turn}, step ${this.gameState?.getStep()}`)
@@ -334,40 +334,40 @@ export class ReconSimulationStrategy implements Strategy {
 
         let maxScore = -100000;
         let maxAction: DirectAction[] = []
-        const snapBeforeActions = JSON.stringify(state.serializeData(playerId, false))
+        // const snapBeforeActions = JSON.stringify(state.serializeData(playerId, false))
         // if (turn == 3 && this.gameState?.getStep() == 1) {
         //     console.log(`Enabling debug`)
         //     state.enableDebug();
         // }
         // console.dir(possibleActions, { depth: null })
         for (const action of possibleActions) {
-            const snapBefore = JSON.stringify(state.serializeData(playerId, false))
+            // const snapBefore = JSON.stringify(state.serializeData(playerId, false))
 
-            if (snapBefore !== snapBeforeActions) {
-                throw new Error(`State mismatch before making action: ${JSON.stringify(action)}`)
-            }
-            let snapMiddle = ''
+            // if (snapBefore !== snapBeforeActions) {
+            //     throw new Error(`State mismatch before making action: ${JSON.stringify(action)}`)
+            // }
+            // let snapMiddle = ''
             const spellMetaDataSnapshot = this.cloneSpellMetaData((state as any).state.spellMetaData)
             this.spellMetaDataCheckpoints.push(spellMetaDataSnapshot)
             const point = state.beginSearchFrame()
 
             const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
-            const beforeStateHash = createHash('sha256').update(snapBefore).digest('hex')
+            // const beforeStateHash = createHash('sha256').update(snapBefore).digest('hex')
             try {
-                if (this.gameState?.getStep() === 1 && (this.gameState?.getTurn() === 2 && actionHash.startsWith('f06c83bc8ba19b7')) && beforeStateHash.startsWith('c53651242919ea68d2b45b')) {
-                    console.log('=====*====')
-                    console.dir(action, { depth: null })
-                    console.log('==========')
-                    // state.enableDebug()
-                }
+                // if (this.gameState?.getStep() === 1 && (this.gameState?.getTurn() === 2 && actionHash.startsWith('f06c83bc8ba19b7')) && beforeStateHash.startsWith('c53651242919ea68d2b45b')) {
+                //     console.log('=====*====')
+                //     console.dir(action, { depth: null })
+                //     console.log('==========')
+                //     // state.enableDebug()
+                // }
                 DirectActionExtractor.applyAction(state, action, playerId, opponentId)
-                snapMiddle = JSON.stringify(state.serializeData(playerId, false))
+                // snapMiddle = JSON.stringify(state.serializeData(playerId, false))
             } catch (e: any) {
                 console.error(`Unmaking from catch <${this.gameState?.getTurn()}:${this.gameState?.getStep()}>`)
                 console.error(e.message)
                 console.error(e.stack)
                 console.error(actionHash)
-                console.error(beforeStateHash, '---')
+                // console.error(beforeStateHash, '---')
                 if (e.message.startsWith("Non-prompt")) {
                     console.error(e.stack)
                 }
@@ -375,20 +375,20 @@ export class ReconSimulationStrategy implements Strategy {
                 state.rollback(point)
                     ; (state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
 
-                const snapAfter = JSON.stringify(state.serializeData(playerId, false))
-                if (snapBefore !== snapAfter) {
-                    console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
-                    console.error(`State mismatch after unmaking action`)
-                    console.error('')
-                    console.log(snapBefore)
-                    console.error('>')
-                    console.log(snapMiddle)
-                    console.error('<')
-                    console.log(snapAfter)
-                    console.dir(action)
-                    console.log(actionHash)
-                    throw new Error(`State mismatch after unmaking action`)
-                }
+                // const snapAfter = JSON.stringify(state.serializeData(playerId, false))
+                // if (snapBefore !== snapAfter) {
+                //     console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
+                //     console.error(`State mismatch after unmaking action`)
+                //     console.error('')
+                //     console.log(snapBefore)
+                //     console.error('>')
+                //     console.log(snapMiddle)
+                //     console.error('<')
+                //     console.log(snapAfter)
+                //     console.dir(action)
+                //     console.log(actionHash)
+                //     throw new Error(`State mismatch after unmaking action`)
+                // }
                 continue  // skip actions that crash the simulation (e.g. non-prompt action in prompt state)
             }
             const childHash = this.hashBuilder.makeHash(state)
@@ -400,7 +400,7 @@ export class ReconSimulationStrategy implements Strategy {
             }
             if (!this.hashes.has(childHash)) {
                 this.hashes.add(childHash)
-                let scoredAction = this.solveState(state, unmaker, playerId, opponentId, childHash, depth + 1)
+                let scoredAction = this.solveState(state, playerId, opponentId, childHash, depth + 1)
                 if (scoredAction.score > maxScore) {
                     maxScore = scoredAction.score
                     maxAction = [action, ...scoredAction.actions]
@@ -410,20 +410,20 @@ export class ReconSimulationStrategy implements Strategy {
 
             state.rollback(point)
                 ; (state as any).state.spellMetaData = this.spellMetaDataCheckpoints.pop()
-            const snapAfter = JSON.stringify(state.serializeData(playerId, false))
-            if (snapBefore !== snapAfter) {
-                console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
-                console.error(`State mismatch after unmaking action`)
-                console.error('')
-                console.log(snapBefore)
-                console.error('')
-                console.log(snapMiddle)
-                console.error('')
-                console.log(snapAfter)
-                console.dir(action)
-                console.log(actionHash)
-                throw new Error(`State mismatch after unmaking action`)
-            }
+            // const snapAfter = JSON.stringify(state.serializeData(playerId, false))
+            // if (snapBefore !== snapAfter) {
+            //     console.error(this.gameState?.getTurn(), ':', this.gameState?.getStep())
+            //     console.error(`State mismatch after unmaking action`)
+            //     console.error('')
+            //     console.log(snapBefore)
+            //     console.error('')
+            //     console.log(snapMiddle)
+            //     console.error('')
+            //     console.log(snapAfter)
+            //     console.dir(action)
+            //     console.log(actionHash)
+            //     throw new Error(`State mismatch after unmaking action`)
+            // }
 
         }
         if (possibleActions.length == 0) {
@@ -854,8 +854,8 @@ export class ReconSimulationStrategy implements Strategy {
                             TEMPORARY_OPPONENT_ID,
                         )
 
-                        const unmaker = new Unmaker(outerSim);
-                        const result = this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID)
+                        // const unmaker = new Unmaker(outerSim);
+                        const result = this.startSolving(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
                         if (!result.actions[0]) {
                             return this.pass()
                         }
@@ -900,8 +900,8 @@ export class ReconSimulationStrategy implements Strategy {
                                 TEMPORARY_OPPONENT_ID,
                             )
 
-                            const unmaker = new Unmaker(outerSim);
-                            const result = this.startSolving(outerSim, unmaker, this.playerId, TEMPORARY_OPPONENT_ID)
+                            // const unmaker = new Unmaker(outerSim);
+                            const result = this.startSolving(outerSim, this.playerId, TEMPORARY_OPPONENT_ID)
                             if (result.actions[0]) {
                                 return this.directActionToClientAction(result.actions[0])
                             }

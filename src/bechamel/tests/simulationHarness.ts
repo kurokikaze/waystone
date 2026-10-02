@@ -75,6 +75,33 @@ const defaultConfig: HarnessConfig = {
         ],
     },
     playerTwoPool: {
+        name: 'Naroom Pool',
+        magi: ['Poad', 'Tryn', 'Yaki', 'Pruitt', 'Evu', 'Orwin'],
+        cards: [
+            'Bhatar',
+            'Timber Hyren',
+            'Twee',
+            'Balamant Pup',
+            'Rudwot',
+            'Arboll',
+            'Carillion',
+            'Furok',
+            'Leaf Hyren',
+            'Plith',
+            'Weebo',
+            'Ancestral Flute',
+            'Robe of Vines',
+            'Water of Life',
+            "Hyren's Call",
+            "Orwin's Gaze",
+            'Vortex of Knowledge',
+            'Grow',
+            'Giant Carillion',
+        ],
+    },
+};
+/**
+ * {
         name: 'Cald Pool',
         magi: ['Grega', 'Sinder', 'Valkan', 'Ashgar', 'Magam', 'Gar', 'Barak'],
         cards: [
@@ -107,11 +134,11 @@ const defaultConfig: HarnessConfig = {
             'Flame Control',
             'Flame Hyren'
         ],
-    },
-};
+    }
+ */
 
 /*
-{
+    {
         name: 'Naroom Pool',
         magi: ['Poad', 'Tryn', 'Yaki', 'Pruitt', 'Evu', 'Orwin'],
         cards: [
@@ -301,12 +328,16 @@ function persistHarnessOutput(output: HarnessOutput): string {
 
 function summarize(output: HarnessOutput) {
     const successCount = output.results.filter(result => !result.error).length;
-    const errorCount = output.results.length - successCount;
+    const maxIterationCount = output.results.filter(result =>
+        result.error?.includes('Simulation exceeded max iterations'),
+    ).length;
+    const errorCount = output.results.filter(result =>
+        result.error && !result.error.includes('Simulation exceeded max iterations'),
+    ).length;
 
     console.log(`Simulation harness completed: ${successCount}/${output.results.length} successful runs`);
-    if (errorCount > 0) {
-        console.log(`Runs with errors: ${errorCount}`);
-    }
+    console.log(`Runs with errors: ${errorCount}`);
+    console.log(`Runs exceeding max iterations: ${maxIterationCount}`);
 }
 
 const harnessConfig = withConfigOverrides(defaultConfig, parseCliOverrides(process.argv.slice(2)));
