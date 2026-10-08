@@ -9,6 +9,8 @@ import convertClientCommands, { convertServerCommand } from '../../containedEngi
 import { Socket } from 'socket.io-client';
 
 import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { ExtractionHashLog } from './ExtractionHashLog';
 
 export type PlayerId = 1 | 2;
 
@@ -33,9 +35,17 @@ export type SimulationOptions = {
     playerOne: DeckConfig;
     playerTwo: DeckConfig;
     writeLogs?: boolean;
+    writeExtractionHashes?: boolean;
+    replayOutputDir?: string;
     maxIterations?: number;
     strategy?: 'simulation' | 'recon';
 };
+
+// Replay output is written after the run; snapshot live card references now so
+// each event records the values that were present when that event occurred.
+function snapshotLogValue<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
+}
 
 type WinnerSummary = {
     magiLeft: number;
@@ -70,7 +80,7 @@ class SimulationConnector {
             this.gameDataCallback = (state: any) => {
                 if (this.writeLogs) this.gameLog.push({
                     for: this.playerId,
-                    state,
+                    state: snapshotLogValue(state),
                 });
                 callback(state);
             };
@@ -80,7 +90,7 @@ class SimulationConnector {
             this.actionCallback = (action: any) => {
                 if (this.writeLogs) this.gameLog.push({
                     for: this.playerId,
-                    action,
+                    action: snapshotLogValue(action),
                 });
                 callback(action);
             };
@@ -95,7 +105,7 @@ class SimulationConnector {
         if (this.writeLogs) this.gameLog.push({
             from: this.playerId,
             count: this.commandCount,
-            action,
+            action: snapshotLogValue(action),
         });
 
         this.commandCount++;
@@ -160,18 +170,32 @@ export class Simulation {
     }
 
     public run(): SimulationResult {
+        const extractionLogs: ExtractionHashLog[] = [];
         try {
-            const result = this.execute();
+            if (this.options.writeExtractionHashes) {
+                if (this.options.strategy !== 'recon') {
+                    throw new Error('Extraction hash logging requires strategy=recon');
+                }
+                for (const player of ['one', 'two']) {
+                    extractionLogs.push(new ExtractionHashLog(path.join(
+                        this.options.replayOutputDir ?? '.',
+                        `extraction-hashes-seed-${this.options.rng}-player-${player}.txt`,
+                    )));
+                }
+            }
+            const result = this.execute(extractionLogs);
             this.subscribers.forEach(subscriber => subscriber.next?.(result));
             return result;
         } catch (e: unknown) {
             const error = e instanceof Error ? e : new Error(String(e));
             this.subscribers.forEach(subscriber => subscriber.error?.(error));
             throw error;
+        } finally {
+            extractionLogs.forEach(log => log.close());
         }
     }
 
-    private execute(): SimulationResult {
+    private execute(extractionLogs: ExtractionHashLog[]): SimulationResult {
         const game = createGame();
         // @ts-ignore
         game.initiatePRNG(this.options.rng);
@@ -190,12 +214,16 @@ export class Simulation {
         const connectorOne = new SimulationConnector(1, game, onPromptStateConflict, this.options.writeLogs ?? true);
         const connectorTwo = new SimulationConnector(2, game, onPromptStateConflict, this.options.writeLogs ?? true);
 
-        const strategyConnectorOne = new StrategyConnector(connectorOne as unknown as Socket);
+            const strategyConnectorOne = new StrategyConnector(connectorOne as unknown as Socket);
         const strategyConnectorTwo = new StrategyConnector(connectorTwo as unknown as Socket);
 
-        const StrategyClass = this.options.strategy === 'recon' ? ReconSimulationStrategy : SimulationStrategy;
-        strategyConnectorOne.connect(new StrategyClass());
-        strategyConnectorTwo.connect(new StrategyClass());
+        const createStrategy = (index: number) => this.options.strategy === 'recon'
+            ? new ReconSimulationStrategy(extractionLogs[index]
+                ? (stateHash, actionsHash) => extractionLogs[index].write(stateHash, actionsHash)
+                : undefined)
+            : new SimulationStrategy();
+        strategyConnectorOne.connect(createStrategy(0));
+        strategyConnectorTwo.connect(createStrategy(1));
 
         let winnerData: SimulationResult | null = null;
 
@@ -208,7 +236,7 @@ export class Simulation {
             connectorTwo.dispatchAction(commandForBotTwo);
 
             if (commandForBotTwo) {
-                if (this.options.writeLogs) gameLog.push({ for: 2, action: commandForBotTwo });
+                if (this.options.writeLogs) gameLog.push({ for: 2, action: snapshotLogValue(commandForBotTwo) });
             }
 
             if (action.type === ACTION_PLAYER_WINS) {
@@ -234,7 +262,7 @@ export class Simulation {
             }
         });
 
-        if (this.options.writeLogs) gameLog.push({ for: 2, state: game.serializeData(2) });
+        if (this.options.writeLogs) gameLog.push({ for: 2, state: snapshotLogValue(game.serializeData(2)) });
         connectorOne.dispatchGameData({ playerId: 1, state: game.serializeData(1) });
         connectorTwo.dispatchGameData({ playerId: 2, state: game.serializeData(2) });
 
@@ -244,6 +272,7 @@ export class Simulation {
         const firstLog: string[] = [];
         const ACTION_LOG_SIZE = 30;
 
+        try {
         while (!game.hasWinner()) {
             iterations++;
             if (iterations > maxIterations) {
@@ -283,9 +312,13 @@ export class Simulation {
             if (iterations <= 10) firstLog.push(`#${iterations} ${stateBefore}→${stateAfter} [${actionDesc}]`);
         }
 
-        if (this.options.writeLogs) {
-            connectorOne.writeLog('./replayPlayerOne-node.json');
-            connectorTwo.writeLog('./replayPlayerTwo-node.json');
+        } finally {
+            if (this.options.writeLogs) {
+                const replayOutputDir = this.options.replayOutputDir ?? '.';
+                fs.mkdirSync(replayOutputDir, { recursive: true });
+                connectorOne.writeLog(path.join(replayOutputDir, `replay-seed-${this.options.rng}-player-one.json`));
+                connectorTwo.writeLog(path.join(replayOutputDir, `replay-seed-${this.options.rng}-player-two.json`));
+            }
         }
 
         if (!winnerData) {

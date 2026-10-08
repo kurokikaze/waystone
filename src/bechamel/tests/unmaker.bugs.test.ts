@@ -900,6 +900,40 @@ describe('DirectActionExtractor – Cyclone Vashp own/opponent creature filterin
         const oppTargetIds = oppActions.filter(a => a.type === 'TARGET').map((a: any) => a.targetId);
         expect(oppTargetIds).toEqual([theirs.id]);
     });
+
+    it.each([
+        { sourceName: 'Implosion', powerName: undefined, expectedController: OPPONENT },
+        { sourceName: 'Fog Bank', powerName: undefined, expectedController: PLAYER },
+        { sourceName: 'Furok', powerName: 'Final Blow', expectedController: OPPONENT },
+        { sourceName: 'Furok', powerName: 'Vitalize', expectedController: PLAYER },
+    ])('restricts $sourceName $powerName target choices to the intended side', ({ sourceName, powerName, expectedController }) => {
+        const ownCreature = new CardInGame(byName('Furok') as Card, PLAYER).addEnergy(3);
+        const opponentCreature = new CardInGame(byName('Furok') as Card, OPPONENT).addEnergy(3);
+        const source = new CardInGame(byName(sourceName) as Card, PLAYER);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const state = makeState(STEP_PRS1, [ownCreature, opponentCreature], [source], [], adis, sinder);
+        const rawState = state.state as any;
+
+        rawState.prompt = true;
+        rawState.promptType = 'prompt/creature';
+        rawState.promptPlayer = PLAYER;
+        rawState.promptGeneratedBy = source.id;
+        rawState.promptParams = {};
+        rawState.spellMetaData[source.id] = {
+            source,
+            ...(powerName ? { sourcePower: { name: powerName } } : {}),
+        };
+
+        const targetIds = DirectActionExtractor.extractActions(state, PLAYER, OPPONENT)
+            .filter(action => action.type === 'TARGET')
+            .map(action => action.type === 'TARGET' ? action.targetId : '');
+        const expectedId = expectedController === PLAYER ? ownCreature.id : opponentCreature.id;
+        const excludedId = expectedController === PLAYER ? opponentCreature.id : ownCreature.id;
+
+        expect(targetIds).toEqual([expectedId]);
+        expect(targetIds).not.toContain(excludedId);
+    });
 });
 
 // ---------------------------------------------------------------------------

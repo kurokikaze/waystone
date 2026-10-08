@@ -169,6 +169,12 @@ export function createState(
   const seed = gameState.getTurn() * 100 + gameState.getStep() * 10 + gameState.playerId
   // console.log(`${gameState.getTurn()} * 100 + ${gameState.getStep()} * 10 + ${gameState.playerId}`)
   sim.initiatePRNG(seed)
+  // These zones bypass State.createZones(), which normally binds deck shuffles
+  // to the engine RNG. Otherwise Mindwinds/other redraws fall back to Math.random
+  // when the deck empties, escaping both the seed and search-frame rollback.
+  for (const player of [playerId, opponentId]) {
+    sim.getZone(ZONE_TYPE_DECK, player).setPRNG(sim.twister!)
+  }
   // Carry over spellMetaData: mid-spell/power prompts (e.g. Fire Flow's "target" then "number"
   // prompts) resolve across separate generateAction() calls, each rebuilding the sim from scratch.
   // Without this, variables stored by an earlier real prompt resolution (like $target) are lost,

@@ -9,6 +9,8 @@ type HarnessConfig = {
     deckSize: number;
     outputDir: string;
     verbose: boolean;
+    writeLogs: boolean;
+    writeExtractionHashes: boolean;
     maxIterations: number;
     strategy: 'simulation' | 'recon';
     playerOnePool: DeckPool;
@@ -31,7 +33,7 @@ type HarnessOutput = {
     results: SimulationRunResult[];
 };
 
-type CliOverrides = Partial<Pick<HarnessConfig, 'runs' | 'baseSeed' | 'deckSize' | 'outputDir' | 'verbose' | 'maxIterations' | 'strategy'>>;
+type CliOverrides = Partial<Pick<HarnessConfig, 'runs' | 'baseSeed' | 'deckSize' | 'outputDir' | 'verbose' | 'writeLogs' | 'writeExtractionHashes' | 'maxIterations' | 'strategy'>>;
 
 const defaultConfig: HarnessConfig = {
     runs: 5,
@@ -39,6 +41,8 @@ const defaultConfig: HarnessConfig = {
     deckSize: 43,
     outputDir: './stateDumps',
     verbose: false,
+    writeLogs: false,
+    writeExtractionHashes: false,
     maxIterations: 500,
     strategy: 'simulation',
     playerOnePool: {
@@ -194,6 +198,12 @@ function parseCliOverrides(args: string[]): CliOverrides {
             case 'verbose':
                 overrides.verbose = value === 'true' || value === '1';
                 break;
+            case 'writeLogs':
+                overrides.writeLogs = value === 'true' || value === '1';
+                break;
+            case 'writeExtractionHashes':
+                overrides.writeExtractionHashes = value === 'true' || value === '1';
+                break;
             case 'strategy':
                 if (value === 'recon' || value === 'simulation') overrides.strategy = value;
                 break;
@@ -228,7 +238,9 @@ function runSingleSimulation(config: HarnessConfig, runIndex: number): Simulatio
         rng: seed,
         playerOne: playerOneDeck,
         playerTwo: playerTwoDeck,
-        writeLogs: false,
+        writeLogs: config.writeLogs,
+        writeExtractionHashes: config.writeExtractionHashes,
+        replayOutputDir: config.outputDir,
         maxIterations: config.maxIterations,
         strategy: config.strategy,
     });

@@ -2,6 +2,7 @@ import { byName } from 'moonlands/dist/esm/cards'
 import { AnyEffectType } from 'moonlands/dist/esm/types';
 import CardInGame from 'moonlands/dist/esm/classes/CardInGame';
 import { createHash } from 'crypto';
+import fs from 'fs';
 
 import {
     PROMPT_TYPE_MAY_ABILITY,
@@ -91,7 +92,7 @@ export class ReconSimulationStrategy implements Strategy {
     protected actionsOnHold: (C2SActionOnHold & { fromStep?: number, fromTurn?: number, generateNumber?: number })[] = []
     private StoredTree: SimulationEntity[] = []
 
-    constructor() {
+    constructor(private readonly logExtractionHashes?: (stateHash: string, actionsHash: string) => void) {
         this.hashBuilder = new HashBuilder()
     }
 
@@ -331,6 +332,10 @@ export class ReconSimulationStrategy implements Strategy {
 
         const parentHash = hash == '' ? this.hashBuilder.makeHash(state) : hash
         const possibleActions = DirectActionExtractor.extractActions(state, playerId, opponentId)
+        // if (this.logExtractionHashes) {
+        //     const actionsHash = createHash('sha256').update(JSON.stringify(possibleActions)).digest('hex')
+        //     this.logExtractionHashes(parentHash, actionsHash)
+        // }
 
         let maxScore = -100000;
         let maxAction: DirectAction[] = []
@@ -351,7 +356,6 @@ export class ReconSimulationStrategy implements Strategy {
             this.spellMetaDataCheckpoints.push(spellMetaDataSnapshot)
             const point = state.beginSearchFrame()
 
-            const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
             // const beforeStateHash = createHash('sha256').update(snapBefore).digest('hex')
             try {
                 // if (this.gameState?.getStep() === 1 && (this.gameState?.getTurn() === 2 && actionHash.startsWith('f06c83bc8ba19b7')) && beforeStateHash.startsWith('c53651242919ea68d2b45b')) {
@@ -363,6 +367,7 @@ export class ReconSimulationStrategy implements Strategy {
                 DirectActionExtractor.applyAction(state, action, playerId, opponentId)
                 // snapMiddle = JSON.stringify(state.serializeData(playerId, false))
             } catch (e: any) {
+                const actionHash = createHash('sha256').update(JSON.stringify(action)).digest('hex')
                 console.error(`Unmaking from catch <${this.gameState?.getTurn()}:${this.gameState?.getStep()}>`)
                 console.error(e.message)
                 console.error(e.stack)
