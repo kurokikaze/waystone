@@ -332,10 +332,10 @@ export class ReconSimulationStrategy implements Strategy {
 
         const parentHash = hash == '' ? this.hashBuilder.makeHash(state) : hash
         const possibleActions = DirectActionExtractor.extractActions(state, playerId, opponentId)
-        // if (this.logExtractionHashes) {
-        //     const actionsHash = createHash('sha256').update(JSON.stringify(possibleActions)).digest('hex')
-        //     this.logExtractionHashes(parentHash, actionsHash)
-        // }
+        if (this.logExtractionHashes) {
+            const actionsHash = createHash('sha256').update(JSON.stringify(possibleActions)).digest('hex')
+            this.logExtractionHashes(parentHash, actionsHash)
+        }
 
         let maxScore = -100000;
         let maxAction: DirectAction[] = []
