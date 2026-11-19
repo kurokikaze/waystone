@@ -1,5 +1,9 @@
 /* global window */
 import { byName } from 'moonlands/dist/esm/cards';
+
+export function booleanGuard<T>(value: T | null | undefined | false): value is T {
+  return Boolean(value);
+}
 import Card from 'moonlands/dist/esm/classes/Card';
 import { ConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
 import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, TYPE_CREATURE } from 'moonlands/dist/esm/const';

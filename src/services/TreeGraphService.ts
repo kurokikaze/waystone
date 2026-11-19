@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { BaseDirectory, exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { isTauri } from "@tauri-apps/api/core";
-import { booleanGuard } from "../bechamel/strategies/simulationUtils";
+import { booleanGuard } from '../utils';
 import { ClientMessage } from "../clientProtocol";
 import testReplay from './testReplay.json';
 

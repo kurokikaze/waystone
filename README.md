@@ -4,19 +4,19 @@ This app lets you play Magi-Nation Duel locally, against the bot. You can edit b
 
 The cards currently included in the app are almost all cards of the Base set.
 
-Match simulator is implemented.
+Bot code, tests and the match-simulation harness live in the sibling Bechamel
+package. Shared wire messages and engine command conversion come from the
+duel-protocol 0.1.0 GitHub Release archive. Moonlands remains the game engine.
 
-The reusable simulation class lives in src/bechamel/tests/simulation.ts.
+For local development, keep Waystone and Bechamel side by side. Install and build
+bechamel, then run `npm install` and
+`npm run build` here. See `../bechamel/README.md` for commands and public APIs,
+and `../duel-protocol/README.md` for package boundaries and the future triage split.
 
-For quick reproducible deck-vs-deck batches, use the harness in src/bechamel/tests/simulationHarness.ts:
-- Configure card pools, run count, and base seed in defaultConfig.
-- Build with npm run compile-sim.
-- Run with npm run sim:harness.
+`src/worker/botWorker.ts` is the application adapter: it connects Bechamel to a
+Web Worker and injects the application's diagnostic service. The local engine
+host remains in `src/containedEngine`; wire conversion is re-exported there for
+existing application imports.
 
-Each harness run stores a compact JSON file in stateDumps with:
-- seed
-- generated decks for both players
-- winner (if any)
-- error message (if any)
-
-The full action log is intentionally not stored, so any run can be reproduced by reusing the same seed and generated decks.
+The npm lockfile uses public registry URLs. The pre-existing Yarn lockfile is
+preserved; npm is the verified installation path for this extraction.

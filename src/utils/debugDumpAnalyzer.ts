@@ -2,7 +2,7 @@ import { BaseDirectory, exists, readDir, readTextFile } from "@tauri-apps/plugin
 import { isTauri } from "@tauri-apps/api/core"
 import * as fs from 'fs'
 import * as path from 'path'
-import { GameState } from '../bechamel/GameState'
+import { GameState } from 'bechamel'
 
 export async function listDumps(): Promise<string[]> {
     if (isTauri()) {
