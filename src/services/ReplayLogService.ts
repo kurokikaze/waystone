@@ -31,7 +31,7 @@ export class ReplayLogService {
             const replayContent = JSON.parse(contentRaw) as ClientMessage[];
             return replayContent;
         }
-        return new Promise((resolve) => resolve((replay === 'testReplay' ? testReplay.filter(event => event.for == 2) : testReplay2) as ClientMessage[]));
+        return (replay === 'testReplay' ? (testReplay as ClientMessage[]).filter(event => event.action) : testReplay2 as ClientMessage[]);
     }
 
     private async createReplayFileIfNotExists(replayName: string, replayContents: string[]) {

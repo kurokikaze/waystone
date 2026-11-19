@@ -161,61 +161,84 @@ const convertTimer = (type: TimersKeyType | any) => {
     return type in TIMERS_BY_EVENT ? TIMERS_BY_EVENT[type as TimersKeyType] : 0;
 };
 
-export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>, onlyEnemy = true) {
-    const actionsStorage: ClientCommand[] = []
-    let delaying: boolean = false;
-    let timeout: ReturnType<typeof setTimeout> = 0;
-    let finished = false;
-
+export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>, onlyEnemy = true, playback$?: Observable<boolean>) {
     const actionDelayed = new Observable<ClientCommand>(observer => {
+        const actionsStorage: ClientCommand[][] = [];
+        let currentActions: ClientCommand[] = [];
+        let delaying = false;
+        let streaming = false;
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        let finished = false;
+        let playing = true;
+
         const streamActions = () => {
-            while (actionsStorage.length) {
-                const action = actionsStorage.shift();
-                if (action) {
-                    const delayBy = convertTimer(action.type)
-                    observer.next(action);
+            if (delaying || streaming || observer.closed) return;
+            streaming = true;
+            try {
+                while (!observer.closed) {
+                    if (!currentActions.length) {
+                        if (!playing || !actionsStorage.length) break;
+                        currentActions = actionsStorage.shift()!;
+                    }
+                    const action = currentActions.shift()!;
+                    const delayBy = convertTimer(action.type);
                     if (delayBy > 0) {
+                        delaying = true;
                         timeout = setTimeout(() => {
+                            timeout = undefined;
                             delaying = false;
                             streamActions();
                         }, delayBy);
-                        delaying = true;
-                        return;
                     }
+                    observer.next(action);
+                    if (delaying) return;
                 }
-            }
-            if (finished) {
-                observer.complete();
+                if (finished && !currentActions.length && !actionsStorage.length) {
+                    observer.complete();
+                }
+            } finally {
+                streaming = false;
             }
         }
 
-        break$.subscribe({
+        const playbackSubscription = playback$?.subscribe({
+            next: value => {
+                playing = value;
+                streamActions();
+            },
+            error: error => observer.error(error),
+        });
+
+        const breakSubscription = break$.subscribe({
             next: () => {
                 if (delaying) {
-                    // console.log('Break applied');
                     clearTimeout(timeout);
+                    timeout = undefined;
                     delaying = false;
                     streamActions();
                 }
             }
         });
 
-        action$.subscribe({
+        const actionSubscription = action$.subscribe({
             next: (action) => {
                 const convertedActions = convertAction(action, store, onlyEnemy);
-                actionsStorage.push(...convertedActions);
-                if (!delaying) {
-                    streamActions()
-                }
+                actionsStorage.push(convertedActions);
+                streamActions();
             },
             complete: () => {
-                if (!delaying && actionsStorage.length == 0) {
-                    observer.complete()
-                } else {
-                    finished = true;
-                }
-            }
-        })
+                finished = true;
+                streamActions();
+            },
+            error: error => observer.error(error),
+        });
+
+        return () => {
+            clearTimeout(timeout);
+            actionSubscription.unsubscribe();
+            breakSubscription.unsubscribe();
+            playbackSubscription?.unsubscribe();
+        };
     })
 
     return actionDelayed;
