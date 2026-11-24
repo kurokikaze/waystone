@@ -11,9 +11,9 @@ import {
 } from 'moonlands/dist/esm/const';
 import { byName } from 'moonlands/dist/esm/cards';
 import Card from '../Card.tsx';
-import { isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy, getMagiEnergy, getPlayerNumber } from '../../selectors';
+import { isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy, getPlayerNumber } from '../../selectors';
 import { withAbilities } from '../CardAbilities.tsx';
-import { useZoneContent, useCardData } from '../common';
+import { useZoneContent, useCardData, isPromptPaymentSource } from '../common';
 import { ANIMATION_MAGI_DEFEATED } from '../../const';
 
 const CardWithAbilities = withAbilities(Card);
@@ -21,11 +21,11 @@ const CardWithAbilities = withAbilities(Card);
 const playerHasCreatures = state => state.zones.inPlay.some(card => byName(card.card).type === TYPE_CREATURE && card.data.controller === state.playerNumber);
 
 const isOnFilteredMagiPrompt = (state) => {
-    if (!state.prompt) return false;
+    if (!state.prompt || state.promptPlayer !== state.playerNumber) return false;
     const isOnMWCPrompt = state.promptType === PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
     if (isOnMWCPrompt) return !playerHasCreatures(state);
     const isOnPaymentPrompt = state.promptType === PROMPT_TYPE_PAYMENT_SOURCE;
-    if (isOnPaymentPrompt) return getMagiEnergy(state) >= state.promptParams.paymentAmount;
+    if (isOnPaymentPrompt) return state.zones.playerActiveMagi.some(card => isPromptPaymentSource(state.promptParams, card.id));
     return false;
 };
 

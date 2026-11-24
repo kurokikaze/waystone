@@ -26,7 +26,8 @@ import {
 import { EngineConnector } from '../../types.js';
 import { ZoneType } from 'moonlands/dist/esm/types/common.js';
 
-const ZoneNames: Record<ZoneType, string> = {
+const ZoneNames: Record<ZoneType | 'zones/set_aside', string> = {
+	'zones/set_aside': 'Set aside',
 	[ZONE_TYPE_DECK]: 'Deck',
 	[ZONE_TYPE_ACTIVE_MAGI]: 'Active Magi',
 	[ZONE_TYPE_DEFEATED_MAGI]: 'Defeated Magi',

@@ -1,5 +1,4 @@
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Provider } from "react-redux"
 import { createStore, compose, applyMiddleware } from "redux";
 import { createEpicMiddleware } from "redux-observable";
@@ -36,18 +35,22 @@ export const GameAppWrapper = ({
   opponentDeck,
   onReturnToBase,
 }: GameAppWrapperProps) => {
-  let breakCallback = () => {}
+  const breakCallback = useRef(() => {});
 
   const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
   useEffect(() => {
-   const [realEngineConnector, callback] = connectToEngine(store, playerDeck, opponentDeck)
+   const [realEngineConnector, callback, disconnect] = connectToEngine(store, playerDeck, opponentDeck)
 
    setEngineConnector(realEngineConnector)
-   breakCallback = callback
+   breakCallback.current = callback;
+   return () => {
+    breakCallback.current = () => {};
+    disconnect();
+   };
   }, []);
 
   return (<Provider store={store}>
-    <GameApp engineConnector={engineConnector} onBreak={breakCallback} onReturnToBase={onReturnToBase} playerId={1} />
+    <GameApp engineConnector={engineConnector} onBreak={() => breakCallback.current()} onReturnToBase={onReturnToBase} playerId={1} />
   </Provider>)
 }

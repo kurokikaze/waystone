@@ -10,7 +10,7 @@ import { ClientAction } from "../../clientProtocol";
 import { enrichState } from "../../utils";
 import { EngineConnector } from "../../types";
 
-export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck: string[]): [EngineConnector, () => void] => {
+export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck: string[]): [EngineConnector, () => void, () => void] => {
     const bechamel = new BotWorker();
     // botRef.current = bechamel
     console.log('Bechamel worker created');
@@ -56,6 +56,7 @@ export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck
         }
 
         engine.onmessage = onmessage;
+        return () => { engine.onmessage = null; };
     });
 
     const breakObservable = new Observable<{}>(observer => {
@@ -66,7 +67,7 @@ export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck
 
     const delayedActions = addAnimations(actionsObservable, breakObservable, store, true);
 
-    delayedActions.subscribe({
+    const subscription = delayedActions.subscribe({
         next: (transformedAction) => {
             store.dispatch(transformedAction);
         },
@@ -108,5 +109,9 @@ export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck
         console.log('Bechamel connected to the engine');
     }
 
-    return [realEngineConnector, breakCallback]
+    return [realEngineConnector, () => breakCallback(), () => {
+        subscription.unsubscribe();
+        engine.terminate();
+        bechamel.terminate();
+    }];
 }

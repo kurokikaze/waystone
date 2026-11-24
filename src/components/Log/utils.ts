@@ -16,10 +16,12 @@ import {
 	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 	LOG_ENTRY_DIE_ROLLED
 } from 'moonlands/dist/esm/const';
-import { LogEntryType } from 'moonlands/dist/esm/types';
+import { GameLogEntry } from '../../types';
 
-export const mapEntryToText = (entry: LogEntryType): string => {
+export const mapEntryToText = (entry: GameLogEntry): string => {
 	switch (entry.type) {
+		case 'log/revealed_cards':
+			return entry.cards.length ? `Revealed cards: ${entry.cards.join(', ')}` : 'No cards to reveal';
 		case LOG_ENTRY_PLAY:
 			return `Player ${entry.player} plays ${entry.card}`;
 		case LOG_ENTRY_DRAW:

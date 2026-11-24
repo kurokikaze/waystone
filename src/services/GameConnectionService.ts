@@ -6,7 +6,7 @@ import { ClientCommand } from "../clientProtocol";
 import { EngineConnector } from "../types";
 
 export class GameConnectionService {
-    public connectToGame(store: Store, secret: string): [EngineConnector, () => void] {
+    public connectToGame(store: Store, secret: string): [EngineConnector, () => void, () => void] {
         console.log(`Secret is ${secret}`)
         const socket = io(`ws://ec2-13-60-188-142.eu-north-1.compute.amazonaws.com/game`);
         let breakCallback = () => {}
@@ -31,9 +31,11 @@ export class GameConnectionService {
         })
 
         const actionsObservable = new Observable<ClientCommand>(subscriber => {
-            socket.on('message', (msg) => {
+            const onMessage = (msg: ClientCommand) => {
                 subscriber.next(msg)
-            })
+            };
+            socket.on('message', onMessage);
+            return () => { socket.off('message', onMessage); };
         })
 
         const breakObservable = new Observable<{}>(observer => {
@@ -44,7 +46,7 @@ export class GameConnectionService {
 
         const delayedActions = addAnimations(actionsObservable, breakObservable, store, true);
 
-        delayedActions.subscribe({
+        const subscription = delayedActions.subscribe({
             next: (transformedAction) => {
                 store.dispatch(transformedAction);
             },
@@ -61,10 +63,11 @@ export class GameConnectionService {
                 socket.send(action)
             },
             disconnect: () => {
+                subscription.unsubscribe();
                 socket.close()
             }
         };
 
-        return [networkEngineConnector, breakCallback]
+        return [networkEngineConnector, () => breakCallback(), networkEngineConnector.disconnect]
     }
 }

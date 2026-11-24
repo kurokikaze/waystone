@@ -1,9 +1,9 @@
 /* globals */
 import { useSelector, useDispatch } from 'react-redux';
-import { RESTRICTION_EXCEPT_SOURCE } from 'moonlands/dist/esm/const';
+import { PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, RESTRICTION_EXCEPT_SOURCE } from 'moonlands/dist/esm/const';
 import cn from 'classnames';
 import { plusEnergyOnCreature, minusEnergyOnCreature } from '../actions';
-import { getPromptGeneratedBy } from '../selectors';
+import { getPromptGeneratedBy, getPromptType } from '../selectors';
 
 export const SimpleButton = ({name, disabled, style, onClick}) =>
 	(
@@ -17,6 +17,7 @@ export const withEnergyManipulation = Component => ({ id, data, card, ...props }
 	const currentEnergy = useSelector(state => state.energyPrompt.cards[id]) || 0;
 	const restriction = useSelector(state => state.promptParams?.restriction);
 	const generatedBy = useSelector(getPromptGeneratedBy);
+	const promptType = useSelector(getPromptType);
 
 	const handlePlusEnergy = () => {
 		if (freeEnergy > 0) {
@@ -31,7 +32,7 @@ export const withEnergyManipulation = Component => ({ id, data, card, ...props }
 	};
 	
 	const thisIsNotTheSource = restriction !== RESTRICTION_EXCEPT_SOURCE || id !== generatedBy;
-	const ableToParticipate = !data.energyStasis;
+	const ableToParticipate = promptType !== PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES || !card.data.energyStasis;
 	return <div>
 		<Component
 			id={id}

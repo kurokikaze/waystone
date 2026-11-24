@@ -5,6 +5,7 @@ import {
 	ACTION_PASS,
 	ACTION_ATTACK,
 	ACTION_ENTER_PROMPT,
+	EFFECT_TYPE_PROMPT_ENTERED,
 	ACTION_RESOLVE_PROMPT,
 	ACTION_PLAYER_WINS,
 	ACTION_POWER,
@@ -385,6 +386,7 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 						min: action.min,
 						max: action.max
 					};
+					break;
 				}
 				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
 					action = action as ClientEnterPromptAnyCreatureExceptSource
@@ -495,12 +497,12 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 					break;
 				}
 				case PROMPT_TYPE_PAYMENT_SOURCE: {
-					// A bit of a hack
-					action.message = `Select who should pay ${action.amount} energy for a creature`;
 					promptParams = {
 						paymentType: action.paymentType,
 						paymentAmount: action.amount,
-					}
+						paymentSourceIds: action.cards.map(card => card.id),
+					};
+					break;
 				}
 			}
 
@@ -509,9 +511,10 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 				prompt: true,
 				promptPlayer: action.player,
 				promptType: action.promptType,
-				promptMessage: action?.message || null,
+				promptMessage: action.message || (promptParams?.paymentAmount !== undefined
+					? `Choose a card to pay ${promptParams.paymentAmount} energy.` : null),
 				promptParams,
-				// promptGeneratedBy: (action?.generatedBy || ''),
+				promptGeneratedBy: 'generatedBy' in action ? action.generatedBy ?? null : null,
 				promptAvailableCards: ('availableCards' in action ? action.availableCards as string[] : null),
 				energyPrompt,
 			};
@@ -613,6 +616,15 @@ const reducer = (state = defaultState, action: ReducerAction): State => {
 			};
 		}
 		case ACTION_EFFECT: {
+			if ('effectType' in action && action.effectType === EFFECT_TYPE_PROMPT_ENTERED && 'promptType' in action) {
+				const params = 'promptParams' in action ? action.promptParams : undefined;
+				return reducer(state, {
+					...params,
+					...action,
+					...(params && 'sourceZoneOwner' in params && { zoneOwner: params.sourceZoneOwner }),
+					type: ACTION_ENTER_PROMPT,
+				} as ClientAction);
+			}
 			return applyEffect(state, action as ClientEffectAction);
 		}
 		case PLUS_ENERGY_ON_CREATURE: {

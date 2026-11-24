@@ -17,7 +17,8 @@ import { ClientEffectAddEnergyToCreature, ClientEffectRemoveEnergyFromCreature }
 import { State, ContinuousEffectType } from '../types';
 import { byName } from 'moonlands/dist/esm/cards';
 
-const clientZoneNames: Record<ZoneType, string> = {
+const clientZoneNames: Record<ZoneType | 'zones/set_aside', string> = {
+  'zones/set_aside': 'setAside',
   [ZONE_TYPE_DECK]: 'Deck',
   [ZONE_TYPE_HAND]: 'Hand',
   [ZONE_TYPE_DISCARD]: 'Discard',
@@ -49,6 +50,7 @@ export const getZoneName = (
     throw new Error(`Unknown zone: ${serverZoneType}`);
   }
 
+  if (String(serverZoneType) === 'zones/set_aside') return 'setAside';
   if (serverZoneType === ZONE_TYPE_IN_PLAY) {
     return 'inPlay';
   }
@@ -62,7 +64,11 @@ export { tickDownContinuousEffects } from 'duel-protocol/effects';
 export const cleanupContinuousEffects = (effects: ContinuousEffectType[], opponent: boolean): ContinuousEffectType[] => {
   let resultingEffects: ContinuousEffectType[] = [];
   for (const effect of effects) {
-    switch (effect.expiration.type) {
+    switch (String(effect.expiration.type)) {
+      case 'expirations/during_opponent_turns':
+      case 'expirations/during_player_turns':
+        resultingEffects.push(effect);
+        break;
       case EXPIRATION_NEVER: {
         resultingEffects.push(effect);
         break;

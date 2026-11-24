@@ -50,45 +50,34 @@ export const ReplayAppWrapper = ({
     const [playing, setPlaying] = useState(true);
     const replayDataSaved = useRef<ClientMessage[]>()
     const replayDataInitial = useRef<ClientMessage[]>()
+    const replayPlayer = useRef(1);
     const actionSubscriber = useRef<Subscriber<ClientAction>>()
     const playback = useRef(new BehaviorSubject(true));
     const interval = useRef<ReturnType<typeof setInterval>>();
     const animationSubscription = useRef<Subscription>();
     const [ticks, setTicks] = useState<Record<number, string>>({})
 
-    const startPlayback = (speed = 100) => {
-        if (replayDataSaved.current && actionSubscriber.current && !actionSubscriber.current.closed && !interval.current) {
+    const startPlayback = () => {
+        if (!animationSubscription.current || animationSubscription.current.closed) {
+            if (replayDataInitial.current) resetReplay(replayDataInitial.current, true);
+            return;
+        }
+        if (!interval.current && !actionSubscriber.current?.closed) {
             interval.current = setInterval(() => {
                 if (!replayDataSaved.current) {
                     throw new Error('Replay stopped prematurely');
                 }
                 const messageData = replayDataSaved.current.shift();
-                if (messageData && 'state' in messageData) {
-                    const data = messageData;
-                    if (data.for === 1) {
-                        console.log('Setting the initial state');
-                        console.dir(messageData.state);
-                        // @ts-ignore
-                        store.dispatch({ type: 'setInitialState', state: enrichState(messageData.state, 1) });
-                    }
-                } else if (messageData && 'action' in messageData) {
-                    if (messageData.for === 1) {
-                        actionSubscriber.current?.next(messageData.action);
-                        if (messageData.action.type === ACTION_PLAYER_WINS) {
-                            clearInterval(interval.current);
-                            interval.current = undefined;
-                            actionSubscriber.current?.complete();
-                        }
-                    }
-                } else if (!messageData) {
+                if (messageData) actionSubscriber.current?.next(messageData.action);
+                if (!messageData || messageData.action.type === ACTION_PLAYER_WINS) {
                     clearInterval(interval.current);
                     interval.current = undefined;
                     actionSubscriber.current?.complete();
                 }
-            }, speed);
+            }, 100);
         }
-        playback.current.next(true);
         setPlaying(true);
+        playback.current.next(true);
     }
 
     const pause = () => {
@@ -104,36 +93,41 @@ export const ReplayAppWrapper = ({
 
     const rewind = () => {
         if (replayDataInitial.current) {
-            replayDataSaved.current = [...replayDataInitial.current]
-            setCurrentPosition(0)
+            resetReplay(replayDataInitial.current, playing);
         }
     }
 
     const breakRef = useRef<Function>(() => { });
     const [length, setLength] = useState<number>(0)
     const [currentPosition, setCurrentPosition] = useState<number>(0)
+    const [replayRun, setReplayRun] = useState(0);
 
-    const loadReplay = async (replayName: string, isCancelled: () => boolean) => {
-        const replayData = await (new ReplayLogService()).readReplay(replayName);
-        if (isCancelled()) return;
-        replayDataSaved.current = replayData;
-        replayDataInitial.current = [...replayData];
-        const ticksFromReplay = replayData
-            .map((entry, index) => {
-                if (!('action' in entry) || !entry.action) return [index, '', ''];
-                if (entry.action.type !== ACTION_EFFECT) return [index, entry.action.type, ''];
-                const { type = '', effectType = '' } = entry.action
-                return [index, type, effectType];
-            })
-            .filter(([_, type, effectType]) => type == ACTION_EFFECT && effectType == EFFECT_TYPE_START_OF_TURN)
-            .map(([step], index) => [step, (index + 1).toString()])
-        setTicks(Object.fromEntries(ticksFromReplay))
-        setLength(replayData.length)
+    const disposeReplay = () => {
+        clearInterval(interval.current);
+        interval.current = undefined;
+        animationSubscription.current?.unsubscribe();
+        animationSubscription.current = undefined;
+        actionSubscriber.current = undefined;
+        breakRef.current = () => {};
+    };
 
+    const resetReplay = (replayData: ClientMessage[], autoplay: boolean) => {
+        disposeReplay();
+        playback.current.next(false);
+        const playerNumber = replayPlayer.current;
+        const initial = replayData.find(entry => entry.for === playerNumber && 'state' in entry);
+        const initialState = structuredClone(defaultState);
+        if (initial && 'state' in initial) {
+            Object.assign(initialState, structuredClone(initial.state));
+        }
+        store.dispatch({ type: 'setInitialState', state: enrichState({ ...initialState, playerNumber }) });
+        const actions = replayData.filter(entry => entry.for === playerNumber && entry.action);
+        replayDataSaved.current = [...actions];
+        const positions = new Map(actions.map((entry, index) => [entry.action, index + 1]));
+        setCurrentPosition(0);
+        setReplayRun(run => run + 1);
         const actionsObservable = new Observable<ClientAction>(subscriber => {
             actionSubscriber.current = subscriber;
-
-            startPlayback();
         });
 
         const breakObservable = new Observable<{}>(observer => {
@@ -144,18 +138,34 @@ export const ReplayAppWrapper = ({
         const animatedActions = addAnimations(actionsObservable, breakObservable, store, false, playback.current);
         animationSubscription.current = animatedActions.subscribe({
             next: (transformedAction) => {
-                setCurrentPosition(pos => pos + 1);
                 store.dispatch(transformedAction);
+                const position = positions.get(transformedAction as ClientAction);
+                if (position !== undefined) setCurrentPosition(position);
             },
             complete: () => setPlaying(false),
         });
+        setPlaying(autoplay);
+        if (autoplay) startPlayback();
+    };
+
+    const loadReplay = async (replayName: string, isCancelled: () => boolean) => {
+        const replayData = await (new ReplayLogService()).readReplay(replayName);
+        if (isCancelled()) return;
+        replayDataInitial.current = replayData;
+        replayPlayer.current = replayData.find(entry => 'state' in entry)?.for ?? replayData[0]?.for ?? 1;
+        const actions = replayData.filter(entry => entry.for === replayPlayer.current && entry.action);
+        let turn = 0;
+        setTicks(Object.fromEntries(actions.flatMap(({ action }, index) =>
+            action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_START_OF_TURN
+                ? [[index + 1, String(++turn)]] : [])));
+        setLength(actions.length);
+        resetReplay(replayData, true);
         setLoading(false);
     }
 
     useEffect(() => {
         let cancelled = false;
         setLoading(true);
-        playback.current.next(true);
         try {
             if (isTauri()) {
                 const appWindow = getCurrentWebviewWindow()
@@ -184,18 +194,15 @@ export const ReplayAppWrapper = ({
         loadReplay(replayName, () => cancelled);
         return () => {
             cancelled = true;
-            clearInterval(interval.current);
-            interval.current = undefined;
-            animationSubscription.current?.unsubscribe();
-            actionSubscriber.current = undefined;
-            breakRef.current = () => {};
+            disposeReplay();
+            replayDataInitial.current = undefined;
         };
     }, [replayName]);
 
     return (
         <div className="replayWrapper">
             <Provider store={store}>
-                {loading ? <Spin /> : <GameApp engineConnector={engineConnector} onBreak={breakRef.current} onReturnToBase={onReturnToBase} playerId={1} />}
+                {loading ? <Spin /> : <GameApp key={replayRun} engineConnector={engineConnector} onBreak={() => breakRef.current()} onReturnToBase={onReturnToBase} playerId={replayPlayer.current} />}
                 <div className="controls">
                     <div>
                         <Slider disabled max={length} marks={ticks} value={currentPosition}></Slider>

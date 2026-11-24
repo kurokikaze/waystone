@@ -18,7 +18,7 @@ import {isOurTurn, getCurrentStep, getPromptGeneratedBy, getIsOnMagiPrompt, getA
 const CardWithAbilities = withAbilities(Card);
 
 const isOnFilteredMagiPrompt = (state) => {
-	const isOnMWCPrompt = state.prompt && state.promptType === PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
+	const isOnMWCPrompt = state.prompt && state.promptPlayer === state.playerNumber && state.promptType === PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
 	return isOnMWCPrompt && !getCardDetails(state).inPlay.some(card => card.data.controller !== state.playerNumber && card.card.type === TYPE_CREATURE);
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Provider } from "react-redux"
 import { createStore, compose, applyMiddleware } from "redux";
 import { createEpicMiddleware } from "redux-observable";
@@ -32,25 +32,25 @@ export const NetworkGameAppWrapper = ({
     secret,
     onReturnToBase,
 }: NetworkGameAppWrapperProps) => {
-    let breakCallback = () => { }
+    const breakCallback = useRef(() => {});
 
     const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
     useEffect(() => {
         console.log(`Connecting with the secret ${secret}`)
-        const [realEngineConnector, callback] = connectToEngine(store, secret)
+        const [realEngineConnector, callback, disconnect] = connectToEngine(store, secret)
 
         setEngineConnector(realEngineConnector)
-        breakCallback = callback
+        breakCallback.current = callback;
 
         return () => {
             console.log('Disconnecting from the game')
-            // @ts-ignore
-            realEngineConnector.disconnect()
+            breakCallback.current = () => {};
+            disconnect();
         }
     }, [secret]);
 
     return (<Provider store={store}>
-        <GameApp engineConnector={engineConnector} onBreak={breakCallback} onReturnToBase={onReturnToBase} playerId={1} />
+        <GameApp engineConnector={engineConnector} onBreak={() => breakCallback.current()} onReturnToBase={onReturnToBase} playerId={1} />
     </Provider>)
 }

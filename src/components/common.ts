@@ -16,6 +16,9 @@ import {
 	PROMPT_TYPE_PAYMENT_SOURCE,
 
 	RESTRICTION_TYPE,
+	RESTRICTION_EXCEPT_SOURCE,
+	RESTRICTION_CREATURE_NAME,
+	RESTRICTION_REGION_IS_NOT,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_ENERGY_LESS_THAN,
 	RESTRICTION_OWN_CREATURE,
@@ -69,7 +72,7 @@ import {
 
 import { ZoneIdentifier, getZoneContent } from '../selectors';
 import { EnrichedCard, ExtendedCard, State } from '../types';
-import { CardData, OperatorType, PromptParams, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, StaticAbilityType, PropertyType } from 'moonlands/dist/esm/types';
+import { CardData, OperatorType, PromptTypeType, RestrictionType, SelectorTypeType, StaticAbilityType, PropertyType } from 'moonlands/dist/esm/types';
 import { ConvertedCard, HiddenConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
 import Card from 'moonlands/dist/esm/classes/Card';
 
@@ -245,10 +248,17 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any, playerNu
 	switch (restriction) {
 		case RESTRICTION_TYPE:
 			return card => card.card.type === value;
+		case RESTRICTION_EXCEPT_SOURCE:
+			return card => card.id !== value;
+		case RESTRICTION_CREATURE_NAME:
+			return card => card.card.name === value;
 		case RESTRICTION_REGION:
 			return card => card.card.region === value;
+		case RESTRICTION_REGION_IS_NOT:
+			return card => card.card.region !== value;
 		case RESTRICTION_CREATURE_TYPE:
-			return card => (card.card.type === TYPE_CREATURE && card.card.name.split(' ').includes(value));
+			return card => card.card.type === TYPE_CREATURE &&
+				card.card.name.split(' ').some(type => Array.isArray(value) ? value.includes(type) : type === value);
 		case RESTRICTION_ENERGY_EQUALS:
 			return card => (card.card.type === TYPE_CREATURE && card.data.energy === value);
 		case RESTRICTION_ENERGY_LESS_THAN:
@@ -256,9 +266,9 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any, playerNu
 		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
 			return card => (card.card.type === TYPE_CREATURE && card.data.energy < ((typeof card.card.cost == 'number') ? card.card.cost : 0));
 		case RESTRICTION_OWN_CREATURE:
-			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) === playerNumber);
+			return card => card.card.type === TYPE_CREATURE && (card.data.controller ?? card.owner) === (typeof value === 'number' ? value : playerNumber);
 		case RESTRICTION_OPPONENT_CREATURE:
-			return card => (card.card.type === TYPE_CREATURE && (card.data.controller || card.owner) !== playerNumber);
+			return card => card.card.type === TYPE_CREATURE && (card.data.controller ?? card.owner) !== (typeof value === 'number' ? value : playerNumber);
 		case RESTRICTION_CREATURE_WAS_ATTACKED:
 			return card => (card.card.type === TYPE_CREATURE && card.data.wasAttacked === true);
 		case RESTRICTION_STATUS:
@@ -271,8 +281,10 @@ const getRestrictionFilter = (restriction: RestrictionType, value: any, playerNu
 };
 
 type SelectorFunction = (card: EnrichedCard) => Boolean
-type PromptParamsFixed = PromptParams & { paymentAmount?: number, paymentType: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL; }
-export const getPromptFilter = (promptType: PromptTypeType, promptParams: PromptParams, playerNumber: number): SelectorFunction => {
+export const isPromptPaymentSource = (promptParams: State['promptParams'], id: string): boolean =>
+	promptParams?.paymentSourceIds?.includes(id) ?? !!promptParams?.cards?.some(candidate => candidate.id === id);
+
+export const getPromptFilter = (promptType: PromptTypeType, promptParams: State['promptParams'], playerNumber: number): SelectorFunction => {
 	switch (promptType) {
 		case PROMPT_TYPE_RELIC:
 			return card => card.card.type === TYPE_RELIC;
@@ -283,31 +295,16 @@ export const getPromptFilter = (promptType: PromptTypeType, promptParams: Prompt
 		case PROMPT_TYPE_OWN_SINGLE_CREATURE:
 			return card => (card.data.controller || card.owner) === playerNumber && card.card.type === TYPE_CREATURE;
 		case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-			if ('promptParams' in promptParams && promptParams.promptParams) {
-				return card => card.id !== promptParams.promptParams?.source;
+			return card => card.card.type === TYPE_CREATURE && !!promptParams?.source && card.id !== promptParams.source;
+		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+			const checkers = (promptParams?.restrictions ?? []).map(({ type, value }) => getRestrictionFilter(type, value, playerNumber));
+			if (promptParams?.restriction) {
+				checkers.push(getRestrictionFilter(promptParams.restriction, promptParams.restrictionValue, playerNumber));
 			}
-			return () => false
-		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
-			if (promptParams) {
-				if (promptParams.promptParams?.restrictions && promptParams.promptParams?.restrictions.length) {
-					const checkers: SelectorFunction[] = promptParams.promptParams?.restrictions.map(({ type, value }: RestrictionObjectType): SelectorFunction => getRestrictionFilter(type, value, playerNumber));
-					return card =>
-						checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
-				} else {
-					return getRestrictionFilter(promptParams.promptParams?.restriction!, promptParams.promptParams?.restrictionValue, playerNumber);
-				}
-			} else {
-				return () => true;
-			}
-		case PROMPT_TYPE_PAYMENT_SOURCE: {
-			return card => {
-				const promptParamsFixed = promptParams as PromptParamsFixed;
-				const canPayAtAll = card.card.data?.paymentSource && card.card.data?.paymentSource.includes(promptParamsFixed.paymentType);
-				const haveEnoughEnergy = card.data.energy >= (promptParamsFixed?.paymentAmount || 0);
-
-				return Boolean(canPayAtAll && haveEnoughEnergy);
-			}
+			return card => card.card.type === TYPE_CREATURE && checkers.every(check => check(card));
 		}
+		case PROMPT_TYPE_PAYMENT_SOURCE:
+			return card => isPromptPaymentSource(promptParams, card.id);
 		default:
 			return () => true;
 	}

@@ -49,8 +49,10 @@ import { ConvertedCard, HiddenConvertedCard } from 'moonlands/dist/esm/classes/C
 
 const zonesToConsiderForStaticAbilities = new Set<string>(['inPlay', 'opponentInPlay', 'playerActiveMagi', 'opponentActiveMagi']);
 
-export function applyEffect(state: State, action: ClientEffectAction): State {
+export function applyEffect(state: State, action: ClientEffectAction | { effectType: 'effects/reveal_cards'; cards: string[] }): State {
 	switch (action.effectType) {
+		case 'effects/reveal_cards':
+			return { ...state, log: [...state.log, { type: 'log/revealed_cards', cards: action.cards }] };
 		case EFFECT_TYPE_DRAW: {
 			const drawLogEntry: LogEntryType = {
 				type: LOG_ENTRY_DRAW,
@@ -178,8 +180,8 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 				staticAbilities,
 				zones: {
 					...state.zones,
-					[sourceZone]: (state.zones[sourceZone] as ConvertedCard[]).filter((card: ConvertedCard) => card.id !== action.sourceCard.id),
-					[destinationZone]: [...state.zones[destinationZone], action.destinationCard],
+					[sourceZone]: ((state.zones[sourceZone] ?? []) as ConvertedCard[]).filter(card => card.id !== action.sourceCard.id),
+					[destinationZone]: [...(state.zones[destinationZone] ?? []), action.destinationCard],
 				},
 				packs,
 				lastPositions,
@@ -195,7 +197,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 						playerActiveMagi: state.zones.playerActiveMagi.map(card => ({ ...card, data: { ...card.data, wasAttacked: false, actionsUsed: [] } })),
 					},
 					activePlayer: action.player,
-					continuousEffects: tickDownContinuousEffects(state.continuousEffects, false),
+					continuousEffects: tickDownContinuousEffects(state.continuousEffects, false, action.player),
 				};
 			} else {
 				return {
@@ -206,7 +208,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 						opponentActiveMagi: state.zones.opponentActiveMagi.map(card => ({ ...card, data: { ...card.data, wasAttacked: false, actionsUsed: [] } })),
 					},
 					activePlayer: action.player,
-					continuousEffects: tickDownContinuousEffects(state.continuousEffects, true),
+					continuousEffects: tickDownContinuousEffects(state.continuousEffects, true, action.player),
 				};
 			}
 		}
@@ -538,6 +540,7 @@ export function applyEffect(state: State, action: ClientEffectAction): State {
 					{
 						generatedBy: action.generatedBy,
 						expiration: action.expiration,
+						...('discardSourceId' in action && typeof action.discardSourceId === 'string' && { discardSourceId: action.discardSourceId }),
 						staticAbilities: action.staticAbilities || [],
 						triggerEffects: action.triggerEffects || [],
 						player: action.player,

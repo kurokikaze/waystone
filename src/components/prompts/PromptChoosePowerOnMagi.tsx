@@ -2,9 +2,10 @@
 import { byName } from 'moonlands/dist/esm/cards';
 import {
     ACTION_RESOLVE_PROMPT,
+    COST_X,
 } from 'moonlands/dist/esm/const';
 import { useSelector } from 'react-redux';
-import { getPlayerNumber, getPromptMagi } from '../../selectors';
+import { getPlayerNumber, getPromptGeneratedBy, getPromptMagi } from '../../selectors';
 import { EngineConnector } from '../../types';
 
 type Props = {
@@ -13,16 +14,17 @@ type Props = {
 
 function PromptChoosePowerOnMagi({ engineConnector }: Props) {
     const magi = useSelector(getPromptMagi);
-    const magiCard = byName(magi?.card || 'Grega');
-    const magiPowers = magiCard?.data.powers || []
+    const magiCard = magi ? byName(magi.card) : undefined;
+    const energy = magi?.data.energy ?? 0;
+    const magiPowers = magiCard?.data.powers?.filter(power => energy >= (power.cost === COST_X ? 3 : power.cost + 2)) ?? [];
     const playerNumber = useSelector(getPlayerNumber)
+    const generatedBy = useSelector(getPromptGeneratedBy);
 
     const handleSend = (powerName: string) => {
         engineConnector.emit({
             type: ACTION_RESOLVE_PROMPT,
-            // promptType: PROMPT_TYPE_PLAYER,
             power: powerName,
-            // generatedBy,
+            generatedBy: generatedBy ?? undefined,
             player: playerNumber,
         });
     };

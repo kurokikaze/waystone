@@ -2,7 +2,7 @@
 import {useEffect, useRef} from 'react';
 import cn from 'classnames';
 import {useSelector} from 'react-redux';
-import { LogEntryType } from 'moonlands/dist/esm/types';
+import { GameLogEntry } from '../../types';
 
 import {mapEntryToText} from './utils';
 import './style.css';
@@ -13,7 +13,7 @@ const SHOW_CLASS = 'show';
 const getLogEntries = (state: AppState) => state.log;
 
 type LogEntryProps = {
-	entry: LogEntryType
+	entry: GameLogEntry
 	playerNumber: number
 }
 // @ts-ignore
@@ -45,7 +45,7 @@ const Log = () => {
 };
 
 type AppState = {
-	log: LogEntryType[];
+	log: GameLogEntry[];
 }
 
 export default Log;

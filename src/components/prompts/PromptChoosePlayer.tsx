@@ -4,19 +4,20 @@ import {
 	ACTION_RESOLVE_PROMPT,
 } from 'moonlands/dist/esm/const';
 import { EngineConnector } from '../../types';
-import { getPlayerNumber } from '../../selectors';
+import { getPlayerNumber, getPromptGeneratedBy } from '../../selectors';
 
 type Props = {
 	engineConnector: EngineConnector
 }
 function PromptChoosePlayer({ engineConnector }: Props) {
 	const playerNumber = useSelector(getPlayerNumber);
+	const generatedBy = useSelector(getPromptGeneratedBy);
+	const opponent = playerNumber === 1 ? 2 : 1;
 	const handleSend = (player: number) => {
 		engineConnector.emit({
 			type: ACTION_RESOLVE_PROMPT,
-			// promptType: PROMPT_TYPE_PLAYER,
 			targetPlayer: player,
-			// generatedBy,
+			generatedBy: generatedBy ?? undefined,
 			player: playerNumber,
 		});
 	};
@@ -24,10 +25,10 @@ function PromptChoosePlayer({ engineConnector }: Props) {
 	return (
 		<div className="promptWindow promptEnergyManipulation">
 			<div className="buttonHolder">
-				<button onClick={() => handleSend(2)}>Opponent</button>
+				<button onClick={() => handleSend(opponent)}>Opponent</button>
 			</div>
 			<div className="buttonHolder">
-				<button onClick={() => handleSend(1)}>You</button>
+				<button onClick={() => handleSend(playerNumber)}>You</button>
 			</div>
 		</div>
 	);

@@ -77,7 +77,7 @@ export function zoneContent(zoneId: ZoneIdentifier, state: State) {
 			return state.zones.inPlay.filter(isNotRelic);
 		}
 		default: {
-			return state.zones[zoneId];
+			return state.zones[zoneId] ?? [];
 		}
 	}
 }
@@ -146,7 +146,7 @@ export const getCardsCountInOpponentDiscard = (state: State) => state.zones.oppo
 export const getCardsCountInOurDeck = (state: State) => state.zones.playerDeck.length;
 export const getCardsCountInOpponentDeck = (state: State) => state.zones.opponentDeck.length;
 export const getAnimation = (state: State) => state.animation;
-export const getIsOnMagiPrompt = (state: State) => state.prompt &&
+export const getIsOnMagiPrompt = (state: State) => isPromptActive(state) &&
 	(state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI || state.promptType === PROMPT_TYPE_SINGLE_MAGI);
 export const getPowerSource = (id: string) => (state: State) => {
 	if (!id) return null;

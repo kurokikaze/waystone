@@ -4,11 +4,12 @@ import {
     ACTION_ATTACK,
     ACTION_EFFECT,
     ACTION_PASS,
+    ACTION_RESOLVE_PROMPT,
     EFFECT_TYPE_START_STEP,
     EFFECT_TYPE_MAGI_IS_DEFEATED,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 } from 'moonlands/dist/esm/const';
-import { START_ATTACK_ANIMATION, END_ATTACK_ANIMATION } from '../../actions';
+import { START_ATTACK_ANIMATION, END_ATTACK_ANIMATION, START_PROMPT_RESOLUTION_ANIMATION } from '../../actions';
 import addAnimations from '../../addAnimations';
 import type { ClientCommand } from '../../clientProtocol';
 
@@ -156,5 +157,25 @@ describe('Replay animation playback', () => {
         expect(playback.observed).toBe(false);
         jest.runAllTimers();
         expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads the updated board when a queued prompt resolution starts', () => {
+        const inPlay: { id: string; card: string }[] = [];
+        const testStore = { getState: () => ({ playerNumber: 1, zones: { inPlay, opponentActiveMagi: [] } }) } as unknown as Store;
+        const emitted: ClientCommand[] = [];
+        const precedingAction = { type: ACTION_PASS } as ClientCommand;
+        const subscription = addAnimations(actions, breaks, testStore).subscribe(action => {
+            if (action === precedingAction) inPlay.push({ id: 'new-target', card: 'Furok' });
+            emitted.push(action);
+        });
+        actions.next(attack('first'));
+        actions.next(precedingAction);
+        const resolution = { type: ACTION_RESOLVE_PROMPT, player: 2, target: 'new-target' } as ClientCommand;
+        actions.next(resolution);
+        breaks.next({});
+        expect(emitted.at(-1)?.type).toBe(START_PROMPT_RESOLUTION_ANIMATION);
+        jest.runAllTimers();
+        expect(emitted.at(-1)).toBe(resolution);
+        subscription.unsubscribe();
     });
 });

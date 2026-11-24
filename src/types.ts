@@ -11,6 +11,8 @@ export type EngineConnector = {
   emit: (action: C2SAction) => void
 }
 
+export type GameLogEntry = LogEntryType | { type: 'log/revealed_cards'; cards: string[] };
+
 export type MessageType = {
   type: string,
   source?: string,
@@ -50,6 +52,7 @@ export type ExpandedPromptParams = Omit<Omit<Omit<PromptParams, "promptType">, "
   alternatives?: AlternativeType[]
   paymentType?: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC;
   paymentAmount?: number;
+  paymentSourceIds?: string[];
   restriction?: RestrictionType
   restrictionValue?: string | string[] | number | boolean
   restrictions?: RestrictionObjectType[]
@@ -93,6 +96,7 @@ export type State = {
     playerMagiPile: HiddenConvertedCard[],
     playerDefeatedMagi: ConvertedCard[],
     inPlay: ConvertedCard[],
+    setAside?: ConvertedCard[],
     opponentHand: HiddenConvertedCard[],
     opponentDeck: HiddenConvertedCard[],
     opponentDiscard: ConvertedCard[],
@@ -104,7 +108,7 @@ export type State = {
   staticAbilities: ExtendedCard[],
   animation: AnimationStateType | null,
   message: MessageType | null,
-  log: LogEntryType[],
+  log: GameLogEntry[],
   step: number | null,
   turnTimer: boolean,
   turnSecondsLeft: number | null,

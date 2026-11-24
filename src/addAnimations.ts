@@ -57,7 +57,7 @@ const STEP_TIMEOUT = 500;
 
 const convertAction = (action: ClientCommand, store: Store<any, Action<any>>, onlyEnemy = true) => {
     if (!('type' in action)) {
-        return action;
+        return [action];
     }
     const state = store.getState();
     switch (action.type) {
@@ -163,7 +163,7 @@ const convertTimer = (type: TimersKeyType | any) => {
 
 export default function addAnimationsNew(action$: Observable<ClientCommand>, break$: Observable<{}>, store: Store<any, Action<any>>, onlyEnemy = true, playback$?: Observable<boolean>) {
     const actionDelayed = new Observable<ClientCommand>(observer => {
-        const actionsStorage: ClientCommand[][] = [];
+        const actionsStorage: ClientCommand[] = [];
         let currentActions: ClientCommand[] = [];
         let delaying = false;
         let streaming = false;
@@ -178,7 +178,7 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, bre
                 while (!observer.closed) {
                     if (!currentActions.length) {
                         if (!playing || !actionsStorage.length) break;
-                        currentActions = actionsStorage.shift()!;
+                        currentActions = convertAction(actionsStorage.shift()!, store, onlyEnemy);
                     }
                     const action = currentActions.shift()!;
                     const delayBy = convertTimer(action.type);
@@ -222,8 +222,7 @@ export default function addAnimationsNew(action$: Observable<ClientCommand>, bre
 
         const actionSubscription = action$.subscribe({
             next: (action) => {
-                const convertedActions = convertAction(action, store, onlyEnemy);
-                actionsStorage.push(convertedActions);
+                actionsStorage.push(action);
                 streamActions();
             },
             complete: () => {
