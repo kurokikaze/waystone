@@ -10,10 +10,9 @@ import Card from '../Card.tsx';
 import {withAbilities} from '../CardAbilities.tsx';
 import {
   ANIMATION_MAGI_DEFEATED,
-	STEP_ATTACK,
 } from '../../const';
 import {useCardData, useZoneContent, getCardDetails} from '../common';
-import {isOurTurn, getCurrentStep, getPromptGeneratedBy, getIsOnMagiPrompt, getAnimation, getPlayerNumber} from '../../selectors';
+import {isOurTurn, getPromptGeneratedBy, getIsOnMagiPrompt, getAnimation, getPlayerNumber, isAttackAvailable} from '../../selectors';
 
 const CardWithAbilities = withAbilities(Card);
 
@@ -25,9 +24,9 @@ const isOnFilteredMagiPrompt = (state) => {
 function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 	const rawContent = useZoneContent(zoneId);
 	const content = useCardData(rawContent);
-	const currentStep = useSelector(getCurrentStep);
 	const ourTurn = useSelector(isOurTurn);
-	const active = ourTurn && currentStep === STEP_ATTACK;
+	const attackAvailable = useSelector(isAttackAvailable);
+	const active = attackAvailable && ourTurn;
 	const animation = useSelector(getAnimation);
 	const inPlayContent = useSelector(getCardDetails, shallowEqual);
 	const playerNumber = useSelector(getPlayerNumber);
@@ -62,6 +61,7 @@ function ZoneOpponentActiveMagi({ name, zoneId, engineConnector }) {
 					target={active}
 					guarded={guarded}
 					engineConnector={engineConnector}
+						playerNumber={playerNumber}
 					className={cn({'attackTarget': animation && animation.type == 'attack' && animation.target === cardData.id})}
 				/>,
 			) : null}

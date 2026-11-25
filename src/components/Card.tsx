@@ -202,35 +202,41 @@ function Card({
 		}, 0)
 	}, [energyChange]);
 
+	const unableToAttack = data && (
+		data.ableToAttack === false
+		|| modifiedData?.ableToAttack === false
+		|| data.attacked === Infinity
+	);
 	const [{ isDragging }, drag, preview] = useDrag(() => ({
 		// "type" is required. It is used by the "accept" specification of drop targets.
 		type: DraggableTypes.CARD,
+		canDrag: () => draggable && !unableToAttack && !isOnPrompt,
 		// The collect function utilizes a "monitor" instance (see the Overview for what this is)
 		// to pull important pieces of state from the DnD system.
 		item: () => ({ card, data, id, pack }),
 		collect: (monitor) => ({
 			isDragging: monitor.isDragging()
 		})
-	}), [card, data, id, pack]);
+	}), [card, data, id, pack, draggable, unableToAttack, isOnPrompt]);
 
 	// useEffect(() => {
 	// 	preview(document.querySelector('.attackSource .cutAround'), { captureDraggingState: true })
 	// }, [])
-  const unableToAttack = data && (
-    data.ableToAttack === false
-    || (modifiedData && modifiedData.ableToAttack === false) 
-    || data.attacked === Infinity
-  );
 
 	const [_, drop] = useDrop(() => ({
 		// The type (or types) to accept - strings or symbols
 		accept: DraggableTypes.CARD,
+		canDrop: (item: DraggedItem) => !!droppable && !isOnPrompt && (
+			canFirstAttackSecond(item, { card, data, id, guarded })
+			|| (!!onPackHunt && canPackHuntWith(item, { card, data, id, guarded }))
+		),
 		// Props to collect
 		collect: (monitor) => ({
 			isOver: monitor.isOver(),
 			canDrop: monitor.canDrop()
 		}),
 		drop: (item: DraggedItem) => {
+			if (!droppable || isOnPrompt) return;
 			const dropTarget = { card, data, id, guarded };
 
 			const canAttack = canFirstAttackSecond(item, dropTarget);
@@ -245,20 +251,15 @@ function Card({
 					additionalAttackers: item.pack ? item.pack.hunters : [],
 					player: playerNumber,
 				});
-			} else if (canPackHunt) {
+			} else if (canPackHunt && onPackHunt) {
 				onPackHunt(id, item.id);
 			} else {
 				console.log('Problem, captain');
 			}
 		}
-	}), [card, data, id, guarded]);
+	}), [card, data, id, guarded, droppable, isOnPrompt, engineConnector, playerNumber, onPackHunt]);
 
-	if (droppable) {
-		drop(ref);
-	}
-	if (draggable && !unableToAttack) {
-		drag(ref);
-	}
+	drop(drag(ref));
 
 	const regionStyle = (cardStyle != CARD_STYLE_LOCKET && card && 'region' in card && card.region) ? regionClass[card.region as Region] : null;
 

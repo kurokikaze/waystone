@@ -55,6 +55,8 @@ import { withSingleCardData } from '../common';
 import {
 	isPromptActive,
 	isOurTurn,
+	isOurAction,
+	canPass,
 	getCurrentStep,
 	getMessage,
 	getCardsCountInOurDiscard,
@@ -130,6 +132,8 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 
 	const prompt: boolean = useSelector(isPromptActive);
 	const ourTurn: boolean = useSelector(isOurTurn);
+	const ourAction = useSelector(isOurAction);
+	const passAvailable = useSelector(canPass);
 	const currentPlayer: number = useSelector((state: { activePlayer: number }) => state.activePlayer);
 	// const timer = useSelector(getTimer);
 	const currentStep = useSelector(getCurrentStep);
@@ -203,10 +207,11 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 						<ZoneHand zoneId='playerHand' name='Player hand' onCardClick={onPlay} />
 						<StepBoard />
 						<ActionCardView />
-						{ourTurn && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <>
+						{passAvailable && (currentStep !== STEP_ENERGIZE) && (currentStep !== STEP_DRAW) && <>
 							<button onClick={onPass}>{currentStep === null ? 'Start the game' : 'Pass'}</button>
 						</>}
-						{!ourTurn && <div>Opponent&apos;s turn ({currentPlayer}/{playerNumber})</div>}
+						{!ourTurn && <div>{ourAction ? 'You control opponent’s attacks' : `Opponent’s turn (${currentPlayer}/${playerNumber})`}</div>}
+						{ourTurn && !ourAction && <div>Opponent controls your attacks</div>}
 						{/*<button onClick={onRefresh}>Refresh</button>*/}
 						{discardShown && <div className='discardOverlay'>
 							<h2>Discard</h2>

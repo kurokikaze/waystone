@@ -11,7 +11,7 @@ import {
 } from 'moonlands/dist/esm/const';
 import { byName } from 'moonlands/dist/esm/cards';
 import Card from '../Card.tsx';
-import { isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy, getPlayerNumber } from '../../selectors';
+import { isPRSAvailable, getIsOnMagiPrompt, getAnimation, getPromptGeneratedBy, getPlayerNumber, isAttackingWithOpponent } from '../../selectors';
 import { withAbilities } from '../CardAbilities.tsx';
 import { useZoneContent, useCardData, isPromptPaymentSource } from '../common';
 import { ANIMATION_MAGI_DEFEATED } from '../../const';
@@ -37,6 +37,8 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
     const isOnFilteredPrompt = useSelector(isOnFilteredMagiPrompt);
     const promptGeneratedBy = useSelector(getPromptGeneratedBy);
     const playerNumber = useSelector(getPlayerNumber);
+    const attackTarget = useSelector(isAttackingWithOpponent);
+    const guarded = useSelector(playerHasCreatures);
 
     const animation = useSelector(getAnimation);
     const defeatedId = animation && animation.type === ANIMATION_MAGI_DEFEATED ? animation.target : null;
@@ -55,7 +57,7 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
     }), [engineConnector]);
 
     return (
-        <div className={cn('zone', 'zone-magi', { 'zone-active': active })} data-zone-name={name}>
+        <div className={cn('zone', 'zone-magi', { 'zone-active': active || attackTarget })} data-zone-name={name}>
             {content.length ? content.map(cardData =>
                 <CardWithAbilities
                     key={cardData.id}
@@ -66,7 +68,10 @@ function ZonePlayerActiveMagi({ name, zoneId, engineConnector }) {
                     isDefeated={cardData.id === defeatedId}
                     onClick={cardClickHandler}
                     isOnPrompt={isOnMagiPrompt || isOnFilteredPrompt}
-                    target={active && cardData.card.data.powers && cardData.card.data.powers.length > cardData.data.actionsUsed.length}
+                    target={attackTarget || (active && cardData.card.data.powers && cardData.card.data.powers.length > cardData.data.actionsUsed.length)}
+                    droppable={attackTarget}
+                    guarded={guarded}
+                    engineConnector={engineConnector}
                     onAbilityUse={abilityUseHandler}
                     playerNumber={playerNumber}
                     actionsAvailable={active}

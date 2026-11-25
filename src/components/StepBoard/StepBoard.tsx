@@ -16,14 +16,14 @@ import {
 	STEP_PRS_SECOND,
 	STEP_DRAW,
 } from '../../const';
-import { getCurrentStep, isOurTurn } from '../../selectors';
+import { getCurrentStep, isOurAction } from '../../selectors';
 
 const OUR_TURN_ACTIVE = '#32bb32';
 const NOT_OUR_TURN_ACTIVE = '#F8E71C';
 
 function StepBoard() {
 	const currentStep = useSelector(getCurrentStep);
-	const ourTurn = useSelector(isOurTurn);
+	const ourTurn = useSelector(isOurAction);
 
 	const activeColor = ourTurn ? OUR_TURN_ACTIVE : NOT_OUR_TURN_ACTIVE;
 

@@ -6,12 +6,17 @@ import {
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_SINGLE_MAGI,
 	TYPE_CREATURE,
+	PROPERTY_CONTROLLING_PLAYER,
+	SELECTOR_CREATURES_OF_PLAYER,
+	EXPIRATION_DURING_PLAYER_TURNS,
+	EXPIRATION_DURING_OPPONENT_TURNS,
 } from 'moonlands/dist/esm/const';
 
 import {
 	ANIMATION_CREATURE_DISCARDED,
 	STEP_PRS_FIRST,
 	STEP_PRS_SECOND,
+	STEP_ATTACK,
 } from '../const';
 import { State } from '../types';
 import { ConvertedCard } from 'moonlands/dist/esm/classes/CardInGame';
@@ -28,6 +33,26 @@ cards.forEach(card => {
 export function isOurTurn(state: State) {
 	return state.activePlayer === state.playerNumber;
 }
+
+export function getAttackControllingPlayer(state: State) {
+	if (state.step !== STEP_ATTACK) return state.activePlayer;
+	for (const effect of state.continuousEffects) {
+		if ([EXPIRATION_DURING_PLAYER_TURNS, EXPIRATION_DURING_OPPONENT_TURNS].includes(effect.expiration.type)
+			&& effect.expiration.active !== true) continue;
+		for (const ability of effect.staticAbilities) {
+			if (ability.property === PROPERTY_CONTROLLING_PLAYER
+				&& (!ability.activeDuringSteps || ability.activeDuringSteps.includes('attack'))
+				&& (ability.selector !== SELECTOR_CREATURES_OF_PLAYER || ability.selectorParameter === state.activePlayer)
+				&& typeof ability.modifier.operandOne === 'number') return ability.modifier.operandOne;
+		}
+	}
+	return state.activePlayer;
+}
+
+export const isOurAction = (state: State) => getAttackControllingPlayer(state) === state.playerNumber;
+export const isAttackAvailable = (state: State) => state.step === STEP_ATTACK && isOurAction(state) && !state.prompt && !state.gameEnded;
+export const isAttackingWithOpponent = (state: State) => isAttackAvailable(state) && !isOurTurn(state);
+export const canPass = (state: State) => isOurAction(state) && !state.prompt && !state.gameEnded;
 
 export function isPromptActive(state: State) {
 	return state.prompt && state.promptPlayer === state.playerNumber;

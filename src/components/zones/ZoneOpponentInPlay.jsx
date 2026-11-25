@@ -10,7 +10,6 @@ import Card from '../Card.tsx';
 import { withAbilities } from '../CardAbilities.tsx';
 import {
 	ANIMATION_CREATURE_DISCARDED,
-	STEP_ATTACK,
 } from '../../const';
 import {
 	getCardDetails,
@@ -19,7 +18,6 @@ import {
 	getPromptFilter,
 } from '../common';
 import {
-	getCurrentStep,
 	isOurTurn,
 	getPromptGeneratedBy,
 	isPromptActive,
@@ -27,6 +25,8 @@ import {
 	getPromptParams,
 	getAnimation,
 	getPlayerNumber,
+	isAttackAvailable,
+	isAttackingWithOpponent,
 } from '../../selectors';
 import { withEnergyManipulation } from '../CardEnergyManipulation.jsx';
 import { useCallback } from 'react';
@@ -42,9 +42,10 @@ function ZoneOpponentInPlay({
 	const playerNumber = useSelector(getPlayerNumber)
 	const content = rawContent.inPlay.filter(card => card.card.type === TYPE_CREATURE && card.data.controller !== playerNumber);
 
-	const currentStep = useSelector(getCurrentStep);
 	const ourTurn = useSelector(isOurTurn);
-	const active = ourTurn && currentStep === STEP_ATTACK;
+	const attackAvailable = useSelector(isAttackAvailable);
+	const attackingWithOpponent = useSelector(isAttackingWithOpponent);
+	const active = attackAvailable && ourTurn;
 	const promptGeneratedBy = useSelector(getPromptGeneratedBy);
 	const isOnCreaturePrompt = useSelector(isPromptActive);
 	const promptType = useSelector(getPromptType);
@@ -68,7 +69,7 @@ function ZoneOpponentInPlay({
 	} : () => { };
 
 	return (
-		<div className={cn('zone', 'zone-creatures', { 'zone-active': active })} data-zone-name={name} data-items={content.length}>
+		<div className={cn('zone', 'zone-creatures', { 'zone-active': attackAvailable })} data-zone-name={name} data-items={content.length}>
 			{content.length ? content.map(cardData =>
 				<div key={cardData.id}>
 					<SelectedCard
@@ -79,9 +80,12 @@ function ZoneOpponentInPlay({
 						modifiedData={cardData.card.data}
 						onClick={cardClickHandler}
 						isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}
+						draggable={attackingWithOpponent && cardData.data.attacked < cardData.card.data.attacksPerTurn}
+						available={attackingWithOpponent && cardData.data.attacked < cardData.card.data.attacksPerTurn}
 						droppable={active && cardData.card.type === TYPE_CREATURE}
 						target={active && cardData.card.type === TYPE_CREATURE}
 						engineConnector={engineConnector}
+						playerNumber={playerNumber}
 						className={cn({ 'attackTarget': animation && animation.target === cardData.id, 'attackSource': animation && animation.source === cardData.id, 'additionalAttacker': animation && animation.additionalAttacker === cardData.id })}
 						attacker={animation && animation.source === cardData.id}
 						attackNumber={cardData.data.attacked}

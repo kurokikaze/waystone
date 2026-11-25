@@ -13,7 +13,6 @@ import {
 import Card from '../Card.tsx';
 import {
 	CARD_STYLE_DRAGGABLE,
-	STEP_ATTACK,
 } from '../../const';
 import {
 	addToPack,
@@ -24,12 +23,13 @@ import {
 	getAnimation,
 	isOurTurn,
 	isPromptActive,
-	getCurrentStep,
 	getPromptType,
 	getPromptParams,
 	getPromptGeneratedBy,
 	getDefeatedCreatureId,
 	getPlayerNumber,
+	isAttackAvailable,
+	isAttackingWithOpponent,
 } from '../../selectors';
 import {
 	UNFILTERED_CREATURE_PROMPTS,
@@ -62,8 +62,9 @@ function ZonePlayerInPlay({
 	const prsAvailable = useSelector(isPRSAvailable);
 	const animation = useSelector(getAnimation);
 	const ourTurn = useSelector(isOurTurn);
-	const currentStep = useSelector(getCurrentStep);
-	const active = ourTurn && currentStep === STEP_ATTACK;
+	const attackAvailable = useSelector(isAttackAvailable);
+	const attackingWithOpponent = useSelector(isAttackingWithOpponent);
+	const active = attackAvailable && ourTurn;
 	const isOnPrompt = useSelector(isPromptActive);
 	const promptType = useSelector(getPromptType);
 	const promptParams = useSelector(getPromptParams);
@@ -113,8 +114,8 @@ function ZonePlayerInPlay({
 	const defeatedId = useSelector(getDefeatedCreatureId);
 
 	return (
-		<div className={cn('zone', 'zone-player-creatures', 'zone-creatures', { 'zone-active': active })} data-zone-name={name}>
-			{content.filter(({ id }) => !packs.some(pack => pack.hunters.includes(id))).map(cardData =>
+		<div className={cn('zone', 'zone-player-creatures', 'zone-creatures', { 'zone-active': attackAvailable })} data-zone-name={name}>
+			{content.filter(({ id }) => attackingWithOpponent || !packs.some(pack => pack.hunters.includes(id))).map(cardData =>
 				<div key={cardData.id} className='packHolder'>
 					<SelectedCard
 						id={cardData.id}
@@ -125,9 +126,9 @@ function ZonePlayerInPlay({
 						isDefeated={defeatedId === cardData.id}
 						isOnPrompt={isOnUnfilteredPrompt || (isOnFilteredPrompt && promptFilter(cardData))}
 						draggable={active && cardData.card.type === TYPE_CREATURE && cardData.data.attacked < cardData.card.data.attacksPerTurn}
-						target={active && hasPackHunters && cardData.data.attacked < cardData.card.data.attacksPerTurn && !packs.some(({ leader }) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
+						target={attackingWithOpponent || (active && hasPackHunters && cardData.data.attacked < cardData.card.data.attacksPerTurn && !packs.some(({ leader }) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id))}
 						pack={packs.find(({ leader }) => leader === cardData.id)}
-						droppable={active && hasPackHunters && !packs.some(({ leader }) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id)}
+						droppable={attackingWithOpponent || (active && hasPackHunters && !packs.some(({ leader }) => leader === cardData.id) && packHuntersList.some(id => id !== cardData.id))}
 						available={active && cardData.card.type === TYPE_CREATURE && cardData.data.attacked < cardData.card.data.attacksPerTurn}
 						actionsAvailable={prsAvailable}
 						onAbilityUse={abilityUseHandler}
