@@ -9,3 +9,13 @@
 .appHolder {
   margin-left: 80px;
 }
+
+.deckSelection {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.deckSelection .ant-select {
+  min-width: 180px;
+}

@@ -1,9 +1,23 @@
-import { BaseDirectory, readTextFile, writeTextFile, create, exists } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, readTextFile, writeTextFile, mkdir, exists, rename } from '@tauri-apps/plugin-fs';
 import { byName } from 'moonlands/dist/esm/cards';
 import { TYPE_MAGI } from 'moonlands/dist/esm/const';
 import { isTauri } from "@tauri-apps/api/core";
 
-type DecksResult = { player: string[], opponent: string[] }
+import type { DeckType } from '../types';
+
+export type SavedDeck = DeckType & { id: string };
+export type DeckLibrary = { decks: SavedDeck[]; playerDeckId: string; opponentDeckId: string };
+
+const libraryPath = 'decks/library.json';
+const browserKey = 'waystone.deckLibrary';
+const config = { baseDir: BaseDirectory.AppConfig };
+
+export function isPlayableDeck(cards: string[]): boolean {
+  return cards.length >= 43 && cards.every((name, index) => {
+    const card = byName(name);
+    return !!card && (card.type === TYPE_MAGI) === (index < 3);
+  }) && new Set(cards.slice(0, 3)).size === 3;
+}
 
 export class DeckKeeperService {
   static DECKS_DIR = 'decks'
@@ -191,68 +205,57 @@ export class DeckKeeperService {
     // 'Robe of Vines',
     // 'Sea Barl',
   ]
-  constructor() {
-
-  }
-
-  public async createFiles() {
-    if (!this.isTauri()) {
-      return;
-    }
-    const dirExists = await exists(DeckKeeperService.DECKS_DIR, { baseDir: BaseDirectory.AppConfig });
-    if (!dirExists) {
-      await create(DeckKeeperService.DECKS_DIR, { baseDir: BaseDirectory.AppConfig });
-    }
-    await this.createDeckFileIfNotExists('playerDeck', DeckKeeperService.defaultPlayerDeck);
-    await this.createDeckFileIfNotExists('opponentDeck', DeckKeeperService.defaultOpponentDeck);
-  }
-
-  private async createDeckFileIfNotExists(deckFileName: string, deckContents: string[]) {
-    const deckFileExists = await exists(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, { baseDir: BaseDirectory.AppConfig });
-    if (!deckFileExists) {
-      await this.saveDeck(deckFileName, deckContents)
-    }
-  }
-
-  public async loadDecks(): Promise<DecksResult> {
-    if (!this.isTauri()) {
+  async loadLibrary(): Promise<DeckLibrary> {
+    const stored = this.isTauri()
+      ? await exists(libraryPath, config) ? await readTextFile(libraryPath, config) : null
+      : localStorage.getItem(browserKey);
+    if (stored !== null) {
+      const library = JSON.parse(stored) as DeckLibrary;
+      if (!Array.isArray(library?.decks) || !library.decks.length ||
+          library.decks.some(deck => typeof deck?.id !== 'string' ||
+            typeof deck.name !== 'string' || !Array.isArray(deck.cards) ||
+            deck.cards.some(card => typeof card !== 'string'))) {
+        throw new Error('Invalid deck library.');
+      }
       return {
-        player: DeckKeeperService.defaultPlayerDeck,
-        opponent: DeckKeeperService.defaultOpponentDeck,
+        ...library,
+        playerDeckId: library.decks.find(deck => deck.id === library.playerDeckId)?.id ?? library.decks[0].id,
+        opponentDeckId: library.decks.find(deck => deck.id === library.opponentDeckId)?.id ?? library.decks.at(-1)!.id,
       };
     }
-    const result: DecksResult = { player: [], opponent: [] }
-    const playerDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\playerDeck.txt`, { baseDir: BaseDirectory.AppConfig });
-    const playerDeckCards: string[] = playerDeckContents.split("\n");
-    if (
-      playerDeckCards.length === 43 &&
-      byName(playerDeckCards[0])?.type === TYPE_MAGI &&
-      byName(playerDeckCards[1])?.type === TYPE_MAGI &&
-      byName(playerDeckCards[2])?.type === TYPE_MAGI
-    ) {
-      result.player = playerDeckCards;
-    } else {
-      result.player = DeckKeeperService.defaultPlayerDeck
-    }
 
-    const opponentDeckContents = await readTextFile(`${DeckKeeperService.DECKS_DIR}\\opponentDeck.txt`, { baseDir: BaseDirectory.AppConfig });
-    const opponentDeckCards: string[] = opponentDeckContents.split("\n");
-    if (
-      opponentDeckCards.length === 43 &&
-      byName(opponentDeckCards[0])?.type === TYPE_MAGI &&
-      byName(opponentDeckCards[1])?.type === TYPE_MAGI &&
-      byName(opponentDeckCards[2])?.type === TYPE_MAGI
-    ) {
-      result.opponent = opponentDeckCards;
-    } else {
-      result.opponent = DeckKeeperService.defaultOpponentDeck
-    }
-    return result;
+    const [player, opponent] = await Promise.all([
+      this.loadLegacyDeck('playerDeck', DeckKeeperService.defaultPlayerDeck),
+      this.loadLegacyDeck('opponentDeck', DeckKeeperService.defaultOpponentDeck),
+    ]);
+    return {
+      decks: [
+        { id: 'playerDeck', name: 'Player deck', cards: player },
+        { id: 'opponentDeck', name: 'Opponent deck', cards: opponent },
+      ],
+      playerDeckId: 'playerDeck',
+      opponentDeckId: 'opponentDeck',
+    };
   }
 
-  public async saveDeck(deckFileName: string, deckContents: string[]) {
-    if (this.isTauri()) {
-      await writeTextFile(`${DeckKeeperService.DECKS_DIR}\\${deckFileName}.txt`, deckContents.join("\n"), { baseDir: BaseDirectory.AppConfig })
+  private async loadLegacyDeck(name: string, fallback: string[]): Promise<string[]> {
+    const path = `decks/${name}.txt`;
+    if (this.isTauri() && await exists(path, config)) {
+      const cards = (await readTextFile(path, config)).trim().split(/\r?\n/);
+      if (isPlayableDeck(cards)) return cards;
     }
+    return [...fallback];
+  }
+
+  async saveLibrary(library: DeckLibrary): Promise<void> {
+    const content = JSON.stringify(library);
+    if (!this.isTauri()) {
+      localStorage.setItem(browserKey, content);
+      return;
+    }
+    await mkdir(DeckKeeperService.DECKS_DIR, { ...config, recursive: true });
+    const temporaryPath = 'decks/library.json.tmp';
+    await writeTextFile(temporaryPath, content, config);
+    await rename(temporaryPath, libraryPath, { oldPathBaseDir: BaseDirectory.AppConfig, newPathBaseDir: BaseDirectory.AppConfig });
   }
 }

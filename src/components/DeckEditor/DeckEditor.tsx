@@ -3,25 +3,24 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { LogicalSize } from "@tauri-apps/api/dpi"
 
 import Card from 'moonlands/dist/esm/classes/Card';
-import { Region } from 'moonlands/dist/esm/types';
 import { Tooltip } from 'antd';
 import { isTauri } from '@tauri-apps/api/core';
 
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
 import Input from 'antd/es/input';
-import Spin from 'antd/es/spin';
 import Button from 'antd/es/button';
 
 import Add from '../icons/Add';
 
 import { byName, cards } from 'moonlands/dist/esm/cards';
 import cn from 'classnames';
-import { REGION_ARDERIAL, REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/dist/esm/const';
+import { REGION_UNIVERSAL, TYPE_MAGI } from 'moonlands/dist/esm/const';
 
 import CardFilter, { CardFilterType, defaultFilter } from '../CardFilter/CardFilter.jsx';
 import { MAX_COPIES_IN_DECK } from '../../const';
 import { DeckType } from '../../types';
+import { isPlayableDeck } from '../../services/DeckKeeperService';
 import DeckView from '../DeckView/DeckView';
 import { camelCase } from '../../utils';
 
@@ -29,14 +28,13 @@ import './style.css';
 
 type DeckEditorProps = {
 	deckContents: DeckType
-	onSave: (deck: string[]) => void
+	onSave: (deck: DeckType) => Promise<void>
 	onClose: () => void
+	saving: boolean
+	error: string
 }
 
-const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
-	const [loading, setLoading] = useState(false);
-	const [saving, setSaving] = useState(false);
-	const [savingNew, setSavingNew] = useState(false);
+const DeckEditor = ({ deckContents, onSave, onClose, saving, error }: DeckEditorProps) => {
 	const [deck, setDeck] = useState<DeckType>(deckContents);
 	const [filter, setFilter] = useState<CardFilterType>(defaultFilter);
 	const [search, setSearch] = useState<string>('');
@@ -50,12 +48,6 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
 			appWindow.setSize(new LogicalSize(1080, 816));
 		}
 	}, []);
-
-	const handleSave = useCallback(() => {
-		setSaving(true);
-		onSave(deck.cards);
-		setSaving(false);
-	}, [deck]);
 
 	const removeFromDeck = useCallback((name: string) => {
 		const id = deck.cards.lastIndexOf(name);
@@ -88,21 +80,12 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
 
 	const onClearRegions = useCallback(() => {
 		const fullCards = deck.cards.map(card => byName(card));
-		const magi = fullCards.filter(card => card?.type === TYPE_MAGI)
-		const magiRegions = new Set<Region>([...magi.map(card => card?.region || REGION_ARDERIAL), REGION_UNIVERSAL])
-		const newCards: string[] = []
-		magi.forEach(card => {
-			if (card) {
-				newCards.push(card.name)
-			}
-		})
-		fullCards.forEach(card => {
-			if (card?.type !== TYPE_MAGI) {
-				if (card?.region && magiRegions.has(card?.region)) {
-					newCards.push(card.name)
-				}
-			}
-		})
+		const magiRegions = new Set(fullCards.slice(0, 3).map(card => card?.region));
+		const newCards = [
+			...deck.cards.slice(0, 3),
+			...fullCards.slice(3).flatMap(card =>
+				card && (card.region === REGION_UNIVERSAL || magiRegions.has(card.region)) ? [card.name] : []),
+		];
 		setDeck({
 			...deck,
 			cards: newCards,
@@ -112,7 +95,7 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
 	])
 
 	const filterFunction = useCallback(
-		(card: Card) => (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && filter.types.includes(card.type),
+		(card: Card) => card.type !== TYPE_MAGI && (search === '' || card.name.toLowerCase().includes(search.toLowerCase())) && filter.regions.includes(card.region) && filter.types.includes(card.type),
 		[filter, search]
 	);
 
@@ -126,18 +109,17 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
 	}, [deck]);
 
 	const canSelectMagi = useCallback((card: string) => {
-		// @ts-ignore
-		return (deck.cards[0] !== card && deck.cards[1] !== card && deck.cards[2] !== card) || deck.cards[magiEditor] === card;
+		return deck.cards.slice(0, 3).every((name, index) => name !== card || index === magiEditor);
 	}, [deck, magiEditor]);
 
-	const isDeckReadyForSaving = deck && (deck.name !== '' && deck.cards.length === 43);
+	const isDeckReadyForSaving = !!deck.name.trim() && isPlayableDeck(deck.cards);
 
 	return (<div>
-		{loading ? <Spin size='large' /> :
-			<>
 				<Row>
-					<Col span={24}><Input className='deckName' /*onChange={(e: React.FormEvent<HTMLInputElement>) => setName(e.currentTarget.value)}*/ disabled defaultValue={deck.name} /></Col>
+					<Col span={24}><Input className='deckName' aria-label="Deck name" placeholder="Deck name" value={deck.name}
+						disabled={saving} onChange={event => setDeck({ ...deck, name: event.target.value })} /></Col>
 				</Row>
+				{error && <p role="alert">{error}</p>}
 				<Row>
 					<Col span={16}>
 						<div>
@@ -172,13 +154,11 @@ const DeckEditor = ({ deckContents, onSave, onClose }: DeckEditorProps) => {
 							<DeckView ourCards={deck.cards} addToDeck={addToDeck} onClearRegions={onClearRegions} removeFromDeck={removeFromDeck} onMagiEditor={setMagiEditor} magiEditor={magiEditor} />
 						</div>
 						<div className='commands'>
-							<Tooltip title={isDeckReadyForSaving ? null : 'Deck should have 43 cards in it'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={handleSave}>Save deck</Button></Tooltip>
-							<Button onClick={onClose} type="default">Close</Button>
+							<Tooltip title={isDeckReadyForSaving ? null : 'Name the deck and choose 3 Magi and 40 other cards'}><Button disabled={!isDeckReadyForSaving} loading={saving} type="primary" onClick={() => void onSave({ ...deck, name: deck.name.trim() })}>Save deck</Button></Tooltip>
+							<Button disabled={saving} onClick={onClose} type="default">Close</Button>
 						</div>
 					</Col>
 				</Row>
-			</>
-		}
 	</div>);
 };
 

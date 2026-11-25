@@ -17,6 +17,7 @@ import Relic from '../icons/Relic';
 import Spell from '../icons/Spell';
 import { REGION_ARDERIAL } from 'moonlands/dist/esm/const';
 import { MAX_COPIES_IN_DECK } from '../../const';
+import { isPlayableDeck } from '../../services/DeckKeeperService';
 
 type MagiViewProps = {
 	name: string
@@ -43,10 +44,11 @@ function MagiView({name, id, chosenMagi, onMagiEditor}: MagiViewProps) {
 		<div
 			onClick={() => onMagiEditor((!chosenMagi) ? id : null)}
 			className={cn('magiVignette', {'chosenMagi': chosenMagi})}
-			style={{backgroundImage: `url("/cards/${camelCase(name)}.jpg")`}}
+			style={name ? { backgroundImage: `url("/cards/${camelCase(name)}.jpg")` } : undefined}
 		>
+			{!name && <button type="button">Choose Magi</button>}
 		</div>
-		<CardView name={name} className='deckView' top={false} />
+		{name && <CardView name={name} className='deckView' top={false} />}
 		{magi && <Tooltip title='Starting energy' placement='bottom'><div className='startingEnergy'>{magi.data.startingEnergy}</div></Tooltip>}
 		{magi && <Tooltip title='Energize rate' placement='bottom'><div className='energizeRate'>+{magi.data.energize}</div></Tooltip>}
 	</div>);
@@ -93,15 +95,14 @@ export default function DeckView({ourCards, addToDeck, onClearRegions, removeFro
   const magi = [magiOne, magiTwo, magiThree]
   const magiRegions = new Set<Region>([...magi.map(card => byName(card)?.region || REGION_ARDERIAL), REGION_UNIVERSAL])
 
-	// @ts-ignore
-	const startingCards = new Set([magiOne, magiTwo, magiThree].map(magi => cards.find(card => card.name === magi).data.startingCards).flat());
+	const startingCards = new Set(magi.flatMap(name => byName(name)?.data.startingCards ?? []));
 	const deckCards = ourCards.slice(3);
 
 	const distinctCards: string[] = deckCards.filter((card, i) => deckCards.indexOf(card) === i);
 
 	return (
 		<div>
-			<div style={{lineHeight: '22px'}}><Cards size={20} color={ourCards.length === 43 ? '#3f7d20' : '#990033' }/> {ourCards.length}</div>
+			<div style={{lineHeight: '22px'}}><Cards size={20} color={isPlayableDeck(ourCards) ? '#3f7d20' : '#990033' }/> {ourCards.filter(Boolean).length}</div>
 			<div className='magiHolder'>
 				<MagiView name={magiOne} id={0} onMagiEditor={onMagiEditor} chosenMagi={magiEditor === 0} />
 				<MagiView name={magiTwo} id={1} onMagiEditor={onMagiEditor} chosenMagi={magiEditor === 1} />
