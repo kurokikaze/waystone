@@ -135,6 +135,7 @@ export type State = {
     challenges: ChallengeType[],
   },
   playerNumber: number
+  snapshotVersion?: number
 }
 
 export type DraggedItem = {

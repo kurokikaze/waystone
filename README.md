@@ -20,3 +20,25 @@ existing application imports.
 
 The npm lockfile uses public registry URLs. The pre-existing Yarn lockfile is
 preserved; npm is the verified installation path for this extraction.
+
+## Everflame network server
+
+The shared server address is configured in `src/config/everflame.json`:
+
+```json
+{
+  "serverUrl": "http://localhost:3000"
+}
+```
+
+Set the HTTP(S) base address of your Everflame installation, without `/game`,
+`/challenge` or `/socket.io`. Both Socket.IO namespaces and the legacy challenge
+list request use this address. The checked-in default is the original EC2 host.
+The configuration is bundled into the app: rebuild Waystone after changing it
+for a packaged Tauri application.
+
+Each local or network match has its own Redux store. A network snapshot replaces
+the previous UI state, rebuilds prompt allocations and static abilities, and
+discards pending animations from the old connection. Reconnecting during a
+prompt restores the server's pending choice; unfinished local selections are
+reset. Actions are sent only after authentication and a fresh snapshot arrive.

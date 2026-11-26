@@ -58,6 +58,7 @@ import {
 	isOurAction,
 	canPass,
 	getCurrentStep,
+	getPromptInstanceKey,
 	getMessage,
 	getCardsCountInOurDiscard,
 	getCardsCountInOpponentDiscard,
@@ -131,6 +132,7 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 	);
 
 	const prompt: boolean = useSelector(isPromptActive);
+	const promptInstanceKey = useSelector(getPromptInstanceKey);
 	const ourTurn: boolean = useSelector(isOurTurn);
 	const ourAction = useSelector(isOurAction);
 	const passAvailable = useSelector(canPass);
@@ -223,7 +225,7 @@ function App({ engineConnector, onBreak, onReturnToBase, playerId }: AppProps) {
 							<div className='closeIcon' onClick={handleOpponentDiscardClose}>&times;</div>
 							<ZoneDiscard zoneId='opponentDiscard' name='Opponent discard' />
 						</div>}
-						{prompt && <PromptOverlay engineConnector={engineConnector} />}
+						{prompt && <PromptOverlay key={promptInstanceKey} engineConnector={engineConnector} />}
 						{gameEnded && <EndgameOverlay onReturnToBase={onReturnToBase} />}
 					</>
 				</DndProvider>

@@ -98,63 +98,14 @@ import { ExpandedPromptParams, MessageType, State } from '../types';
 
 const INITIAL_STATE = 'setInitialState';
 
-export const defaultState: State = {
-	zones: {
-		playerHand: [],
-		playerDeck: [],
-		playerDiscard: [],
-		playerActiveMagi: [],
-		playerMagiPile: [],
-		playerDefeatedMagi: [],
-		inPlay: [],
-		opponentHand: [],
-		opponentDeck: [],
-		opponentDiscard: [],
-		opponentActiveMagi: [],
-		opponentMagiPile: [],
-		opponentDefeatedMagi: [],
-	},
-	continuousEffects: [],
-	staticAbilities: [],
-	animation: null,
-	message: {
-		type: 'power',
-		source: 'TestSource',
-		power: 'Power Name',
-	},
-	step: null,
-	log: [],
-	turnTimer: false,
-	turnSecondsLeft: null,
-	gameEnded: false,
-	winner: null,
-	packs: [],
-	energyLosses: [],
-	energyLossId: 0,
-	energyPrompt: {
-		freeEnergy: 0,
-		cards: {},
-	},
-	prompt: false,
-	promptPlayer: null,
-	promptType: null,
-	promptMessage: null,
-	promptParams: null,
-	promptGeneratedBy: null,
-	promptAvailableCards: [],
-	activePlayer: 0,
-	lastPositions: {},
-	energyAnimationsShown: new Set<number>(),
-	challenges: {
-		challenges: []
-	},
-	playerNumber: 1
-};
+import { createInitialState, defaultState } from './initialState';
+import { enrichState } from '../utils';
+export { defaultState } from './initialState';
 
 
 type InitialStateAction = {
 	type: typeof INITIAL_STATE,
-	state: State,
+	state: Partial<State>,
 }
 
 type AnimationAction = StartPowerAnimationAction |
@@ -193,10 +144,12 @@ type ReducerAction = ClientAction | InternalAction
 const reducer = (state = defaultState, action: ReducerAction): State => {
 	switch (action.type) {
 		case INITIAL_STATE: {
-			return {
-				...state,
-				...action.state
-			};
+			const fresh = createInitialState();
+			return enrichState({
+				...fresh, ...action.state,
+				zones: { ...fresh.zones, ...action.state.zones },
+				snapshotVersion: (state.snapshotVersion ?? 0) + 1,
+			});
 		}
 		// case ACTION_TIME_NOTIFICATION: {
 		// 	return {

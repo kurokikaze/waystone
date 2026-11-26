@@ -1,73 +1,74 @@
-import { Store } from "redux";
-import { Observable } from "rxjs";
-import { io } from "socket.io-client";
-import addAnimations from "../addAnimations";
-import { ClientCommand } from "../clientProtocol";
-import { EngineConnector } from "../types";
+import { Store } from 'redux';
+import { Subject, Subscription } from 'rxjs';
+import { io } from 'socket.io-client';
+import addAnimations from '../addAnimations';
+import { ClientCommand } from '../clientProtocol';
+import { EngineConnector, State } from '../types';
+import { getEverflameUrl } from '../config/everflame';
+
+type InitialStateMessage = { type: 'setInitialState'; state: Partial<State> };
 
 export class GameConnectionService {
     public connectToGame(store: Store, secret: string): [EngineConnector, () => void, () => void] {
-        console.log(`Secret is ${secret}`)
-        const socket = io(`ws://ec2-13-60-188-142.eu-north-1.compute.amazonaws.com/game`);
-        let breakCallback = () => {}
-        socket.on("connect_error", (err) => {
-            // the reason of the error, for example "xhr poll error"
-            console.log(err.message);
-          
-            // some additional description, for example the status code of the initial HTTP response
-            // @ts-ignore
-            console.log(err?.description);
-          
-            // some additional context, for example the XMLHttpRequest object
-            // @ts-ignore
-            console.log(err?.context);
-          });
-                    
-        socket.on('connect', () => {
-            console.log(`Connected to the game`)
-            socket.emit('secret', JSON.stringify({
-                secret,
-            }))
-        })
+        const socket = io(getEverflameUrl('game'), { autoConnect: false });
+        const actions = new Subject<ClientCommand>();
+        const breaks = new Subject<{}>();
+        let subscription: Subscription | undefined;
+        let ready = false;
+        let disposed = false;
 
-        const actionsObservable = new Observable<ClientCommand>(subscriber => {
-            const onMessage = (msg: ClientCommand) => {
-                subscriber.next(msg)
-            };
-            socket.on('message', onMessage);
-            return () => { socket.off('message', onMessage); };
-        })
-
-        const breakObservable = new Observable<{}>(observer => {
-            breakCallback = () => {
-                observer.next({});
-            }
-        });
-
-        const delayedActions = addAnimations(actionsObservable, breakObservable, store, true);
-
-        const subscription = delayedActions.subscribe({
-            next: (transformedAction) => {
-                store.dispatch(transformedAction);
-            },
-        });
-
-        socket.on('disconnect', () => {
-            console.log(`Disconnected from the game server`)
-        })
-
-        const networkEngineConnector: EngineConnector & { disconnect: () => void } = {
-            emit: (action: any) => {
-                console.log(`Outgoing action`)
-                console.dir(action)
-                socket.send(action)
-            },
-            disconnect: () => {
-                subscription.unsubscribe();
-                socket.close()
+        const stopAnimations = () => {
+            subscription?.unsubscribe();
+            subscription = undefined;
+        };
+        const onConnect = () => {
+            ready = false;
+            stopAnimations();
+            socket.emit('secret', JSON.stringify({ secret }));
+        };
+        const onDisconnect = () => {
+            ready = false;
+            stopAnimations();
+        };
+        const onMessage = (message: ClientCommand | InitialStateMessage) => {
+            if (disposed) return;
+            if (message.type === 'setInitialState' && 'state' in message) {
+                // A snapshot supersedes all queued events from the old connection.
+                stopAnimations();
+                store.dispatch(message);
+                subscription = addAnimations(actions, breaks, store, true).subscribe(action => store.dispatch(action));
+                ready = true;
+            } else if (ready) {
+                actions.next(message as ClientCommand);
             }
         };
+        const onConnectionError = (error: Error) => console.error('Game connection failed:', error.message);
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
+        socket.on('connect_error', onConnectionError);
+        socket.on('message', onMessage);
+        socket.connect();
 
-        return [networkEngineConnector, () => breakCallback(), networkEngineConnector.disconnect]
+        const disconnect = () => {
+            if (disposed) return;
+            disposed = true;
+            ready = false;
+            stopAnimations();
+            actions.complete();
+            breaks.complete();
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
+            socket.off('connect_error', onConnectionError);
+            socket.off('message', onMessage);
+            socket.close();
+        };
+        const connector: EngineConnector = {
+            emit: action => {
+                // Socket.IO buffers offline sends; those actions would be stale
+                // when authentication and a fresh snapshot arrive after reconnect.
+                if (ready && socket.connected && !disposed) socket.send(action);
+            },
+        };
+        return [connector, () => breaks.next({}), disconnect];
     }
 }

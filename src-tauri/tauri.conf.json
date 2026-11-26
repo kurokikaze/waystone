@@ -41,7 +41,7 @@
   },
   "productName": "waystone",
   "mainBinaryName": "waystone",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "identifier": "waystone",
   "plugins": {},
   "app": {

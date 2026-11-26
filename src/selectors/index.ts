@@ -148,6 +148,7 @@ export const getPromptTargetZones = (state: State) => state.promptParams?.target
 export const getPromptMessage = (state: State) => state.promptMessage;
 export const getPromptType = (state: State) => state.prompt ? state.promptType : null;
 export const getPromptGeneratedBy = (state: State) => state.promptGeneratedBy;
+export const getPromptInstanceKey = (state: State) => `${state.snapshotVersion ?? 0}:${state.promptGeneratedBy ?? ''}:${state.promptType ?? ''}`;
 export const getPromptNumberOfCards = (state: State) => state.promptParams?.numberOfCards;
 export const getPromptMagi = (state: State) => state.promptParams?.magi;
 export const getPromptMin = (state: State) => {

@@ -5,6 +5,7 @@ export default {
           }],
     },
     extensionsToTreatAsEsm: ['.ts'],
+    moduleNameMapper: { '^(\\.{1,2}/.*)\\.js$': '$1' },
     transformIgnorePatterns: [],
     testEnvironment: 'node',
     testRegex: '.*/tests/.*\\.(test|spec)?\\.(ts|tsx)$',
