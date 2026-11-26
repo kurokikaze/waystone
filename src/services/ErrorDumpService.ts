@@ -1,4 +1,4 @@
-import { BaseDirectory, create, exists, writeTextFile } from "@tauri-apps/plugin-fs"
+import { BaseDirectory, mkdir, writeTextFile } from "@tauri-apps/plugin-fs"
 import { isTauri } from "@tauri-apps/api/core"
 import * as fs from 'fs'
 import * as path from 'path'
@@ -69,7 +69,7 @@ export class ErrorDumpService {
         try {
             const contentStr = this.safeStringify(payload)
 
-            if (this.isNodeEnv()) {
+            if (this.isNodeEnv() && !this.isTauriEnv()) {
                 const dumpsDir = path.resolve(process.cwd(), ErrorDumpService.DEBUG_DIR)
                 try {
                     fs.mkdirSync(dumpsDir, { recursive: true })
@@ -82,11 +82,8 @@ export class ErrorDumpService {
             }
 
             if (this.isTauriEnv()) {
-                const dirExists = await exists(ErrorDumpService.DEBUG_DIR, { baseDir: BaseDirectory.AppConfig })
-                if (!dirExists) {
-                    await create(ErrorDumpService.DEBUG_DIR, { baseDir: BaseDirectory.AppConfig })
-                }
-                await writeTextFile(`${ErrorDumpService.DEBUG_DIR}\\${filename}`, contentStr, { baseDir: BaseDirectory.AppConfig })
+                await mkdir(ErrorDumpService.DEBUG_DIR, { baseDir: BaseDirectory.AppConfig, recursive: true })
+                await writeTextFile(`${ErrorDumpService.DEBUG_DIR}/${filename}`, contentStr, { baseDir: BaseDirectory.AppConfig })
             } else {
                 // Fallback: write to console when not running in Tauri/Node
                 try {
@@ -120,7 +117,7 @@ export class ErrorDumpService {
         try {
             const contentStr = this.safeStringify(payload)
 
-            if (this.isNodeEnv()) {
+            if (this.isNodeEnv() && !this.isTauriEnv()) {
                 const dumpsDir = path.resolve(process.cwd(), ErrorDumpService.STATE_DIR)
                 try {
                     fs.mkdirSync(dumpsDir, { recursive: true })
@@ -133,11 +130,8 @@ export class ErrorDumpService {
             }
 
             if (this.isTauriEnv()) {
-                const dirExists = await exists(ErrorDumpService.STATE_DIR, { baseDir: BaseDirectory.AppConfig })
-                if (!dirExists) {
-                    await create(ErrorDumpService.STATE_DIR, { baseDir: BaseDirectory.AppConfig })
-                }
-                await writeTextFile(`${ErrorDumpService.STATE_DIR}\\${filename}`, contentStr, { baseDir: BaseDirectory.AppConfig })
+                await mkdir(ErrorDumpService.STATE_DIR, { baseDir: BaseDirectory.AppConfig, recursive: true })
+                await writeTextFile(`${ErrorDumpService.STATE_DIR}/${filename}`, contentStr, { baseDir: BaseDirectory.AppConfig })
             } else {
                 try {
                     console.error('ErrorDumpService state dump (fallback):', filename)

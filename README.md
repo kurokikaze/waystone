@@ -42,3 +42,16 @@ the previous UI state, rebuilds prompt allocations and static abilities, and
 discards pending animations from the old connection. Reconnecting during a
 prompt restores the server's pending choice; unfinished local selections are
 reset. Actions are sent only after authentication and a fresh snapshot arrive.
+
+## Replays and diagnostics
+
+The desktop app stores replay `.log` files in `replays` under Tauri's AppConfig
+directory. On Windows this is `%APPDATA%\waystone\replays` (Roaming, not Local).
+The directory is created automatically before listing or saving matches.
+The web version uses the bundled sample replays.
+
+Replay loading errors appear on screen and are saved as JSON files in
+`%APPDATA%\waystone\debugDumps`. Unhandled frontend errors and rejected promises
+are also recorded there. State dumps use `%APPDATA%\waystone\stateDumps`.
+Diagnostic directories are created when a dump is written; the app does not
+currently maintain a continuous console log file.

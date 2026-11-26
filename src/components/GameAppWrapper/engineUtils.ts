@@ -9,6 +9,7 @@ import { Store } from "redux";
 import { ClientAction } from "../../clientProtocol";
 import { enrichState } from "../../utils";
 import { EngineConnector } from "../../types";
+import { ErrorDumpService } from "../../services/ErrorDumpService";
 
 export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck: string[]): [EngineConnector, () => void, () => void] => {
     const bechamel = new BotWorker();
@@ -46,7 +47,8 @@ export const connectToEngine = (store: Store, playerDeck: string[], opponentDeck
                         console.log('Trying to save the replay');
                         const replayDate = new Date();
                         const replayName = `${replayDate.getDate().toString().padStart(2, '0')}-${(replayDate.getMonth() + 1).toString().padStart(2, '0')}-${replayDate.getFullYear()} ${replayDate.getHours()}-${replayDate.getMinutes()}`;
-                        (new ReplayLogService()).saveReplay(replayName, fullLog);
+                        void (new ReplayLogService()).saveReplay(replayName, fullLog).catch(error =>
+                            ErrorDumpService.dumpActionFailure({ type: 'replays/save', replayName }, null, error));
                         subscriber.complete();
                     }
                 } else if (bechamel) {

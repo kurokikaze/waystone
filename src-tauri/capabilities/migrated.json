@@ -25,6 +25,12 @@
         "$APPDATA/decks/*",
         "$APPCONFIG/decks",
         "$APPCONFIG/decks/*",
+        "$APPCONFIG/replays",
+        "$APPCONFIG/replays/*",
+        "$APPCONFIG/debugDumps",
+        "$APPCONFIG/debugDumps/*",
+        "$APPCONFIG/stateDumps",
+        "$APPCONFIG/stateDumps/*",
         "$APPDATA/replays/*"
       ]
     },

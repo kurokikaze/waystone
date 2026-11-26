@@ -8,7 +8,7 @@ import { createStore, compose, applyMiddleware } from "redux";
 import { createEpicMiddleware } from "redux-observable";
 import thunk from "redux-thunk";
 import { BehaviorSubject, Observable, Subscriber, Subscription } from "rxjs";
-import { Spin, Slider, Button } from "antd";
+import { Alert, Spin, Slider, Button } from "antd";
 import addAnimations from "../../addAnimations";
 import { C2SAction, ClientAction, ClientMessage } from "../../clientProtocol";
 import { defaultState } from "../../reducers/reducer";
@@ -17,6 +17,7 @@ import { enrichState } from "../../utils";
 import rootReducer from '../../reducers';
 import GameApp from "../GameApp/GameApp"
 import { ReplayLogService } from "../../services/ReplayLogService";
+import { ErrorDumpService } from "../../services/ErrorDumpService";
 
 import './style.css';
 
@@ -47,6 +48,7 @@ export const ReplayAppWrapper = ({
     const [engineConnector, setEngineConnector] = useState<EngineConnector>(emptyEngineConnector);
 
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string>();
     const [playing, setPlaying] = useState(true);
     const replayDataSaved = useRef<ClientMessage[]>()
     const replayDataInitial = useRef<ClientMessage[]>()
@@ -166,12 +168,13 @@ export const ReplayAppWrapper = ({
     useEffect(() => {
         let cancelled = false;
         setLoading(true);
+        setLoadError(undefined);
         try {
             if (isTauri()) {
                 const appWindow = getCurrentWebviewWindow()
 
-                appWindow.setResizable(false);
-                appWindow.setSize(new LogicalSize(1111, 660));
+                void Promise.all([appWindow.setResizable(false), appWindow.setSize(new LogicalSize(1111, 660))])
+                    .catch(error => ErrorDumpService.dumpActionFailure({ type: 'replays/resize' }, null, error));
             }
         } catch (e) {
 
@@ -191,7 +194,13 @@ export const ReplayAppWrapper = ({
             }
         };
         setEngineConnector(realEngineConnector);
-        loadReplay(replayName, () => cancelled);
+        loadReplay(replayName, () => cancelled).catch(error => {
+            if (cancelled) return;
+            disposeReplay();
+            setLoadError(String(error instanceof Error ? error.message : error));
+            setLoading(false);
+            void ErrorDumpService.dumpActionFailure({ type: 'replays/open', replayName }, null, error);
+        });
         return () => {
             cancelled = true;
             disposeReplay();
@@ -202,8 +211,9 @@ export const ReplayAppWrapper = ({
     return (
         <div className="replayWrapper">
             <Provider store={store}>
-                {loading ? <Spin /> : <GameApp key={replayRun} engineConnector={engineConnector} onBreak={() => breakRef.current()} onReturnToBase={onReturnToBase} playerId={replayPlayer.current} />}
-                <div className="controls">
+                {loadError ? <div><Alert type="error" message="Could not open replay" description={loadError} /><Button onClick={onReturnToBase}>Return</Button></div>
+                    : loading ? <Spin /> : <GameApp key={replayRun} engineConnector={engineConnector} onBreak={() => breakRef.current()} onReturnToBase={onReturnToBase} playerId={replayPlayer.current} />}
+                {!loading && !loadError && <div className="controls">
                     <div>
                         <Slider disabled max={length} marks={ticks} value={currentPosition}></Slider>
                     </div>
@@ -212,7 +222,7 @@ export const ReplayAppWrapper = ({
                         {playing ? <Button onClick={pause}>Pause</Button>
                             : <Button onClick={play}>Play</Button>}
                     </div>
-                </div>
+                </div>}
             </Provider>
         </div>)
 }

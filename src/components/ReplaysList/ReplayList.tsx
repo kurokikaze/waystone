@@ -1,6 +1,7 @@
-import { Divider, List, Spin, Typography, Button, Space } from 'antd';
+import { Alert, Divider, List, Spin, Typography, Button, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { ReplayLogService } from '../../services/ReplayLogService';
+import { ErrorDumpService } from '../../services/ErrorDumpService';
 
 type ReplayListProps = {
 	onReplayClick: (replay: string) => void,
@@ -13,11 +14,19 @@ const ReplayList: React.FC<ReplayListProps> = ({
 }) => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [data, setData] = useState<string[]>([]);
+	const [error, setError] = useState<string>();
 
 	const loadReplays = async () => {
-		const replays = await (new ReplayLogService()).getReplaysList();
-		setData(replays);
-		setLoading(false);
+		setLoading(true);
+		setError(undefined);
+		try {
+			setData(await (new ReplayLogService()).getReplaysList());
+		} catch (error) {
+			setError(String(error instanceof Error ? error.message : error));
+			void ErrorDumpService.dumpActionFailure({ type: 'replays/list' }, null, error);
+		} finally {
+			setLoading(false);
+		}
 	}
 
 	useEffect(() => {
@@ -28,6 +37,7 @@ const ReplayList: React.FC<ReplayListProps> = ({
 		<div className='appHolder'>
 			<Space direction='vertical' style={{ width: 800 }}>
 				<Divider orientation="left">Default Size</Divider>
+				{error && <Alert type="error" message="Could not load replays" description={error} />}
 				{loading ? <Spin /> : <List
 					header={<div>Replays</div>}
 					bordered
@@ -39,7 +49,8 @@ const ReplayList: React.FC<ReplayListProps> = ({
 						</List.Item>
 					)}
 				/>}
-				<Button onClick={onReturnToBase} disabled={loading}>Return</Button>
+				{error && <Button onClick={loadReplays} disabled={loading}>Retry</Button>}
+				<Button onClick={onReturnToBase}>Return</Button>
 			</Space>
 		</div>
 	);

@@ -4787,7 +4787,7 @@ dependencies = [
 
 [[package]]
 name = "waystone"
-version = "0.0.50"
+version = "0.0.52"
 dependencies = [
  "serde",
  "serde_json",

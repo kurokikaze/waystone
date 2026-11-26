@@ -1267,12 +1267,12 @@ baseline-browser-mapping@^2.11.37:
   resolved "https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.11.39.tgz"
   integrity sha512-Q9buOYhr2ggrEZpImICecZTJHCCd8yXkRUokFlUEQ8uiD6oP82F4W4jWnhOHZYV+wlvrC51V7Wy0ULyWjil5Wg==
 
-"bechamel@https://github.com/kurokikaze/bechamel/releases/download/0.15.0/bechamel-0.15.0.tgz":
-  version "0.15.0"
-  resolved "https://github.com/kurokikaze/bechamel/releases/download/0.15.0/bechamel-0.15.0.tgz"
-  integrity sha512-iE+dxpktfxFow/7ls+Ik3UskYYcb5M1dD42wDAUePUur5zShzJG8NE/Wxn9wntvtgzlMiStNe/YPu6jHLwZPOQ==
+"bechamel@https://github.com/kurokikaze/bechamel/releases/download/0.16.0/bechamel-0.16.0.tgz":
+  version "0.16.0"
+  resolved "https://github.com/kurokikaze/bechamel/releases/download/0.16.0/bechamel-0.16.0.tgz"
+  integrity sha512-7VvD1BQvsNPumjG8xxAEw+THDbIJx8q2tPZ8DHTn7hagrwimZ2eLf7NQi8HTVnsv0CVQMYC01CvF82j+n9sFjQ==
   dependencies:
-    duel-protocol "https://github.com/kurokikaze/duel-protocol/releases/download/0.3.7/duel-protocol-0.3.7.tgz"
+    duel-protocol "https://github.com/kurokikaze/duel-protocol/releases/download/0.3.8/duel-protocol-0.3.8.tgz"
     isomorphic-fetch "^3.0.0"
     socket.io-client "^4.8.1"
 
@@ -1574,10 +1574,10 @@ dnd-core@^16.0.1:
     "@react-dnd/invariant" "^4.0.1"
     redux "^4.2.0"
 
-"duel-protocol@https://github.com/kurokikaze/duel-protocol/releases/download/0.3.7/duel-protocol-0.3.7.tgz":
-  version "0.3.7"
-  resolved "https://github.com/kurokikaze/duel-protocol/releases/download/0.3.7/duel-protocol-0.3.7.tgz"
-  integrity sha512-dwB81ftsefVy/lJ1RPb2dkc0XCysTLkX4V76g2fKnoXlhc+5uMt7tCVusUTd5YHGAIGYNikBzuWzG9knOnVSRg==
+"duel-protocol@https://github.com/kurokikaze/duel-protocol/releases/download/0.3.8/duel-protocol-0.3.8.tgz":
+  version "0.3.8"
+  resolved "https://github.com/kurokikaze/duel-protocol/releases/download/0.3.8/duel-protocol-0.3.8.tgz"
+  integrity sha512-zikRbLogGsHt684eCp+V1E5CkUWhHdkiHm24FRAv9kyjokhp+BnzSz+rz7EBFwXpKFM78r6tqN1+nTKWL9XwSg==
 
 dunder-proto@^1.0.1:
   version "1.0.1"
@@ -2733,10 +2733,10 @@ minimist@^1.2.6, minimist@^1.2.8:
   resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.8.tgz"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
 
-"moonlands@>=0.46.0 <0.47.0", "moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.46.0.tar.gz":
-  version "v0.46.0"
-  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.46.0.tar.gz"
-  integrity sha512-oYnKhdaqJcMuMBGxQDqAztn/9SPQRoL0Mgk6SEHLlUfZ4bSghjZLhTOKPKBiyuHjn5f5Mc+HWYZkeZu6VTJP1A==
+"moonlands@>=0.47.0 <0.48.0", "moonlands@https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.47.0.tar.gz":
+  version "v0.47.0"
+  resolved "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.47.0.tar.gz"
+  integrity sha512-+lO/12stv4qToWc4jbyo5ddSPN2mJfBQhe2lDCgZdg1sX4o2D2/r7Au5pEbquWtek01F1MxRzHfYXV5NkNqPRA==
   dependencies:
     nanoid "^6.0.1"
 
