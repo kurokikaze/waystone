@@ -46,7 +46,7 @@ describe('Deck library', () => {
     const legacy = DeckKeeperService.defaultOpponentDeck.join('\r\n');
     files.set('decks/playerDeck.txt', legacy);
     const library = await new DeckKeeperService().loadLibrary();
-    expect(library.decks[0].cards).toEqual(DeckKeeperService.defaultOpponentDeck);
+    expect(library.decks.find(deck => deck.id === library.playerDeckId)?.cards).toEqual(DeckKeeperService.defaultOpponentDeck);
     const newDeck = { id: 'custom', name: 'Orothe', cards: DeckKeeperService.defaultPlayerDeck };
     const updated = { ...library, decks: [...library.decks, newDeck], opponentDeckId: newDeck.id };
     await new DeckKeeperService().saveLibrary(updated);
@@ -61,5 +61,25 @@ describe('Deck library', () => {
     const updated = { ...library, playerDeckId: library.opponentDeckId, opponentDeckId: library.playerDeckId };
     await new DeckKeeperService().saveLibrary(updated);
     expect(await new DeckKeeperService().loadLibrary()).toEqual(updated);
+  });
+
+  it.each([false, true])('starts with all five starters and Arderial vs Cald (desktop: %s)', async desktop => {
+    jest.mocked(isTauri).mockReturnValue(desktop);
+    const service = new DeckKeeperService();
+    const library = await service.loadLibrary();
+    expect(library.decks.map(deck => deck.name)).toEqual(['Arderial Starter', 'Cald Starter', 'Naroom Starter', 'Orothe Starter', 'Underneath Starter']);
+    expect(library.decks.every(deck => deck.cards.length === 43 && isPlayableDeck(deck.cards))).toBe(true);
+    expect(library.decks.find(deck => deck.id === library.playerDeckId)?.cards).toEqual(DeckKeeperService.arderialStarterDeck);
+    expect(library.decks.find(deck => deck.id === library.opponentDeckId)?.cards).toEqual(DeckKeeperService.caldStarterDeck);
+    library.decks[0].cards.pop();
+    expect((await service.loadLibrary()).decks[0].cards).toHaveLength(43);
+    expect(DeckKeeperService.arderialStarterDeck).toHaveLength(43);
+  });
+
+  it.each([false, true])('keeps an existing custom library intact (desktop: %s)', async desktop => {
+    jest.mocked(isTauri).mockReturnValue(desktop);
+    const library = { decks: [{ id: 'custom', name: 'My deck', cards: DeckKeeperService.defaultPlayerDeck }], playerDeckId: 'custom', opponentDeckId: 'custom' };
+    await new DeckKeeperService().saveLibrary(library);
+    expect(await new DeckKeeperService().loadLibrary()).toEqual(library);
   });
 });
