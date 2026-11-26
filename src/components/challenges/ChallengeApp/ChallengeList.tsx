@@ -1,14 +1,14 @@
-import { useDispatch } from 'react-redux';
 import { UserOutlined } from '@ant-design/icons';
-import { Alert, Avatar, Breadcrumb, Button, Input, List } from 'antd';
-import { acceptChallenge, createChallenge, cancelChallenge } from '../../../actions/index.js';
-import { ChallengeType, DeckType } from '../../../types.js';
+import { Avatar, Button, Input, List, Select, Space } from 'antd';
+import { ChallengeType } from '../../../types.js';
+import { isPlayableDeck, type SavedDeck } from '../../../services/DeckKeeperService';
 import { useEffect, useRef, useState } from 'react';
 import { ChallengesService } from '../../../services/ChallengesService.js';
 import { Socket } from 'socket.io-client';
 
 type ChallengeListProps = {
-    currentDeck: DeckType
+    decks: SavedDeck[]
+    initialDeckId: string
     onChallengeAccepted: (secret: string) => void
 }
 
@@ -38,23 +38,22 @@ function formatTimeAgo(date: string) {
     }
 }
 
-export default function ChallengeList({ currentDeck, onChallengeAccepted }: ChallengeListProps) {
+export default function ChallengeList({ decks, initialDeckId, onChallengeAccepted }: ChallengeListProps) {
     const [challenges, setChallenges] = useState<ChallengeType[]>([])
     const [challengeComment, setChallengeComment] = useState<string>('')
     const hasChallenged = challenges.some(challenge => challenge.own);
+    const defaultDeckId = decks.find(deck => deck.id === initialDeckId && isPlayableDeck(deck.cards))?.id
+        ?? decks.find(deck => isPlayableDeck(deck.cards))?.id;
+    const [createDeckId, setCreateDeckId] = useState(defaultDeckId);
+    const [acceptDeckId, setAcceptDeckId] = useState(defaultDeckId);
+    const createDeck = decks.find(deck => deck.id === createDeckId);
+    const acceptDeck = decks.find(deck => deck.id === acceptDeckId);
+    const deckOptions = decks.map(deck => ({ value: deck.id, label: deck.name, disabled: !isPlayableDeck(deck.cards) }));
 
     const connection = useRef<Socket>()
 
-    const dispatch = useDispatch()
-
     const handleAcceptChallenge = (challengeId: string) => {
-        if (connection.current) {
-            connection.current.emit('accept', JSON.stringify({
-                challengeId,
-                deck: currentDeck.cards,
-            }))
-        }
-        dispatch(acceptChallenge(challengeId))
+        if (connection.current) ChallengesService.acceptChallenge(connection.current, challengeId, acceptDeck);
     }
     const handleCancelChallenge = () => {
         if (connection.current) {
@@ -62,34 +61,34 @@ export default function ChallengeList({ currentDeck, onChallengeAccepted }: Chal
         }
     }
     const handleCreateChallenge = () => {
-        if (connection.current) {
-            connection.current.emit('create', JSON.stringify({
-                deck: currentDeck.cards,
-                comment: challengeComment
-            }))
+        if (connection.current && !hasChallenged && ChallengesService.createChallenge(connection.current, createDeck, challengeComment)) {
             setChallengeComment('')
         }
-        dispatch(createChallenge('challenge', currentDeck.cards))
     }
 
     useEffect(() => {
         const challengesService = new ChallengesService()
-        connection.current = challengesService.connectToChallenges(setChallenges, onChallengeAccepted)
+        const socket = challengesService.connectToChallenges(setChallenges, onChallengeAccepted)
+        connection.current = socket;
 
         return () => {
-            connection.current?.disconnect()
+            socket.disconnect();
+            connection.current = undefined;
         }
-    }, [])
+    }, [onChallengeAccepted])
 
     return <div className='challenges'>
-        <Alert message="As multiple decks are not yet implemented, you create and accept the challenges using your current deck" type="warning" />
+        <Space style={{ margin: '16px 0' }}>
+            <label id="accept-challenge-deck-label">Deck for accepting challenges</label>
+            <Select aria-labelledby="accept-challenge-deck-label" style={{ minWidth: 220 }} value={acceptDeckId} options={deckOptions} onChange={setAcceptDeckId} />
+        </Space>
         <List
             itemLayout="horizontal"
             style={{ width: '80%' }}
             dataSource={challenges}
             renderItem={(challenge) => (
                 <List.Item
-                    actions={challenge.own ? [<Button key={`${challenge.id}-actions-cancel`} onClick={handleCancelChallenge}>Cancel</Button>] : [<Button key={`${challenge.id}-actions-accept`} onClick={() => handleAcceptChallenge(challenge.id)}>Accept</Button>]}
+                    actions={challenge.own ? [<Button key={`${challenge.id}-actions-cancel`} onClick={handleCancelChallenge}>Cancel</Button>] : [<Button key={`${challenge.id}-actions-accept`} disabled={!acceptDeck || !isPlayableDeck(acceptDeck.cards)} onClick={() => handleAcceptChallenge(challenge.id)}>Accept</Button>]}
                     key={`${challenge.id}-actions`}
                 >
                     <List.Item.Meta
@@ -102,13 +101,18 @@ export default function ChallengeList({ currentDeck, onChallengeAccepted }: Chal
             )}
         />
         {!hasChallenged && <div className='create_challenge'>
+            <Space style={{ margin: '16px 0' }}>
+                <label id="create-challenge-deck-label">Deck for creating a challenge</label>
+                <Select aria-labelledby="create-challenge-deck-label" style={{ minWidth: 220 }} value={createDeckId} options={deckOptions} onChange={setCreateDeckId} />
+            </Space>
+            <br />
             <Input
                 value={challengeComment}
                 onChange={event => setChallengeComment(event.target.value)}
                 onPressEnter={handleCreateChallenge}
                 style={{ width: 400, marginRight: 80 }}
             />
-            <Button onClick={handleCreateChallenge} disabled={challengeComment == ''}>Create challenge!</Button>
+            <Button onClick={handleCreateChallenge} disabled={!challengeComment.trim() || !createDeck || !isPlayableDeck(createDeck.cards)}>Create challenge!</Button>
         </div>}
     </div>;
 }

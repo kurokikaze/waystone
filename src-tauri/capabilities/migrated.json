@@ -23,6 +23,8 @@
       "allow": [
         "$APPDATA/*",
         "$APPDATA/decks/*",
+        "$APPCONFIG",
+        "$APPCONFIG/everflame.json",
         "$APPCONFIG/decks",
         "$APPCONFIG/decks/*",
         "$APPCONFIG/replays",

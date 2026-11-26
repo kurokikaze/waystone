@@ -41,7 +41,7 @@
   },
   "productName": "waystone",
   "mainBinaryName": "waystone",
-  "version": "0.0.52",
+  "version": "0.0.55",
   "identifier": "waystone",
   "plugins": {},
   "app": {
@@ -49,7 +49,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 640,
         "resizable": true,
         "dragDropEnabled": false,
         "title": "Waystone",

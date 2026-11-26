@@ -14,6 +14,7 @@ import type { DeckLibrary, SavedDeck } from "./services/DeckKeeperService";
 import { DeckType } from "./types";
 import { ChallengeAppWrapper } from "./components/challenges/ChallengeAppWrapper/ChallengeAppWrapper";
 import { NetworkGameAppWrapper } from "./components/NetworkGameAppWrapper/NetworkGameAppWrapper";
+import { loadEverflameConfig } from './config/everflame';
 
 const MODE_BASE = 'modes/base';
 const MODE_EDITOR = 'modes/editor';
@@ -36,6 +37,16 @@ function App() {
     const saveInProgress = useRef(false);
     const [error, setError] = useState('');
     const [chosenReplay, setChosenReplay] = useState('');
+    const [networkReady, setNetworkReady] = useState(false);
+    const [networkConfigError, setNetworkConfigError] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+        loadEverflameConfig()
+            .then(() => { if (!cancelled) setNetworkReady(true); })
+            .catch(error => { if (!cancelled) setNetworkConfigError(`Could not load everflame.json: ${String(error)}`); });
+        return () => { cancelled = true; };
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -124,9 +135,10 @@ function App() {
             {mode === MODE_REPLAY ? <div>
                 <ReplayAppWrapper replayName={chosenReplay} onReturnToBase={handleReturnToBase} />
             </div> : null}
-            {mode === MODE_CHALLENGES && playerDeck ? <div className="appHolder">
+            {mode === MODE_CHALLENGES && library ? <div className="appHolder">
                 <ChallengeAppWrapper
-                    playerDeck={playerDeck}
+                    decks={library.decks}
+                    initialDeckId={library.playerDeckId}
                     onChallengeAccepted={handleChallengeAccept}
                     onReturnToMenu={handleReturnToBase}
                 />
@@ -139,6 +151,7 @@ function App() {
             </div>
 
                 {error ? <div><pre>{error}</pre></div> : null}
+                {networkConfigError ? <div><pre>{networkConfigError}</pre></div> : null}
 
                 <p>Moonlands engine version: {engineData.version}</p>
                 <div className="deckSelection">
@@ -157,7 +170,7 @@ function App() {
                     <Button disabled={saving || !library} onClick={() => editDeck({ id: crypto.randomUUID(), name: '', cards: ['', '', ''] })}>New deck</Button>
                 </div>
                 <p><Button disabled={saving || !playerDeck || !opponentDeck || !isPlayableDeck(playerDeck.cards) || !isPlayableDeck(opponentDeck.cards)} onClick={handleStartGame} type="primary">Start game</Button></p>
-                <p><Button disabled={saving || !playerDeck || !isPlayableDeck(playerDeck.cards)} onClick={handleConnectToServer} type="primary">Network play</Button></p>
+                <p><Button disabled={!networkReady || loading || saving || !library?.decks.some(deck => isPlayableDeck(deck.cards))} onClick={handleConnectToServer} type="primary">Network play</Button></p>
                 <p><Button disabled={loading} onClick={handleOpenReplays}>Replays</Button></p>
             </div> : null}
             {mode === MODE_EDITOR && editedDeck ? <DeckEditor deckContents={editedDeck} onSave={handleSave} onClose={handleReturnToBase} saving={saving} error={error} /> : null}

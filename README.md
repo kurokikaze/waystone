@@ -23,7 +23,9 @@ preserved; npm is the verified installation path for this extraction.
 
 ## Everflame network server
 
-The shared server address is configured in `src/config/everflame.json`:
+The desktop app reads the shared server address from `everflame.json` in Tauri's
+AppConfig directory. On Windows this is `%APPDATA%\waystone\everflame.json`, next
+to the `replays` directory. The file is created on first launch with this format:
 
 ```json
 {
@@ -34,8 +36,13 @@ The shared server address is configured in `src/config/everflame.json`:
 Set the HTTP(S) base address of your Everflame installation, without `/game`,
 `/challenge` or `/socket.io`. Both Socket.IO namespaces and the legacy challenge
 list request use this address. The checked-in default is the original EC2 host.
-The configuration is bundled into the app: rebuild Waystone after changing it
-for a packaged Tauri application.
+Edit the file and restart Waystone to change the address without rebuilding.
+Existing configuration files are preserved during startup. An invalid file shows
+an error and disables Network play; local games and replays remain available.
+
+The web version loads `/everflame.json` at startup without caching. Its template
+is `public/everflame.json`, copied into `dist` during a build; edit the deployed
+file and reload the page to change the server without rebuilding JavaScript.
 
 Each local or network match has its own Redux store. A network snapshot replaces
 the previous UI state, rebuilds prompt allocations and static abilities, and

@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { isTauri } from "@tauri-apps/api/core";
 import { ChallengeType } from '../types';
 import { getEverflameUrl } from '../config/everflame';
+import { isPlayableDeck, type SavedDeck } from './DeckKeeperService';
 
 const CLIENT_CHALLENGE_EVENT_INITIAL = 'response'
 const CLIENT_CHALLENGE_EVENT_CREATE = 'new_challenge'
@@ -11,6 +12,17 @@ const CLIENT_CHALLENGE_EVENT_DELETE = 'remove_challenge'
 const CLIENT_CHALLENGE_EVENT_ACCEPT = 'challenge_accepted'
 
 export class ChallengesService {
+    public static createChallenge(socket: Socket, deck: SavedDeck | undefined, comment: string): boolean {
+        if (!deck || !isPlayableDeck(deck.cards) || !comment.trim()) return false;
+        socket.emit('create', JSON.stringify({ deck: deck.cards, comment: comment.trim() }));
+        return true;
+    }
+
+    public static acceptChallenge(socket: Socket, challengeId: string, deck: SavedDeck | undefined): boolean {
+        if (!deck || !isPlayableDeck(deck.cards)) return false;
+        socket.emit('accept', JSON.stringify({ challengeId, deck: deck.cards }));
+        return true;
+    }
     // @deprecated
     public async getChallenges(): Promise<ChallengeType[]> {
         const fetchFunction = isTauri() ? tauriFetch : fetch;
