@@ -1,7 +1,7 @@
 {
   "name": "waystone",
   "private": true,
-  "version": "0.0.56",
+  "version": "0.0.57",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -37,7 +37,7 @@
     "socket.io-client": "^4.8.1",
     "ts-jest": "^29.4.6",
     "tsc-alias": "^1.8.10",
-    "bechamel": "https://github.com/kurokikaze/bechamel/releases/download/0.19.0/bechamel-0.19.0.tgz",
+    "bechamel": "https://github.com/kurokikaze/bechamel/releases/download/0.20.0/bechamel-0.20.0.tgz",
     "duel-protocol": "https://github.com/kurokikaze/duel-protocol/releases/download/0.4.0/duel-protocol-0.4.0.tgz"
   },
   "devDependencies": {

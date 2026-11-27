@@ -1,6 +1,6 @@
 [package]
 name = "waystone"
-version = "0.0.56"
+version = "0.0.57"
 description = "Magi-Nation Duel game client"
 authors = ["bolter.fire@gmail.com"]
 license = ""
