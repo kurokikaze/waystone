@@ -1,7 +1,7 @@
 {
   "name": "waystone",
   "private": true,
-  "version": "0.0.57",
+  "version": "0.0.58",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,7 @@
     "comlink": "^4.4.1",
     "gsap": "^3.11.4",
     "jest": "^29",
-    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.49.0.tar.gz",
+    "moonlands": "https://github.com/kurokikaze/moonlands/archive/refs/tags/v0.50.0.tar.gz",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
@@ -37,8 +37,8 @@
     "socket.io-client": "^4.8.1",
     "ts-jest": "^29.4.6",
     "tsc-alias": "^1.8.10",
-    "bechamel": "https://github.com/kurokikaze/bechamel/releases/download/0.20.0/bechamel-0.20.0.tgz",
-    "duel-protocol": "https://github.com/kurokikaze/duel-protocol/releases/download/0.4.0/duel-protocol-0.4.0.tgz"
+    "bechamel": "https://github.com/kurokikaze/bechamel/releases/download/0.21.0/bechamel-0.21.0.tgz",
+    "duel-protocol": "https://github.com/kurokikaze/duel-protocol/releases/download/0.5.0/duel-protocol-0.5.0.tgz"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.4",
